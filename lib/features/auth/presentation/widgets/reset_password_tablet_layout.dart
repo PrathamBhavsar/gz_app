@@ -19,11 +19,13 @@ class ResetPasswordTabletLayout extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Set new password', style: AppTypography.headingLarge.copyWith(fontSize: 40)),
+              Text('Set new password', style: AppTypography.headingLarge),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 'Create a strong password that is at least 8 characters long.',
-                style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
+                style: AppTypography.bodyLarge.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: AppSpacing.xxl),
               _buildTextField(label: 'New Password', obscureText: true),
@@ -35,17 +37,25 @@ class ResetPasswordTabletLayout extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Password updated successfully')),
+                      const SnackBar(
+                        content: Text('Password updated successfully'),
+                      ),
                     );
                     context.go(AppRoutes.authLanding);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.background,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadius)),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.lg,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadius,
+                      ),
+                    ),
                   ),
-                  child: Text('Update Password', style: AppTypography.button.copyWith(fontSize: 16)),
+                  child: Text('Update Password', style: AppTypography.button),
                 ),
               ),
             ],
@@ -61,10 +71,15 @@ class ResetPasswordTabletLayout extends StatelessWidget {
       style: AppTypography.bodyLarge,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+        labelStyle: AppTypography.bodyMedium.copyWith(
+          color: AppColors.textSecondary,
+        ),
         filled: true,
         fillColor: AppColors.surface,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm), borderSide: BorderSide.none),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
+          borderSide: BorderSide.none,
+        ),
       ),
     );
   }

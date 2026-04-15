@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../../core/responsive/breakpoints.dart';
 import '../../../../../core/responsive/responsive_builder.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../widgets/register_mobile_layout.dart';
-import '../widgets/register_tablet_layout.dart';
+import '../../widgets/register_mobile_layout.dart';
+import '../../widgets/register_tablet_layout.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});

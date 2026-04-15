@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../../core/responsive/breakpoints.dart';
 import '../../../../../core/responsive/responsive_builder.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../widgets/otp_verification_mobile_layout.dart';
-import '../widgets/otp_verification_tablet_layout.dart';
+import '../../widgets/otp_verification_mobile_layout.dart';
+import '../../widgets/otp_verification_tablet_layout.dart';
 
 class OtpVerificationScreen extends StatelessWidget {
   const OtpVerificationScreen({super.key});

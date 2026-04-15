@@ -23,13 +23,15 @@ class OnboardingTabletLayout extends StatelessWidget {
               const SizedBox(height: AppSpacing.xl),
               Text(
                 'Book Gaming Slots',
-                style: AppTypography.headingLarge.copyWith(fontSize: 48),
+                style: AppTypography.headingLarge,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
                 'Reserve PCs and Consoles instantly.',
-                style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary, fontSize: 20),
+                style: AppTypography.headingSmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
                 textAlign: TextAlign.center,
               ),
               const Spacer(),
@@ -40,18 +42,27 @@ class OnboardingTabletLayout extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.background,
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.lg,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadius,
+                      ),
                     ),
                   ),
-                  child: Text('Get Started', style: AppTypography.button.copyWith(fontSize: 18)),
+                  child: Text('Get Started', style: AppTypography.headingSmall),
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
               TextButton(
                 onPressed: () => context.go(AppRoutes.authLanding),
-                child: Text('Skip', style: AppTypography.button.copyWith(color: AppColors.textSecondary, fontSize: 18)),
+                child: Text(
+                  'Skip',
+                  style: AppTypography.headingSmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ),
               const SizedBox(height: AppSpacing.xxl),
             ],

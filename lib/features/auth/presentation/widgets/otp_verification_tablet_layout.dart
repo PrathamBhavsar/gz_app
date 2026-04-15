@@ -19,9 +19,14 @@ class OtpVerificationTabletLayout extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Enter OTP', style: AppTypography.headingLarge.copyWith(fontSize: 40)),
+              Text('Enter OTP', style: AppTypography.headingLarge),
               const SizedBox(height: AppSpacing.sm),
-              Text('Sent to +91 ••••• 67890', style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary, fontSize: 16)),
+              Text(
+                'Sent to +91 ••••• 67890',
+                style: AppTypography.bodyLarge.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
               const SizedBox(height: AppSpacing.xxl),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -29,7 +34,12 @@ class OtpVerificationTabletLayout extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xl),
               Center(
-                child: Text('Resend in 0:45', style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary, fontSize: 16)),
+                child: Text(
+                  'Resend in 0:45',
+                  style: AppTypography.bodyLarge.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ),
               const SizedBox(height: AppSpacing.xl),
               SizedBox(
@@ -41,10 +51,16 @@ class OtpVerificationTabletLayout extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.background,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadius)),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.lg,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadius,
+                      ),
+                    ),
                   ),
-                  child: Text('Verify & Continue', style: AppTypography.button.copyWith(fontSize: 16)),
+                  child: Text('Verify & Continue', style: AppTypography.button),
                 ),
               ),
             ],

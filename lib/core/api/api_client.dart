@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
 import '../errors/app_exception.dart';
 
 class ApiClient {
@@ -28,6 +26,9 @@ class ApiClient {
     if (statusCode >= 400 && statusCode < 500) {
       return ValidationException('Validation failed: $responseBody');
     }
-    return ApiException(statusCode: statusCode, message: 'Server error: $responseBody');
+    return ApiException(
+      statusCode: statusCode,
+      message: 'Server error: $responseBody',
+    );
   }
 }

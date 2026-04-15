@@ -62,7 +62,7 @@ class AuthLandingMobileLayout extends StatelessWidget {
 
   Widget _buildAuthButton({
     required BuildContext context,
-    required IconData icon,
+    required dynamic icon,
     required String label,
     required VoidCallback onTap,
     bool isPrimary = false,

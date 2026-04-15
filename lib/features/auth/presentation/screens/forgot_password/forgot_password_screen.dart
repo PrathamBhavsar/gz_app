@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../../core/responsive/breakpoints.dart';
 import '../../../../../core/responsive/responsive_builder.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../widgets/forgot_password_mobile_layout.dart';
-import '../widgets/forgot_password_tablet_layout.dart';
+import '../../widgets/forgot_password_mobile_layout.dart';
+import '../../widgets/forgot_password_tablet_layout.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
   const ForgotPasswordScreen({super.key});

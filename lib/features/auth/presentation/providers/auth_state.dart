@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../models/domain_global.dart';
 
 sealed class AuthState {

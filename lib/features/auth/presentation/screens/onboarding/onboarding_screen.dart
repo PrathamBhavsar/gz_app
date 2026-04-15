@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../../core/responsive/breakpoints.dart';
 import '../../../../../core/responsive/responsive_builder.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../widgets/onboarding_mobile_layout.dart';
-import '../widgets/onboarding_tablet_layout.dart';
+import '../../widgets/onboarding_mobile_layout.dart';
+import '../../widgets/onboarding_tablet_layout.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});

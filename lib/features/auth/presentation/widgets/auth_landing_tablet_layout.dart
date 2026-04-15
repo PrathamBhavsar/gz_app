@@ -19,8 +19,13 @@ class AuthLandingTabletLayout extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Welcome to', style: AppTypography.headingSmall.copyWith(color: AppColors.textSecondary)),
-              Text('GAMING ZONE', style: AppTypography.headingLarge.copyWith(fontSize: 48)),
+              Text(
+                'Welcome to',
+                style: AppTypography.headingSmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              Text('GAMING ZONE', style: AppTypography.headingLarge),
               const SizedBox(height: AppSpacing.xxl),
               _buildAuthButton(
                 context: context,
@@ -40,10 +45,18 @@ class AuthLandingTabletLayout extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Don't have an account?", style: AppTypography.bodyMedium),
+                  Text(
+                    "Don't have an account?",
+                    style: AppTypography.bodyMedium,
+                  ),
                   TextButton(
                     onPressed: () => context.go(AppRoutes.register),
-                    child: Text('Create one', style: AppTypography.button.copyWith(color: AppColors.rose)),
+                    child: Text(
+                      'Create one',
+                      style: AppTypography.button.copyWith(
+                        color: AppColors.rose,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -57,7 +70,7 @@ class AuthLandingTabletLayout extends StatelessWidget {
 
   Widget _buildAuthButton({
     required BuildContext context,
-    required IconData icon,
+    required dynamic icon,
     required String label,
     required VoidCallback onTap,
     bool isPrimary = false,
@@ -66,16 +79,24 @@ class AuthLandingTabletLayout extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: onTap,
-        icon: HugeIcon(icon: icon, color: isPrimary ? AppColors.background : AppColors.textPrimary, size: 24),
-        label: Text(label, style: AppTypography.button.copyWith(fontSize: 16)),
+        icon: HugeIcon(
+          icon: icon,
+          color: isPrimary ? AppColors.background : AppColors.textPrimary,
+          size: 24,
+        ),
+        label: Text(label, style: AppTypography.button),
         style: ElevatedButton.styleFrom(
           backgroundColor: isPrimary ? AppColors.primary : AppColors.surface,
-          foregroundColor: isPrimary ? AppColors.background : AppColors.textPrimary,
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          foregroundColor: isPrimary
+              ? AppColors.background
+              : AppColors.textPrimary,
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-            side: isPrimary ? BorderSide.none : const BorderSide(color: AppColors.border),
+            side: isPrimary
+                ? BorderSide.none
+                : const BorderSide(color: AppColors.border),
           ),
         ),
       ),

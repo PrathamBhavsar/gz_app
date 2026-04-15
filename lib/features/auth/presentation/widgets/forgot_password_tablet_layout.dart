@@ -18,21 +18,30 @@ class ForgotPasswordTabletLayout extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Forgot Password', style: AppTypography.headingLarge.copyWith(fontSize: 40)),
+              Text('Forgot Password', style: AppTypography.headingLarge),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 'Enter your registered email address securely. We will send you a link to reset your password.',
-                style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
+                style: AppTypography.bodyLarge.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: AppSpacing.xxl),
               TextField(
                 style: AppTypography.bodyLarge,
                 decoration: InputDecoration(
                   labelText: 'Email Address',
-                  labelStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                  labelStyle: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                   filled: true,
                   fillColor: AppColors.surface,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.borderRadiusSm,
+                    ),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.xxl),
@@ -41,24 +50,39 @@ class ForgotPasswordTabletLayout extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('If that email is registered, a reset link has been sent.')),
+                      const SnackBar(
+                        content: Text(
+                          'If that email is registered, a reset link has been sent.',
+                        ),
+                      ),
                     );
                     context.pop();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.background,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadius)),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.lg,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadius,
+                      ),
+                    ),
                   ),
-                  child: Text('Reset Password', style: AppTypography.button.copyWith(fontSize: 16)),
+                  child: Text('Reset Password', style: AppTypography.button),
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
               Center(
                 child: TextButton(
                   onPressed: () => context.pop(),
-                  child: Text('Back to Login', style: AppTypography.button.copyWith(color: AppColors.textSecondary, fontSize: 16)),
+                  child: Text(
+                    'Back to Login',
+                    style: AppTypography.button.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ),
               ),
             ],

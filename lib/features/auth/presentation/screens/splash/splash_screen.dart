@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/responsive/breakpoints.dart';
 import '../../../../../core/responsive/responsive_builder.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../widgets/splash_mobile_layout.dart';
-import '../widgets/splash_tablet_layout.dart';
+import '../../widgets/splash_mobile_layout.dart';
+import '../../widgets/splash_tablet_layout.dart';
 import '../../providers/auth_notifier.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {

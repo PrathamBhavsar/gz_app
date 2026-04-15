@@ -13,13 +13,14 @@ class AuthNotifier extends Notifier<AuthState> {
     _repository = ref.watch(authRepositoryProvider);
 
     _connectivitySub = ref
-        .watch(connectivityStreamProvider.stream)
+        .read(connectivityServiceProvider)
+        .onConnectivityChanged
         .listen((isConnected) {
-      if (isConnected && state is AuthError) {
-        // Auto-retry checking user status if connection comes back and we were in error state
-        checkAuthStatus();
-      }
-    });
+          if (isConnected && state is AuthError) {
+            // Auto-retry checking user status if connection comes back and we were in error state
+            checkAuthStatus();
+          }
+        });
 
     ref.onDispose(() => _connectivitySub?.cancel());
 

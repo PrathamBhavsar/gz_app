@@ -18,13 +18,19 @@ class EmailVerificationPendingTabletLayout extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.mark_email_unread_outlined, size: 100, color: AppColors.rose),
+              Icon(
+                Icons.mark_email_unread_outlined,
+                size: 100,
+                color: AppColors.rose,
+              ),
               const SizedBox(height: AppSpacing.xl),
-              Text('Check your inbox', style: AppTypography.headingLarge.copyWith(fontSize: 40)),
+              Text('Check your inbox', style: AppTypography.headingLarge),
               const SizedBox(height: AppSpacing.md),
               Text(
                 'We have sent a verification link. Please verify your email to continue.',
-                style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
+                style: AppTypography.bodyLarge.copyWith(
+                  color: AppColors.textSecondary,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.xxl),
@@ -38,10 +44,19 @@ class EmailVerificationPendingTabletLayout extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.background,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadius)),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.lg,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadius,
+                      ),
+                    ),
                   ),
-                  child: Text("I've verified, continue", style: AppTypography.button.copyWith(fontSize: 16)),
+                  child: Text(
+                    "I've verified, continue",
+                    style: AppTypography.button,
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
@@ -52,7 +67,12 @@ class EmailVerificationPendingTabletLayout extends StatelessWidget {
                     const SnackBar(content: Text('Verification email resent.')),
                   );
                 },
-                child: Text('Resend verification email', style: AppTypography.button.copyWith(color: AppColors.textSecondary, fontSize: 16)),
+                child: Text(
+                  'Resend verification email',
+                  style: AppTypography.button.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ),
             ],
           ),

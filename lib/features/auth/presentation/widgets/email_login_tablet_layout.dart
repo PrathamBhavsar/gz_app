@@ -19,17 +19,29 @@ class EmailLoginTabletLayout extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Welcome back,', style: AppTypography.headingSmall.copyWith(color: AppColors.textSecondary)),
-              Text('Log in', style: AppTypography.headingLarge.copyWith(fontSize: 40)),
+              Text(
+                'Welcome back,',
+                style: AppTypography.headingSmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              Text('Log in', style: AppTypography.headingLarge),
               const SizedBox(height: AppSpacing.xxl),
               TextField(
                 style: AppTypography.bodyLarge,
                 decoration: InputDecoration(
                   labelText: 'Email Address',
-                  labelStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                  labelStyle: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                   filled: true,
                   fillColor: AppColors.surface,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.borderRadiusSm,
+                    ),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
@@ -38,18 +50,31 @@ class EmailLoginTabletLayout extends StatelessWidget {
                 style: AppTypography.bodyLarge,
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  labelStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                  labelStyle: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                   filled: true,
                   fillColor: AppColors.surface,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm), borderSide: BorderSide.none),
-                  suffixIcon: const Icon(Icons.visibility_off, color: AppColors.textSecondary),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.borderRadiusSm,
+                    ),
+                    borderSide: BorderSide.none,
+                  ),
+                  suffixIcon: const Icon(
+                    Icons.visibility_off,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => context.push(AppRoutes.forgotPassword),
-                  child: Text('Forgot Password?', style: AppTypography.button.copyWith(color: AppColors.rose)),
+                  child: Text(
+                    'Forgot Password?',
+                    style: AppTypography.button.copyWith(color: AppColors.rose),
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
@@ -60,10 +85,16 @@ class EmailLoginTabletLayout extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.background,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadius)),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.lg,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadius,
+                      ),
+                    ),
                   ),
-                  child: Text('Log in with Email', style: AppTypography.button.copyWith(fontSize: 16)),
+                  child: Text('Log in with Email', style: AppTypography.button),
                 ),
               ),
             ],

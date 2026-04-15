@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../../core/responsive/breakpoints.dart';
 import '../../../../../core/responsive/responsive_builder.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../widgets/email_verification_pending_mobile_layout.dart';
-import '../widgets/email_verification_pending_tablet_layout.dart';
+import '../../widgets/email_verification_pending_mobile_layout.dart';
+import '../../widgets/email_verification_pending_tablet_layout.dart';
 
 class EmailVerificationPendingScreen extends StatelessWidget {
   const EmailVerificationPendingScreen({super.key});

@@ -10,7 +10,6 @@ class AuthService {
   Future<UserResponse> getMe() async {
     // Simulated API Call
     return const UserResponse(
-      success: true,
       data: null, // Replace later with actual UserModel when decoded
     );
   }
@@ -22,7 +21,6 @@ class AuthService {
   Future<UserResponse> verifyOtp(String phone, String code) async {
     // Simulated API Call (Assuming this returns auth tokens + user)
     return const UserResponse(
-      success: true,
       data: null, 
     );
   }

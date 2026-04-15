@@ -4,30 +4,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'routes.dart';
 
-import '../features/auth/presentation/screens/splash/splash_screen.dart';
-import '../features/auth/presentation/screens/onboarding/onboarding_screen.dart';
-import '../features/auth/presentation/screens/auth_landing/auth_landing_screen.dart';
-import '../features/auth/presentation/screens/register/register_screen.dart';
-import '../features/auth/presentation/screens/otp/otp_verification_screen.dart';
-import '../features/auth/presentation/screens/email_login/email_login_screen.dart';
-import '../features/auth/presentation/screens/oauth_handler/oauth_handler_screen.dart';
-import '../features/auth/presentation/screens/forgot_password/forgot_password_screen.dart';
-import '../features/auth/presentation/screens/reset_password/reset_password_screen.dart';
-import '../features/auth/presentation/screens/email_verification_pending/email_verification_pending_screen.dart';
+import '../../features/auth/presentation/screens/splash/splash_screen.dart';
+import '../../features/auth/presentation/screens/onboarding/onboarding_screen.dart';
+import '../../features/auth/presentation/screens/auth_landing/auth_landing_screen.dart';
+import '../../features/auth/presentation/screens/register/register_screen.dart';
+import '../../features/auth/presentation/screens/otp/otp_verification_screen.dart';
+import '../../features/auth/presentation/screens/email_login/email_login_screen.dart';
+import '../../features/auth/presentation/screens/oauth_handler/oauth_handler_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password/forgot_password_screen.dart';
+import '../../features/auth/presentation/screens/reset_password/reset_password_screen.dart';
+import '../../features/auth/presentation/screens/email_verification_pending/email_verification_pending_screen.dart';
 
-import 'routes.dart';
-
-import '../features/home/presentation/screens/home_screen.dart';
-import '../features/home/presentation/screens/store_search/store_search_screen.dart';
-import '../features/home/presentation/screens/store_detail/store_detail_screen.dart';
-import '../features/main_shell/presentation/screens/main_page.dart';
-import '../features/booking/presentation/screens/slot_selection/booking_slot_selection_screen.dart';
-import '../features/booking/presentation/screens/system_selection/booking_system_selection_screen.dart';
-import '../features/booking/presentation/screens/summary/booking_summary_screen.dart';
-import '../features/booking/presentation/screens/success/booking_success_screen.dart';
-import '../features/sessions/presentation/screens/sessions_screen.dart';
-import '../features/wallet/presentation/screens/wallet_screen.dart';
-import '../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/home/presentation/screens/store_search/store_search_screen.dart';
+import '../../features/home/presentation/screens/store_detail/store_detail_screen.dart';
+import '../../features/main_shell/presentation/screens/main_page.dart';
+import '../../features/booking/presentation/screens/slot_selection/booking_slot_selection_screen.dart';
+import '../../features/booking/presentation/screens/system_selection/booking_system_selection_screen.dart';
+import '../../features/booking/presentation/screens/summary/booking_summary_screen.dart';
+import '../../features/booking/presentation/screens/success/booking_success_screen.dart';
+import '../../features/sessions/presentation/screens/sessions_screen.dart';
+import '../../features/wallet/presentation/screens/wallet_screen.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(

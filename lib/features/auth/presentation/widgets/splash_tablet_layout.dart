@@ -4,8 +4,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../providers/auth_notifier.dart';
-import '../../providers/auth_state.dart';
+import '../providers/auth_notifier.dart';
+import '../providers/auth_state.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/navigation/routes.dart';
 
@@ -34,7 +34,7 @@ class SplashTabletLayout extends ConsumerWidget {
           const SizedBox(height: AppSpacing.xl),
           Text(
             'GAMING ZONE',
-            style: AppTypography.headingLarge.copyWith(fontSize: 48), // Handled responsive sizes ideally but fixed here
+            style: AppTypography.headingLarge,
           ).animate().fadeIn(delay: 200.ms, duration: 400.ms),
         ],
       ),
