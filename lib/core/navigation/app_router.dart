@@ -21,7 +21,10 @@ import '../features/home/presentation/screens/home_screen.dart';
 import '../features/home/presentation/screens/store_search/store_search_screen.dart';
 import '../features/home/presentation/screens/store_detail/store_detail_screen.dart';
 import '../features/main_shell/presentation/screens/main_page.dart';
-import '../features/booking/presentation/screens/booking_screen.dart';
+import '../features/booking/presentation/screens/slot_selection/booking_slot_selection_screen.dart';
+import '../features/booking/presentation/screens/system_selection/booking_system_selection_screen.dart';
+import '../features/booking/presentation/screens/summary/booking_summary_screen.dart';
+import '../features/booking/presentation/screens/success/booking_success_screen.dart';
 import '../features/sessions/presentation/screens/sessions_screen.dart';
 import '../features/wallet/presentation/screens/wallet_screen.dart';
 import '../features/profile/presentation/screens/profile_screen.dart';
@@ -81,7 +84,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.book,
-            builder: (context, state) => const BookingScreen(),
+            builder: (context, state) => const BookingSlotSelectionScreen(),
           ),
           GoRoute(
             path: AppRoutes.sessions,
@@ -109,6 +112,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           final slug = state.pathParameters['slug'] ?? '';
           return StoreDetailScreen(slug: slug);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.bookSystems,
+        builder: (context, state) => const BookingSystemSelectionScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.bookSummary,
+        builder: (context, state) => const BookingSummaryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.bookSuccess,
+        builder: (context, state) => const BookingSuccessScreen(),
       ),
     ],
 

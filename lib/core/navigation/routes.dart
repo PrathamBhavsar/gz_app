@@ -19,7 +19,12 @@ class AppRoutes {
   static const storeDetail = '/home/store/:slug';
 
   static const book = '/book';
+  static const bookSystems = '/book/systems';
+  static const bookSummary = '/book/summary';
+  static const bookSuccess = '/book/success';
+  
   static const sessions = '/sessions';
+
   static const wallet = '/wallet';
   static const profile = '/profile';
 }
