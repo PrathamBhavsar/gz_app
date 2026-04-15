@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../providers/booking_notifier.dart';
+import '../providers/booking_notifier.dart';
 
 class BookingSummaryMobileLayout extends ConsumerWidget {
   const BookingSummaryMobileLayout({super.key});
@@ -33,13 +33,13 @@ class BookingSummaryMobileLayout extends ConsumerWidget {
               children: [
                 Text('Booking Details', style: AppTypography.headingSmall),
                 const Divider(height: AppSpacing.xl, color: AppColors.border),
-                _summaryRow('System', '\${system.name}'),
+                _summaryRow('System', '${system.name}'),
                 const SizedBox(height: AppSpacing.sm),
-                _summaryRow('Date', '\${state.selectedDate?.toString().split(' ')[0]}'),
+                _summaryRow('Date', '${state.selectedDate?.toString().split(' ')[0]}'),
                 const SizedBox(height: AppSpacing.sm),
-                _summaryRow('Duration', '\${state.selectedDurationMinutes ~/ 60} Hours'),
+                _summaryRow('Duration', '${state.selectedDurationMinutes ~/ 60} Hours'),
                 const Divider(height: AppSpacing.xl, color: AppColors.border),
-                _summaryRow('Total', '\$ \${totalAmount.toStringAsFixed(2)}', isTotal: true),
+                _summaryRow('Total', '\$ ${totalAmount.toStringAsFixed(2)}', isTotal: true),
               ],
             ),
           ),

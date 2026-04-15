@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../providers/booking_notifier.dart';
+import '../providers/booking_notifier.dart';
 
 class BookingSlotSelectionTabletLayout extends ConsumerWidget {
   const BookingSlotSelectionTabletLayout({super.key});
@@ -24,7 +24,11 @@ class BookingSlotSelectionTabletLayout extends ConsumerWidget {
             children: [
               Text('Select Date & Time', style: AppTypography.headingLarge),
               const SizedBox(height: AppSpacing.xl),
-              _buildDatePickerCard(context, state.selectedDate ?? DateTime.now(), notifier),
+              _buildDatePickerCard(
+                context,
+                state.selectedDate ?? DateTime.now(),
+                notifier,
+              ),
               const SizedBox(height: AppSpacing.xxl),
               Text('Duration', style: AppTypography.headingLarge),
               const SizedBox(height: AppSpacing.xl),
@@ -38,10 +42,19 @@ class BookingSlotSelectionTabletLayout extends ConsumerWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadius)),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.lg,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadius,
+                      ),
+                    ),
                   ),
-                  child: Text('Find Available Systems', style: AppTypography.button.copyWith(fontSize: 18)),
+                  child: Text(
+                    'Find Available Systems',
+                    style: AppTypography.headingSmall,
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
@@ -52,7 +65,11 @@ class BookingSlotSelectionTabletLayout extends ConsumerWidget {
     );
   }
 
-  Widget _buildDatePickerCard(BuildContext context, DateTime selectedDate, BookingNotifier notifier) {
+  Widget _buildDatePickerCard(
+    BuildContext context,
+    DateTime selectedDate,
+    BookingNotifier notifier,
+  ) {
     return InkWell(
       onTap: () async {
         final date = await showDatePicker(
@@ -73,8 +90,15 @@ class BookingSlotSelectionTabletLayout extends ConsumerWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('\${selectedDate.year}-\${selectedDate.month.toString().padLeft(2, '0')}-\${selectedDate.day.toString().padLeft(2, '0')}', style: AppTypography.headingMedium),
-            const Icon(Icons.calendar_today, color: AppColors.primary, size: 28),
+            Text(
+              '${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}',
+              style: AppTypography.headingMedium,
+            ),
+            const Icon(
+              Icons.calendar_today,
+              color: AppColors.primary,
+              size: 28,
+            ),
           ],
         ),
       ),
@@ -93,7 +117,12 @@ class BookingSlotSelectionTabletLayout extends ConsumerWidget {
     );
   }
 
-  Widget _durationChip(String label, int value, int current, BookingNotifier notifier) {
+  Widget _durationChip(
+    String label,
+    int value,
+    int current,
+    BookingNotifier notifier,
+  ) {
     final isSelected = value == current;
     return Expanded(
       child: GestureDetector(
@@ -103,12 +132,18 @@ class BookingSlotSelectionTabletLayout extends ConsumerWidget {
           decoration: BoxDecoration(
             color: isSelected ? AppColors.primary : AppColors.surface,
             borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
-            border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
+            border: Border.all(
+              color: isSelected ? AppColors.primary : AppColors.border,
+            ),
           ),
           child: Center(
             child: Text(
               label,
-              style: AppTypography.button.copyWith(color: isSelected ? AppColors.background : AppColors.textPrimary, fontSize: 18),
+              style: AppTypography.headingSmall.copyWith(
+                color: isSelected
+                    ? AppColors.background
+                    : AppColors.textPrimary,
+              ),
             ),
           ),
         ),

@@ -5,7 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../providers/booking_notifier.dart';
+import '../providers/booking_notifier.dart';
 import '../../../../models/domain_systems.dart';
 
 class BookingSystemSelectionMobileLayout extends ConsumerWidget {
@@ -57,7 +57,7 @@ class BookingSystemSelectionMobileLayout extends ConsumerWidget {
                 Text(system.name ?? '', style: AppTypography.headingSmall),
                 Text(system.description ?? '', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
                 const SizedBox(height: AppSpacing.sm),
-                Text('\$ \${system.hourlyBaseRate} / hr', style: AppTypography.headingSmall.copyWith(color: AppColors.primary)),
+                Text('\$ ${system.hourlyBaseRate} / hr', style: AppTypography.headingSmall.copyWith(color: AppColors.primary)),
               ],
             ),
           ),

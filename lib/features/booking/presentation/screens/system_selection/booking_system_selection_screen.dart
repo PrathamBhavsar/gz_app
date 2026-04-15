@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../../core/responsive/breakpoints.dart';
 import '../../../../../core/responsive/responsive_builder.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../widgets/booking_system_selection_mobile_layout.dart';
-import '../widgets/booking_system_selection_tablet_layout.dart';
+import '../../widgets/booking_system_selection_mobile_layout.dart';
+import '../../widgets/booking_system_selection_tablet_layout.dart';
 
 class BookingSystemSelectionScreen extends StatelessWidget {
   const BookingSystemSelectionScreen({super.key});

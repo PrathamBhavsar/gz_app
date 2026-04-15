@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../../core/responsive/breakpoints.dart';
 import '../../../../../core/responsive/responsive_builder.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../widgets/booking_summary_mobile_layout.dart';
-import '../widgets/booking_summary_tablet_layout.dart';
+import '../../widgets/booking_summary_mobile_layout.dart';
+import '../../widgets/booking_summary_tablet_layout.dart';
 
 class BookingSummaryScreen extends StatelessWidget {
   const BookingSummaryScreen({super.key});

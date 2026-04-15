@@ -21,17 +21,23 @@ class BookingSuccessTabletLayout extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.xxl),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const HugeIcon(icon: HugeIcons.strokeRoundedTick01, color: AppColors.primary, size: 120),
+                child: const HugeIcon(
+                  icon: HugeIcons.strokeRoundedTick01,
+                  color: AppColors.primary,
+                  size: 120,
+                ),
               ),
               const SizedBox(height: AppSpacing.xxl),
-              Text('Booking Confirmed!', style: AppTypography.headingLarge.copyWith(fontSize: 48)),
+              Text('Booking Confirmed!', style: AppTypography.headingLarge),
               const SizedBox(height: AppSpacing.md),
               Text(
                 'Your gaming session has been reserved successfully. You can manage your upcoming sessions in the Sessions tab.',
-                style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
+                style: AppTypography.bodyLarge.copyWith(
+                  color: AppColors.textSecondary,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.xxl * 2),
@@ -43,16 +49,30 @@ class BookingSuccessTabletLayout extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadius)),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.lg,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadius,
+                      ),
+                    ),
                   ),
-                  child: Text('View Sessions', style: AppTypography.button.copyWith(fontSize: 18)),
+                  child: Text(
+                    'View Sessions',
+                    style: AppTypography.headingSmall,
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
               TextButton(
                 onPressed: () => context.go('/home'),
-                child: Text('Back to Home', style: AppTypography.button.copyWith(color: AppColors.textSecondary, fontSize: 18)),
+                child: Text(
+                  'Back to Home',
+                  style: AppTypography.headingSmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ),
             ],
           ),

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../providers/booking_notifier.dart';
+import '../providers/booking_notifier.dart';
 
 class BookingSlotSelectionMobileLayout extends ConsumerWidget {
   const BookingSlotSelectionMobileLayout({super.key});
@@ -68,7 +68,7 @@ class BookingSlotSelectionMobileLayout extends ConsumerWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('\${selectedDate.year}-\${selectedDate.month.toString().padLeft(2, '0')}-\${selectedDate.day.toString().padLeft(2, '0')}', style: AppTypography.bodyLarge),
+            Text('${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}', style: AppTypography.bodyLarge),
             const Icon(Icons.calendar_today, color: AppColors.primary),
           ],
         ),
