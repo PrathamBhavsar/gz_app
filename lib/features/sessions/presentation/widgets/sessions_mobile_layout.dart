@@ -6,7 +6,6 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../providers/sessions_notifier.dart';
 import '../../../../models/domain_systems.dart';
-import '../../../../models/enums.dart';
 
 class SessionsMobileLayout extends ConsumerWidget {
   const SessionsMobileLayout({super.key});
@@ -16,7 +15,9 @@ class SessionsMobileLayout extends ConsumerWidget {
     final state = ref.watch(sessionsNotifierProvider);
 
     if (state.isLoading && state.activeSessions.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     }
 
     if (state.error != null) {
@@ -27,7 +28,8 @@ class SessionsMobileLayout extends ConsumerWidget {
             Text('Failed to load sessions', style: AppTypography.headingMedium),
             const SizedBox(height: AppSpacing.sm),
             ElevatedButton(
-              onPressed: () => ref.read(sessionsNotifierProvider.notifier).refresh(),
+              onPressed: () =>
+                  ref.read(sessionsNotifierProvider.notifier).refresh(),
               child: const Text('Retry'),
             ),
           ],
@@ -50,7 +52,7 @@ class SessionsMobileLayout extends ConsumerWidget {
             ...state.activeSessions.map((s) => _buildActiveSessionCard(s)),
             const SizedBox(height: AppSpacing.xl),
           ],
-          
+
           Text('History', style: AppTypography.headingMedium),
           const SizedBox(height: AppSpacing.md),
           if (state.sessionLogs.isEmpty)
@@ -67,8 +69,8 @@ class SessionsMobileLayout extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        color: AppColors.primary.withValues(alpha: 0.1),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
         borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
       ),
       child: Column(
@@ -79,24 +81,48 @@ class SessionsMobileLayout extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  const HugeIcon(icon: HugeIcons.strokeRoundedGameboy, color: AppColors.primary, size: 24),
+                  const HugeIcon(
+                    icon: HugeIcons.strokeRoundedGameboy,
+                    color: AppColors.primary,
+                    size: 24,
+                  ),
                   const SizedBox(width: AppSpacing.sm),
-                  Text('System ID: \${session.systemId ?? 'N/A'}', style: AppTypography.headingSmall),
+                  Text(
+                    'System ID: ${session.systemId ?? 'N/A'}',
+                    style: AppTypography.headingSmall,
+                  ),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text('LIVE', style: AppTypography.labelSmall.copyWith(color: AppColors.background, fontWeight: FontWeight.bold)),
+                child: Text(
+                  'LIVE',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.background,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Text('Time Remaining', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
-          Text('\${session.durationMinutes ?? 0} mins left', style: AppTypography.headingLarge),
+          Text(
+            'Time Remaining',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          Text(
+            '${session.durationMinutes ?? 0} mins left',
+            style: AppTypography.headingLarge,
+          ),
         ],
       ),
     );
@@ -111,11 +137,24 @@ class SessionsMobileLayout extends ConsumerWidget {
           color: AppColors.surface,
           shape: BoxShape.circle,
         ),
-        child: const HugeIcon(icon: HugeIcons.strokeRoundedClock01, color: AppColors.textSecondary, size: 20),
+        child: const HugeIcon(
+          icon: HugeIcons.strokeRoundedClock01,
+          color: AppColors.textSecondary,
+          size: 20,
+        ),
       ),
-      title: Text(log.eventType ?? 'Unknown Event', style: AppTypography.bodyLarge),
-      subtitle: Text('\${log.localTime?.toString().split('.')[0] ?? 'Time N/A'}', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
-      trailing: Text('\${log.durationSeconds != null ? log.durationSeconds! ~/ 60 : 0} mins', style: AppTypography.bodyMedium),
+      title: Text(
+        log.eventType ?? 'Unknown Event',
+        style: AppTypography.bodyLarge,
+      ),
+      subtitle: Text(
+        '${log.localTime?.toString().split('.')[0] ?? 'Time N/A'}',
+        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+      ),
+      trailing: Text(
+        '${log.durationSeconds != null ? log.durationSeconds! ~/ 60 : 0} mins',
+        style: AppTypography.bodyMedium,
+      ),
     );
   }
 
@@ -123,7 +162,12 @@ class SessionsMobileLayout extends ConsumerWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-        child: Text(message, style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
+        child: Text(
+          message,
+          style: AppTypography.bodyLarge.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
       ),
     );
   }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/responsive/breakpoints.dart';
 import '../../../../core/responsive/responsive_builder.dart';
 import '../../../../core/theme/app_colors.dart';
-import 'widgets/sessions_mobile_layout.dart';
-import 'widgets/sessions_tablet_layout.dart';
+import '../widgets/sessions_mobile_layout.dart';
+import '../widgets/sessions_tablet_layout.dart';
 
 class SessionsScreen extends StatelessWidget {
   const SessionsScreen({super.key});

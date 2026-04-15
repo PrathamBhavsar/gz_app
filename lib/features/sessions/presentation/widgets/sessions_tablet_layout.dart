@@ -15,7 +15,9 @@ class SessionsTabletLayout extends ConsumerWidget {
     final state = ref.watch(sessionsNotifierProvider);
 
     if (state.isLoading && state.activeSessions.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     }
 
     return Row(
@@ -31,12 +33,20 @@ class SessionsTabletLayout extends ConsumerWidget {
                 Text('Active Now', style: AppTypography.headingLarge),
                 const SizedBox(height: AppSpacing.lg),
                 if (state.activeSessions.isEmpty)
-                  Center(child: Text('No active sessions right now.', style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)))
+                  Center(
+                    child: Text(
+                      'No active sessions right now.',
+                      style: AppTypography.bodyLarge.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  )
                 else
                   Expanded(
                     child: ListView.builder(
                       itemCount: state.activeSessions.length,
-                      itemBuilder: (context, index) => _buildActiveSessionCard(state.activeSessions[index]),
+                      itemBuilder: (context, index) =>
+                          _buildActiveSessionCard(state.activeSessions[index]),
                     ),
                   ),
               ],
@@ -55,10 +65,18 @@ class SessionsTabletLayout extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.lg),
                 Expanded(
                   child: state.sessionLogs.isEmpty
-                      ? Center(child: Text('No history found.', style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)))
+                      ? Center(
+                          child: Text(
+                            'No history found.',
+                            style: AppTypography.bodyLarge.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        )
                       : ListView.builder(
                           itemCount: state.sessionLogs.length,
-                          itemBuilder: (context, index) => _buildHistoryItem(state.sessionLogs[index]),
+                          itemBuilder: (context, index) =>
+                              _buildHistoryItem(state.sessionLogs[index]),
                         ),
                 ),
               ],
@@ -74,8 +92,8 @@ class SessionsTabletLayout extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        color: AppColors.primary.withValues(alpha: 0.1),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
         borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
       ),
       child: Column(
@@ -86,24 +104,48 @@ class SessionsTabletLayout extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  const HugeIcon(icon: HugeIcons.strokeRoundedGameboy, color: AppColors.primary, size: 32),
+                  const HugeIcon(
+                    icon: HugeIcons.strokeRoundedGameboy,
+                    color: AppColors.primary,
+                    size: 32,
+                  ),
                   const SizedBox(width: AppSpacing.md),
-                  Text('System ID: \${session.systemId ?? 'N/A'}', style: AppTypography.headingMedium),
+                  Text(
+                    'System ID: ${session.systemId ?? 'N/A'}',
+                    style: AppTypography.headingMedium,
+                  ),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Text('LIVE', style: AppTypography.labelLarge.copyWith(color: AppColors.background, fontWeight: FontWeight.bold)),
+                child: Text(
+                  'LIVE',
+                  style: AppTypography.bodyLarge.copyWith(
+                    color: AppColors.background,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          Text('Time Remaining', style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary)),
-          Text('\${session.durationMinutes ?? 0} mins left', style: AppTypography.headingLarge.copyWith(fontSize: 48)),
+          Text(
+            'Time Remaining',
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          Text(
+            '${session.durationMinutes ?? 0} mins left',
+            style: AppTypography.headingLarge,
+          ),
         ],
       ),
     );
@@ -122,18 +164,35 @@ class SessionsTabletLayout extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const HugeIcon(icon: HugeIcons.strokeRoundedClock01, color: AppColors.textSecondary, size: 28),
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedClock01,
+                color: AppColors.textSecondary,
+                size: 28,
+              ),
               const SizedBox(width: AppSpacing.md),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(log.eventType ?? 'Unknown Event', style: AppTypography.headingSmall),
-                  Text('\${log.localTime?.toString().split('.')[0] ?? 'Time N/A'}', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                  Text(
+                    log.eventType ?? 'Unknown Event',
+                    style: AppTypography.headingSmall,
+                  ),
+                  Text(
+                    '${log.localTime?.toString().split('.')[0] ?? 'Time N/A'}',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
-          Text('\${log.durationSeconds != null ? log.durationSeconds! ~/ 60 : 0} mins', style: AppTypography.headingSmall.copyWith(color: AppColors.primary)),
+          Text(
+            '${log.durationSeconds != null ? log.durationSeconds! ~/ 60 : 0} mins',
+            style: AppTypography.headingSmall.copyWith(
+              color: AppColors.primary,
+            ),
+          ),
         ],
       ),
     );
