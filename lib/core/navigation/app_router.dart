@@ -17,6 +17,10 @@ import '../features/auth/presentation/screens/email_verification_pending/email_v
 
 import 'routes.dart';
 
+import '../features/home/presentation/screens/home_screen.dart';
+import '../features/home/presentation/screens/store_search/store_search_screen.dart';
+import '../features/home/presentation/screens/store_detail/store_detail_screen.dart';
+
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: AppRoutes.splash,
@@ -63,7 +67,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.home,
-        builder: (context, state) => const Scaffold(body: Center(child: Text('Home placeholder'))),
+        builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.storeSearch,
+        builder: (context, state) => const StoreSearchScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.storeDetail,
+        builder: (context, state) {
+          final slug = state.pathParameters['slug'] ?? '';
+          return StoreDetailScreen(slug: slug);
+        },
       ),
     ],
     // The redirect logic will be injected here during Auth Notifier creation

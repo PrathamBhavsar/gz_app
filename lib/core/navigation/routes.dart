@@ -15,4 +15,6 @@ class AppRoutes {
 
   // Main App (Authenticated)
   static const home = '/home';
+  static const storeSearch = '/home/search';
+  static const storeDetail = '/home/store/:slug';
 }
