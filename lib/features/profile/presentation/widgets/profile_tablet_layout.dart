@@ -31,12 +31,27 @@ class ProfileTabletLayout extends ConsumerWidget {
                       ref.read(authNotifierProvider.notifier).logout();
                       context.go('/auth_landing');
                     },
-                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedLogout01, color: AppColors.error, size: 28),
-                    label: Text('Log Out', style: AppTypography.button.copyWith(color: AppColors.error, fontSize: 18)),
+                    icon: const HugeIcon(
+                      icon: HugeIcons.strokeRoundedLogout01,
+                      color: AppColors.error,
+                      size: 28,
+                    ),
+                    label: Text(
+                      'Log Out',
+                      style: AppTypography.headingSmall.copyWith(
+                        color: AppColors.error,
+                      ),
+                    ),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppColors.error, width: 2),
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadius)),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.lg,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.borderRadius,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -53,15 +68,39 @@ class ProfileTabletLayout extends ConsumerWidget {
             children: [
               Text('Account Settings', style: AppTypography.headingLarge),
               const SizedBox(height: AppSpacing.lg),
-              _buildTabletListTile(HugeIcons.strokeRoundedUserEdit01, 'Edit Profile', 'Update your personal details'),
-              _buildTabletListTile(HugeIcons.strokeRoundedLockPassword, 'Change Password', 'Secure your account'),
-              _buildTabletListTile(HugeIcons.strokeRoundedNotification03, 'Notifications', 'Manage alerts and emails'),
+              _buildTabletListTile(
+                HugeIcons.strokeRoundedUserEdit01,
+                'Edit Profile',
+                'Update your personal details',
+              ),
+              _buildTabletListTile(
+                HugeIcons.strokeRoundedLockPassword,
+                'Change Password',
+                'Secure your account',
+              ),
+              _buildTabletListTile(
+                HugeIcons.strokeRoundedNotification03,
+                'Notifications',
+                'Manage alerts and emails',
+              ),
               const SizedBox(height: AppSpacing.xxl),
               Text('Support & Legal', style: AppTypography.headingLarge),
               const SizedBox(height: AppSpacing.lg),
-              _buildTabletListTile(HugeIcons.strokeRoundedCustomerService01, 'Help Center', 'Get support and FAQs'),
-              _buildTabletListTile(HugeIcons.strokeRoundedDocumentValidation, 'Terms of Service', 'Read our rules'),
-              _buildTabletListTile(HugeIcons.strokeRoundedShieldQuestion, 'Privacy Policy', 'Understand how we use your data'),
+              _buildTabletListTile(
+                HugeIcons.strokeRoundedCustomerService01,
+                'Help Center',
+                'Get support and FAQs',
+              ),
+              _buildTabletListTile(
+                HugeIcons.strokeRoundedDocumentValidation,
+                'Terms of Service',
+                'Read our rules',
+              ),
+              _buildTabletListTile(
+                HugeIcons.strokeRoundedShield01,
+                'Privacy Policy',
+                'Understand how we use your data',
+              ),
             ],
           ),
         ),
@@ -78,7 +117,7 @@ class ProfileTabletLayout extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -89,28 +128,45 @@ class ProfileTabletLayout extends ConsumerWidget {
           const CircleAvatar(
             radius: 70,
             backgroundColor: AppColors.primary,
-            child: HugeIcon(icon: HugeIcons.strokeRoundedUser, color: AppColors.background, size: 70),
+            child: HugeIcon(
+              icon: HugeIcons.strokeRoundedUser,
+              color: AppColors.background,
+              size: 70,
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           Text('Gamer One', style: AppTypography.headingLarge),
           const SizedBox(height: AppSpacing.sm),
-          Text('gamer@gamingzone.com', style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
+          Text(
+            'gamer@gamingzone.com',
+            style: AppTypography.bodyLarge.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
           const SizedBox(height: AppSpacing.xl),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.rose.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: AppColors.rose.withOpacity(0.5)),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
             ),
-            child: Text('Gold Tier Member', style: AppTypography.headingMedium.copyWith(color: AppColors.rose)),
+            decoration: BoxDecoration(
+              color: AppColors.rose.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(AppSpacing.xxl),
+              border: Border.all(color: AppColors.rose.withValues(alpha: 0.5)),
+            ),
+            child: Text(
+              'Gold Tier Member',
+              style: AppTypography.headingMedium.copyWith(
+                color: AppColors.rose,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTabletListTile(IconData icon, String title, String subtitle) {
+  Widget _buildTabletListTile(dynamic icon, String title, String subtitle) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       decoration: BoxDecoration(
@@ -127,9 +183,20 @@ class ProfileTabletLayout extends ConsumerWidget {
           child: HugeIcon(icon: icon, color: AppColors.primary, size: 24),
         ),
         title: Text(title, style: AppTypography.headingSmall),
-        subtitle: Text(subtitle, style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+        subtitle: Text(
+          subtitle,
+          style: AppTypography.bodySmall.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        trailing: const Icon(
+          Icons.chevron_right,
+          color: AppColors.textSecondary,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
         onTap: () {
           // Placeholder
         },

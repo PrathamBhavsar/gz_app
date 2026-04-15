@@ -24,20 +24,31 @@ class ProfileMobileLayout extends ConsumerWidget {
         const SizedBox(height: AppSpacing.xl),
         _buildSectionTitle('Support & Legal'),
         _buildListTile(HugeIcons.strokeRoundedCustomerService01, 'Help Center'),
-        _buildListTile(HugeIcons.strokeRoundedDocumentValidation, 'Terms of Service'),
-        _buildListTile(HugeIcons.strokeRoundedShieldQuestion, 'Privacy Policy'),
+        _buildListTile(
+          HugeIcons.strokeRoundedDocumentValidation,
+          'Terms of Service',
+        ),
+        _buildListTile(HugeIcons.strokeRoundedShield01, 'Privacy Policy'),
         const SizedBox(height: AppSpacing.xxl),
         ElevatedButton.icon(
           onPressed: () {
             ref.read(authNotifierProvider.notifier).logout();
-            context.go('/auth_landing'); // Temporary hard redirect since GoRouter redirect logic might be stubbed
+            context.go(
+              '/auth_landing',
+            ); // Temporary hard redirect since GoRouter redirect logic might be stubbed
           },
-          icon: const HugeIcon(icon: HugeIcons.strokeRoundedLogout01, color: AppColors.background, size: 24),
+          icon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedLogout01,
+            color: AppColors.background,
+            size: 24,
+          ),
           label: Text('Log Out', style: AppTypography.button),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.error,
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadius)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.xxl),
@@ -51,21 +62,36 @@ class ProfileMobileLayout extends ConsumerWidget {
         const CircleAvatar(
           radius: 50,
           backgroundColor: AppColors.primary,
-          child: HugeIcon(icon: HugeIcons.strokeRoundedUser, color: AppColors.background, size: 50),
+          child: HugeIcon(
+            icon: HugeIcons.strokeRoundedUser,
+            color: AppColors.background,
+            size: 50,
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         Text('Gamer One', style: AppTypography.headingLarge),
         const SizedBox(height: AppSpacing.xs),
-        Text('gamer@gamingzone.com', style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary)),
+        Text(
+          'gamer@gamingzone.com',
+          style: AppTypography.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
         const SizedBox(height: AppSpacing.sm),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.rose.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.rose.withOpacity(0.5)),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs,
           ),
-          child: Text('Gold Tier', style: AppTypography.labelLarge.copyWith(color: AppColors.rose)),
+          decoration: BoxDecoration(
+            color: AppColors.rose.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(AppSpacing.lg),
+            border: Border.all(color: AppColors.rose.withValues(alpha: 0.5)),
+          ),
+          child: Text(
+            'Gold Tier',
+            style: AppTypography.bodyLarge.copyWith(color: AppColors.rose),
+          ),
         ),
       ],
     );
@@ -78,7 +104,7 @@ class ProfileMobileLayout extends ConsumerWidget {
     );
   }
 
-  Widget _buildListTile(IconData icon, String title) {
+  Widget _buildListTile(dynamic icon, String title) {
     return ListTile(
       leading: HugeIcon(icon: icon, color: AppColors.textPrimary, size: 24),
       title: Text(title, style: AppTypography.bodyLarge),
