@@ -23,7 +23,11 @@ class HomeTabletLayout extends ConsumerWidget {
         title: Text('GAMING ZONE', style: AppTypography.headingLarge),
         actions: [
           IconButton(
-            icon: const HugeIcon(icon: HugeIcons.strokeRoundedSearch01, color: AppColors.textPrimary, size: 28),
+            icon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedSearch01,
+              color: AppColors.textPrimary,
+              size: 28,
+            ),
             onPressed: () => context.push('/home/search'),
           ),
           const SizedBox(width: AppSpacing.lg),
@@ -40,8 +44,15 @@ class HomeTabletLayout extends ConsumerWidget {
             const SizedBox(height: AppSpacing.xxl),
           ],
         ),
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.rose)),
-        error: (err, st) => Center(child: Text('Error: \$err', style: AppTypography.bodyLarge.copyWith(color: AppColors.error))),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: AppColors.rose),
+        ),
+        error: (err, st) => Center(
+          child: Text(
+            'Error: \$err',
+            style: AppTypography.bodyLarge.copyWith(color: AppColors.error),
+          ),
+        ),
       ),
     );
   }
@@ -70,7 +81,12 @@ class HomeTabletLayout extends ConsumerWidget {
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
           ),
-          child: Center(child: Text('Offer \${index + 1}', style: AppTypography.headingMedium)),
+          child: Center(
+            child: Text(
+              'Offer ${index + 1}',
+              style: AppTypography.headingMedium,
+            ),
+          ),
         );
       },
     );
@@ -90,7 +106,7 @@ class HomeTabletLayout extends ConsumerWidget {
       itemBuilder: (context, index) {
         final store = stores[index];
         return GestureDetector(
-          onTap: () => context.push('/home/store/\${store.slug}'),
+          onTap: () => context.push('/home/store/${store.slug}'),
           child: Container(
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
@@ -104,16 +120,32 @@ class HomeTabletLayout extends ConsumerWidget {
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: AppColors.background.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
+                      color: AppColors.background.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadiusSm,
+                      ),
                     ),
-                    child: const Center(child: HugeIcon(icon: HugeIcons.strokeRoundedGameboy, color: AppColors.primary, size: 60)),
+                    child: const Center(
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedGameboy,
+                        color: AppColors.primary,
+                        size: 60,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                Text(store.name ?? 'Unknown Store', style: AppTypography.headingMedium),
+                Text(
+                  store.name ?? 'Unknown Store',
+                  style: AppTypography.headingMedium,
+                ),
                 const SizedBox(height: AppSpacing.xs),
-                Text('\${store.address}, \${store.city}', style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary)),
+                Text(
+                  '${store.address}, ${store.city}',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ],
             ),
           ),

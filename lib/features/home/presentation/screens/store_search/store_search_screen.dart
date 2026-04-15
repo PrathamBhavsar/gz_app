@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../../core/responsive/breakpoints.dart';
 import '../../../../../core/responsive/responsive_builder.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../widgets/store_search_mobile_layout.dart';
-import '../widgets/store_search_tablet_layout.dart';
+import '../../widgets/store_search_mobile_layout.dart';
+import '../../widgets/store_search_tablet_layout.dart';
 
 class StoreSearchScreen extends StatelessWidget {
   const StoreSearchScreen({super.key});

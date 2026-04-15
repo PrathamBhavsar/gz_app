@@ -49,14 +49,14 @@ class StoreDetailMobileLayout extends ConsumerWidget {
                         children: [
                           const HugeIcon(icon: HugeIcons.strokeRoundedLocation01, color: AppColors.rose, size: 20),
                           const SizedBox(width: AppSpacing.sm),
-                          Text('\${store.address}, \${store.city}', style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
+                          Text('${store.address}, ${store.city}', style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
                         ],
                       ),
                       const SizedBox(height: AppSpacing.xxl),
                       Text('About', style: AppTypography.headingMedium),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        'Welcome to \${store.name}. The ultimate gaming experience with \${store.settings?['systemCount'] ?? 'many'} modern PC and console setups waiting for you.',
+                        'Welcome to ${store.name}. The ultimate gaming experience with ${store.settings?['systemCount'] ?? 'many'} modern PC and console setups waiting for you.',
                         style: AppTypography.bodyMedium,
                       ),
                       const SizedBox(height: AppSpacing.xxl),

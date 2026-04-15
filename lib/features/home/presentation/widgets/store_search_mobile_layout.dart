@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/app_spacing.dart';
 import '../providers/store_search_notifier.dart';
 
 class StoreSearchMobileLayout extends ConsumerWidget {
@@ -26,10 +25,13 @@ class StoreSearchMobileLayout extends ConsumerWidget {
         title: TextField(
           autofocus: true,
           style: AppTypography.bodyLarge,
-          onChanged: (val) => ref.read(storeSearchProvider.notifier).search(val),
+          onChanged: (val) =>
+              ref.read(storeSearchProvider.notifier).search(val),
           decoration: InputDecoration(
             hintText: 'Search stores...',
-            hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+            hintStyle: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
             border: InputBorder.none,
           ),
         ),
@@ -40,15 +42,29 @@ class StoreSearchMobileLayout extends ConsumerWidget {
 
   Widget _buildBody(BuildContext context, StoreSearchState state) {
     if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.rose));
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.rose),
+      );
     }
 
     if (state.error != null) {
-      return Center(child: Text('Error: \${state.error}', style: AppTypography.bodyLarge.copyWith(color: AppColors.error)));
+      return Center(
+        child: Text(
+          'Error: ${state.error}',
+          style: AppTypography.bodyLarge.copyWith(color: AppColors.error),
+        ),
+      );
     }
 
     if (state.results.isEmpty) {
-      return Center(child: Text('No results found.', style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)));
+      return Center(
+        child: Text(
+          'No results found.',
+          style: AppTypography.bodyLarge.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+      );
     }
 
     return ListView.builder(
@@ -59,12 +75,27 @@ class StoreSearchMobileLayout extends ConsumerWidget {
           leading: Container(
             width: 48,
             height: 48,
-            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(8)),
-            child: const HugeIcon(icon: HugeIcons.strokeRoundedGameboy, color: AppColors.primary, size: 24),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const HugeIcon(
+              icon: HugeIcons.strokeRoundedGameboy,
+              color: AppColors.primary,
+              size: 24,
+            ),
           ),
-          title: Text(store.name ?? 'Unknown', style: AppTypography.headingSmall),
-          subtitle: Text('\${store.address}, \${store.city}', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
-          onTap: () => context.push('/home/store/\${store.slug}'),
+          title: Text(
+            store.name ?? 'Unknown',
+            style: AppTypography.headingSmall,
+          ),
+          subtitle: Text(
+            '${store.address}, ${store.city}',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          onTap: () => context.push('/home/store/${store.slug}'),
         );
       },
     );

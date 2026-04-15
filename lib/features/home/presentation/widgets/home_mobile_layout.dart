@@ -5,7 +5,6 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/navigation/routes.dart';
 import '../providers/home_notifier.dart';
 import '../../../../models/domain_global.dart';
 
@@ -26,8 +25,13 @@ class HomeMobileLayout extends ConsumerWidget {
           title: Text('GAMING ZONE', style: AppTypography.headingMedium),
           actions: [
             IconButton(
-              icon: const HugeIcon(icon: HugeIcons.strokeRoundedSearch01, color: AppColors.textPrimary, size: 24),
-              onPressed: () => context.push('/home/search'), // We will add to routes later
+              icon: const HugeIcon(
+                icon: HugeIcons.strokeRoundedSearch01,
+                color: AppColors.textPrimary,
+                size: 24,
+              ),
+              onPressed: () =>
+                  context.push('/home/search'), // We will add to routes later
             ),
             const SizedBox(width: AppSpacing.sm),
           ],
@@ -42,8 +46,19 @@ class HomeMobileLayout extends ConsumerWidget {
               const SizedBox(height: AppSpacing.xxl),
             ]),
           ),
-          loading: () => const SliverFillRemaining(child: Center(child: CircularProgressIndicator(color: AppColors.rose))),
-          error: (err, st) => SliverFillRemaining(child: Center(child: Text('Error: \$err', style: AppTypography.bodyLarge.copyWith(color: AppColors.error)))),
+          loading: () => const SliverFillRemaining(
+            child: Center(
+              child: CircularProgressIndicator(color: AppColors.rose),
+            ),
+          ),
+          error: (err, st) => SliverFillRemaining(
+            child: Center(
+              child: Text(
+                'Error: \$err',
+                style: AppTypography.bodyLarge.copyWith(color: AppColors.error),
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -51,7 +66,10 @@ class HomeMobileLayout extends ConsumerWidget {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.lg,
+      ),
       child: Text(title, style: AppTypography.headingSmall),
     );
   }
@@ -71,7 +89,12 @@ class HomeMobileLayout extends ConsumerWidget {
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
             ),
-            child: Center(child: Text('Offer \${index + 1}', style: AppTypography.headingMedium)),
+            child: Center(
+              child: Text(
+                'Offer ${index + 1}',
+                style: AppTypography.headingMedium,
+              ),
+            ),
           );
         },
       ),
@@ -80,9 +103,12 @@ class HomeMobileLayout extends ConsumerWidget {
 
   Widget _buildStoreCard(BuildContext context, StoreModel store) {
     return GestureDetector(
-      onTap: () => context.push('/home/store/\${store.slug}'),
+      onTap: () => context.push('/home/store/${store.slug}'),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        margin: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: AppColors.surface,
@@ -95,15 +121,29 @@ class HomeMobileLayout extends ConsumerWidget {
               height: 140,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: AppColors.background.withOpacity(0.5),
+                color: AppColors.background.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
               ),
-              child: const Center(child: HugeIcon(icon: HugeIcons.strokeRoundedGameboy, color: AppColors.primary, size: 40)),
+              child: const Center(
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedGameboy,
+                  color: AppColors.primary,
+                  size: 40,
+                ),
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
-            Text(store.name ?? 'Unknown Store', style: AppTypography.headingSmall),
+            Text(
+              store.name ?? 'Unknown Store',
+              style: AppTypography.headingSmall,
+            ),
             const SizedBox(height: AppSpacing.xs),
-            Text('\${store.address}, \${store.city}', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+            Text(
+              '${store.address}, ${store.city}',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
           ],
         ),
       ),

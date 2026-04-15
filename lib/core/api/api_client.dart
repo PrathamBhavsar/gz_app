@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../errors/app_exception.dart';
 
 class ApiClient {
@@ -32,3 +33,8 @@ class ApiClient {
     );
   }
 }
+
+/// Global ApiClient provider — shared across all services
+final apiClientProvider = Provider<ApiClient>((ref) {
+  return ApiClient(baseUrl: 'http://192.168.1.4:3000/v1');
+});

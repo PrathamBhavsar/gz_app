@@ -9,9 +9,9 @@ class StoreService {
   StoreService(this._apiClient);
 
   Future<PaginatedStoresResponse> getStores({String? query}) async {
-    // Simulated API call. In real implementation, this would use _apiClient.get('/stores?search=$query')
+    // TODO: Implement GET /stores using _apiClient
     await Future.delayed(const Duration(milliseconds: 600));
-    
+
     final mockStores = [
       StoreModel(
         id: '1',
@@ -37,16 +37,16 @@ class StoreService {
       final filtered = mockStores
           .where((s) => s.name!.toLowerCase().contains(query.toLowerCase()))
           .toList();
-      return PaginatedStoresResponse(success: true, data: filtered);
+      return PaginatedStoresResponse(data: filtered);
     }
 
-    return PaginatedStoresResponse(success: true, data: mockStores);
+    return PaginatedStoresResponse(data: mockStores);
   }
 
   Future<StoreResponse> getStore(String slug) async {
+    // TODO: Implement GET /stores/:slug using _apiClient
     await Future.delayed(const Duration(milliseconds: 300));
     return StoreResponse(
-      success: true,
       data: StoreModel(
         id: '1',
         name: 'Nexus Gaming Center',
@@ -60,9 +60,9 @@ class StoreService {
   }
 
   Future<PaginatedCampaignsResponse> getActiveCampaigns(String storeId) async {
+    // TODO: Implement GET /stores/:storeId/campaigns/active using _apiClient
     await Future.delayed(const Duration(milliseconds: 400));
-    // Assuming campaigns would map properly here. Return empty to avoid compile error for now
-    return const PaginatedCampaignsResponse(success: true, data: []);
+    return const PaginatedCampaignsResponse(data: []);
   }
 }
 
@@ -70,8 +70,3 @@ final storeServiceProvider = Provider<StoreService>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   return StoreService(apiClient);
 });
-
-// Since ApiClient was previously placed in auth (mistakenly), let's ensure it's provided here or globally
-// But we actually created ApiClient globally so it should be fine. Wait, the provider was in auth layer.
-// Let's declare it in core/api if needed, or simply redefine/reuse.
-// To be safe, I've defined apiClientProvider in auth_service.dart. I will redefine it properly here if not shared.

@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/responsive/breakpoints.dart';
 import '../../../../../core/responsive/responsive_builder.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../widgets/store_detail_mobile_layout.dart';
-import '../widgets/store_detail_tablet_layout.dart';
-import '../providers/active_store_notifier.dart';
+import '../../widgets/store_detail_mobile_layout.dart';
+import '../../widgets/store_detail_tablet_layout.dart';
+import '../../providers/active_store_notifier.dart';
 
 class StoreDetailScreen extends ConsumerStatefulWidget {
   final String slug;

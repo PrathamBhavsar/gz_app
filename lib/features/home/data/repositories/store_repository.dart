@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/network_checker.dart';
-import 'store_service.dart';
+import '../../../../core/api/api_client.dart';
+import '../services/store_service.dart';
 import '../../../../models/api_responses.dart';
-import '../../../auth/data/services/auth_service.dart'; // import the global provider
 
 class StoreRepository {
   final StoreService _storeService;
@@ -20,16 +20,16 @@ class StoreRepository {
     return await _storeService.getStore(slug);
   }
 
-  Future<PaginatedCampaignsResponse> fetchActiveCampaigns(String storeId) async {
+  Future<PaginatedCampaignsResponse> fetchActiveCampaigns(
+    String storeId,
+  ) async {
     await _networkChecker.assertConnection();
     return await _storeService.getActiveCampaigns(storeId);
   }
 }
 
 final storeRepositoryProvider = Provider<StoreRepository>((ref) {
-  // reusing the apiClientProvider from auth for now
-  final apiClient = ref.watch(apiClientProvider);
-  final storeService = StoreService(apiClient);
+  final storeService = ref.watch(storeServiceProvider);
   final networkChecker = ref.watch(networkCheckerProvider);
   return StoreRepository(storeService, networkChecker);
 });

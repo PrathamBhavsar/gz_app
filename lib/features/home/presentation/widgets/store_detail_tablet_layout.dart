@@ -16,7 +16,10 @@ class StoreDetailTabletLayout extends ConsumerWidget {
 
     return activeStoreState.when(
       data: (store) {
-        if (store == null) return const Center(child: CircularProgressIndicator(color: AppColors.rose));
+        if (store == null)
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.rose),
+          );
         return Scaffold(
           backgroundColor: AppColors.background,
           extendBodyBehindAppBar: true,
@@ -35,7 +38,11 @@ class StoreDetailTabletLayout extends ConsumerWidget {
                 child: Container(
                   color: AppColors.surface,
                   child: const Center(
-                    child: HugeIcon(icon: HugeIcons.strokeRoundedGameboy, color: AppColors.primary, size: 120),
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedGameboy,
+                      color: AppColors.primary,
+                      size: 120,
+                    ),
                   ),
                 ),
               ),
@@ -47,20 +54,32 @@ class StoreDetailTabletLayout extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(store.name ?? 'Unknown Store', style: AppTypography.headingLarge.copyWith(fontSize: 48)),
+                      Text(
+                        store.name ?? 'Unknown Store',
+                        style: AppTypography.headingLarge,
+                      ),
                       const SizedBox(height: AppSpacing.md),
                       Row(
                         children: [
-                          const HugeIcon(icon: HugeIcons.strokeRoundedLocation01, color: AppColors.rose, size: 28),
+                          const HugeIcon(
+                            icon: HugeIcons.strokeRoundedLocation01,
+                            color: AppColors.rose,
+                            size: 28,
+                          ),
                           const SizedBox(width: AppSpacing.sm),
-                          Text('\${store.address}, \${store.city}', style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary, fontSize: 20)),
+                          Text(
+                            '${store.address}, ${store.city}',
+                            style: AppTypography.headingSmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: AppSpacing.xxl),
                       Text('About', style: AppTypography.headingMedium),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        'Welcome to \${store.name}. The ultimate gaming experience with \${store.settings?['systemCount'] ?? 'many'} modern PC and console setups waiting for you.',
+                        'Welcome to ${store.name}. The ultimate gaming experience with ${store.settings?['systemCount'] ?? 'many'} modern PC and console setups waiting for you.',
                         style: AppTypography.bodyLarge,
                       ),
                       const Spacer(),
@@ -72,10 +91,19 @@ class StoreDetailTabletLayout extends ConsumerWidget {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadius)),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.lg,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.borderRadius,
+                              ),
+                            ),
                           ),
-                          child: Text('Book a Session', style: AppTypography.button.copyWith(fontSize: 18)),
+                          child: Text(
+                            'Book a Session',
+                            style: AppTypography.headingSmall,
+                          ),
                         ),
                       ),
                     ],
@@ -86,8 +114,14 @@ class StoreDetailTabletLayout extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.rose)),
-      error: (err, st) => Center(child: Text('Error: \$err', style: AppTypography.bodyLarge.copyWith(color: AppColors.error))),
+      loading: () =>
+          const Center(child: CircularProgressIndicator(color: AppColors.rose)),
+      error: (err, st) => Center(
+        child: Text(
+          'Error: \$err',
+          style: AppTypography.bodyLarge.copyWith(color: AppColors.error),
+        ),
+      ),
     );
   }
 }
