@@ -56,23 +56,39 @@ class WalletTabletLayout extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Transaction History', style: AppTypography.headingLarge),
+                    Text(
+                      'Transaction History',
+                      style: AppTypography.headingLarge,
+                    ),
                     IconButton(
                       icon: const Icon(Icons.refresh, color: AppColors.primary),
-                      onPressed: () => ref.read(walletNotifierProvider.notifier).refresh(),
+                      onPressed: () =>
+                          ref.read(walletNotifierProvider.notifier).refresh(),
                     ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Expanded(
                   child: state.isLoading && state.transactions.isEmpty
-                      ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
+                        )
                       : state.transactions.isEmpty
-                          ? Center(child: Text('No transactions yet.', style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)))
-                          : ListView.builder(
-                              itemCount: state.transactions.length,
-                              itemBuilder: (context, index) => _buildTransactionItem(state.transactions[index]),
+                      ? Center(
+                          child: Text(
+                            'No transactions yet.',
+                            style: AppTypography.bodyLarge.copyWith(
+                              color: AppColors.textSecondary,
                             ),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: state.transactions.length,
+                          itemBuilder: (context, index) =>
+                              _buildTransactionItem(state.transactions[index]),
+                        ),
                 ),
               ],
             ),
@@ -82,7 +98,11 @@ class WalletTabletLayout extends ConsumerWidget {
     );
   }
 
-  Widget _buildBalanceCard(BuildContext context, double balance, WidgetRef ref) {
+  Widget _buildBalanceCard(
+    BuildContext context,
+    double balance,
+    WidgetRef ref,
+  ) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xxl * 1.5),
       decoration: BoxDecoration(
@@ -94,7 +114,7 @@ class WalletTabletLayout extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -106,33 +126,60 @@ class WalletTabletLayout extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Available Balance', style: AppTypography.headingMedium.copyWith(color: AppColors.background)),
-              const HugeIcon(icon: HugeIcons.strokeRoundedWallet01, color: AppColors.background, size: 40),
+              Text(
+                'Available Balance',
+                style: AppTypography.headingMedium.copyWith(
+                  color: AppColors.background,
+                ),
+              ),
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedWallet01,
+                color: AppColors.background,
+                size: 40,
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          Text('\$ \${balance.toStringAsFixed(2)}', style: AppTypography.headingLarge.copyWith(color: AppColors.background, fontSize: 56)),
+          Text(
+            '\$ ${balance.toStringAsFixed(2)}',
+            style: AppTypography.headingLarge.copyWith(
+              color: AppColors.background,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _actionChip(BuildContext context, WidgetRef ref, String label, double amount) {
+  Widget _actionChip(
+    BuildContext context,
+    WidgetRef ref,
+    String label,
+    double amount,
+  ) {
     return ActionChip(
       label: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
       backgroundColor: AppColors.surface,
       side: const BorderSide(color: AppColors.primary),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
       onPressed: () {
         ref.read(walletNotifierProvider.notifier).topUp(amount);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Processing \$amount top-up...')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Processing \$amount top-up...')),
+        );
       },
     );
   }
 
   Widget _buildTransactionItem(TransactionModel tx) {
-    final isCredit = tx.type == TransactionType.topUp || tx.type == TransactionType.refund;
-    final icon = isCredit ? HugeIcons.strokeRoundedArrowDownLeft01 : HugeIcons.strokeRoundedArrowUpRight01;
+    final isCredit =
+        tx.type == TransactionType.topUp || tx.type == TransactionType.refund;
+    final icon = isCredit
+        ? HugeIcons.strokeRoundedArrowDownLeft01
+        : HugeIcons.strokeRoundedArrowUpRight01;
     final color = isCredit ? Colors.greenAccent : AppColors.error;
 
     return Container(
@@ -159,14 +206,22 @@ class WalletTabletLayout extends ConsumerWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(tx.type?.name ?? 'Transaction', style: AppTypography.headingSmall),
-                  Text('\${tx.createdAt?.toString().split(' ')[0] ?? 'Date N/A'}', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                  Text(
+                    tx.type?.name ?? 'Transaction',
+                    style: AppTypography.headingSmall,
+                  ),
+                  Text(
+                    '${tx.createdAt?.toString().split(' ')[0] ?? 'Date N/A'}',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
           Text(
-            '\${isCredit ? '+' : '-'}\$ \${tx.amount?.abs().toStringAsFixed(2) ?? '0.00'}',
+            '${isCredit ? '+' : '-'}\$ ${tx.amount?.abs().toStringAsFixed(2) ?? '0.00'}',
             style: AppTypography.headingMedium.copyWith(color: color),
           ),
         ],

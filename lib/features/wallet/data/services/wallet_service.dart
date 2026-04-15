@@ -10,12 +10,12 @@ class WalletService {
 
   Future<PaginatedTransactionsResponse> getTransactions() async {
     await Future.delayed(const Duration(milliseconds: 600));
-    return const PaginatedTransactionsResponse(success: true, data: []); // Return mock empty or populated
+    return const PaginatedTransactionsResponse(data: []); // Return mock empty or populated
   }
 
   Future<TransactionResponse> topUpWallet(double amount) async {
     await Future.delayed(const Duration(milliseconds: 800));
-    return const TransactionResponse(success: true, data: null);
+    return const TransactionResponse(data: null);
   }
 }
 

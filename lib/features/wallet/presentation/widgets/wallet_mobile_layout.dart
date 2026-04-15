@@ -16,7 +16,9 @@ class WalletMobileLayout extends ConsumerWidget {
     final state = ref.watch(walletNotifierProvider);
 
     if (state.isLoading && state.transactions.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     }
 
     return RefreshIndicator(
@@ -38,7 +40,11 @@ class WalletMobileLayout extends ConsumerWidget {
     );
   }
 
-  Widget _buildBalanceCard(BuildContext context, double balance, WidgetRef ref) {
+  Widget _buildBalanceCard(
+    BuildContext context,
+    double balance,
+    WidgetRef ref,
+  ) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xxl),
       decoration: BoxDecoration(
@@ -55,12 +61,26 @@ class WalletMobileLayout extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Available Balance', style: AppTypography.bodyMedium.copyWith(color: AppColors.background)),
-              const HugeIcon(icon: HugeIcons.strokeRoundedWallet01, color: AppColors.background, size: 28),
+              Text(
+                'Available Balance',
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.background,
+                ),
+              ),
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedWallet01,
+                color: AppColors.background,
+                size: 28,
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text('\$ \${balance.toStringAsFixed(2)}', style: AppTypography.headingLarge.copyWith(color: AppColors.background, fontSize: 36)),
+          Text(
+            '\$ ${balance.toStringAsFixed(2)}',
+            style: AppTypography.headingLarge.copyWith(
+              color: AppColors.background,
+            ),
+          ),
           const SizedBox(height: AppSpacing.xl),
           SizedBox(
             width: double.infinity,
@@ -70,9 +90,16 @@ class WalletMobileLayout extends ConsumerWidget {
                 backgroundColor: AppColors.background,
                 foregroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    AppSpacing.borderRadiusSm,
+                  ),
+                ),
               ),
-              child: const Text('Top Up Balance', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Top Up Balance',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],
@@ -82,8 +109,11 @@ class WalletMobileLayout extends ConsumerWidget {
 
   Widget _buildTransactionItem(TransactionModel tx) {
     // Assuming positive amount means Top Up (Credit), negative is Booking (Debit)
-    final isCredit = tx.type == TransactionType.topUp || tx.type == TransactionType.refund;
-    final icon = isCredit ? HugeIcons.strokeRoundedArrowDownLeft01 : HugeIcons.strokeRoundedArrowUpRight01;
+    final isCredit =
+        tx.type == TransactionType.topUp || tx.type == TransactionType.refund;
+    final icon = isCredit
+        ? HugeIcons.strokeRoundedArrowDownLeft01
+        : HugeIcons.strokeRoundedArrowUpRight01;
     final color = isCredit ? Colors.greenAccent : AppColors.error;
 
     return ListTile(
@@ -96,10 +126,16 @@ class WalletMobileLayout extends ConsumerWidget {
         ),
         child: HugeIcon(icon: icon, color: color, size: 20),
       ),
-      title: Text(tx.type?.name ?? 'Transaction', style: AppTypography.bodyLarge),
-      subtitle: Text('\${tx.createdAt?.toString().split(' ')[0] ?? 'Date N/A'}', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+      title: Text(
+        tx.type?.name ?? 'Transaction',
+        style: AppTypography.bodyLarge,
+      ),
+      subtitle: Text(
+        '${tx.createdAt?.toString().split(' ')[0] ?? 'Date N/A'}',
+        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+      ),
       trailing: Text(
-        '\${isCredit ? '+' : '-'}\$ \${tx.amount?.abs().toStringAsFixed(2) ?? '0.00'}',
+        '${isCredit ? '+' : '-'}\$ ${tx.amount?.abs().toStringAsFixed(2) ?? '0.00'}',
         style: AppTypography.headingSmall.copyWith(color: color),
       ),
     );
@@ -109,7 +145,12 @@ class WalletMobileLayout extends ConsumerWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-        child: Text('No transactions found', style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary)),
+        child: Text(
+          'No transactions found',
+          style: AppTypography.bodyLarge.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
       ),
     );
   }
@@ -119,7 +160,11 @@ class WalletMobileLayout extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.borderRadius))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.borderRadius),
+        ),
+      ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
@@ -147,11 +192,11 @@ class WalletMobileLayout extends ConsumerWidget {
       onPressed: () {
         Navigator.pop(ctx);
         ref.read(walletNotifierProvider.notifier).topUp(amount);
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Processing \$amount top-up...')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text('Processing \$amount top-up...')),
+        );
       },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-      ),
+      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
       child: Text('\$\$amount'),
     );
   }

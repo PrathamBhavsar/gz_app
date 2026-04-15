@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/network_checker.dart';
-import 'wallet_service.dart';
+import '../services/wallet_service.dart';
 import '../../../../models/api_responses.dart';
 
 class WalletRepository {
