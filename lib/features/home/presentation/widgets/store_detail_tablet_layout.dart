@@ -16,10 +16,11 @@ class StoreDetailTabletLayout extends ConsumerWidget {
 
     return activeStoreState.when(
       data: (store) {
-        if (store == null)
+        if (store == null) {
           return const Center(
             child: CircularProgressIndicator(color: AppColors.rose),
           );
+        }
         return Scaffold(
           backgroundColor: AppColors.background,
           extendBodyBehindAppBar: true,

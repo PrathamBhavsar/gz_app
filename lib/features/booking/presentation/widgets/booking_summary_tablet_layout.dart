@@ -82,7 +82,7 @@ class BookingSummaryTabletLayout extends ConsumerWidget {
                           final success = await ref
                               .read(bookingNotifierProvider.notifier)
                               .confirmBooking();
-                          if (success) {
+                          if (success && context.mounted) {
                             context.go('/book/success');
                           }
                         },

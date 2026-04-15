@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/navigation/routes.dart';
 
 class MainTabletLayout extends StatelessWidget {
@@ -49,7 +48,9 @@ class MainTabletLayout extends StatelessWidget {
           onDestinationSelected: (index) => _onTap(context, index),
           backgroundColor: AppColors.surface,
           selectedIconTheme: const IconThemeData(color: AppColors.primary),
-          unselectedIconTheme: const IconThemeData(color: AppColors.textSecondary),
+          unselectedIconTheme: const IconThemeData(
+            color: AppColors.textSecondary,
+          ),
           labelType: NavigationRailLabelType.all,
           leading: Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
@@ -57,28 +58,58 @@ class MainTabletLayout extends StatelessWidget {
           ),
           destinations: const [
             NavigationRailDestination(
-              icon: HugeIcon(icon: HugeIcons.strokeRoundedHome01, color: AppColors.textSecondary),
-              selectedIcon: HugeIcon(icon: HugeIcons.strokeRoundedHome01, color: AppColors.primary),
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedHome01,
+                color: AppColors.textSecondary,
+              ),
+              selectedIcon: HugeIcon(
+                icon: HugeIcons.strokeRoundedHome01,
+                color: AppColors.primary,
+              ),
               label: Text('Home'),
             ),
             NavigationRailDestination(
-              icon: HugeIcon(icon: HugeIcons.strokeRoundedCalendar03, color: AppColors.textSecondary),
-              selectedIcon: HugeIcon(icon: HugeIcons.strokeRoundedCalendar03, color: AppColors.primary),
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedCalendar03,
+                color: AppColors.textSecondary,
+              ),
+              selectedIcon: HugeIcon(
+                icon: HugeIcons.strokeRoundedCalendar03,
+                color: AppColors.primary,
+              ),
               label: Text('Book'),
             ),
             NavigationRailDestination(
-              icon: HugeIcon(icon: HugeIcons.strokeRoundedGameboy, color: AppColors.textSecondary),
-              selectedIcon: HugeIcon(icon: HugeIcons.strokeRoundedGameboy, color: AppColors.primary),
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedGameboy,
+                color: AppColors.textSecondary,
+              ),
+              selectedIcon: HugeIcon(
+                icon: HugeIcons.strokeRoundedGameboy,
+                color: AppColors.primary,
+              ),
               label: Text('Sessions'),
             ),
             NavigationRailDestination(
-              icon: HugeIcon(icon: HugeIcons.strokeRoundedWallet01, color: AppColors.textSecondary),
-              selectedIcon: HugeIcon(icon: HugeIcons.strokeRoundedWallet01, color: AppColors.primary),
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedWallet01,
+                color: AppColors.textSecondary,
+              ),
+              selectedIcon: HugeIcon(
+                icon: HugeIcons.strokeRoundedWallet01,
+                color: AppColors.primary,
+              ),
               label: Text('Wallet'),
             ),
             NavigationRailDestination(
-              icon: HugeIcon(icon: HugeIcons.strokeRoundedUser, color: AppColors.textSecondary),
-              selectedIcon: HugeIcon(icon: HugeIcons.strokeRoundedUser, color: AppColors.primary),
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedUser,
+                color: AppColors.textSecondary,
+              ),
+              selectedIcon: HugeIcon(
+                icon: HugeIcons.strokeRoundedUser,
+                color: AppColors.primary,
+              ),
               label: Text('Profile'),
             ),
           ],

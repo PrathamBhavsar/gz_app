@@ -232,3 +232,13 @@ class BillingDisputeModel {
     'updated_at': updatedAt?.toIso8601String(),
   };
 }
+
+class TransactionModel {
+  final String? id;
+  final double? amount;
+  final TransactionType? type;
+  final DateTime? createdAt;
+
+  const TransactionModel({this.id, this.amount, this.type, this.createdAt});
+}
+

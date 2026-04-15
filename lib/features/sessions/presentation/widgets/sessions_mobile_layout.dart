@@ -148,7 +148,7 @@ class SessionsMobileLayout extends ConsumerWidget {
         style: AppTypography.bodyLarge,
       ),
       subtitle: Text(
-        '${log.localTime?.toString().split('.')[0] ?? 'Time N/A'}',
+        log.localTime?.toString().split('.')[0] ?? 'Time N/A',
         style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
       ),
       trailing: Text(

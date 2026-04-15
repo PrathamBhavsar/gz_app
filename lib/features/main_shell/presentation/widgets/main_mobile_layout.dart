@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/navigation/routes.dart';
 
 class MainMobileLayout extends StatelessWidget {
@@ -53,28 +51,58 @@ class MainMobileLayout extends StatelessWidget {
         unselectedItemColor: AppColors.textSecondary,
         items: const [
           BottomNavigationBarItem(
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedHome01, color: AppColors.textSecondary),
-            activeIcon: HugeIcon(icon: HugeIcons.strokeRoundedHome01, color: AppColors.primary),
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedHome01,
+              color: AppColors.textSecondary,
+            ),
+            activeIcon: HugeIcon(
+              icon: HugeIcons.strokeRoundedHome01,
+              color: AppColors.primary,
+            ),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedCalendar03, color: AppColors.textSecondary),
-            activeIcon: HugeIcon(icon: HugeIcons.strokeRoundedCalendar03, color: AppColors.primary),
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedCalendar03,
+              color: AppColors.textSecondary,
+            ),
+            activeIcon: HugeIcon(
+              icon: HugeIcons.strokeRoundedCalendar03,
+              color: AppColors.primary,
+            ),
             label: 'Book',
           ),
           BottomNavigationBarItem(
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedGameboy, color: AppColors.textSecondary),
-            activeIcon: HugeIcon(icon: HugeIcons.strokeRoundedGameboy, color: AppColors.primary),
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedGameboy,
+              color: AppColors.textSecondary,
+            ),
+            activeIcon: HugeIcon(
+              icon: HugeIcons.strokeRoundedGameboy,
+              color: AppColors.primary,
+            ),
             label: 'Sessions',
           ),
           BottomNavigationBarItem(
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedWallet01, color: AppColors.textSecondary),
-            activeIcon: HugeIcon(icon: HugeIcons.strokeRoundedWallet01, color: AppColors.primary),
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedWallet01,
+              color: AppColors.textSecondary,
+            ),
+            activeIcon: HugeIcon(
+              icon: HugeIcons.strokeRoundedWallet01,
+              color: AppColors.primary,
+            ),
             label: 'Wallet',
           ),
           BottomNavigationBarItem(
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedUser, color: AppColors.textSecondary),
-            activeIcon: HugeIcon(icon: HugeIcons.strokeRoundedUser, color: AppColors.primary),
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedUser,
+              color: AppColors.textSecondary,
+            ),
+            activeIcon: HugeIcon(
+              icon: HugeIcons.strokeRoundedUser,
+              color: AppColors.primary,
+            ),
             label: 'Profile',
           ),
         ],

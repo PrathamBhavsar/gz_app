@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/network_checker.dart';
-import '../../../../core/api/api_client.dart';
 import '../services/store_service.dart';
 import '../../../../models/api_responses.dart';
 

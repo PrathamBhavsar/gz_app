@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'breakpoints.dart';
 
 class ResponsiveBuilderWidget extends StatelessWidget {
-  const ResponsiveBuilderWidget({
-    Key? key,
-    required this.builder,
-  }) : super(key: key);
+  const ResponsiveBuilderWidget({super.key, required this.builder});
 
   final Widget Function(BuildContext context, DeviceType deviceType) builder;
 

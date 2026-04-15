@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../models/api_responses.dart';
-import '../../../auth/data/services/auth_service.dart';
 
 class SessionsService {
   final ApiClient _apiClient;

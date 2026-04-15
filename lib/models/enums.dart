@@ -17,6 +17,7 @@ enum NotificationChannel { push, sms, email, inApp }
 enum NotificationStatus { pending, sent, delivered, failed, read }
 enum VerificationPurpose { phoneVerification, emailVerification, passwordReset, loginOtp, phoneChange }
 enum CreditTransactionType { earned, redeemed, bonus, adminAdjust, expired, refund }
+enum TransactionType { topUp, refund, booking, purchase }
 
 // Safe parsing extensions
 extension ParseEnums on String {
@@ -39,4 +40,5 @@ extension ParseEnums on String {
   NotificationStatus? toNotificationStatus() => NotificationStatus.values.cast<NotificationStatus?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
   VerificationPurpose? toVerificationPurpose() => VerificationPurpose.values.cast<VerificationPurpose?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
   CreditTransactionType? toCreditTransactionType() => CreditTransactionType.values.cast<CreditTransactionType?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
+  TransactionType? toTransactionType() => TransactionType.values.cast<TransactionType?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
 }

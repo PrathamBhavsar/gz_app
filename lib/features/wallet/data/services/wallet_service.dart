@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../models/api_responses.dart';
-import '../../../auth/data/services/auth_service.dart';
 
 class WalletService {
   final ApiClient _apiClient;
@@ -10,7 +9,9 @@ class WalletService {
 
   Future<PaginatedTransactionsResponse> getTransactions() async {
     await Future.delayed(const Duration(milliseconds: 600));
-    return const PaginatedTransactionsResponse(data: []); // Return mock empty or populated
+    return const PaginatedTransactionsResponse(
+      data: [],
+    ); // Return mock empty or populated
   }
 
   Future<TransactionResponse> topUpWallet(double amount) async {

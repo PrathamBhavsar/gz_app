@@ -178,7 +178,7 @@ class SessionsTabletLayout extends ConsumerWidget {
                     style: AppTypography.headingSmall,
                   ),
                   Text(
-                    '${log.localTime?.toString().split('.')[0] ?? 'Time N/A'}',
+                    log.localTime?.toString().split('.')[0] ?? 'Time N/A',
                     style: AppTypography.bodySmall.copyWith(
                       color: AppColors.textSecondary,
                     ),

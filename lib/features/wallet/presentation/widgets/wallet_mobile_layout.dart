@@ -131,7 +131,7 @@ class WalletMobileLayout extends ConsumerWidget {
         style: AppTypography.bodyLarge,
       ),
       subtitle: Text(
-        '${tx.createdAt?.toString().split(' ')[0] ?? 'Date N/A'}',
+        tx.createdAt?.toString().split(' ')[0] ?? 'Date N/A',
         style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
       ),
       trailing: Text(
