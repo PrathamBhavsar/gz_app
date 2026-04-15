@@ -1,0 +1,388 @@
+Analyzing gz_app...                                             
+
+warning • Unused import: 'dart:convert' • lib/core/api/api_client.dart:1:8 • unused_import
+warning • Unused import: 'dart:io' • lib/core/api/api_client.dart:2:8 • unused_import
+warning • The declaration '_handleError' isn't referenced • lib/core/api/api_client.dart:24:13 • unused_element
+  error • Target of URI doesn't exist: '../features/auth/presentation/screens/splash/splash_screen.dart' • lib/core/navigation/app_router.dart:7:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/auth/presentation/screens/onboarding/onboarding_screen.dart' • lib/core/navigation/app_router.dart:8:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/auth/presentation/screens/auth_landing/auth_landing_screen.dart' • lib/core/navigation/app_router.dart:9:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/auth/presentation/screens/register/register_screen.dart' • lib/core/navigation/app_router.dart:10:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/auth/presentation/screens/otp/otp_verification_screen.dart' • lib/core/navigation/app_router.dart:11:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/auth/presentation/screens/email_login/email_login_screen.dart' • lib/core/navigation/app_router.dart:12:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/auth/presentation/screens/oauth_handler/oauth_handler_screen.dart' • lib/core/navigation/app_router.dart:13:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/auth/presentation/screens/forgot_password/forgot_password_screen.dart' • lib/core/navigation/app_router.dart:14:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/auth/presentation/screens/reset_password/reset_password_screen.dart' • lib/core/navigation/app_router.dart:15:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/auth/presentation/screens/email_verification_pending/email_verification_pending_screen.dart' • lib/core/navigation/app_router.dart:16:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/home/presentation/screens/home_screen.dart' • lib/core/navigation/app_router.dart:20:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/home/presentation/screens/store_search/store_search_screen.dart' • lib/core/navigation/app_router.dart:21:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/home/presentation/screens/store_detail/store_detail_screen.dart' • lib/core/navigation/app_router.dart:22:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/main_shell/presentation/screens/main_page.dart' • lib/core/navigation/app_router.dart:23:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/booking/presentation/screens/slot_selection/booking_slot_selection_screen.dart' • lib/core/navigation/app_router.dart:24:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/booking/presentation/screens/system_selection/booking_system_selection_screen.dart' • lib/core/navigation/app_router.dart:25:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/booking/presentation/screens/summary/booking_summary_screen.dart' • lib/core/navigation/app_router.dart:26:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/booking/presentation/screens/success/booking_success_screen.dart' • lib/core/navigation/app_router.dart:27:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/sessions/presentation/screens/sessions_screen.dart' • lib/core/navigation/app_router.dart:28:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/wallet/presentation/screens/wallet_screen.dart' • lib/core/navigation/app_router.dart:29:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../features/profile/presentation/screens/profile_screen.dart' • lib/core/navigation/app_router.dart:30:8 • uri_does_not_exist
+  error • The name 'SplashScreen' isn't a class • lib/core/navigation/app_router.dart:38:44 • creation_with_non_type
+  error • The name 'OnboardingScreen' isn't a class • lib/core/navigation/app_router.dart:42:44 • creation_with_non_type
+  error • The name 'AuthLandingScreen' isn't a class • lib/core/navigation/app_router.dart:46:44 • creation_with_non_type
+  error • The name 'RegisterScreen' isn't a class • lib/core/navigation/app_router.dart:50:44 • creation_with_non_type
+  error • The name 'OtpVerificationScreen' isn't a class • lib/core/navigation/app_router.dart:54:44 • creation_with_non_type
+  error • The name 'EmailLoginScreen' isn't a class • lib/core/navigation/app_router.dart:58:44 • creation_with_non_type
+  error • The name 'OAuthHandlerScreen' isn't a class • lib/core/navigation/app_router.dart:62:44 • creation_with_non_type
+  error • The name 'ForgotPasswordScreen' isn't a class • lib/core/navigation/app_router.dart:66:44 • creation_with_non_type
+  error • The name 'ResetPasswordScreen' isn't a class • lib/core/navigation/app_router.dart:70:44 • creation_with_non_type
+  error • The name 'EmailVerificationPendingScreen' isn't a class • lib/core/navigation/app_router.dart:74:44 • creation_with_non_type
+  error • The function 'MainPage' isn't defined • lib/core/navigation/app_router.dart:79:45 • undefined_function
+  error • The name 'HomeScreen' isn't a class • lib/core/navigation/app_router.dart:83:48 • creation_with_non_type
+  error • The name 'BookingSlotSelectionScreen' isn't a class • lib/core/navigation/app_router.dart:87:48 • creation_with_non_type
+  error • The name 'SessionsScreen' isn't a class • lib/core/navigation/app_router.dart:91:48 • creation_with_non_type
+  error • The name 'WalletScreen' isn't a class • lib/core/navigation/app_router.dart:95:48 • creation_with_non_type
+  error • The name 'ProfileScreen' isn't a class • lib/core/navigation/app_router.dart:99:48 • creation_with_non_type
+  error • The name 'StoreSearchScreen' isn't a class • lib/core/navigation/app_router.dart:107:44 • creation_with_non_type
+  error • The function 'StoreDetailScreen' isn't defined • lib/core/navigation/app_router.dart:113:18 • undefined_function
+  error • The name 'BookingSystemSelectionScreen' isn't a class • lib/core/navigation/app_router.dart:118:44 • creation_with_non_type
+  error • The name 'BookingSummaryScreen' isn't a class • lib/core/navigation/app_router.dart:122:44 • creation_with_non_type
+  error • The name 'BookingSuccessScreen' isn't a class • lib/core/navigation/app_router.dart:126:44 • creation_with_non_type
+warning • Unnecessary type check; the result is always 'true' • lib/core/network/connectivity_service.dart:20:22 • unnecessary_type_check
+warning • Dead code • lib/core/network/connectivity_service.dart:22:13 • dead_code
+   info • The type of the right operand ('ConnectivityResult') isn't a subtype or a supertype of the left operand ('List<ConnectivityResult>') • lib/core/network/connectivity_service.dart:22:20 • unrelated_type_equality_checks
+warning • Unnecessary type check; the result is always 'true' • lib/core/network/connectivity_service.dart:37:20 • unnecessary_type_check
+warning • Dead code • lib/core/network/connectivity_service.dart:39:11 • dead_code
+   info • The type of the right operand ('ConnectivityResult') isn't a subtype or a supertype of the left operand ('List<ConnectivityResult>') • lib/core/network/connectivity_service.dart:39:18 • unrelated_type_equality_checks
+   info • Parameter 'key' could be a super parameter • lib/core/responsive/responsive_builder.dart:5:9 • use_super_parameters
+  error • Target of URI doesn't exist: 'auth_service.dart' • lib/features/auth/data/repositories/auth_repository.dart:3:8 • uri_does_not_exist
+  error • Undefined class 'AuthService' • lib/features/auth/data/repositories/auth_repository.dart:7:9 • undefined_class
+  error • Undefined name 'authServiceProvider' • lib/features/auth/data/repositories/auth_repository.dart:34:33 • undefined_identifier
+warning • The value of the field '_apiClient' isn't used • lib/features/auth/data/services/auth_service.dart:6:19 • unused_field
+  error • The named parameter 'success' isn't defined • lib/features/auth/data/services/auth_service.dart:13:7 • undefined_named_parameter
+  error • The named parameter 'success' isn't defined • lib/features/auth/data/services/auth_service.dart:25:7 • undefined_named_parameter
+   info • 'stream' is deprecated and shouldn't be used. .stream will be removed in 3.0.0. As a replacement, either listen to the provider itself (AsyncValue) or .future • lib/features/auth/presentation/providers/auth_notifier.dart:16:43 • deprecated_member_use
+warning • Unused import: 'package:flutter_riverpod/flutter_riverpod.dart' • lib/features/auth/presentation/providers/auth_state.dart:1:8 • unused_import
+  error • Target of URI doesn't exist: '../widgets/auth_landing_mobile_layout.dart' • lib/features/auth/presentation/screens/auth_landing/auth_landing_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/auth_landing_tablet_layout.dart' • lib/features/auth/presentation/screens/auth_landing/auth_landing_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'AuthLandingMobileLayout' isn't a class • lib/features/auth/presentation/screens/auth_landing/auth_landing_screen.dart:17:38 • creation_with_non_type
+  error • The name 'AuthLandingTabletLayout' isn't a class • lib/features/auth/presentation/screens/auth_landing/auth_landing_screen.dart:18:38 • creation_with_non_type
+  error • The name 'AuthLandingTabletLayout' isn't a class • lib/features/auth/presentation/screens/auth_landing/auth_landing_screen.dart:19:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../widgets/email_login_mobile_layout.dart' • lib/features/auth/presentation/screens/email_login/email_login_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/email_login_tablet_layout.dart' • lib/features/auth/presentation/screens/email_login/email_login_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'EmailLoginMobileLayout' isn't a class • lib/features/auth/presentation/screens/email_login/email_login_screen.dart:18:38 • creation_with_non_type
+  error • The name 'EmailLoginTabletLayout' isn't a class • lib/features/auth/presentation/screens/email_login/email_login_screen.dart:19:38 • creation_with_non_type
+  error • The name 'EmailLoginTabletLayout' isn't a class • lib/features/auth/presentation/screens/email_login/email_login_screen.dart:20:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../widgets/email_verification_pending_mobile_layout.dart' • lib/features/auth/presentation/screens/email_verification_pending/email_verification_pending_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/email_verification_pending_tablet_layout.dart' • lib/features/auth/presentation/screens/email_verification_pending/email_verification_pending_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'EmailVerificationPendingMobileLayout' isn't a class • lib/features/auth/presentation/screens/email_verification_pending/email_verification_pending_screen.dart:17:38 • creation_with_non_type
+  error • The name 'EmailVerificationPendingTabletLayout' isn't a class • lib/features/auth/presentation/screens/email_verification_pending/email_verification_pending_screen.dart:18:38 • creation_with_non_type
+  error • The name 'EmailVerificationPendingTabletLayout' isn't a class • lib/features/auth/presentation/screens/email_verification_pending/email_verification_pending_screen.dart:19:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../widgets/forgot_password_mobile_layout.dart' • lib/features/auth/presentation/screens/forgot_password/forgot_password_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/forgot_password_tablet_layout.dart' • lib/features/auth/presentation/screens/forgot_password/forgot_password_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'ForgotPasswordMobileLayout' isn't a class • lib/features/auth/presentation/screens/forgot_password/forgot_password_screen.dart:18:38 • creation_with_non_type
+  error • The name 'ForgotPasswordTabletLayout' isn't a class • lib/features/auth/presentation/screens/forgot_password/forgot_password_screen.dart:19:38 • creation_with_non_type
+  error • The name 'ForgotPasswordTabletLayout' isn't a class • lib/features/auth/presentation/screens/forgot_password/forgot_password_screen.dart:20:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../widgets/oauth_handler_mobile_layout.dart' • lib/features/auth/presentation/screens/oauth_handler/oauth_handler_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/oauth_handler_tablet_layout.dart' • lib/features/auth/presentation/screens/oauth_handler/oauth_handler_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'OAuthHandlerMobileLayout' isn't a class • lib/features/auth/presentation/screens/oauth_handler/oauth_handler_screen.dart:17:38 • creation_with_non_type
+  error • The name 'OAuthHandlerTabletLayout' isn't a class • lib/features/auth/presentation/screens/oauth_handler/oauth_handler_screen.dart:18:38 • creation_with_non_type
+  error • The name 'OAuthHandlerTabletLayout' isn't a class • lib/features/auth/presentation/screens/oauth_handler/oauth_handler_screen.dart:19:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../widgets/onboarding_mobile_layout.dart' • lib/features/auth/presentation/screens/onboarding/onboarding_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/onboarding_tablet_layout.dart' • lib/features/auth/presentation/screens/onboarding/onboarding_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'OnboardingMobileLayout' isn't a class • lib/features/auth/presentation/screens/onboarding/onboarding_screen.dart:17:38 • creation_with_non_type
+  error • The name 'OnboardingTabletLayout' isn't a class • lib/features/auth/presentation/screens/onboarding/onboarding_screen.dart:18:38 • creation_with_non_type
+  error • The name 'OnboardingTabletLayout' isn't a class • lib/features/auth/presentation/screens/onboarding/onboarding_screen.dart:19:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../widgets/otp_verification_mobile_layout.dart' • lib/features/auth/presentation/screens/otp/otp_verification_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/otp_verification_tablet_layout.dart' • lib/features/auth/presentation/screens/otp/otp_verification_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'OtpVerificationMobileLayout' isn't a class • lib/features/auth/presentation/screens/otp/otp_verification_screen.dart:18:38 • creation_with_non_type
+  error • The name 'OtpVerificationTabletLayout' isn't a class • lib/features/auth/presentation/screens/otp/otp_verification_screen.dart:19:38 • creation_with_non_type
+  error • The name 'OtpVerificationTabletLayout' isn't a class • lib/features/auth/presentation/screens/otp/otp_verification_screen.dart:20:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../widgets/register_mobile_layout.dart' • lib/features/auth/presentation/screens/register/register_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/register_tablet_layout.dart' • lib/features/auth/presentation/screens/register/register_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'RegisterMobileLayout' isn't a class • lib/features/auth/presentation/screens/register/register_screen.dart:18:38 • creation_with_non_type
+  error • The name 'RegisterTabletLayout' isn't a class • lib/features/auth/presentation/screens/register/register_screen.dart:19:38 • creation_with_non_type
+  error • The name 'RegisterTabletLayout' isn't a class • lib/features/auth/presentation/screens/register/register_screen.dart:20:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../widgets/reset_password_mobile_layout.dart' • lib/features/auth/presentation/screens/reset_password/reset_password_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/reset_password_tablet_layout.dart' • lib/features/auth/presentation/screens/reset_password/reset_password_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'ResetPasswordMobileLayout' isn't a class • lib/features/auth/presentation/screens/reset_password/reset_password_screen.dart:18:38 • creation_with_non_type
+  error • The name 'ResetPasswordTabletLayout' isn't a class • lib/features/auth/presentation/screens/reset_password/reset_password_screen.dart:19:38 • creation_with_non_type
+  error • The name 'ResetPasswordTabletLayout' isn't a class • lib/features/auth/presentation/screens/reset_password/reset_password_screen.dart:20:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../widgets/splash_mobile_layout.dart' • lib/features/auth/presentation/screens/splash/splash_screen.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/splash_tablet_layout.dart' • lib/features/auth/presentation/screens/splash/splash_screen.dart:7:8 • uri_does_not_exist
+  error • The name 'SplashMobileLayout' isn't a class • lib/features/auth/presentation/screens/splash/splash_screen.dart:33:38 • creation_with_non_type
+  error • The name 'SplashTabletLayout' isn't a class • lib/features/auth/presentation/screens/splash/splash_screen.dart:34:38 • creation_with_non_type
+  error • The name 'SplashTabletLayout' isn't a class • lib/features/auth/presentation/screens/splash/splash_screen.dart:35:39 • creation_with_non_type
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/auth/presentation/widgets/auth_landing_mobile_layout.dart:25:19 • argument_type_not_assignable
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/auth/presentation/widgets/auth_landing_mobile_layout.dart:35:19 • argument_type_not_assignable
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/auth/presentation/widgets/auth_landing_mobile_layout.dart:42:19 • argument_type_not_assignable
+  error • The argument type 'IconData' can't be assigned to the parameter type 'List<List<dynamic>>'.  • lib/features/auth/presentation/widgets/auth_landing_mobile_layout.dart:74:30 • argument_type_not_assignable
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/auth/presentation/widgets/auth_landing_tablet_layout.dart:27:23 • argument_type_not_assignable
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/auth/presentation/widgets/auth_landing_tablet_layout.dart:35:23 • argument_type_not_assignable
+  error • The argument type 'IconData' can't be assigned to the parameter type 'List<List<dynamic>>'.  • lib/features/auth/presentation/widgets/auth_landing_tablet_layout.dart:69:30 • argument_type_not_assignable
+  error • Target of URI doesn't exist: '../../providers/auth_notifier.dart' • lib/features/auth/presentation/widgets/splash_mobile_layout.dart:7:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../../providers/auth_state.dart' • lib/features/auth/presentation/widgets/splash_mobile_layout.dart:8:8 • uri_does_not_exist
+  error • The name 'AuthState' isn't a type, so it can't be used as a type argument • lib/features/auth/presentation/widgets/splash_mobile_layout.dart:18:16 • non_type_as_type_argument
+  error • Undefined name 'authNotifierProvider' • lib/features/auth/presentation/widgets/splash_mobile_layout.dart:18:27 • undefined_identifier
+  error • The name 'AuthUnauthenticated' isn't defined, so it can't be used in an 'is' expression • lib/features/auth/presentation/widgets/splash_mobile_layout.dart:19:19 • type_test_with_undefined_name
+warning • Dead code • lib/features/auth/presentation/widgets/splash_mobile_layout.dart:22:14 • dead_code
+  error • The name 'AuthAuthenticated' isn't defined, so it can't be used in an 'is' expression • lib/features/auth/presentation/widgets/splash_mobile_layout.dart:22:26 • type_test_with_undefined_name
+  error • Target of URI doesn't exist: '../../providers/auth_notifier.dart' • lib/features/auth/presentation/widgets/splash_tablet_layout.dart:7:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../../providers/auth_state.dart' • lib/features/auth/presentation/widgets/splash_tablet_layout.dart:8:8 • uri_does_not_exist
+  error • The name 'AuthState' isn't a type, so it can't be used as a type argument • lib/features/auth/presentation/widgets/splash_tablet_layout.dart:17:16 • non_type_as_type_argument
+  error • Undefined name 'authNotifierProvider' • lib/features/auth/presentation/widgets/splash_tablet_layout.dart:17:27 • undefined_identifier
+  error • The name 'AuthUnauthenticated' isn't defined, so it can't be used in an 'is' expression • lib/features/auth/presentation/widgets/splash_tablet_layout.dart:18:19 • type_test_with_undefined_name
+warning • Dead code • lib/features/auth/presentation/widgets/splash_tablet_layout.dart:20:14 • dead_code
+  error • The name 'AuthAuthenticated' isn't defined, so it can't be used in an 'is' expression • lib/features/auth/presentation/widgets/splash_tablet_layout.dart:20:26 • type_test_with_undefined_name
+  error • Target of URI doesn't exist: 'booking_service.dart' • lib/features/booking/data/repositories/booking_repository.dart:3:8 • uri_does_not_exist
+  error • Undefined class 'BookingService' • lib/features/booking/data/repositories/booking_repository.dart:7:9 • undefined_class
+  error • The name 'PaginatedSystemTypesResponse' isn't a type, so it can't be used as a type argument • lib/features/booking/data/repositories/booking_repository.dart:12:10 • non_type_as_type_argument
+  error • Undefined name 'bookingServiceProvider' • lib/features/booking/data/repositories/booking_repository.dart:24:29 • undefined_identifier
+warning • The value of the field '_apiClient' isn't used • lib/features/booking/data/services/booking_service.dart:7:19 • unused_field
+  error • The name 'PaginatedSystemTypesResponse' isn't a type, so it can't be used as a type argument • lib/features/booking/data/services/booking_service.dart:11:10 • non_type_as_type_argument
+  error • The name 'PaginatedSystemTypesResponse' isn't a class • lib/features/booking/data/services/booking_service.dart:13:18 • creation_with_non_type
+  error • The named parameter 'success' isn't defined • lib/features/booking/data/services/booking_service.dart:18:34 • undefined_named_parameter
+  error • Target of URI doesn't exist: '../widgets/booking_slot_selection_mobile_layout.dart' • lib/features/booking/presentation/screens/slot_selection/booking_slot_selection_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/booking_slot_selection_tablet_layout.dart' • lib/features/booking/presentation/screens/slot_selection/booking_slot_selection_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'BookingSlotSelectionMobileLayout' isn't a class • lib/features/booking/presentation/screens/slot_selection/booking_slot_selection_screen.dart:22:38 • creation_with_non_type
+  error • The name 'BookingSlotSelectionTabletLayout' isn't a class • lib/features/booking/presentation/screens/slot_selection/booking_slot_selection_screen.dart:23:38 • creation_with_non_type
+  error • The name 'BookingSlotSelectionTabletLayout' isn't a class • lib/features/booking/presentation/screens/slot_selection/booking_slot_selection_screen.dart:24:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../widgets/booking_success_mobile_layout.dart' • lib/features/booking/presentation/screens/success/booking_success_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/booking_success_tablet_layout.dart' • lib/features/booking/presentation/screens/success/booking_success_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'BookingSuccessMobileLayout' isn't a class • lib/features/booking/presentation/screens/success/booking_success_screen.dart:17:38 • creation_with_non_type
+  error • The name 'BookingSuccessTabletLayout' isn't a class • lib/features/booking/presentation/screens/success/booking_success_screen.dart:18:38 • creation_with_non_type
+  error • The name 'BookingSuccessTabletLayout' isn't a class • lib/features/booking/presentation/screens/success/booking_success_screen.dart:19:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../widgets/booking_summary_mobile_layout.dart' • lib/features/booking/presentation/screens/summary/booking_summary_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/booking_summary_tablet_layout.dart' • lib/features/booking/presentation/screens/summary/booking_summary_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'BookingSummaryMobileLayout' isn't a class • lib/features/booking/presentation/screens/summary/booking_summary_screen.dart:22:38 • creation_with_non_type
+  error • The name 'BookingSummaryTabletLayout' isn't a class • lib/features/booking/presentation/screens/summary/booking_summary_screen.dart:23:38 • creation_with_non_type
+  error • The name 'BookingSummaryTabletLayout' isn't a class • lib/features/booking/presentation/screens/summary/booking_summary_screen.dart:24:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../widgets/booking_system_selection_mobile_layout.dart' • lib/features/booking/presentation/screens/system_selection/booking_system_selection_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/booking_system_selection_tablet_layout.dart' • lib/features/booking/presentation/screens/system_selection/booking_system_selection_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'BookingSystemSelectionMobileLayout' isn't a class • lib/features/booking/presentation/screens/system_selection/booking_system_selection_screen.dart:22:38 • creation_with_non_type
+  error • The name 'BookingSystemSelectionTabletLayout' isn't a class • lib/features/booking/presentation/screens/system_selection/booking_system_selection_screen.dart:23:38 • creation_with_non_type
+  error • The name 'BookingSystemSelectionTabletLayout' isn't a class • lib/features/booking/presentation/screens/system_selection/booking_system_selection_screen.dart:24:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../../providers/booking_notifier.dart' • lib/features/booking/presentation/widgets/booking_slot_selection_mobile_layout.dart:7:8 • uri_does_not_exist
+  error • Undefined name 'bookingNotifierProvider' • lib/features/booking/presentation/widgets/booking_slot_selection_mobile_layout.dart:14:29 • undefined_identifier
+  error • Undefined name 'bookingNotifierProvider' • lib/features/booking/presentation/widgets/booking_slot_selection_mobile_layout.dart:15:31 • undefined_identifier
+  error • Undefined class 'BookingNotifier' • lib/features/booking/presentation/widgets/booking_slot_selection_mobile_layout.dart:50:76 • undefined_class
+  error • Expected to find ',' • lib/features/booking/presentation/widgets/booking_slot_selection_mobile_layout.dart:71:86 • expected_token
+  error • Too many positional arguments: 1 expected, but 5 found • lib/features/booking/presentation/widgets/booking_slot_selection_mobile_layout.dart:71:86 • extra_positional_arguments_could_be_named
+  error • Expected to find ',' • lib/features/booking/presentation/widgets/booking_slot_selection_mobile_layout.dart:71:87 • expected_token
+  error • Expected to find ',' • lib/features/booking/presentation/widgets/booking_slot_selection_mobile_layout.dart:71:134 • expected_token
+  error • Expected to find ',' • lib/features/booking/presentation/widgets/booking_slot_selection_mobile_layout.dart:71:135 • expected_token
+  error • Undefined class 'BookingNotifier' • lib/features/booking/presentation/widgets/booking_slot_selection_mobile_layout.dart:79:47 • undefined_class
+  error • Undefined class 'BookingNotifier' • lib/features/booking/presentation/widgets/booking_slot_selection_mobile_layout.dart:91:62 • undefined_class
+  error • Target of URI doesn't exist: '../../providers/booking_notifier.dart' • lib/features/booking/presentation/widgets/booking_slot_selection_tablet_layout.dart:7:8 • uri_does_not_exist
+  error • Undefined name 'bookingNotifierProvider' • lib/features/booking/presentation/widgets/booking_slot_selection_tablet_layout.dart:14:29 • undefined_identifier
+  error • Undefined name 'bookingNotifierProvider' • lib/features/booking/presentation/widgets/booking_slot_selection_tablet_layout.dart:15:31 • undefined_identifier
+  error • Undefined class 'BookingNotifier' • lib/features/booking/presentation/widgets/booking_slot_selection_tablet_layout.dart:55:76 • undefined_class
+  error • Expected to find ',' • lib/features/booking/presentation/widgets/booking_slot_selection_tablet_layout.dart:76:86 • expected_token
+  error • Too many positional arguments: 1 expected, but 5 found • lib/features/booking/presentation/widgets/booking_slot_selection_tablet_layout.dart:76:86 • extra_positional_arguments_could_be_named
+  error • Expected to find ',' • lib/features/booking/presentation/widgets/booking_slot_selection_tablet_layout.dart:76:87 • expected_token
+  error • Expected to find ',' • lib/features/booking/presentation/widgets/booking_slot_selection_tablet_layout.dart:76:134 • expected_token
+  error • Expected to find ',' • lib/features/booking/presentation/widgets/booking_slot_selection_tablet_layout.dart:76:135 • expected_token
+  error • Undefined class 'BookingNotifier' • lib/features/booking/presentation/widgets/booking_slot_selection_tablet_layout.dart:84:47 • undefined_class
+  error • Undefined class 'BookingNotifier' • lib/features/booking/presentation/widgets/booking_slot_selection_tablet_layout.dart:96:62 • undefined_class
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/booking/presentation/widgets/booking_success_mobile_layout.dart:22:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/booking/presentation/widgets/booking_success_tablet_layout.dart:24:44 • deprecated_member_use
+  error • Target of URI doesn't exist: '../../providers/booking_notifier.dart' • lib/features/booking/presentation/widgets/booking_summary_mobile_layout.dart:7:8 • uri_does_not_exist
+  error • Undefined name 'bookingNotifierProvider' • lib/features/booking/presentation/widgets/booking_summary_mobile_layout.dart:14:29 • undefined_identifier
+warning • The value of the local variable 'totalAmount' isn't used • lib/features/booking/presentation/widgets/booking_summary_mobile_layout.dart:18:11 • unused_local_variable
+  error • Undefined name 'bookingNotifierProvider' • lib/features/booking/presentation/widgets/booking_summary_mobile_layout.dart:55:48 • undefined_identifier
+   info • Don't use 'BuildContext's across async gaps • lib/features/booking/presentation/widgets/booking_summary_mobile_layout.dart:57:19 • use_build_context_synchronously
+  error • Target of URI doesn't exist: '../../providers/booking_notifier.dart' • lib/features/booking/presentation/widgets/booking_summary_tablet_layout.dart:7:8 • uri_does_not_exist
+  error • Undefined name 'bookingNotifierProvider' • lib/features/booking/presentation/widgets/booking_summary_tablet_layout.dart:14:29 • undefined_identifier
+warning • The value of the local variable 'totalAmount' isn't used • lib/features/booking/presentation/widgets/booking_summary_tablet_layout.dart:18:11 • unused_local_variable
+  error • Undefined name 'bookingNotifierProvider' • lib/features/booking/presentation/widgets/booking_summary_tablet_layout.dart:58:52 • undefined_identifier
+   info • Don't use 'BuildContext's across async gaps • lib/features/booking/presentation/widgets/booking_summary_tablet_layout.dart:60:23 • use_build_context_synchronously
+  error • Target of URI doesn't exist: '../../providers/booking_notifier.dart' • lib/features/booking/presentation/widgets/booking_system_selection_mobile_layout.dart:8:8 • uri_does_not_exist
+  error • Undefined name 'bookingNotifierProvider' • lib/features/booking/presentation/widgets/booking_system_selection_mobile_layout.dart:66:24 • undefined_identifier
+  error • Target of URI doesn't exist: '../../providers/booking_notifier.dart' • lib/features/booking/presentation/widgets/booking_system_selection_tablet_layout.dart:8:8 • uri_does_not_exist
+  error • Undefined name 'bookingNotifierProvider' • lib/features/booking/presentation/widgets/booking_system_selection_tablet_layout.dart:72:24 • undefined_identifier
+  error • Target of URI doesn't exist: 'store_service.dart' • lib/features/home/data/repositories/store_repository.dart:3:8 • uri_does_not_exist
+  error • Undefined class 'StoreService' • lib/features/home/data/repositories/store_repository.dart:8:9 • undefined_class
+  error • The function 'StoreService' isn't defined • lib/features/home/data/repositories/store_repository.dart:32:24 • undefined_function
+warning • The value of the field '_apiClient' isn't used • lib/features/home/data/services/store_service.dart:7:19 • unused_field
+  error • The named parameter 'success' isn't defined • lib/features/home/data/services/store_service.dart:40:38 • undefined_named_parameter
+  error • The named parameter 'success' isn't defined • lib/features/home/data/services/store_service.dart:43:36 • undefined_named_parameter
+  error • The named parameter 'success' isn't defined • lib/features/home/data/services/store_service.dart:49:7 • undefined_named_parameter
+  error • The named parameter 'success' isn't defined • lib/features/home/data/services/store_service.dart:65:45 • undefined_named_parameter
+  error • Undefined name 'apiClientProvider' • lib/features/home/data/services/store_service.dart:70:31 • undefined_identifier
+  error • Target of URI doesn't exist: '../widgets/store_detail_mobile_layout.dart' • lib/features/home/presentation/screens/store_detail/store_detail_screen.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/store_detail_tablet_layout.dart' • lib/features/home/presentation/screens/store_detail/store_detail_screen.dart:7:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../providers/active_store_notifier.dart' • lib/features/home/presentation/screens/store_detail/store_detail_screen.dart:8:8 • uri_does_not_exist
+  error • Undefined name 'activeStoreProvider' • lib/features/home/presentation/screens/store_detail/store_detail_screen.dart:24:16 • undefined_identifier
+  error • The name 'StoreDetailMobileLayout' isn't a class • lib/features/home/presentation/screens/store_detail/store_detail_screen.dart:34:38 • creation_with_non_type
+  error • The name 'StoreDetailTabletLayout' isn't a class • lib/features/home/presentation/screens/store_detail/store_detail_screen.dart:35:38 • creation_with_non_type
+  error • The name 'StoreDetailTabletLayout' isn't a class • lib/features/home/presentation/screens/store_detail/store_detail_screen.dart:36:39 • creation_with_non_type
+  error • Target of URI doesn't exist: '../widgets/store_search_mobile_layout.dart' • lib/features/home/presentation/screens/store_search/store_search_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../widgets/store_search_tablet_layout.dart' • lib/features/home/presentation/screens/store_search/store_search_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'StoreSearchMobileLayout' isn't a class • lib/features/home/presentation/screens/store_search/store_search_screen.dart:17:38 • creation_with_non_type
+  error • The name 'StoreSearchTabletLayout' isn't a class • lib/features/home/presentation/screens/store_search/store_search_screen.dart:18:38 • creation_with_non_type
+  error • The name 'StoreSearchTabletLayout' isn't a class • lib/features/home/presentation/screens/store_search/store_search_screen.dart:19:39 • creation_with_non_type
+warning • Unused import: '../../../../../core/navigation/routes.dart' • lib/features/home/presentation/widgets/home_mobile_layout.dart:8:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/widgets/home_mobile_layout.dart:98:45 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/widgets/home_tablet_layout.dart:107:51 • deprecated_member_use
+  error • Expected to find ',' • lib/features/home/presentation/widgets/store_detail_mobile_layout.dart:59:109 • expected_token
+  error • Too many positional arguments: 1 expected, but 5 found • lib/features/home/presentation/widgets/store_detail_mobile_layout.dart:59:109 • extra_positional_arguments_could_be_named
+  error • Undefined name 'systemCount' • lib/features/home/presentation/widgets/store_detail_mobile_layout.dart:59:109 • undefined_identifier
+  error • Expected to find ',' • lib/features/home/presentation/widgets/store_detail_mobile_layout.dart:59:120 • expected_token
+  error • Expected to find ',' • lib/features/home/presentation/widgets/store_detail_mobile_layout.dart:59:127 • expected_token
+  error • Undefined name 'many' • lib/features/home/presentation/widgets/store_detail_mobile_layout.dart:59:127 • undefined_identifier
+  error • Expected to find ',' • lib/features/home/presentation/widgets/store_detail_mobile_layout.dart:59:131 • expected_token
+  error • Expected to find ',' • lib/features/home/presentation/widgets/store_detail_tablet_layout.dart:63:109 • expected_token
+  error • Too many positional arguments: 1 expected, but 5 found • lib/features/home/presentation/widgets/store_detail_tablet_layout.dart:63:109 • extra_positional_arguments_could_be_named
+  error • Undefined name 'systemCount' • lib/features/home/presentation/widgets/store_detail_tablet_layout.dart:63:109 • undefined_identifier
+  error • Expected to find ',' • lib/features/home/presentation/widgets/store_detail_tablet_layout.dart:63:120 • expected_token
+  error • Expected to find ',' • lib/features/home/presentation/widgets/store_detail_tablet_layout.dart:63:127 • expected_token
+  error • Undefined name 'many' • lib/features/home/presentation/widgets/store_detail_tablet_layout.dart:63:127 • undefined_identifier
+  error • Expected to find ',' • lib/features/home/presentation/widgets/store_detail_tablet_layout.dart:63:131 • expected_token
+warning • Unused import: '../../../../../core/theme/app_spacing.dart' • lib/features/home/presentation/widgets/store_search_mobile_layout.dart:7:8 • unused_import
+   info • Unnecessary use of multiple underscores • lib/features/home/presentation/widgets/store_search_tablet_layout.dart:66:29 • unnecessary_underscores
+  error • Target of URI doesn't exist: '../../core/responsive/breakpoints.dart' • lib/features/main_shell/presentation/screens/main_page.dart:3:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../../core/responsive/responsive_builder.dart' • lib/features/main_shell/presentation/screens/main_page.dart:4:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: '../../core/theme/app_colors.dart' • lib/features/main_shell/presentation/screens/main_page.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'widgets/main_mobile_layout.dart' • lib/features/main_shell/presentation/screens/main_page.dart:6:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'widgets/main_tablet_layout.dart' • lib/features/main_shell/presentation/screens/main_page.dart:7:8 • uri_does_not_exist
+  error • Undefined name 'AppColors' • lib/features/main_shell/presentation/screens/main_page.dart:16:24 • undefined_identifier
+  error • The method 'ResponsiveBuilderWidget' isn't defined for the type 'MainPage' • lib/features/main_shell/presentation/screens/main_page.dart:17:13 • undefined_method
+  error • Undefined name 'DeviceType' • lib/features/main_shell/presentation/screens/main_page.dart:19:11 • undefined_identifier
+  error • The method 'MainMobileLayout' isn't defined for the type 'MainPage' • lib/features/main_shell/presentation/screens/main_page.dart:19:32 • undefined_method
+  error • Undefined name 'DeviceType' • lib/features/main_shell/presentation/screens/main_page.dart:20:11 • undefined_identifier
+  error • The method 'MainTabletLayout' isn't defined for the type 'MainPage' • lib/features/main_shell/presentation/screens/main_page.dart:20:32 • undefined_method
+  error • Undefined name 'DeviceType' • lib/features/main_shell/presentation/screens/main_page.dart:21:11 • undefined_identifier
+  error • The method 'MainTabletLayout' isn't defined for the type 'MainPage' • lib/features/main_shell/presentation/screens/main_page.dart:21:33 • undefined_method
+warning • Unused import: '../../../../core/theme/app_spacing.dart' • lib/features/main_shell/presentation/widgets/main_mobile_layout.dart:5:8 • unused_import
+warning • Unused import: '../../../../core/theme/app_typography.dart' • lib/features/main_shell/presentation/widgets/main_mobile_layout.dart:6:8 • unused_import
+warning • Unused import: '../../../../core/theme/app_typography.dart' • lib/features/main_shell/presentation/widgets/main_tablet_layout.dart:6:8 • unused_import
+  error • Target of URI doesn't exist: 'widgets/profile_mobile_layout.dart' • lib/features/profile/presentation/screens/profile_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'widgets/profile_tablet_layout.dart' • lib/features/profile/presentation/screens/profile_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'ProfileMobileLayout' isn't a class • lib/features/profile/presentation/screens/profile_screen.dart:23:38 • creation_with_non_type
+  error • The name 'ProfileTabletLayout' isn't a class • lib/features/profile/presentation/screens/profile_screen.dart:24:38 • creation_with_non_type
+  error • The name 'ProfileTabletLayout' isn't a class • lib/features/profile/presentation/screens/profile_screen.dart:25:39 • creation_with_non_type
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/profile/presentation/widgets/profile_mobile_layout.dart:21:24 • argument_type_not_assignable
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/profile/presentation/widgets/profile_mobile_layout.dart:22:24 • argument_type_not_assignable
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/profile/presentation/widgets/profile_mobile_layout.dart:23:24 • argument_type_not_assignable
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/profile/presentation/widgets/profile_mobile_layout.dart:26:24 • argument_type_not_assignable
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/profile/presentation/widgets/profile_mobile_layout.dart:27:24 • argument_type_not_assignable
+  error • The getter 'strokeRoundedShieldQuestion' isn't defined for the type 'HugeIcons' • lib/features/profile/presentation/widgets/profile_mobile_layout.dart:28:34 • undefined_getter
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/widgets/profile_mobile_layout.dart:64:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/widgets/profile_mobile_layout.dart:66:54 • deprecated_member_use
+  error • The getter 'labelLarge' isn't defined for the type 'AppTypography' • lib/features/profile/presentation/widgets/profile_mobile_layout.dart:68:57 • undefined_getter
+  error • The argument type 'IconData' can't be assigned to the parameter type 'List<List<dynamic>>'.  • lib/features/profile/presentation/widgets/profile_mobile_layout.dart:83:31 • argument_type_not_assignable
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/profile/presentation/widgets/profile_tablet_layout.dart:56:36 • argument_type_not_assignable
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/profile/presentation/widgets/profile_tablet_layout.dart:57:36 • argument_type_not_assignable
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/profile/presentation/widgets/profile_tablet_layout.dart:58:36 • argument_type_not_assignable
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/profile/presentation/widgets/profile_tablet_layout.dart:62:36 • argument_type_not_assignable
+  error • The argument type 'List<List<dynamic>>' can't be assigned to the parameter type 'IconData'.  • lib/features/profile/presentation/widgets/profile_tablet_layout.dart:63:36 • argument_type_not_assignable
+  error • The getter 'strokeRoundedShieldQuestion' isn't defined for the type 'HugeIcons' • lib/features/profile/presentation/widgets/profile_tablet_layout.dart:64:46 • undefined_getter
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/widgets/profile_tablet_layout.dart:81:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/widgets/profile_tablet_layout.dart:102:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/profile/presentation/widgets/profile_tablet_layout.dart:104:56 • deprecated_member_use
+  error • The argument type 'IconData' can't be assigned to the parameter type 'List<List<dynamic>>'.  • lib/features/profile/presentation/widgets/profile_tablet_layout.dart:127:33 • argument_type_not_assignable
+  error • Target of URI doesn't exist: 'sessions_service.dart' • lib/features/sessions/data/repositories/sessions_repository.dart:3:8 • uri_does_not_exist
+  error • Undefined class 'SessionsService' • lib/features/sessions/data/repositories/sessions_repository.dart:7:9 • undefined_class
+  error • The name 'PaginatedSessionLogsResponse' isn't a type, so it can't be used as a type argument • lib/features/sessions/data/repositories/sessions_repository.dart:17:10 • non_type_as_type_argument
+  error • Undefined name 'sessionsServiceProvider' • lib/features/sessions/data/repositories/sessions_repository.dart:24:29 • undefined_identifier
+warning • The value of the field '_apiClient' isn't used • lib/features/sessions/data/services/sessions_service.dart:8:19 • unused_field
+  error • The named parameter 'success' isn't defined • lib/features/sessions/data/services/sessions_service.dart:15:44 • undefined_named_parameter
+  error • The name 'PaginatedSessionLogsResponse' isn't a type, so it can't be used as a type argument • lib/features/sessions/data/services/sessions_service.dart:18:10 • non_type_as_type_argument
+  error • The name 'PaginatedSessionLogsResponse' isn't a class • lib/features/sessions/data/services/sessions_service.dart:20:18 • creation_with_non_type
+  error • Target of URI doesn't exist: 'widgets/sessions_mobile_layout.dart' • lib/features/sessions/presentation/screens/sessions_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'widgets/sessions_tablet_layout.dart' • lib/features/sessions/presentation/screens/sessions_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'SessionsMobileLayout' isn't a class • lib/features/sessions/presentation/screens/sessions_screen.dart:23:38 • creation_with_non_type
+  error • The name 'SessionsTabletLayout' isn't a class • lib/features/sessions/presentation/screens/sessions_screen.dart:24:38 • creation_with_non_type
+  error • The name 'SessionsTabletLayout' isn't a class • lib/features/sessions/presentation/screens/sessions_screen.dart:25:39 • creation_with_non_type
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:70:34 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:71:53 • deprecated_member_use
+  error • Expected to find ',' • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:84:60 • expected_token
+  error • Too many positional arguments: 1 expected, but 3 found • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:84:60 • extra_positional_arguments_could_be_named
+  error • Undefined name 'N' • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:84:60 • undefined_identifier
+  error • Undefined name 'A' • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:84:62 • undefined_identifier
+  error • Expected to find ',' • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:84:63 • expected_token
+  error • The getter 'labelSmall' isn't defined for the type 'AppTypography' • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:93:58 • undefined_getter
+  error • Expected an identifier • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:117:60 • missing_identifier
+  error • The getter '')[0] ?? '' isn't defined for the type 'String' • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:117:60 • undefined_getter
+  error • Expected to find ',' • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:117:70 • expected_token
+  error • Too many positional arguments: 1 expected, but 4 found • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:117:70 • extra_positional_arguments_could_be_named
+  error • Undefined name 'Time' • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:117:70 • undefined_identifier
+  error • Expected to find ',' • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:117:75 • expected_token
+  error • Undefined name 'N' • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:117:75 • undefined_identifier
+  error • Undefined name 'A' • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:117:77 • undefined_identifier
+  error • Expected to find ',' • lib/features/sessions/presentation/widgets/sessions_mobile_layout.dart:117:78 • expected_token
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:77:34 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:78:53 • deprecated_member_use
+  error • Expected to find ',' • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:91:60 • expected_token
+  error • Too many positional arguments: 1 expected, but 3 found • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:91:60 • extra_positional_arguments_could_be_named
+  error • Undefined name 'N' • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:91:60 • undefined_identifier
+  error • Undefined name 'A' • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:91:62 • undefined_identifier
+  error • Expected to find ',' • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:91:63 • expected_token
+  error • The getter 'labelLarge' isn't defined for the type 'AppTypography' • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:100:58 • undefined_getter
+  error • Expected an identifier • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:131:62 • missing_identifier
+  error • The getter '')[0] ?? '' isn't defined for the type 'String' • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:131:62 • undefined_getter
+  error • Expected to find ',' • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:131:72 • expected_token
+  error • Too many positional arguments: 1 expected, but 4 found • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:131:72 • extra_positional_arguments_could_be_named
+  error • Undefined name 'Time' • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:131:72 • undefined_identifier
+  error • Expected to find ',' • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:131:77 • expected_token
+  error • Undefined name 'N' • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:131:77 • undefined_identifier
+  error • Undefined name 'A' • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:131:79 • undefined_identifier
+  error • Expected to find ',' • lib/features/sessions/presentation/widgets/sessions_tablet_layout.dart:131:80 • expected_token
+  error • Target of URI doesn't exist: 'wallet_service.dart' • lib/features/wallet/data/repositories/wallet_repository.dart:3:8 • uri_does_not_exist
+  error • Undefined class 'WalletService' • lib/features/wallet/data/repositories/wallet_repository.dart:7:9 • undefined_class
+  error • The name 'PaginatedTransactionsResponse' isn't a type, so it can't be used as a type argument • lib/features/wallet/data/repositories/wallet_repository.dart:12:10 • non_type_as_type_argument
+  error • The name 'TransactionResponse' isn't a type, so it can't be used as a type argument • lib/features/wallet/data/repositories/wallet_repository.dart:17:10 • non_type_as_type_argument
+  error • Undefined name 'walletServiceProvider' • lib/features/wallet/data/repositories/wallet_repository.dart:24:29 • undefined_identifier
+warning • The value of the field '_apiClient' isn't used • lib/features/wallet/data/services/wallet_service.dart:7:19 • unused_field
+  error • The name 'PaginatedTransactionsResponse' isn't a type, so it can't be used as a type argument • lib/features/wallet/data/services/wallet_service.dart:11:10 • non_type_as_type_argument
+  error • The name 'PaginatedTransactionsResponse' isn't a class • lib/features/wallet/data/services/wallet_service.dart:13:18 • creation_with_non_type
+  error • The name 'TransactionResponse' isn't a type, so it can't be used as a type argument • lib/features/wallet/data/services/wallet_service.dart:16:10 • non_type_as_type_argument
+  error • The name 'TransactionResponse' isn't a class • lib/features/wallet/data/services/wallet_service.dart:18:18 • creation_with_non_type
+warning • Unused import: '../../../../models/domain_billing.dart' • lib/features/wallet/presentation/providers/wallet_notifier.dart:2:8 • unused_import
+  error • The name 'TransactionModel' isn't a type, so it can't be used as a type argument • lib/features/wallet/presentation/providers/wallet_notifier.dart:7:14 • non_type_as_type_argument
+  error • The name 'TransactionModel' isn't a type, so it can't be used as a type argument • lib/features/wallet/presentation/providers/wallet_notifier.dart:20:10 • non_type_as_type_argument
+  error • The name 'TransactionModel' isn't a type, so it can't be used as a type argument • lib/features/wallet/presentation/providers/wallet_notifier.dart:47:28 • non_type_as_type_argument
+  error • Target of URI doesn't exist: 'widgets/wallet_mobile_layout.dart' • lib/features/wallet/presentation/screens/wallet_screen.dart:5:8 • uri_does_not_exist
+  error • Target of URI doesn't exist: 'widgets/wallet_tablet_layout.dart' • lib/features/wallet/presentation/screens/wallet_screen.dart:6:8 • uri_does_not_exist
+  error • The name 'WalletMobileLayout' isn't a class • lib/features/wallet/presentation/screens/wallet_screen.dart:23:38 • creation_with_non_type
+  error • The name 'WalletTabletLayout' isn't a class • lib/features/wallet/presentation/screens/wallet_screen.dart:24:38 • creation_with_non_type
+  error • The name 'WalletTabletLayout' isn't a class • lib/features/wallet/presentation/screens/wallet_screen.dart:25:39 • creation_with_non_type
+  error • Undefined class 'TransactionModel' • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:83:32 • undefined_class
+  error • Undefined name 'TransactionType' • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:85:33 • undefined_identifier
+  error • Undefined name 'TransactionType' • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:85:69 • undefined_identifier
+  error • Expected to find ',' • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:100:69 • expected_token
+  error • Too many positional arguments: 1 expected, but 4 found • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:100:69 • extra_positional_arguments_could_be_named
+  error • Undefined name 'Date' • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:100:69 • undefined_identifier
+  error • Expected to find ',' • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:100:74 • expected_token
+  error • Undefined name 'N' • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:100:74 • undefined_identifier
+  error • Undefined name 'A' • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:100:76 • undefined_identifier
+  error • Expected to find ',' • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:100:77 • expected_token
+   info • String literals shouldn't be concatenated by the '+' operator • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:102:25 • prefer_adjacent_string_concatenation
+  error • The operator '-' isn't defined for the type 'String' • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:102:31 • undefined_operator
+  error • Expected to find ',' • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:102:80 • expected_token
+  error • Too many positional arguments: 1 expected, but 3 found • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:102:80 • extra_positional_arguments_could_be_named
+  error • Expected to find ',' • lib/features/wallet/presentation/widgets/wallet_mobile_layout.dart:102:84 • expected_token
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:97:38 • deprecated_member_use
+  error • Undefined class 'TransactionModel' • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:133:32 • undefined_class
+  error • Undefined name 'TransactionType' • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:134:33 • undefined_identifier
+  error • Undefined name 'TransactionType' • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:134:69 • undefined_identifier
+  error • Expected to find ',' • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:163:71 • expected_token
+  error • Too many positional arguments: 1 expected, but 4 found • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:163:71 • extra_positional_arguments_could_be_named
+  error • Undefined name 'Date' • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:163:71 • undefined_identifier
+  error • Expected to find ',' • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:163:76 • expected_token
+  error • Undefined name 'N' • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:163:76 • undefined_identifier
+  error • Undefined name 'A' • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:163:78 • undefined_identifier
+  error • Expected to find ',' • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:163:79 • expected_token
+   info • String literals shouldn't be concatenated by the '+' operator • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:169:29 • prefer_adjacent_string_concatenation
+  error • The operator '-' isn't defined for the type 'String' • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:169:35 • undefined_operator
+  error • Expected to find ',' • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:169:84 • expected_token
+  error • Too many positional arguments: 1 expected, but 3 found • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:169:84 • extra_positional_arguments_could_be_named
+  error • Expected to find ',' • lib/features/wallet/presentation/widgets/wallet_tablet_layout.dart:169:88 • expected_token
+warning • Unused import: 'domain_misc.dart' • lib/models/api_responses.dart:6:8 • unused_import
+   info • Parameters ''success' and 'message'' could be super parameters • lib/models/core.dart:12:9 • use_super_parameters
+   info • Parameters ''success' and 'message'' could be super parameters • lib/models/core.dart:73:9 • use_super_parameters
+   info • Parameters ''success', 'message', and 'data'' could be super parameters • lib/models/core.dart:83:9 • use_super_parameters
+   info • Parameter 'key' could be a super parameter • lib/shared/widgets/huge_icon_widget.dart:5:9 • use_super_parameters
+  error • A value of type 'List<List<dynamic>>' can't be returned from the method '_getIconData' because it has a return type of 'IconData' • lib/shared/widgets/huge_icon_widget.dart:21:16 • return_of_invalid_type
+  error • The getter 'strokeRoundedCloudCross' isn't defined for the type 'HugeIcons' • lib/shared/widgets/huge_icon_widget.dart:23:26 • undefined_getter
+  error • A value of type 'List<List<dynamic>>' can't be returned from the method '_getIconData' because it has a return type of 'IconData' • lib/shared/widgets/huge_icon_widget.dart:25:16 • return_of_invalid_type
+  error • A value of type 'List<List<dynamic>>' can't be returned from the method '_getIconData' because it has a return type of 'IconData' • lib/shared/widgets/huge_icon_widget.dart:28:16 • return_of_invalid_type
+  error • The argument type 'IconData' can't be assigned to the parameter type 'List<List<dynamic>>'.  • lib/shared/widgets/huge_icon_widget.dart:35:13 • argument_type_not_assignable
+
