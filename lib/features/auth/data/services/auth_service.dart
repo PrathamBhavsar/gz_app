@@ -38,7 +38,7 @@ class AuthService {
 
 // Global provider for ApiClient (Placeholder for now)
 final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient(baseUrl: 'https://api.gamingzone.com/v1');
+  return ApiClient(baseUrl: 'http://192.168.1.4:3000/v1');
 });
 
 final authServiceProvider = Provider<AuthService>((ref) {

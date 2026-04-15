@@ -17,4 +17,9 @@ class AppRoutes {
   static const home = '/home';
   static const storeSearch = '/home/search';
   static const storeDetail = '/home/store/:slug';
+
+  static const book = '/book';
+  static const sessions = '/sessions';
+  static const wallet = '/wallet';
+  static const profile = '/profile';
 }

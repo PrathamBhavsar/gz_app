@@ -20,6 +20,11 @@ import 'routes.dart';
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/home/presentation/screens/store_search/store_search_screen.dart';
 import '../features/home/presentation/screens/store_detail/store_detail_screen.dart';
+import '../features/main_shell/presentation/screens/main_page.dart';
+import '../features/booking/presentation/screens/booking_screen.dart';
+import '../features/sessions/presentation/screens/sessions_screen.dart';
+import '../features/wallet/presentation/screens/wallet_screen.dart';
+import '../features/profile/presentation/screens/profile_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -65,10 +70,35 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.emailVerificationPending,
         builder: (context, state) => const EmailVerificationPendingScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.home,
-        builder: (context, state) => const HomeScreen(),
+
+      // Main App Shell
+      ShellRoute(
+        builder: (context, state, child) => MainPage(child: child),
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            builder: (context, state) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.book,
+            builder: (context, state) => const BookingScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.sessions,
+            builder: (context, state) => const SessionsScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.wallet,
+            builder: (context, state) => const WalletScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.profile,
+            builder: (context, state) => const ProfileScreen(),
+          ),
+        ],
       ),
+
+      // Routes outside the shell or overlapping logic
       GoRoute(
         path: AppRoutes.storeSearch,
         builder: (context, state) => const StoreSearchScreen(),
@@ -81,6 +111,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
     ],
+
     // The redirect logic will be injected here during Auth Notifier creation
     // redirect: (context, state) { ... }
   );
