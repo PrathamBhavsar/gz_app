@@ -5,7 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../providers/wallet_notifier.dart';
-import '../../../../models/domain_billing.dart';
+import '../../../../models/domain_loyalty.dart';
 import '../../../../models/enums.dart';
 
 class WalletTabletLayout extends ConsumerWidget {
@@ -18,7 +18,6 @@ class WalletTabletLayout extends ConsumerWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Left Column: Balance & Actions
         Expanded(
           flex: 4,
           child: Padding(
@@ -34,10 +33,10 @@ class WalletTabletLayout extends ConsumerWidget {
                   spacing: AppSpacing.md,
                   runSpacing: AppSpacing.md,
                   children: [
-                    _actionChip(context, ref, 'Top up \$10', 10.0),
-                    _actionChip(context, ref, 'Top up \$25', 25.0),
-                    _actionChip(context, ref, 'Top up \$50', 50.0),
-                    _actionChip(context, ref, 'Top up \$100', 100.0),
+                    _actionChip(context, ref, 'Redeem 10', 10.0),
+                    _actionChip(context, ref, 'Redeem 25', 25.0),
+                    _actionChip(context, ref, 'Redeem 50', 50.0),
+                    _actionChip(context, ref, 'Redeem 100', 100.0),
                   ],
                 ),
               ],
@@ -45,7 +44,6 @@ class WalletTabletLayout extends ConsumerWidget {
           ),
         ),
         const VerticalDivider(width: 1, color: AppColors.border),
-        // Right Column: Transactions
         Expanded(
           flex: 6,
           child: Padding(
@@ -62,8 +60,9 @@ class WalletTabletLayout extends ConsumerWidget {
                     ),
                     IconButton(
                       icon: const Icon(Icons.refresh, color: AppColors.primary),
-                      onPressed: () =>
-                          ref.read(walletNotifierProvider.notifier).refresh(),
+                      onPressed: () => ref
+                          .read(walletNotifierProvider.notifier)
+                          .refresh('placeholder'),
                     ),
                   ],
                 ),
@@ -166,17 +165,21 @@ class WalletTabletLayout extends ConsumerWidget {
         vertical: AppSpacing.sm,
       ),
       onPressed: () {
-        ref.read(walletNotifierProvider.notifier).topUp(amount);
+        ref
+            .read(walletNotifierProvider.notifier)
+            .redeemCredits('placeholder', amount);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Processing \$amount top-up...')),
+          SnackBar(content: Text('Redeeming \$$amount credits...')),
         );
       },
     );
   }
 
-  Widget _buildTransactionItem(TransactionModel tx) {
+  Widget _buildTransactionItem(CreditLedgerModel tx) {
     final isCredit =
-        tx.type == TransactionType.topUp || tx.type == TransactionType.refund;
+        tx.transactionType == CreditTransactionType.earned ||
+        tx.transactionType == CreditTransactionType.bonus ||
+        tx.transactionType == CreditTransactionType.refund;
     final icon = isCredit
         ? HugeIcons.strokeRoundedArrowDownLeft01
         : HugeIcons.strokeRoundedArrowUpRight01;
@@ -207,7 +210,7 @@ class WalletTabletLayout extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    tx.type?.name ?? 'Transaction',
+                    tx.description ?? tx.transactionType?.name ?? 'Transaction',
                     style: AppTypography.headingSmall,
                   ),
                   Text(

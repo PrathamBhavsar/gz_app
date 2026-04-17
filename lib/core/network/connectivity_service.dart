@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 
 class ConnectivityService {
   ConnectivityService() {
@@ -38,13 +38,14 @@ class ConnectivityService {
     return reachable;
   }
 
-  /// Attempts a real DNS/socket connection to verify gateway access.
+  /// Pings the actual API server to verify internet + backend reachability.
+  /// Uses HTTP HEAD — works over WiFi, mobile data, any connection type.
   Future<bool> _ping() async {
     try {
-      final result = await InternetAddress.lookup(
-        'google.com',
-      ).timeout(const Duration(seconds: 5));
-      return result.isNotEmpty && result.first.rawAddress.isNotEmpty;
+      final response = await http
+          .head(Uri.parse('http://192.168.1.4:3000/health'))
+          .timeout(const Duration(seconds: 5));
+      return response.statusCode < 500;
     } catch (_) {
       return false;
     }

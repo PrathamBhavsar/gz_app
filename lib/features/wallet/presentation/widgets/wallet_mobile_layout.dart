@@ -5,7 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../providers/wallet_notifier.dart';
-import '../../../../models/domain_billing.dart';
+import '../../../../models/domain_loyalty.dart';
 import '../../../../models/enums.dart';
 
 class WalletMobileLayout extends ConsumerWidget {
@@ -22,7 +22,8 @@ class WalletMobileLayout extends ConsumerWidget {
     }
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(walletNotifierProvider.notifier).refresh(),
+      onRefresh: () =>
+          ref.read(walletNotifierProvider.notifier).refresh('placeholder'),
       color: AppColors.primary,
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -85,7 +86,7 @@ class WalletMobileLayout extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => _showTopUpDialog(context, ref),
+              onPressed: () => _showRedeemDialog(context, ref),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.background,
                 foregroundColor: AppColors.primary,
@@ -97,7 +98,7 @@ class WalletMobileLayout extends ConsumerWidget {
                 ),
               ),
               child: const Text(
-                'Top Up Balance',
+                'Redeem Credits',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -107,10 +108,11 @@ class WalletMobileLayout extends ConsumerWidget {
     );
   }
 
-  Widget _buildTransactionItem(TransactionModel tx) {
-    // Assuming positive amount means Top Up (Credit), negative is Booking (Debit)
+  Widget _buildTransactionItem(CreditLedgerModel tx) {
     final isCredit =
-        tx.type == TransactionType.topUp || tx.type == TransactionType.refund;
+        tx.transactionType == CreditTransactionType.earned ||
+        tx.transactionType == CreditTransactionType.bonus ||
+        tx.transactionType == CreditTransactionType.refund;
     final icon = isCredit
         ? HugeIcons.strokeRoundedArrowDownLeft01
         : HugeIcons.strokeRoundedArrowUpRight01;
@@ -127,7 +129,7 @@ class WalletMobileLayout extends ConsumerWidget {
         child: HugeIcon(icon: icon, color: color, size: 20),
       ),
       title: Text(
-        tx.type?.name ?? 'Transaction',
+        tx.description ?? tx.transactionType?.name ?? 'Transaction',
         style: AppTypography.bodyLarge,
       ),
       subtitle: Text(
@@ -155,8 +157,7 @@ class WalletMobileLayout extends ConsumerWidget {
     );
   }
 
-  void _showTopUpDialog(BuildContext context, WidgetRef ref) {
-    // Simple prompt for amounts
+  void _showRedeemDialog(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
@@ -170,14 +171,14 @@ class WalletMobileLayout extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Quick Top Up', style: AppTypography.headingMedium),
+            Text('Redeem Credits', style: AppTypography.headingMedium),
             const SizedBox(height: AppSpacing.xl),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _topUpBtn(ctx, ref, 10),
-                _topUpBtn(ctx, ref, 25),
-                _topUpBtn(ctx, ref, 50),
+                _redeemBtn(ctx, ref, 10),
+                _redeemBtn(ctx, ref, 25),
+                _redeemBtn(ctx, ref, 50),
               ],
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -187,17 +188,19 @@ class WalletMobileLayout extends ConsumerWidget {
     );
   }
 
-  Widget _topUpBtn(BuildContext ctx, WidgetRef ref, double amount) {
+  Widget _redeemBtn(BuildContext ctx, WidgetRef ref, double amount) {
     return ElevatedButton(
       onPressed: () {
         Navigator.pop(ctx);
-        ref.read(walletNotifierProvider.notifier).topUp(amount);
+        ref
+            .read(walletNotifierProvider.notifier)
+            .redeemCredits('placeholder', amount);
         ScaffoldMessenger.of(ctx).showSnackBar(
-          SnackBar(content: Text('Processing \$amount top-up...')),
+          SnackBar(content: Text('Redeeming \$$amount credits...')),
         );
       },
       style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-      child: Text('\$\$amount'),
+      child: Text('\$$amount'),
     );
   }
 }

@@ -103,7 +103,9 @@ class StoreDetailTabletLayout extends ConsumerWidget {
                           ),
                           child: Text(
                             'Book a Session',
-                            style: AppTypography.headingSmall,
+                            style: AppTypography.headingSmall.copyWith(
+                              color: AppColors.background,
+                            ),
                           ),
                         ),
                       ),

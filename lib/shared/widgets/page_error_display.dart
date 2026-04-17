@@ -6,14 +6,13 @@ import 'package:gz_app/shared/widgets/huge_icon_widget.dart';
 import 'package:gz_app/core/errors/app_exception.dart';
 
 class PageErrorDisplay extends StatelessWidget {
-  const PageErrorDisplay({
-    super.key,
-    required this.error,
-    required this.onRetry,
-  });
+  const PageErrorDisplay({super.key, required this.error, this.onRetry});
 
   final AppPageError error;
-  final VoidCallback onRetry;
+  final VoidCallback? onRetry;
+
+  bool get _showRetry =>
+      onRetry != null && error.kind != AppPageErrorKind.empty;
 
   @override
   Widget build(BuildContext context) {
@@ -46,24 +45,28 @@ class PageErrorDisplay extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: AppSpacing.xl),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: onRetry,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.textPrimary,
-                    side: const BorderSide(color: AppColors.border),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.md,
+              if (_showRetry) ...[
+                const SizedBox(height: AppSpacing.xl),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: onRetry,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textPrimary,
+                      side: const BorderSide(color: AppColors.border),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.md,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.borderRadius,
+                        ),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-                    ),
+                    child: Text('Retry', style: AppTypography.button),
                   ),
-                  child: Text('Retry', style: AppTypography.button),
                 ),
-              ),
+              ],
             ],
           ),
         ),

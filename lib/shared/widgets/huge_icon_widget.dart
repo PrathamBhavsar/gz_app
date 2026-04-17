@@ -23,6 +23,8 @@ class HugeIconWidget extends StatelessWidget {
         return HugeIcons.strokeRoundedAlert01;
       case 'lock':
         return HugeIcons.strokeRoundedLockPassword;
+      case 'inbox':
+        return HugeIcons.strokeRoundedInbox;
       case 'alert_circle':
       default:
         return HugeIcons.strokeRoundedAlert01;

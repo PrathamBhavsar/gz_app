@@ -1,68 +1,71 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../models/api_responses.dart';
-import '../../../../models/domain_global.dart';
 
 class StoreService {
   final ApiClient _apiClient;
 
   StoreService(this._apiClient);
 
-  Future<PaginatedStoresResponse> getStores({String? query}) async {
-    // TODO: Implement GET /stores using _apiClient
-    await Future.delayed(const Duration(milliseconds: 600));
-
-    final mockStores = [
-      StoreModel(
-        id: '1',
-        name: 'Nexus Gaming Center',
-        slug: 'nexus-gaming',
-        address: '123 Gamer Street',
-        city: 'Metropolis',
-        isActive: true,
-        settings: {'rating': 4.8, 'systemCount': 40, 'openNow': true},
-      ),
-      StoreModel(
-        id: '2',
-        name: 'Pixel Lounge',
-        slug: 'pixel-lounge',
-        address: '456 Retro Avenue',
-        city: 'Metropolis',
-        isActive: true,
-        settings: {'rating': 4.5, 'systemCount': 25, 'openNow': true},
-      ),
-    ];
-
-    if (query != null && query.isNotEmpty) {
-      final filtered = mockStores
-          .where((s) => s.name!.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-      return PaginatedStoresResponse(data: filtered);
-    }
-
-    return PaginatedStoresResponse(data: mockStores);
+  /// GET /stores — public, optional query params
+  Future<PaginatedStoresResponse> getStores({
+    String? search,
+    String? platform,
+    bool? isOpen,
+    int? page,
+    int? limit,
+  }) async {
+    final queryParams = <String, String>{
+      if (search != null) 'search': search,
+      if (platform != null) 'platform': platform,
+      if (isOpen != null) 'isOpen': isOpen.toString(),
+      if (page != null) 'page': page.toString(),
+      if (limit != null) 'limit': limit.toString(),
+    };
+    final queryString = queryParams.isNotEmpty
+        ? '?${_encodeQuery(queryParams)}'
+        : '';
+    final data = await _apiClient.get('/stores$queryString');
+    return PaginatedStoresResponse.fromJson(data as Map<String, dynamic>);
   }
 
+  /// GET /stores/:slug — public
   Future<StoreResponse> getStore(String slug) async {
-    // TODO: Implement GET /stores/:slug using _apiClient
-    await Future.delayed(const Duration(milliseconds: 300));
-    return StoreResponse(
-      data: StoreModel(
-        id: '1',
-        name: 'Nexus Gaming Center',
-        slug: slug,
-        address: '123 Gamer Street',
-        city: 'Metropolis',
-        isActive: true,
-        settings: {'rating': 4.8, 'systemCount': 40, 'openNow': true},
-      ),
-    );
+    final data = await _apiClient.get('/stores/$slug');
+    return StoreResponse.fromJson(data as Map<String, dynamic>);
   }
 
+  /// GET /stores/:storeId/campaigns/active — Bearer
   Future<PaginatedCampaignsResponse> getActiveCampaigns(String storeId) async {
-    // TODO: Implement GET /stores/:storeId/campaigns/active using _apiClient
-    await Future.delayed(const Duration(milliseconds: 400));
-    return const PaginatedCampaignsResponse(data: []);
+    final data = await _apiClient.get('/stores/$storeId/campaigns/active');
+    return PaginatedCampaignsResponse.fromJson(data as Map<String, dynamic>);
+  }
+
+  /// GET /stores/:storeId/systems/available — Bearer
+  Future<SystemsListResponse> getAvailableSystems(
+    String storeId, {
+    String? systemTypeId,
+    String? startTime,
+    String? endTime,
+  }) async {
+    final queryParams = <String, String>{
+      if (systemTypeId != null) 'systemTypeId': systemTypeId,
+      if (startTime != null) 'startTime': startTime,
+      if (endTime != null) 'endTime': endTime,
+    };
+    final queryString = queryParams.isNotEmpty
+        ? '?${_encodeQuery(queryParams)}'
+        : '';
+    final data = await _apiClient.get(
+      '/stores/$storeId/systems/available$queryString',
+    );
+    return SystemsListResponse.fromJson(data as Map<String, dynamic>);
+  }
+
+  String _encodeQuery(Map<String, String> params) {
+    return params.entries
+        .map((e) => '${e.key}=${Uri.encodeQueryComponent(e.value)}')
+        .join('&');
   }
 }
 

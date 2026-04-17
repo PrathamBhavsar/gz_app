@@ -9,14 +9,24 @@ class SessionsRepository {
 
   SessionsRepository(this._sessionsService, this._networkChecker);
 
-  Future<PaginatedSessionsResponse> fetchActiveSessions() async {
+  Future<PaginatedSessionsResponse> fetchSessions(
+    String storeId, {
+    String? status,
+    int? page,
+    int? limit,
+  }) async {
     await _networkChecker.assertConnection();
-    return await _sessionsService.getActiveSessions();
+    return await _sessionsService.getSessions(
+      storeId,
+      status: status,
+      page: page ?? 1,
+      limit: limit ?? 20,
+    );
   }
 
-  Future<PaginatedSessionLogsResponse> fetchSessionHistory() async {
+  Future<SessionResponse> fetchSession(String storeId, String sessionId) async {
     await _networkChecker.assertConnection();
-    return await _sessionsService.getSessionHistory();
+    return await _sessionsService.getSession(storeId, sessionId);
   }
 }
 

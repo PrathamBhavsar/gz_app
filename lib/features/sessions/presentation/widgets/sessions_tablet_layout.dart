@@ -64,7 +64,7 @@ class SessionsTabletLayout extends ConsumerWidget {
                 Text('Session History', style: AppTypography.headingLarge),
                 const SizedBox(height: AppSpacing.lg),
                 Expanded(
-                  child: state.sessionLogs.isEmpty
+                  child: state.completedSessions.isEmpty
                       ? Center(
                           child: Text(
                             'No history found.',
@@ -74,9 +74,9 @@ class SessionsTabletLayout extends ConsumerWidget {
                           ),
                         )
                       : ListView.builder(
-                          itemCount: state.sessionLogs.length,
+                          itemCount: state.completedSessions.length,
                           itemBuilder: (context, index) =>
-                              _buildHistoryItem(state.sessionLogs[index]),
+                              _buildHistoryItem(state.completedSessions[index]),
                         ),
                 ),
               ],
@@ -151,7 +151,7 @@ class SessionsTabletLayout extends ConsumerWidget {
     );
   }
 
-  Widget _buildHistoryItem(SessionLogModel log) {
+  Widget _buildHistoryItem(SessionModel session) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -174,11 +174,11 @@ class SessionsTabletLayout extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    log.eventType ?? 'Unknown Event',
+                    'Session ${session.id?.substring(0, 8) ?? 'Unknown'}',
                     style: AppTypography.headingSmall,
                   ),
                   Text(
-                    log.localTime?.toString().split('.')[0] ?? 'Time N/A',
+                    session.endedAt?.toString().split('.')[0] ?? 'Time N/A',
                     style: AppTypography.bodySmall.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -188,7 +188,7 @@ class SessionsTabletLayout extends ConsumerWidget {
             ],
           ),
           Text(
-            '${log.durationSeconds != null ? log.durationSeconds! ~/ 60 : 0} mins',
+            '${session.durationMinutes ?? 0} mins',
             style: AppTypography.headingSmall.copyWith(
               color: AppColors.primary,
             ),

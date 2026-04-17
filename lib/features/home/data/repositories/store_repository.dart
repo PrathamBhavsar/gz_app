@@ -9,9 +9,21 @@ class StoreRepository {
 
   StoreRepository(this._storeService, this._networkChecker);
 
-  Future<PaginatedStoresResponse> fetchStores({String? search}) async {
+  Future<PaginatedStoresResponse> fetchStores({
+    String? search,
+    String? platform,
+    bool? isOpen,
+    int? page,
+    int? limit,
+  }) async {
     await _networkChecker.assertConnection();
-    return await _storeService.getStores(query: search);
+    return await _storeService.getStores(
+      search: search,
+      platform: platform,
+      isOpen: isOpen,
+      page: page ?? 1,
+      limit: limit ?? 20,
+    );
   }
 
   Future<StoreResponse> fetchStoreDetails(String slug) async {
@@ -24,6 +36,21 @@ class StoreRepository {
   ) async {
     await _networkChecker.assertConnection();
     return await _storeService.getActiveCampaigns(storeId);
+  }
+
+  Future<SystemsListResponse> fetchAvailableSystems(
+    String storeId, {
+    String? systemTypeId,
+    String? startTime,
+    String? endTime,
+  }) async {
+    await _networkChecker.assertConnection();
+    return await _storeService.getAvailableSystems(
+      storeId,
+      systemTypeId: systemTypeId,
+      startTime: startTime,
+      endTime: endTime,
+    );
   }
 }
 

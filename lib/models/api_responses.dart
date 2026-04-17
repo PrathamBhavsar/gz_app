@@ -4,6 +4,30 @@ import 'domain_systems.dart';
 import 'domain_billing.dart';
 import 'domain_loyalty.dart';
 
+// --- AUTH TOKEN RESPONSE ---
+// Shape returned by /auth/login/email, /auth/verify/otp, /auth/refresh
+class AuthTokenResponse {
+  final String accessToken;
+  final String? refreshToken;
+  final UserModel? user;
+
+  const AuthTokenResponse({
+    required this.accessToken,
+    this.refreshToken,
+    this.user,
+  });
+
+  factory AuthTokenResponse.fromJson(Map<String, dynamic> json) {
+    return AuthTokenResponse(
+      accessToken: json['accessToken'] as String,
+      refreshToken: json['refreshToken'] as String?,
+      user: json['user'] != null
+          ? UserModel.fromJson(json['user'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+}
+
 // --- USERS ---
 class UserResponse extends SuccessResponse<UserModel> {
   const UserResponse({super.message, super.data});
@@ -188,7 +212,6 @@ class PaginatedCampaignsResponse
       );
 }
 
-// --- NEW FIXES FOR MISSING MODELS ---
 class PaginatedSystemTypesResponse
     extends PaginatedSuccessResponse<SystemTypeModel> {
   const PaginatedSystemTypesResponse({
@@ -196,10 +219,29 @@ class PaginatedSystemTypesResponse
     super.data,
     super.pagination,
   });
+
+  factory PaginatedSystemTypesResponse.fromJson(Map<String, dynamic> json) =>
+      PaginatedSystemTypesResponse(
+        message: json['message'] as String?,
+        data: (json['data'] as List<dynamic>?)
+            ?.map((e) => SystemTypeModel.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        pagination: json['pagination'] != null
+            ? PaginationMeta.fromJson(json['pagination'])
+            : null,
+      );
 }
 
 class TransactionResponse extends SuccessResponse<TransactionModel> {
   const TransactionResponse({super.message, super.data});
+
+  factory TransactionResponse.fromJson(Map<String, dynamic> json) =>
+      TransactionResponse(
+        message: json['message'] as String?,
+        data: json['data'] != null
+            ? TransactionModel.fromJson(json['data'] as Map<String, dynamic>)
+            : null,
+      );
 }
 
 class PaginatedTransactionsResponse
@@ -209,6 +251,17 @@ class PaginatedTransactionsResponse
     super.data,
     super.pagination,
   });
+
+  factory PaginatedTransactionsResponse.fromJson(Map<String, dynamic> json) =>
+      PaginatedTransactionsResponse(
+        message: json['message'] as String?,
+        data: (json['data'] as List<dynamic>?)
+            ?.map((e) => TransactionModel.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        pagination: json['pagination'] != null
+            ? PaginationMeta.fromJson(json['pagination'])
+            : null,
+      );
 }
 
 class PaginatedSessionLogsResponse
@@ -218,4 +271,120 @@ class PaginatedSessionLogsResponse
     super.data,
     super.pagination,
   });
+
+  factory PaginatedSessionLogsResponse.fromJson(Map<String, dynamic> json) =>
+      PaginatedSessionLogsResponse(
+        message: json['message'] as String?,
+        data: (json['data'] as List<dynamic>?)
+            ?.map((e) => SessionLogModel.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        pagination: json['pagination'] != null
+            ? PaginationMeta.fromJson(json['pagination'])
+            : null,
+      );
+}
+
+// --- CREDIT BALANCE ---
+class CreditBalanceResponse extends SuccessResponse<CreditBalanceModel> {
+  const CreditBalanceResponse({super.message, super.data});
+
+  factory CreditBalanceResponse.fromJson(Map<String, dynamic> json) =>
+      CreditBalanceResponse(
+        message: json['message'] as String?,
+        data: json['data'] != null
+            ? CreditBalanceModel.fromJson(json['data'] as Map<String, dynamic>)
+            : null,
+      );
+}
+
+// --- CREDIT LEDGER (transactions) ---
+class PaginatedCreditLedgerResponse
+    extends PaginatedSuccessResponse<CreditLedgerModel> {
+  const PaginatedCreditLedgerResponse({
+    super.message,
+    super.data,
+    super.pagination,
+  });
+
+  factory PaginatedCreditLedgerResponse.fromJson(Map<String, dynamic> json) =>
+      PaginatedCreditLedgerResponse(
+        message: json['message'] as String?,
+        data: (json['data'] as List<dynamic>?)
+            ?.map((e) => CreditLedgerModel.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        pagination: json['pagination'] != null
+            ? PaginationMeta.fromJson(json['pagination'])
+            : null,
+      );
+}
+
+// --- SYSTEMS (available systems list) ---
+class SystemsListResponse extends SuccessResponse<List<SystemModel>> {
+  const SystemsListResponse({super.message, super.data});
+
+  factory SystemsListResponse.fromJson(Map<String, dynamic> json) {
+    final rawSystems =
+        json['systems'] as List<dynamic>? ?? json['data'] as List<dynamic>?;
+    return SystemsListResponse(
+      message: json['message'] as String?,
+      data: rawSystems
+          ?.map((e) => SystemModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+// --- BOOKING AVAILABILITY SLOTS ---
+// Returns { slots: [{ startTime, endTime, status, systemCount }] }
+class AvailabilitySlot {
+  final String? startTime;
+  final String? endTime;
+  final String? status;
+  final int? systemCount;
+
+  const AvailabilitySlot({
+    this.startTime,
+    this.endTime,
+    this.status,
+    this.systemCount,
+  });
+
+  factory AvailabilitySlot.fromJson(Map<String, dynamic> json) =>
+      AvailabilitySlot(
+        startTime: json['startTime']?.toString(),
+        endTime: json['endTime']?.toString(),
+        status: json['status']?.toString(),
+        systemCount: json['systemCount'] as int?,
+      );
+}
+
+class AvailabilityResponse extends SuccessResponse<List<AvailabilitySlot>> {
+  const AvailabilityResponse({super.message, super.data});
+
+  factory AvailabilityResponse.fromJson(Map<String, dynamic> json) {
+    final rawSlots =
+        json['slots'] as List<dynamic>? ?? json['data'] as List<dynamic>?;
+    return AvailabilityResponse(
+      message: json['message'] as String?,
+      data: rawSlots
+          ?.map((e) => AvailabilitySlot.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+// --- CAMPAIGN REDEMPTION ---
+class CampaignRedemptionResponse
+    extends SuccessResponse<CampaignRedemptionModel> {
+  const CampaignRedemptionResponse({super.message, super.data});
+
+  factory CampaignRedemptionResponse.fromJson(Map<String, dynamic> json) =>
+      CampaignRedemptionResponse(
+        message: json['message'] as String?,
+        data: json['redemption'] != null
+            ? CampaignRedemptionModel.fromJson(
+                json['redemption'] as Map<String, dynamic>,
+              )
+            : null,
+      );
 }

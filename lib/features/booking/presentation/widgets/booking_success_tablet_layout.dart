@@ -60,7 +60,9 @@ class BookingSuccessTabletLayout extends StatelessWidget {
                   ),
                   child: Text(
                     'View Sessions',
-                    style: AppTypography.headingSmall,
+                    style: AppTypography.headingSmall.copyWith(
+                      color: AppColors.background,
+                    ),
                   ),
                 ),
               ),

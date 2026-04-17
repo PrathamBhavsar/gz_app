@@ -9,14 +9,38 @@ class WalletRepository {
 
   WalletRepository(this._walletService, this._networkChecker);
 
-  Future<PaginatedTransactionsResponse> fetchTransactions() async {
+  Future<CreditBalanceResponse> fetchBalance(String storeId) async {
     await _networkChecker.assertConnection();
-    return await _walletService.getTransactions();
+    return await _walletService.getBalance(storeId);
   }
 
-  Future<TransactionResponse> performTopUp(double amount) async {
+  Future<PaginatedCreditLedgerResponse> fetchTransactions(
+    String storeId, {
+    int? page,
+    int? limit,
+  }) async {
     await _networkChecker.assertConnection();
-    return await _walletService.topUpWallet(amount);
+    return await _walletService.getTransactions(
+      storeId,
+      page: page ?? 1,
+      limit: limit ?? 20,
+    );
+  }
+
+  Future<Map<String, dynamic>> redeemCredits(
+    String storeId, {
+    required double amount,
+  }) async {
+    await _networkChecker.assertConnection();
+    return await _walletService.redeemCredits(storeId, amount: amount);
+  }
+
+  Future<CampaignRedemptionResponse> redeemCampaign(
+    String storeId,
+    String campaignId,
+  ) async {
+    await _networkChecker.assertConnection();
+    return await _walletService.redeemCampaign(storeId, campaignId);
   }
 }
 

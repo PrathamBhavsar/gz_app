@@ -28,8 +28,9 @@ class SessionsMobileLayout extends ConsumerWidget {
             Text('Failed to load sessions', style: AppTypography.headingMedium),
             const SizedBox(height: AppSpacing.sm),
             ElevatedButton(
-              onPressed: () =>
-                  ref.read(sessionsNotifierProvider.notifier).refresh(),
+              onPressed: () => ref
+                  .read(sessionsNotifierProvider.notifier)
+                  .refresh('placeholder'),
               child: const Text('Retry'),
             ),
           ],
@@ -38,7 +39,8 @@ class SessionsMobileLayout extends ConsumerWidget {
     }
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(sessionsNotifierProvider.notifier).refresh(),
+      onRefresh: () =>
+          ref.read(sessionsNotifierProvider.notifier).refresh('placeholder'),
       color: AppColors.primary,
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -55,10 +57,10 @@ class SessionsMobileLayout extends ConsumerWidget {
 
           Text('History', style: AppTypography.headingMedium),
           const SizedBox(height: AppSpacing.md),
-          if (state.sessionLogs.isEmpty)
+          if (state.completedSessions.isEmpty)
             _buildEmptyState('No history available')
           else
-            ...state.sessionLogs.map((log) => _buildHistoryItem(log)),
+            ...state.completedSessions.map((s) => _buildHistoryItem(s)),
         ],
       ),
     );
@@ -128,7 +130,7 @@ class SessionsMobileLayout extends ConsumerWidget {
     );
   }
 
-  Widget _buildHistoryItem(SessionLogModel log) {
+  Widget _buildHistoryItem(SessionModel session) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Container(
@@ -144,15 +146,15 @@ class SessionsMobileLayout extends ConsumerWidget {
         ),
       ),
       title: Text(
-        log.eventType ?? 'Unknown Event',
+        'Session ${session.id?.substring(0, 8) ?? 'Unknown'}',
         style: AppTypography.bodyLarge,
       ),
       subtitle: Text(
-        log.localTime?.toString().split('.')[0] ?? 'Time N/A',
+        session.endedAt?.toString().split('.')[0] ?? 'Time N/A',
         style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
       ),
       trailing: Text(
-        '${log.durationSeconds != null ? log.durationSeconds! ~/ 60 : 0} mins',
+        '${session.durationMinutes ?? 0} mins',
         style: AppTypography.bodyMedium,
       ),
     );

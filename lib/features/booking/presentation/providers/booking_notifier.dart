@@ -26,7 +26,8 @@ class BookingState {
   }) {
     return BookingState(
       selectedDate: selectedDate ?? this.selectedDate,
-      selectedDurationMinutes: selectedDurationMinutes ?? this.selectedDurationMinutes,
+      selectedDurationMinutes:
+          selectedDurationMinutes ?? this.selectedDurationMinutes,
       selectedSystemType: selectedSystemType ?? this.selectedSystemType,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
@@ -52,15 +53,32 @@ class BookingNotifier extends Notifier<BookingState> {
     state = state.copyWith(selectedSystemType: system);
   }
 
-  Future<bool> confirmBooking() async {
+  /// Confirm a booking for the given store.
+  /// Requires storeId + systemId + systemTypeId from the UI layer
+  /// (derived from the store detail / system picker screens).
+  Future<bool> confirmBooking(
+    String storeId, {
+    required String systemId,
+    required String systemTypeId,
+    required DateTime startTime,
+    required DateTime endTime,
+    String? paymentMethod,
+    String? campaignId,
+    int? creditsToRedeem,
+  }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repo = ref.read(bookingRepositoryProvider);
-      final response = await repo.placeBooking({
-        'system_type_id': state.selectedSystemType?.id,
-        'duration_minutes': state.selectedDurationMinutes,
-        'start_time': state.selectedDate?.toIso8601String(),
-      });
+      final response = await repo.placeBooking(
+        storeId,
+        systemId: systemId,
+        startTime: startTime.toUtc().toIso8601String(),
+        endTime: endTime.toUtc().toIso8601String(),
+        systemTypeId: systemTypeId,
+        paymentMethod: paymentMethod,
+        campaignId: campaignId,
+        creditsToRedeem: creditsToRedeem,
+      );
       state = state.copyWith(isLoading: false);
       return response.success == true;
     } catch (e) {
@@ -70,6 +88,8 @@ class BookingNotifier extends Notifier<BookingState> {
   }
 }
 
-final bookingNotifierProvider = NotifierProvider<BookingNotifier, BookingState>(() {
-  return BookingNotifier();
-});
+final bookingNotifierProvider = NotifierProvider<BookingNotifier, BookingState>(
+  () {
+    return BookingNotifier();
+  },
+);

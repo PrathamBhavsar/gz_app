@@ -4,26 +4,26 @@ import '../../data/repositories/sessions_repository.dart';
 
 class SessionsState {
   final List<SessionModel> activeSessions;
-  final List<SessionLogModel> sessionLogs;
+  final List<SessionModel> completedSessions;
   final bool isLoading;
   final String? error;
 
   const SessionsState({
     this.activeSessions = const [],
-    this.sessionLogs = const [],
+    this.completedSessions = const [],
     this.isLoading = true,
     this.error,
   });
 
   SessionsState copyWith({
     List<SessionModel>? activeSessions,
-    List<SessionLogModel>? sessionLogs,
+    List<SessionModel>? completedSessions,
     bool? isLoading,
     String? error,
   }) {
     return SessionsState(
       activeSessions: activeSessions ?? this.activeSessions,
-      sessionLogs: sessionLogs ?? this.sessionLogs,
+      completedSessions: completedSessions ?? this.completedSessions,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
     );
@@ -33,20 +33,26 @@ class SessionsState {
 class SessionsNotifier extends Notifier<SessionsState> {
   @override
   SessionsState build() {
-    _loadData();
     return const SessionsState();
   }
 
-  Future<void> _loadData() async {
+  /// Load sessions for a given store. Call from the UI with the active storeId.
+  Future<void> loadSessions(String storeId) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repo = ref.read(sessionsRepositoryProvider);
-      final activeResponse = await repo.fetchActiveSessions();
-      final logsResponse = await repo.fetchSessionHistory();
-      
+      final activeResponse = await repo.fetchSessions(
+        storeId,
+        status: 'in_progress',
+      );
+      final completedResponse = await repo.fetchSessions(
+        storeId,
+        status: 'completed',
+      );
+
       state = state.copyWith(
-        activeSessions: List<SessionModel>.from(activeResponse.data ?? []),
-        sessionLogs: List<SessionLogModel>.from(logsResponse.data ?? []),
+        activeSessions: activeResponse.data ?? [],
+        completedSessions: completedResponse.data ?? [],
         isLoading: false,
       );
     } catch (e) {
@@ -54,9 +60,10 @@ class SessionsNotifier extends Notifier<SessionsState> {
     }
   }
 
-  Future<void> refresh() => _loadData();
+  Future<void> refresh(String storeId) => loadSessions(storeId);
 }
 
-final sessionsNotifierProvider = NotifierProvider<SessionsNotifier, SessionsState>(() {
-  return SessionsNotifier();
-});
+final sessionsNotifierProvider =
+    NotifierProvider<SessionsNotifier, SessionsState>(() {
+      return SessionsNotifier();
+    });

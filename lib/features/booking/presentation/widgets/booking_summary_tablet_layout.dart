@@ -79,9 +79,22 @@ class BookingSummaryTabletLayout extends ConsumerWidget {
                   onPressed: state.isLoading
                       ? null
                       : () async {
-                          final success = await ref
-                              .read(bookingNotifierProvider.notifier)
-                              .confirmBooking();
+                          final notifier = ref.read(
+                            bookingNotifierProvider.notifier,
+                          );
+                          final selectedDate =
+                              state.selectedDate ?? DateTime.now();
+                          final endTime = selectedDate.add(
+                            Duration(minutes: state.selectedDurationMinutes),
+                          );
+                          final success = await notifier.confirmBooking(
+                            'placeholder',
+                            systemId: 'placeholder',
+                            systemTypeId:
+                                state.selectedSystemType?.id ?? 'placeholder',
+                            startTime: selectedDate,
+                            endTime: endTime,
+                          );
                           if (success && context.mounted) {
                             context.go('/book/success');
                           }
@@ -107,7 +120,9 @@ class BookingSummaryTabletLayout extends ConsumerWidget {
                         )
                       : Text(
                           'Confirm & Pay',
-                          style: AppTypography.headingSmall,
+                          style: AppTypography.headingSmall.copyWith(
+                            color: AppColors.background,
+                          ),
                         ),
                 ),
               ),
