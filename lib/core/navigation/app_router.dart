@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,6 +30,11 @@ import '../../features/profile/presentation/screens/profile_screen.dart';
 // Admin screens
 import '../../features/admin/presentation/screens/admin_login_screen.dart';
 import '../../features/admin/presentation/screens/admin_password_reset_screen.dart';
+import '../../features/admin/presentation/widgets/admin_shell.dart';
+import '../../features/admin/presentation/screens/operations/admin_dashboard_screen.dart';
+import '../../features/admin/presentation/screens/analytics/admin_analytics_screen.dart';
+import '../../features/admin/presentation/screens/management/admin_management_screen.dart';
+import '../../features/admin/presentation/screens/store/admin_store_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -117,6 +123,108 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.storeSearch,
         builder: (context, state) => const StoreSearchScreen(),
       ),
+
+      // Admin App Shell
+      ShellRoute(
+        builder: (context, state, child) => AdminShell(child: child),
+        routes: [
+          // Tab 1: Operations
+          GoRoute(
+            path: AppRoutes.adminDashboard,
+            builder: (context, state) => const AdminDashboardScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.adminSessions,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Session Management'),
+          ),
+          GoRoute(
+            path: AppRoutes.adminWalkIn,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Walk-in Booking'),
+          ),
+          GoRoute(
+            path: AppRoutes.adminBookings,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Booking Management'),
+          ),
+          // Tab 2: Analytics
+          GoRoute(
+            path: AppRoutes.adminAnalytics,
+            builder: (context, state) => const AdminAnalyticsScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.adminRevenue,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Revenue Analytics'),
+          ),
+          GoRoute(
+            path: AppRoutes.adminUtilization,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Utilization Heatmap'),
+          ),
+          GoRoute(
+            path: AppRoutes.adminSessionStats,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Session Statistics'),
+          ),
+          GoRoute(
+            path: AppRoutes.adminPlayers,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Player Analytics'),
+          ),
+          GoRoute(
+            path: AppRoutes.adminSystems,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'System Performance'),
+          ),
+          // Tab 3: Management
+          GoRoute(
+            path: AppRoutes.adminPricing,
+            builder: (context, state) => const AdminManagementScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.adminBilling,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Billing & Payments'),
+          ),
+          GoRoute(
+            path: AppRoutes.adminCampaigns,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Campaign Management'),
+          ),
+          GoRoute(
+            path: AppRoutes.adminCredits,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Credits Management'),
+          ),
+          GoRoute(
+            path: AppRoutes.adminDisputes,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Dispute Resolution'),
+          ),
+          // Tab 4: Store
+          GoRoute(
+            path: AppRoutes.adminSystemsMgmt,
+            builder: (context, state) => const AdminStoreScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.adminStaff,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Staff Management'),
+          ),
+          GoRoute(
+            path: AppRoutes.adminConfig,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Store Config'),
+          ),
+          GoRoute(
+            path: AppRoutes.adminNotifications,
+            builder: (context, state) =>
+                const _PlaceholderScreen(title: 'Notifications'),
+          ),
+        ],
+      ),
       GoRoute(
         path: AppRoutes.storeDetail,
         builder: (context, state) {
@@ -142,3 +250,50 @@ final routerProvider = Provider<GoRouter>((ref) {
     // redirect: (context, state) { ... }
   );
 });
+
+/// Placeholder screen for admin routes not yet fully implemented.
+class _PlaceholderScreen extends StatelessWidget {
+  final String title;
+  const _PlaceholderScreen({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0A0A0A),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0A0A0A),
+        elevation: 0,
+        title: Text(title),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.construction, color: Color(0xFF888888), size: 48),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: const TextStyle(color: Color(0xFF888888), fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Coming soon',
+              style: TextStyle(color: Color(0xFF888888), fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Admin shell wrapper — wraps the AdminMobileLayout around the child route.
+class AdminShell extends StatelessWidget {
+  final Widget child;
+  const AdminShell({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return AdminMobileLayout(child: child);
+  }
+}
