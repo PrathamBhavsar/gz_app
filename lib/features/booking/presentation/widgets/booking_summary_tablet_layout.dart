@@ -5,6 +5,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../providers/booking_notifier.dart';
+import '../../../../../core/auth/token_storage.dart';
 
 class BookingSummaryTabletLayout extends ConsumerWidget {
   const BookingSummaryTabletLayout({super.key});
@@ -79,6 +80,8 @@ class BookingSummaryTabletLayout extends ConsumerWidget {
                   onPressed: state.isLoading
                       ? null
                       : () async {
+                          final storeId = ref.read(activeStoreIdProvider);
+                          if (storeId == null) return;
                           final notifier = ref.read(
                             bookingNotifierProvider.notifier,
                           );
@@ -88,7 +91,7 @@ class BookingSummaryTabletLayout extends ConsumerWidget {
                             Duration(minutes: state.selectedDurationMinutes),
                           );
                           final success = await notifier.confirmBooking(
-                            'placeholder',
+                            storeId,
                             systemId: 'placeholder',
                             systemTypeId:
                                 state.selectedSystemType?.id ?? 'placeholder',

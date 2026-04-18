@@ -10,16 +10,32 @@ class AuthRepository {
   final NetworkChecker _networkChecker;
   final TokenStorage _tokenStorage;
 
-  AuthRepository(this._authService, this._networkChecker, this._tokenStorage);
+  /// Callback to persist accessToken in Riverpod in-memory state.
+  /// This avoids a direct dependency on the Provider container.
+  final void Function(String token) _onAccessTokenReceived;
+
+  AuthRepository(
+    this._authService,
+    this._networkChecker,
+    this._tokenStorage,
+    this._onAccessTokenReceived,
+  );
 
   // ─── Persist tokens from a successful login/verify response ───────
   Future<UserModel> _handleAuthToken(AuthTokenResponse response) async {
+    // 1. Save access token to in-memory Riverpod state (for interceptor)
+    _onAccessTokenReceived(response.accessToken);
+
+    // 2. Save refresh token to secure storage (persists across restarts)
     if (response.refreshToken != null) {
       await _tokenStorage.saveRefreshToken(response.refreshToken!);
     }
+
+    // 3. Save userId for WebSocket connections
     if (response.user?.id != null) {
       await _tokenStorage.saveUserId(response.user!.id!);
     }
+
     if (response.user == null) {
       throw Exception('Authentication succeeded but no user data returned');
     }
@@ -80,7 +96,6 @@ class AuthRepository {
 
   // ─── Logout ───────────────────────────────────────────────────────
   Future<void> logout() async {
-    // Best-effort — even if API call fails, clear local tokens
     try {
       await _authService.logout();
     } catch (_) {
@@ -88,16 +103,42 @@ class AuthRepository {
     }
   }
 
-  // ─── Silent token refresh ─────────────────────────────────────────
+  // ─── Silent token refresh (used by interceptor) ───────────────────
   Future<String?> refreshAccessToken() async {
     final storedRefreshToken = await _tokenStorage.getRefreshToken();
     if (storedRefreshToken == null) return null;
 
     final response = await _authService.refreshToken(storedRefreshToken);
+
+    // Save new access token in memory
+    _onAccessTokenReceived(response.accessToken);
+
+    // Rotate refresh token if a new one was issued
     if (response.refreshToken != null) {
       await _tokenStorage.saveRefreshToken(response.refreshToken!);
     }
     return response.accessToken;
+  }
+
+  // ─── Update profile ──────────────────────────────────────────────
+  Future<UserResponse> updateProfile({String? name, String? email}) async {
+    await _networkChecker.assertConnection();
+    return await _authService.updateMe(name: name, email: email);
+  }
+
+  // ─── Register device for push ────────────────────────────────────
+  Future<void> registerDevice({
+    required String fcmToken,
+    required String platform,
+  }) async {
+    await _networkChecker.assertConnection();
+    await _authService.registerDevice(fcmToken: fcmToken, platform: platform);
+  }
+
+  // ─── Request phone change ────────────────────────────────────────
+  Future<void> requestPhoneChange(String newPhone) async {
+    await _networkChecker.assertConnection();
+    await _authService.requestPhoneChange(newPhone);
   }
 }
 
@@ -105,5 +146,12 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final authService = ref.watch(authServiceProvider);
   final networkChecker = ref.watch(networkCheckerProvider);
   final tokenStorage = ref.watch(tokenStorageProvider);
-  return AuthRepository(authService, networkChecker, tokenStorage);
+
+  return AuthRepository(
+    authService,
+    networkChecker,
+    tokenStorage,
+    // Callback: save accessToken to Riverpod in-memory state
+    (token) => ref.read(accessTokenProvider.notifier).state = token,
+  );
 });

@@ -7,6 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../providers/wallet_notifier.dart';
 import '../../../../models/domain_loyalty.dart';
 import '../../../../models/enums.dart';
+import '../../../../core/auth/token_storage.dart';
 
 class WalletTabletLayout extends ConsumerWidget {
   const WalletTabletLayout({super.key});
@@ -60,9 +61,13 @@ class WalletTabletLayout extends ConsumerWidget {
                     ),
                     IconButton(
                       icon: const Icon(Icons.refresh, color: AppColors.primary),
-                      onPressed: () => ref
-                          .read(walletNotifierProvider.notifier)
-                          .refresh('placeholder'),
+                      onPressed: () {
+                        final storeId = ref.read(activeStoreIdProvider);
+                        if (storeId == null) return;
+                        ref
+                            .read(walletNotifierProvider.notifier)
+                            .refresh(storeId);
+                      },
                     ),
                   ],
                 ),
@@ -165,9 +170,12 @@ class WalletTabletLayout extends ConsumerWidget {
         vertical: AppSpacing.sm,
       ),
       onPressed: () {
-        ref
-            .read(walletNotifierProvider.notifier)
-            .redeemCredits('placeholder', amount);
+        final storeId = ref.read(activeStoreIdProvider);
+        if (storeId != null) {
+          ref
+              .read(walletNotifierProvider.notifier)
+              .redeemCredits(storeId, amount);
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Redeeming \$$amount credits...')),
         );

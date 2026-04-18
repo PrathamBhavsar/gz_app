@@ -7,6 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../providers/wallet_notifier.dart';
 import '../../../../models/domain_loyalty.dart';
 import '../../../../models/enums.dart';
+import '../../../../core/auth/token_storage.dart';
 
 class WalletMobileLayout extends ConsumerWidget {
   const WalletMobileLayout({super.key});
@@ -22,8 +23,11 @@ class WalletMobileLayout extends ConsumerWidget {
     }
 
     return RefreshIndicator(
-      onRefresh: () =>
-          ref.read(walletNotifierProvider.notifier).refresh('placeholder'),
+      onRefresh: () async {
+        final storeId = ref.read(activeStoreIdProvider);
+        if (storeId == null) return;
+        await ref.read(walletNotifierProvider.notifier).refresh(storeId);
+      },
       color: AppColors.primary,
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -192,9 +196,12 @@ class WalletMobileLayout extends ConsumerWidget {
     return ElevatedButton(
       onPressed: () {
         Navigator.pop(ctx);
-        ref
-            .read(walletNotifierProvider.notifier)
-            .redeemCredits('placeholder', amount);
+        final storeId = ref.read(activeStoreIdProvider);
+        if (storeId != null) {
+          ref
+              .read(walletNotifierProvider.notifier)
+              .redeemCredits(storeId, amount);
+        }
         ScaffoldMessenger.of(ctx).showSnackBar(
           SnackBar(content: Text('Redeeming \$$amount credits...')),
         );

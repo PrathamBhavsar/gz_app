@@ -22,6 +22,28 @@ class _EmailLoginMobileLayoutState
   final _passwordController = TextEditingController();
   bool _passwordVisible = false;
   String? _errorMessage;
+  bool _navigated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen once for auth state changes to navigate on success
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.listenManual(authNotifierProvider, (previous, next) {
+        if (next is AuthAuthenticated && !_navigated) {
+          _navigated = true;
+          context.go(AppRoutes.home);
+        } else if (next is AuthError) {
+          final err = next.error;
+          if (mounted) {
+            setState(() {
+              _errorMessage = err.toString().replaceFirst('Exception: ', '');
+            });
+          }
+        }
+      });
+    });
+  }
 
   @override
   void dispose() {
@@ -44,22 +66,6 @@ class _EmailLoginMobileLayoutState
     await ref
         .read(authNotifierProvider.notifier)
         .loginWithEmail(email, password);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Listen for auth state changes to navigate on success
-    ref.listenManual(authNotifierProvider, (previous, next) {
-      if (next is AuthAuthenticated) {
-        context.go(AppRoutes.home);
-      } else if (next is AuthError) {
-        final err = next.error;
-        setState(() {
-          _errorMessage = err.toString().replaceFirst('Exception: ', '');
-        });
-      }
-    });
   }
 
   @override

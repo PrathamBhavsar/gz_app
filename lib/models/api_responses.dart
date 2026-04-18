@@ -3,9 +3,11 @@ import 'domain_global.dart';
 import 'domain_systems.dart';
 import 'domain_billing.dart';
 import 'domain_loyalty.dart';
+import 'domain_misc.dart';
 
 // --- AUTH TOKEN RESPONSE ---
 // Shape returned by /auth/login/email, /auth/verify/otp, /auth/refresh
+// Server wraps under { success, message, data: { accessToken, refreshToken, user } }
 class AuthTokenResponse {
   final String accessToken;
   final String? refreshToken;
@@ -18,11 +20,16 @@ class AuthTokenResponse {
   });
 
   factory AuthTokenResponse.fromJson(Map<String, dynamic> json) {
+    // Unwrap from { data: { ... } } if present
+    final payload = (json['data'] is Map<String, dynamic>)
+        ? json['data'] as Map<String, dynamic>
+        : json;
+
     return AuthTokenResponse(
-      accessToken: json['accessToken'] as String,
-      refreshToken: json['refreshToken'] as String?,
-      user: json['user'] != null
-          ? UserModel.fromJson(json['user'] as Map<String, dynamic>)
+      accessToken: payload['accessToken'] as String,
+      refreshToken: payload['refreshToken'] as String?,
+      user: payload['user'] != null
+          ? UserModel.fromJson(payload['user'] as Map<String, dynamic>)
           : null,
     );
   }
@@ -387,4 +394,82 @@ class CampaignRedemptionResponse
               )
             : null,
       );
+}
+
+// --- NOTIFICATIONS ---
+class NotificationListResponse
+    extends SuccessResponse<List<NotificationModel>> {
+  final int? unreadCount;
+
+  const NotificationListResponse({super.message, super.data, this.unreadCount});
+
+  factory NotificationListResponse.fromJson(Map<String, dynamic> json) {
+    final rawNotifications =
+        json['notifications'] as List<dynamic>? ??
+        json['data'] as List<dynamic>?;
+    return NotificationListResponse(
+      message: json['message'] as String?,
+      unreadCount: json['unreadCount'] as int?,
+      data: rawNotifications
+          ?.map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+class NotificationResponse extends SuccessResponse<NotificationModel> {
+  const NotificationResponse({super.message, super.data});
+
+  factory NotificationResponse.fromJson(Map<String, dynamic> json) =>
+      NotificationResponse(
+        message: json['message'] as String?,
+        data: json['notification'] != null
+            ? NotificationModel.fromJson(
+                json['notification'] as Map<String, dynamic>,
+              )
+            : null,
+      );
+}
+
+class NotificationPreferencesResponse
+    extends SuccessResponse<Map<String, bool>> {
+  const NotificationPreferencesResponse({super.message, super.data});
+
+  factory NotificationPreferencesResponse.fromJson(Map<String, dynamic> json) =>
+      NotificationPreferencesResponse(
+        message: json['message'] as String?,
+        data: json['data'] != null
+            ? Map<String, bool>.from(json['data'] as Map)
+            : null,
+      );
+}
+
+// --- DISPUTES ---
+class DisputeResponse extends SuccessResponse<BillingDisputeModel> {
+  const DisputeResponse({super.message, super.data});
+
+  factory DisputeResponse.fromJson(Map<String, dynamic> json) =>
+      DisputeResponse(
+        message: json['message'] as String?,
+        data: json['dispute'] != null
+            ? BillingDisputeModel.fromJson(
+                json['dispute'] as Map<String, dynamic>,
+              )
+            : null,
+      );
+}
+
+class DisputeListResponse extends SuccessResponse<List<BillingDisputeModel>> {
+  const DisputeListResponse({super.message, super.data});
+
+  factory DisputeListResponse.fromJson(Map<String, dynamic> json) {
+    final rawDisputes =
+        json['disputes'] as List<dynamic>? ?? json['data'] as List<dynamic>?;
+    return DisputeListResponse(
+      message: json['message'] as String?,
+      data: rawDisputes
+          ?.map((e) => BillingDisputeModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }

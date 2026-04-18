@@ -17,7 +17,12 @@ class AuthLandingMobileLayout extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Spacer(),
-          Text('Welcome to', style: AppTypography.headingSmall.copyWith(color: AppColors.textSecondary)),
+          Text(
+            'Welcome to',
+            style: AppTypography.headingSmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
           Text('GAMING ZONE', style: AppTypography.headingLarge),
           const SizedBox(height: AppSpacing.xxl),
           _buildAuthButton(
@@ -50,9 +55,25 @@ class AuthLandingMobileLayout extends StatelessWidget {
               Text("Don't have an account?", style: AppTypography.bodyMedium),
               TextButton(
                 onPressed: () => context.go(AppRoutes.register),
-                child: Text('Create one', style: AppTypography.button.copyWith(color: AppColors.rose)),
+                child: Text(
+                  'Create one',
+                  style: AppTypography.button.copyWith(color: AppColors.rose),
+                ),
               ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          // Admin login link
+          const Divider(color: AppColors.border, thickness: 1),
+          const SizedBox(height: AppSpacing.sm),
+          TextButton(
+            onPressed: () => context.go(AppRoutes.adminLogin),
+            child: Text(
+              'Store Admin / Staff Login',
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
         ],
@@ -71,16 +92,24 @@ class AuthLandingMobileLayout extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: onTap,
-        icon: HugeIcon(icon: icon, color: isPrimary ? AppColors.background : AppColors.textPrimary, size: 20),
+        icon: HugeIcon(
+          icon: icon,
+          color: isPrimary ? AppColors.background : AppColors.textPrimary,
+          size: 20,
+        ),
         label: Text(label, style: AppTypography.button),
         style: ElevatedButton.styleFrom(
           backgroundColor: isPrimary ? AppColors.primary : AppColors.surface,
-          foregroundColor: isPrimary ? AppColors.background : AppColors.textPrimary,
+          foregroundColor: isPrimary
+              ? AppColors.background
+              : AppColors.textPrimary,
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-            side: isPrimary ? BorderSide.none : const BorderSide(color: AppColors.border),
+            side: isPrimary
+                ? BorderSide.none
+                : const BorderSide(color: AppColors.border),
           ),
         ),
       ),

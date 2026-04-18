@@ -26,6 +26,10 @@ import '../../features/sessions/presentation/screens/sessions_screen.dart';
 import '../../features/wallet/presentation/screens/wallet_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 
+// Admin screens
+import '../../features/admin/presentation/screens/admin_login_screen.dart';
+import '../../features/admin/presentation/screens/admin_password_reset_screen.dart';
+
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: AppRoutes.splash,
@@ -69,6 +73,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.emailVerificationPending,
         builder: (context, state) => const EmailVerificationPendingScreen(),
+      ),
+
+      // Admin Auth Stack
+      GoRoute(
+        path: AppRoutes.adminLogin,
+        builder: (context, state) => const AdminLoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminPasswordReset,
+        builder: (context, state) => const AdminPasswordResetScreen(),
       ),
 
       // Main App Shell

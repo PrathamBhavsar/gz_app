@@ -6,6 +6,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../providers/sessions_notifier.dart';
 import '../../../../models/domain_systems.dart';
+import '../../../../core/auth/token_storage.dart';
 
 class SessionsMobileLayout extends ConsumerWidget {
   const SessionsMobileLayout({super.key});
@@ -28,9 +29,11 @@ class SessionsMobileLayout extends ConsumerWidget {
             Text('Failed to load sessions', style: AppTypography.headingMedium),
             const SizedBox(height: AppSpacing.sm),
             ElevatedButton(
-              onPressed: () => ref
-                  .read(sessionsNotifierProvider.notifier)
-                  .refresh('placeholder'),
+              onPressed: () {
+                final storeId = ref.read(activeStoreIdProvider);
+                if (storeId == null) return;
+                ref.read(sessionsNotifierProvider.notifier).refresh(storeId);
+              },
               child: const Text('Retry'),
             ),
           ],
@@ -39,8 +42,11 @@ class SessionsMobileLayout extends ConsumerWidget {
     }
 
     return RefreshIndicator(
-      onRefresh: () =>
-          ref.read(sessionsNotifierProvider.notifier).refresh('placeholder'),
+      onRefresh: () async {
+        final storeId = ref.read(activeStoreIdProvider);
+        if (storeId == null) return;
+        await ref.read(sessionsNotifierProvider.notifier).refresh(storeId);
+      },
       color: AppColors.primary,
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),

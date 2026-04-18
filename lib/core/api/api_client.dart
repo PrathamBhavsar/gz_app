@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'api_constants.dart';
 import '../errors/app_exception.dart';
 import '../auth/token_storage.dart';
 
@@ -123,6 +124,63 @@ class ApiClient {
     }
   }
 
+  Future<dynamic> delete(String endpoint, {Map<String, dynamic>? body}) async {
+    final uri = Uri.parse('$baseUrl$endpoint');
+    _logRequest('DELETE', endpoint);
+
+    final encodedBody = body != null ? jsonEncode(body) : null;
+
+    try {
+      final response = await http.delete(
+        uri,
+        headers: _buildHeaders(),
+        body: encodedBody,
+      );
+      _logResponse(endpoint, response.statusCode, response.body);
+      return await _handleResponse(
+        endpoint,
+        response,
+        () => http.delete(uri, headers: _buildHeaders(), body: encodedBody),
+      );
+    } on http.ClientException catch (e) {
+      debugPrint('✗ $endpoint CLIENT_ERROR: $e');
+      throw NetworkException('Cannot reach server');
+    }
+  }
+
+  // ─── Admin Convenience Methods ─────────────────────────────────────
+
+  /// Admin login via email + password.
+  Future<Map<String, dynamic>> adminLogin({
+    required String email,
+    required String password,
+  }) async {
+    return (await post(
+          ApiConstants.authAdminLogin,
+          body: {'email': email, 'password': password},
+        ))
+        as Map<String, dynamic>;
+  }
+
+  /// Get current admin profile (validates admin token).
+  Future<Map<String, dynamic>> getAdminProfile() async {
+    return (await get(ApiConstants.authAdminMe)) as Map<String, dynamic>;
+  }
+
+  /// Admin logout — invalidates tokens server-side.
+  Future<void> adminLogout({
+    String? refreshToken,
+    bool allDevices = false,
+  }) async {
+    await post(
+      ApiConstants.authAdminLogout,
+      body: {
+        if (refreshToken != null) 'refreshToken': refreshToken,
+        if (allDevices) 'all': true,
+      },
+    );
+  }
+
   // ─── Response Handling ─────────────────────────────────────────────
 
   Future<dynamic> _handleResponse(
@@ -196,7 +254,7 @@ class ApiClient {
 /// lazily at call-time rather than at construction time.
 final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(
-    baseUrl: 'http://192.168.1.4:3000/v1',
+    baseUrl: ApiConstants.baseUrl,
     getAccessToken: () => ref.read(accessTokenProvider),
     onRefreshToken: () async {
       // Lazy read to avoid circular dependency at construction
@@ -206,16 +264,23 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 
       try {
         // Direct HTTP call — bypass ApiClient to avoid re-triggering 401 loop
-        final uri = Uri.parse('http://192.168.1.4:3000/v1/auth/refresh');
+        final uri = Uri.parse(
+          '${ApiConstants.devBaseUrl}${ApiConstants.authRefresh}',
+        );
         final response = await http.post(
           uri,
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'refreshToken': storedToken}),
         );
         if (response.statusCode == 200) {
-          final data = jsonDecode(response.body) as Map<String, dynamic>;
-          final newAccessToken = data['accessToken'] as String?;
-          final newRefreshToken = data['refreshToken'] as String?;
+          final raw = jsonDecode(response.body) as Map<String, dynamic>;
+          // Server wraps under { data: { accessToken, refreshToken? } }
+          final payload = (raw['data'] is Map<String, dynamic>)
+              ? raw['data'] as Map<String, dynamic>
+              : raw;
+
+          final newAccessToken = payload['accessToken'] as String?;
+          final newRefreshToken = payload['refreshToken'] as String?;
 
           if (newAccessToken != null) {
             ref.read(accessTokenProvider.notifier).state = newAccessToken;
@@ -223,10 +288,13 @@ final apiClientProvider = Provider<ApiClient>((ref) {
           if (newRefreshToken != null) {
             await tokenStorage.saveRefreshToken(newRefreshToken);
           }
+          debugPrint('↻ Token refreshed successfully');
           return newAccessToken;
         }
+        debugPrint('↻ Token refresh failed: ${response.statusCode}');
         return null;
-      } catch (_) {
+      } catch (e) {
+        debugPrint('↻ Token refresh error: $e');
         return null;
       }
     },

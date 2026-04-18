@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import '../api/api_constants.dart';
 
 class ConnectivityService {
   ConnectivityService() {
@@ -43,7 +44,7 @@ class ConnectivityService {
   Future<bool> _ping() async {
     try {
       final response = await http
-          .head(Uri.parse('http://192.168.1.4:3000/health'))
+          .head(Uri.parse(ApiConstants.healthUrl))
           .timeout(const Duration(seconds: 5));
       return response.statusCode < 500;
     } catch (_) {
