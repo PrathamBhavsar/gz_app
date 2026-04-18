@@ -42,6 +42,11 @@ import '../../features/admin/presentation/screens/analytics/session_statistics_s
 import '../../features/admin/presentation/screens/analytics/player_analytics_screen.dart';
 import '../../features/admin/presentation/screens/analytics/system_performance_screen.dart';
 import '../../features/admin/presentation/screens/management/admin_management_screen.dart';
+import '../../features/admin/presentation/screens/management/pricing_rules_screen.dart';
+import '../../features/admin/presentation/screens/management/billing_payments_screen.dart';
+import '../../features/admin/presentation/screens/management/campaign_management_screen.dart';
+import '../../features/admin/presentation/screens/management/credits_management_screen.dart';
+import '../../features/admin/presentation/screens/management/dispute_resolution_screen.dart';
 import '../../features/admin/presentation/screens/store/admin_store_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -184,27 +189,23 @@ final routerProvider = Provider<GoRouter>((ref) {
           // Tab 3: Management
           GoRoute(
             path: AppRoutes.adminPricing,
-            builder: (context, state) => const AdminManagementScreen(),
+            builder: (context, state) => const PricingRulesScreen(),
           ),
           GoRoute(
             path: AppRoutes.adminBilling,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Billing & Payments'),
+            builder: (context, state) => const BillingPaymentsScreen(),
           ),
           GoRoute(
             path: AppRoutes.adminCampaigns,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Campaign Management'),
+            builder: (context, state) => const CampaignManagementScreen(),
           ),
           GoRoute(
             path: AppRoutes.adminCredits,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Credits Management'),
+            builder: (context, state) => const CreditsManagementScreen(),
           ),
           GoRoute(
             path: AppRoutes.adminDisputes,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Dispute Resolution'),
+            builder: (context, state) => const DisputeResolutionScreen(),
           ),
           // Tab 4: Store
           GoRoute(
