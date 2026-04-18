@@ -32,7 +32,15 @@ import '../../features/admin/presentation/screens/admin_login_screen.dart';
 import '../../features/admin/presentation/screens/admin_password_reset_screen.dart';
 import '../../features/admin/presentation/widgets/admin_shell.dart';
 import '../../features/admin/presentation/screens/operations/admin_dashboard_screen.dart';
+import '../../features/admin/presentation/screens/operations/session_management_screen.dart';
+import '../../features/admin/presentation/screens/operations/walk_in_booking_screen.dart';
+import '../../features/admin/presentation/screens/operations/booking_management_screen.dart';
 import '../../features/admin/presentation/screens/analytics/admin_analytics_screen.dart';
+import '../../features/admin/presentation/screens/analytics/revenue_analytics_screen.dart';
+import '../../features/admin/presentation/screens/analytics/utilization_heatmap_screen.dart';
+import '../../features/admin/presentation/screens/analytics/session_statistics_screen.dart';
+import '../../features/admin/presentation/screens/analytics/player_analytics_screen.dart';
+import '../../features/admin/presentation/screens/analytics/system_performance_screen.dart';
 import '../../features/admin/presentation/screens/management/admin_management_screen.dart';
 import '../../features/admin/presentation/screens/store/admin_store_screen.dart';
 
@@ -135,18 +143,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.adminSessions,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Session Management'),
+            builder: (context, state) {
+              final systemId = state.uri.queryParameters['systemId'];
+              return SessionManagementScreen(systemId: systemId);
+            },
           ),
           GoRoute(
             path: AppRoutes.adminWalkIn,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Walk-in Booking'),
+            builder: (context, state) => const WalkInBookingScreen(),
           ),
           GoRoute(
             path: AppRoutes.adminBookings,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Booking Management'),
+            builder: (context, state) => const BookingManagementScreen(),
           ),
           // Tab 2: Analytics
           GoRoute(
@@ -155,28 +163,23 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.adminRevenue,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Revenue Analytics'),
+            builder: (context, state) => const RevenueAnalyticsScreen(),
           ),
           GoRoute(
             path: AppRoutes.adminUtilization,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Utilization Heatmap'),
+            builder: (context, state) => const UtilizationHeatmapScreen(),
           ),
           GoRoute(
             path: AppRoutes.adminSessionStats,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Session Statistics'),
+            builder: (context, state) => const SessionStatisticsScreen(),
           ),
           GoRoute(
             path: AppRoutes.adminPlayers,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Player Analytics'),
+            builder: (context, state) => const PlayerAnalyticsScreen(),
           ),
           GoRoute(
             path: AppRoutes.adminSystems,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'System Performance'),
+            builder: (context, state) => const SystemPerformanceScreen(),
           ),
           // Tab 3: Management
           GoRoute(
