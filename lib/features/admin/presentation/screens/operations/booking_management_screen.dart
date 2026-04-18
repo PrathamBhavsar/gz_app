@@ -8,6 +8,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_auth_provider.dart';
 import '../../providers/admin_operations_provider.dart';
+import '../../providers/admin_permissions.dart';
 
 /// Booking Management — Screen 45.
 /// Centralized view of all scheduled reservations.
@@ -42,8 +43,8 @@ class _BookingManagementScreenState
 
   @override
   Widget build(BuildContext context) {
-    final role = ref.watch(adminRoleProvider);
-    final canCancel = role == 'super_admin' || role == 'admin';
+    final perms = ref.watch(adminPermissionsProvider);
+    final canCancel = perms.canCancelBooking;
     final bookingsState = ref.watch(bookingsProvider);
 
     return Scaffold(

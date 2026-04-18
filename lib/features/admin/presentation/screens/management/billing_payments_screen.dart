@@ -7,7 +7,7 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_management_provider.dart';
-import '../../providers/admin_auth_provider.dart';
+import '../../providers/admin_permissions.dart';
 
 /// Billing & Payments — Screen 53.
 /// Ledger view with status filters, override panel (super_admin), refund.
@@ -33,8 +33,8 @@ class _BillingPaymentsScreenState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(billingProvider);
-    final role = ref.watch(adminRoleProvider);
-    final isSuperAdmin = role == 'super_admin';
+    final perms = ref.watch(adminPermissionsProvider);
+    final isSuperAdmin = perms.canBillingOverride;
 
     return Scaffold(
       backgroundColor: AppColors.background,

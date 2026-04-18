@@ -7,7 +7,7 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_management_provider.dart';
-import '../../providers/admin_auth_provider.dart';
+import '../../providers/admin_permissions.dart';
 
 /// Pricing Rules — Screen 52.
 /// CRUD for dynamic pricing rules with active toggle.
@@ -29,8 +29,8 @@ class _PricingRulesScreenState extends ConsumerState<PricingRulesScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(pricingRulesProvider);
-    final role = ref.watch(adminRoleProvider);
-    final canEdit = role == 'super_admin' || role == 'admin';
+    final perms = ref.watch(adminPermissionsProvider);
+    final canEdit = perms.canManagePricingRules;
 
     return Scaffold(
       backgroundColor: AppColors.background,

@@ -7,7 +7,7 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_management_provider.dart';
-import '../../providers/admin_auth_provider.dart';
+import '../../providers/admin_permissions.dart';
 
 /// Campaign Management — Screen 54.
 /// Campaign list with status badges, pause/resume actions, redemption stats.
@@ -30,8 +30,8 @@ class _CampaignManagementScreenState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(campaignsProvider);
-    final role = ref.watch(adminRoleProvider);
-    final canEdit = role == 'super_admin' || role == 'admin';
+    final perms = ref.watch(adminPermissionsProvider);
+    final canEdit = perms.canManagePricingRules; // Campaign edit follows pricing permission level
 
     return Scaffold(
       backgroundColor: AppColors.background,

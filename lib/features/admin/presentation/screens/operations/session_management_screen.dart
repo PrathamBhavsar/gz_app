@@ -7,8 +7,11 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
+import '../../../../../core/network/admin_live_service.dart';
 import '../../providers/admin_auth_provider.dart';
 import '../../providers/admin_operations_provider.dart';
+import '../../providers/admin_permissions.dart';
+import '../../providers/admin_live_provider.dart';
 
 /// Session Management — Screen 43.
 /// Granular control over an individual system and its active session.
@@ -28,6 +31,7 @@ class _SessionManagementScreenState
   String? _sessionId;
   int? _durationMinutes;
   bool _isActionLoading = false;
+  StreamSubscription<WsEvent>? _wsSubscription;
 
   @override
   void initState() {
@@ -72,6 +76,7 @@ class _SessionManagementScreenState
   @override
   void dispose() {
     _timer?.cancel();
+    _wsSubscription?.cancel();
     super.dispose();
   }
 
@@ -84,9 +89,13 @@ class _SessionManagementScreenState
 
   @override
   Widget build(BuildContext context) {
-    final role = ref.watch(adminRoleProvider);
-    final isStaff = role == 'staff';
-    final canPauseResume = !isStaff;
+    final perms = ref.watch(adminPermissionsProvider);
+
+    // Watch live events for session updates
+    _listenToSessionEvents();
+
+    // Ensure WS is connected
+    ref.watch(wsAutoConnectProvider);
 
     // Watch session detail if sessionId is set
     SessionDetailState? sessionState;
@@ -153,13 +162,38 @@ class _SessionManagementScreenState
 
             // Action toolbar
             if (_sessionId != null)
-              _buildActionToolbar(canPauseResume),
+              _buildActionToolbar(perms),
 
             const SizedBox(height: AppSpacing.xxl),
           ],
         ),
       ),
     );
+  }
+
+  /// Listen to WebSocket events for real-time session updates.
+  void _listenToSessionEvents() {
+    _wsSubscription?.cancel();
+    _wsSubscription = ref.read(adminLiveServiceProvider).events.listen((event) {
+      if (!mounted || _sessionId == null) return;
+      switch (event.type) {
+        case WsEventType.sessionEnded:
+          final endedSessionId = event.payload['sessionId']?.toString();
+          if (endedSessionId == _sessionId) {
+            _timer?.cancel();
+            setState(() {
+              _sessionId = null;
+              _isActionLoading = false;
+            });
+          }
+        case WsEventType.sessionStarted:
+        case WsEventType.systemStatusChange:
+          // Refresh session detail if it affects this session
+          ref.read(sessionDetailProvider(_sessionId!).notifier).loadSession(_sessionId!);
+        default:
+          break;
+      }
+    });
   }
 
   Widget _buildLiveBadge() {
@@ -351,7 +385,9 @@ class _SessionManagementScreenState
     );
   }
 
-  Widget _buildActionToolbar(bool canPauseResume) {
+  Widget _buildActionToolbar(AdminPermissions perms) {
+    final canPauseResume = perms.canPauseResumeSessions;
+    final canExtend = perms.canExtendSessions;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -401,7 +437,7 @@ class _SessionManagementScreenState
                 label: 'Extend',
                 color: AppColors.textPrimary,
                 bgColor: AppColors.surface,
-                onTap: canPauseResume ? () => _showExtendSheet() : null,
+                onTap: canExtend ? () => _showExtendSheet() : null,
               ),
             ),
           ],

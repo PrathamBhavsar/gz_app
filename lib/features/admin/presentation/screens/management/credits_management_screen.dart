@@ -7,7 +7,7 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_management_provider.dart';
-import '../../providers/admin_auth_provider.dart';
+import '../../providers/admin_permissions.dart';
 
 /// Credits Management — Screen 55.
 /// Player search, balance card, transaction history, manual adjustment.
@@ -33,8 +33,8 @@ class _CreditsManagementScreenState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(creditsProvider);
-    final role = ref.watch(adminRoleProvider);
-    final canAdjust = role == 'super_admin' || role == 'admin';
+    final perms = ref.watch(adminPermissionsProvider);
+    final canAdjust = perms.canAdjustCreditBalance;
 
     return Scaffold(
       backgroundColor: AppColors.background,

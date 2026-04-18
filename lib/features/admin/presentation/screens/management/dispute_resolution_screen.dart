@@ -7,7 +7,7 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_management_provider.dart';
-import '../../providers/admin_auth_provider.dart';
+import '../../providers/admin_permissions.dart';
 
 /// Dispute Resolution — Screen 56.
 /// Dispute inbox with status filters, resolution actions.
@@ -33,8 +33,8 @@ class _DisputeResolutionScreenState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(disputesProvider);
-    final role = ref.watch(adminRoleProvider);
-    final canResolve = role == 'super_admin' || role == 'admin';
+    final perms = ref.watch(adminPermissionsProvider);
+    final canResolve = perms.canResolveDisputes;
 
     return Scaffold(
       backgroundColor: AppColors.background,

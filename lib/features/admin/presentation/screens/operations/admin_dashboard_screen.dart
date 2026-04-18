@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,9 +7,11 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
+import '../../../../../core/network/admin_live_service.dart';
 import '../../providers/admin_auth_provider.dart';
 import '../../providers/admin_auth_state.dart';
 import '../../providers/admin_operations_provider.dart';
+import '../../providers/admin_live_provider.dart';
 import '../../../../../../models/domain_admin.dart';
 
 /// Admin Dashboard / Floor Map — Screen 42.
@@ -23,6 +26,8 @@ class AdminDashboardScreen extends ConsumerStatefulWidget {
 
 class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   String _selectedFilter = 'All';
+  StreamSubscription<WsEvent>? _wsSubscription;
+  bool _isWsConnected = false;
 
   static const _filterOptions = ['All', 'PC', 'Console', 'VR', 'Maintenance'];
 
@@ -36,6 +41,39 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   }
 
   @override
+  void dispose() {
+    _wsSubscription?.cancel();
+    super.dispose();
+  }
+
+  /// Listen to WebSocket events and refresh floor data on relevant events.
+  void _listenToWsEvents() {
+    _wsSubscription?.cancel();
+    _wsSubscription = ref.read(adminLiveServiceProvider).events.listen((event) {
+      if (!mounted) return;
+      switch (event.type) {
+        case WsEventType.systemStatusChange:
+        case WsEventType.sessionStarted:
+        case WsEventType.sessionEnded:
+        case WsEventType.agentHeartbeat:
+          // Refresh the floor map with latest data from server
+          ref.read(floorMapProvider.notifier).loadSystems();
+        case WsEventType.bookingNew:
+          // Could show a toast notification
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('New booking received'),
+              backgroundColor: AppColors.surface,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        case WsEventType.unknown:
+          break;
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final adminState = ref.watch(adminAuthNotifierProvider);
     final adminName = adminState is AdminAuthAuthenticated
@@ -45,6 +83,16 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         ? adminState.admin.role ?? ''
         : '';
     final floorState = ref.watch(floorMapProvider);
+
+    // Watch WS connection state
+    final wsConnection = ref.watch(liveConnectionProvider);
+    _isWsConnected = wsConnection.valueOrNull ?? false;
+
+    // Subscribe to live events
+    _listenToWsEvents();
+
+    // Ensure WS is connected when this screen is active
+    ref.watch(wsAutoConnectProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -117,13 +165,15 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   // ─── Live Pill ──────────────────────────────────────────────────────
 
   Widget _buildLivePill() {
+    final color = _isWsConnected ? AppColors.success : AppColors.error;
+    final label = _isWsConnected ? 'Live' : 'Offline';
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.15),
+        color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
       ),
       child: Row(
@@ -132,16 +182,16 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
           Container(
             width: 6,
             height: 6,
-            decoration: const BoxDecoration(
-              color: AppColors.success,
+            decoration: BoxDecoration(
+              color: color,
               shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 4),
           Text(
-            'Live',
+            label,
             style: AppTypography.caption.copyWith(
-              color: AppColors.success,
+              color: color,
               fontWeight: FontWeight.w600,
             ),
           ),

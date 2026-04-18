@@ -7,6 +7,7 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_analytics_provider.dart';
+import '../../providers/admin_permissions.dart';
 import '../../../../../../models/domain_analytics.dart';
 
 /// Analytics Dashboard — Screen 46.
@@ -24,7 +25,7 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final role = ref.watch(adminRoleProvider);
+    final perms = ref.watch(adminPermissionsProvider);
     final state = ref.watch(dashboardProvider);
 
     return Scaffold(
@@ -34,7 +35,7 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
         elevation: 0,
         title: Text('Analytics', style: AppTypography.headingSmall),
         actions: [
-          if (role != 'staff')
+          if (perms.canViewRevenueTotals)
             IconButton(
               icon: const HugeIcon(
                 icon: HugeIcons.strokeRoundedArrowUpRight01,
@@ -59,7 +60,7 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
               _buildDateRangeChips(),
               const SizedBox(height: AppSpacing.lg),
               // Content based on state
-              _buildContent(state, role),
+              _buildContent(state, perms),
               const SizedBox(height: AppSpacing.xxl),
             ],
           ),
@@ -107,7 +108,7 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
     );
   }
 
-  Widget _buildContent(AnalyticsState<AnalyticsDashboardModel> state, String? role) {
+  Widget _buildContent(AnalyticsState<AnalyticsDashboardModel> state, AdminPermissions perms) {
     if (state is AnalyticsLoading) {
       return const Center(
         child: Padding(
@@ -122,7 +123,7 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
     }
 
     if (state is AnalyticsLoaded) {
-      return _buildDashboard(state.data, role);
+      return _buildDashboard(state.data, perms);
     }
 
     return const SizedBox.shrink();
@@ -163,8 +164,8 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
     );
   }
 
-  Widget _buildDashboard(AnalyticsDashboardModel data, String? role) {
-    final canViewRevenue = role == 'super_admin' || role == 'admin';
+  Widget _buildDashboard(AnalyticsDashboardModel data, AdminPermissions perms) {
+    final canViewRevenue = perms.canViewRevenueTotals;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
