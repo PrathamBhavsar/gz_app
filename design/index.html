@@ -38,6 +38,10 @@
   <script type="text/babel" src="src/screen-session.jsx"></script>
   <script type="text/babel" src="src/screen-activity.jsx"></script>
   <script type="text/babel" src="src/screen-wallet.jsx"></script>
+  <script type="text/babel" src="src/screen-store.jsx"></script>
+  <script type="text/babel" src="src/screen-notifications.jsx"></script>
+  <script type="text/babel" src="src/screen-dispute-detail.jsx"></script>
+  <script type="text/babel" src="src/screen-dispute-create.jsx"></script>
 </head>
 <body>
   <div id="root"></div>
@@ -114,7 +118,7 @@
             </DCArtboard>
           </DCSection>
 
-          <DCSection id="screens" title="02 · Screens" subtitle="Same components, four contexts">
+          <DCSection id="screens" title="02 · Core screens" subtitle="Booking flow, live session, hub, wallet">
             <DCArtboard id="booking"  label="Booking summary"  width={PHONE_W} height={PHONE_H}>
               <BookingSummaryScreen />
             </DCArtboard>
@@ -126,6 +130,21 @@
             </DCArtboard>
             <DCArtboard id="wallet"   label="Wallet home"      width={PHONE_W} height={PHONE_H}>
               <WalletScreen />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens2" title="03 · Discovery & disputes" subtitle="Store profile, notifications, dispute lifecycle">
+            <DCArtboard id="store"          label="Store detail"       width={PHONE_W} height={PHONE_H}>
+              <StoreDetailScreen />
+            </DCArtboard>
+            <DCArtboard id="notifications"  label="Notification center" width={PHONE_W} height={PHONE_H}>
+              <NotificationsScreen />
+            </DCArtboard>
+            <DCArtboard id="dispute-detail" label="Dispute detail"      width={PHONE_W} height={PHONE_H}>
+              <DisputeDetailScreen />
+            </DCArtboard>
+            <DCArtboard id="dispute-create" label="File dispute"        width={PHONE_W} height={PHONE_H}>
+              <CreateDisputeScreen />
             </DCArtboard>
           </DCSection>
         </DesignCanvas>

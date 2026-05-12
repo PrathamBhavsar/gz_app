@@ -5,7 +5,7 @@ class ApiConstants {
 
   // ─── Base URLs ─────────────────────────────────────────────────────
   static const String prodBaseUrl = 'https://gz.api.splin.app';
-  static const String devBaseUrl = 'http://192.168.1.4:3000';
+  static const String devBaseUrl = 'http://192.168.1.2:3000';
 
   /// Active base URL — switch between prod/dev here (or wire to env config).
   static const String baseUrl = devBaseUrl;

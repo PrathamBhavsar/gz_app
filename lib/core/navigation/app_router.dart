@@ -24,8 +24,12 @@ import '../../features/booking/presentation/screens/system_selection/booking_sys
 import '../../features/booking/presentation/screens/summary/booking_summary_screen.dart';
 import '../../features/booking/presentation/screens/success/booking_success_screen.dart';
 import '../../features/sessions/presentation/screens/sessions_screen.dart';
+import '../../features/sessions/presentation/screens/active_session_screen.dart';
 import '../../features/wallet/presentation/screens/wallet_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
+import '../../features/disputes/presentation/screens/create_dispute_screen.dart';
+import '../../features/disputes/presentation/screens/dispute_detail_screen.dart';
 
 // Admin screens
 import '../../features/admin/presentation/screens/admin_login_screen.dart';
@@ -135,6 +139,25 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.storeSearch,
         builder: (context, state) => const StoreSearchScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.activeSession,
+        builder: (context, state) => const ActiveSessionScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.disputeCreate,
+        builder: (context, state) => const CreateDisputeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.disputeDetail,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return DisputeDetailScreen(id: id);
+        },
       ),
 
       // Admin App Shell

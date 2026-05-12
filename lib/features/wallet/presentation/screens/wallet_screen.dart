@@ -12,16 +12,10 @@ class WalletScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('My Wallet'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false, // Inside shell
-      ),
       body: ResponsiveBuilderWidget(
         builder: (context, deviceType) => switch (deviceType) {
-          DeviceType.mobile => const WalletMobileLayout(),
-          DeviceType.tablet => const WalletTabletLayout(),
+          DeviceType.mobile  => const WalletMobileLayout(),
+          DeviceType.tablet  => const WalletTabletLayout(),
           DeviceType.desktop => const WalletTabletLayout(),
         },
       ),

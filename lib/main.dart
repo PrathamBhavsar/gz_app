@@ -23,13 +23,17 @@ class GamingZoneApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         scaffoldBackgroundColor: AppColors.background,
-        colorScheme: const ColorScheme.dark(
-          primary: AppColors.primary,
+        colorScheme: ColorScheme.light(
+          primary: AppColors.buttonBg,
           surface: AppColors.surface,
-          error: AppColors.error,
+          error: AppColors.err,
+          onPrimary: AppColors.buttonFg,
+          onSurface: AppColors.textPrimary,
         ),
-        fontFamily: 'Inter', // Assuming Inter based on general-layout docs
+        fontFamily: 'Geist',
         useMaterial3: true,
+        splashFactory: NoSplash.splashFactory,
+        highlightColor: Colors.transparent,
       ),
       routerConfig: goRouter,
     );

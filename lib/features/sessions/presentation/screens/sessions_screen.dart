@@ -12,16 +12,10 @@ class SessionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('My Sessions'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false, // We're in a tab shell
-      ),
       body: ResponsiveBuilderWidget(
         builder: (context, deviceType) => switch (deviceType) {
-          DeviceType.mobile => const SessionsMobileLayout(),
-          DeviceType.tablet => const SessionsTabletLayout(),
+          DeviceType.mobile  => const SessionsMobileLayout(),
+          DeviceType.tablet  => const SessionsTabletLayout(),
           DeviceType.desktop => const SessionsTabletLayout(),
         },
       ),
