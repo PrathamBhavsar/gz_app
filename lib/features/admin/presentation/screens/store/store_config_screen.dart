@@ -64,9 +64,9 @@ class _StoreConfigScreenState extends ConsumerState<StoreConfigScreen> {
         ),
         title: Text('Store Config', style: AppTypography.headingSmall),
       ),
-      body: state is ManagementLoaded
+      body: state is ManagementLoaded<Map<String, dynamic>>
           ? _buildForm(state.data, isSuperAdmin)
-          : state is ManagementError
+          : state is ManagementError<Map<String, dynamic>>
               ? _buildError(state.error)
               : const Center(
                   child: CircularProgressIndicator(color: AppColors.rose),

@@ -120,7 +120,7 @@ class AdminLiveService {
     _reconnectTimer = null;
     await _subscription?.cancel();
     _subscription = null;
-    await _channel?.close();
+    await _channel?.sink.close();
     _channel = null;
     _connectionController.add(false);
   }

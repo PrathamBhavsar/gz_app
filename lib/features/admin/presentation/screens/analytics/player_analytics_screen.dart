@@ -64,7 +64,7 @@ class _PlayerAnalyticsScreenState
   }
 
   Widget _buildContent(AnalyticsState<PlayerAnalyticsModel> state) {
-    if (state is AnalyticsLoading) {
+    if (state is AnalyticsLoading<PlayerAnalyticsModel>) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.xxl),
@@ -73,11 +73,11 @@ class _PlayerAnalyticsScreenState
       );
     }
 
-    if (state is AnalyticsError) {
+    if (state is AnalyticsError<PlayerAnalyticsModel>) {
       return _buildError(state.error);
     }
 
-    if (state is AnalyticsLoaded) {
+    if (state is AnalyticsLoaded<PlayerAnalyticsModel>) {
       return _buildPlayerStats(state.data);
     }
 
@@ -159,7 +159,7 @@ class _PlayerAnalyticsScreenState
             _buildSegmentCard(
               'Top Minutes',
               '${_formatHours(topMinutes)}h',
-              HugeIcons.strokeRoundedTrophy,
+              HugeIcons.strokeRoundedStar,
               AppColors.gold,
             ),
           ],
@@ -177,7 +177,7 @@ class _PlayerAnalyticsScreenState
   Widget _buildSegmentCard(
     String label,
     String value,
-    IconData icon,
+    List<List<dynamic>> icon,
     Color iconColor,
   ) {
     return Expanded(

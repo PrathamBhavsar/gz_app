@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/services/admin_store_service.dart';
 import '../../../../core/network/connectivity_service.dart';
 import 'admin_auth_provider.dart';
+import 'admin_management_provider.dart' show ManagementState, ManagementInitial, ManagementLoading, ManagementLoaded, ManagementError;
 
-// Reuse ManagementState from management provider for consistency
+// Re-export for store screens that import this provider
 export 'admin_management_provider.dart' show ManagementState, ManagementInitial, ManagementLoading, ManagementLoaded, ManagementError;
 
 // ============================================================

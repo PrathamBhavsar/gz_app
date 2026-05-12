@@ -224,7 +224,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
           _buildKpiCard(
             'Occupancy',
             totalSystems > 0 ? '$inUseSystems/$totalSystems' : '--',
-            HugeIcons.strokeRoundedDashboard,
+            HugeIcons.strokeRoundedDashboardSpeed01,
             AppColors.rose,
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -249,7 +249,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   Widget _buildKpiCard(
     String label,
     String value,
-    IconData icon,
+    List<List<dynamic>> icon,
     Color iconColor,
   ) {
     return Expanded(
@@ -550,7 +550,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               Row(
                 children: [
                   const HugeIcon(
-                    icon: HugeIcons.strokeRoundedWrench,
+                    icon: HugeIcons.strokeRoundedWrench01,
                     color: AppColors.textSecondary,
                     size: 14,
                   ),

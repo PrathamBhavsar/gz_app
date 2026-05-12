@@ -7,8 +7,7 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_auth_provider.dart';
-import '../../data/services/admin_store_service.dart';
-
+import '../../../data/services/admin_store_service.dart';
 /// Admin Notifications — Screen 60.
 /// Broadcast console with channel/target selector.
 class AdminNotificationsScreen extends ConsumerStatefulWidget {
@@ -65,7 +64,7 @@ class _AdminNotificationsScreenState
                   child: Column(
                     children: [
                       const HugeIcon(
-                        icon: HugeIcons.strokeRoundedLock02,
+                        icon: HugeIcons.strokeRoundedLock,
                         color: AppColors.textSecondary,
                         size: 48,
                       ),

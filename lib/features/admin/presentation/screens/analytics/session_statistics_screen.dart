@@ -64,7 +64,7 @@ class _SessionStatisticsScreenState
   }
 
   Widget _buildContent(AnalyticsState<SessionStatsModel> state) {
-    if (state is AnalyticsLoading) {
+    if (state is AnalyticsLoading<SessionStatsModel>) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.xxl),
@@ -73,11 +73,11 @@ class _SessionStatisticsScreenState
       );
     }
 
-    if (state is AnalyticsError) {
+    if (state is AnalyticsError<SessionStatsModel>) {
       return _buildError(state.error);
     }
 
-    if (state is AnalyticsLoaded) {
+    if (state is AnalyticsLoaded<SessionStatsModel>) {
       return _buildStats(state.data);
     }
 
@@ -196,7 +196,7 @@ class _SessionStatisticsScreenState
   Widget _buildMetricTile(
     String label,
     String value,
-    IconData icon,
+    List<List<dynamic>> icon,
     Color iconColor,
   ) {
     return Expanded(

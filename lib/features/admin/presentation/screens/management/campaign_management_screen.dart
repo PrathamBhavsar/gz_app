@@ -66,7 +66,7 @@ class _CampaignManagementScreenState
   }
 
   Widget _buildContent(ManagementState<List<dynamic>> state, bool canEdit) {
-    if (state is ManagementLoading) {
+    if (state is ManagementLoading<List<dynamic>>) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.xxl),
@@ -75,11 +75,11 @@ class _CampaignManagementScreenState
       );
     }
 
-    if (state is ManagementError) {
+    if (state is ManagementError<List<dynamic>>) {
       return _buildError(state.error);
     }
 
-    if (state is ManagementLoaded) {
+    if (state is ManagementLoaded<List<dynamic>>) {
       final campaigns = state.data;
       if (campaigns.isEmpty) {
         return Center(

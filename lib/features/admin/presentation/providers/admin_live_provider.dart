@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/network/admin_live_service.dart';
-import '../../../core/auth/token_storage.dart';
-import '../../../core/api/api_client.dart';
-import '../../admin/presentation/providers/admin_auth_provider.dart';
+import '../../../../core/network/admin_live_service.dart';
+import '../../../../core/auth/token_storage.dart';
+import '../../../../core/api/api_client.dart';
+import 'admin_auth_provider.dart';
+import 'admin_auth_state.dart';
 
 /// Riverpod provider for [AdminLiveService].
 /// Lifecycle is tied to the admin session — connects when authenticated,

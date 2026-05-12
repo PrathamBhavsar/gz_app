@@ -101,7 +101,7 @@ class _CreditsManagementScreenState
   }
 
   Widget _buildContent(ManagementState<Map<String, dynamic>> state, bool canAdjust) {
-    if (state is ManagementLoading) {
+    if (state is ManagementLoading<Map<String, dynamic>>) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.xxl),
@@ -110,11 +110,11 @@ class _CreditsManagementScreenState
       );
     }
 
-    if (state is ManagementError) {
+    if (state is ManagementError<Map<String, dynamic>>) {
       return _buildError(state.error);
     }
 
-    if (state is ManagementLoaded) {
+    if (state is ManagementLoaded<Map<String, dynamic>>) {
       final balance = state.data['balance'] as Map<String, dynamic>?;
       final transactions = state.data['transactions'] as List<dynamic>?;
 

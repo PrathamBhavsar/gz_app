@@ -235,6 +235,7 @@ final campaignsProvider = NotifierProvider<CampaignsNotifier,
 
 class CreditsNotifier extends Notifier<ManagementState<Map<String, dynamic>>> {
   StreamSubscription<bool>? _connectivitySub;
+  String? _lastUserId;
 
   @override
   ManagementState<Map<String, dynamic>> build() {
@@ -242,13 +243,16 @@ class CreditsNotifier extends Notifier<ManagementState<Map<String, dynamic>>> {
         .read(connectivityServiceProvider)
         .onConnectivityChanged
         .listen((isConnected) {
-      if (isConnected && state is ManagementError) load();
+      if (isConnected && state is ManagementError && _lastUserId != null) {
+        load(userId: _lastUserId!);
+      }
     });
     ref.onDispose(() => _connectivitySub?.cancel());
     return const ManagementInitial();
   }
 
   Future<void> load({required String userId}) async {
+    _lastUserId = userId;
     final storeId = ref.read(adminStoreIdProvider);
     if (storeId == null) return;
 

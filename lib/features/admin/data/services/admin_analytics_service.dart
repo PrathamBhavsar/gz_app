@@ -25,7 +25,7 @@ class AdminAnalyticsService {
     String? dateTo,
   }) async {
     var endpoint = _withStoreId(ApiConstants.analyticsDashboard, storeId);
-    final params = <String, String>[];
+    final params = <String>[];
     if (dateFrom != null) params.add('dateFrom=$dateFrom');
     if (dateTo != null) params.add('dateTo=$dateTo');
     if (params.isNotEmpty) endpoint += '?${params.join('&')}';
@@ -44,7 +44,7 @@ class AdminAnalyticsService {
     String? groupBy,
   }) async {
     var endpoint = _withStoreId(ApiConstants.analyticsRevenue, storeId);
-    final params = <String, String>[];
+    final params = <String>[];
     if (dateFrom != null) params.add('dateFrom=$dateFrom');
     if (dateTo != null) params.add('dateTo=$dateTo');
     if (groupBy != null) params.add('groupBy=$groupBy');
@@ -63,7 +63,7 @@ class AdminAnalyticsService {
     String? dateTo,
   }) async {
     var endpoint = _withStoreId(ApiConstants.analyticsUtilization, storeId);
-    final params = <String, String>[];
+    final params = <String>[];
     if (dateFrom != null) params.add('dateFrom=$dateFrom');
     if (dateTo != null) params.add('dateTo=$dateTo');
     if (params.isNotEmpty) endpoint += '?${params.join('&')}';
@@ -82,7 +82,7 @@ class AdminAnalyticsService {
   }) async {
     var endpoint =
         _withStoreId(ApiConstants.analyticsSessionStats, storeId);
-    final params = <String, String>[];
+    final params = <String>[];
     if (dateFrom != null) params.add('dateFrom=$dateFrom');
     if (dateTo != null) params.add('dateTo=$dateTo');
     if (params.isNotEmpty) endpoint += '?${params.join('&')}';
@@ -100,7 +100,7 @@ class AdminAnalyticsService {
     String? dateTo,
   }) async {
     var endpoint = _withStoreId(ApiConstants.analyticsPlayers, storeId);
-    final params = <String, String>[];
+    final params = <String>[];
     if (dateFrom != null) params.add('dateFrom=$dateFrom');
     if (dateTo != null) params.add('dateTo=$dateTo');
     if (params.isNotEmpty) endpoint += '?${params.join('&')}';
@@ -119,7 +119,7 @@ class AdminAnalyticsService {
   }) async {
     var endpoint =
         _withStoreId(ApiConstants.analyticsSystemPerformance, storeId);
-    final params = <String, String>[];
+    final params = <String>[];
     if (dateFrom != null) params.add('dateFrom=$dateFrom');
     if (dateTo != null) params.add('dateTo=$dateTo');
     if (params.isNotEmpty) endpoint += '?${params.join('&')}';

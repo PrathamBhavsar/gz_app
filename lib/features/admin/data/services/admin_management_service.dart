@@ -88,7 +88,7 @@ class AdminManagementService {
     int? limit,
   }) async {
     var endpoint = _withStoreId(ApiConstants.billingLedger, storeId);
-    final params = <String, String>[];
+    final params = <String>[];
     if (status != null) params.add('status=$status');
     if (page != null) params.add('page=$page');
     if (limit != null) params.add('limit=$limit');

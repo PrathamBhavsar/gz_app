@@ -145,7 +145,7 @@ class AdminOperationsService {
     final endpoint = _withStoreId(ApiConstants.bookingsList, storeId);
     // Append query params if provided
     var url = endpoint;
-    final queryParams = <String, String>[];
+    final queryParams = <String>[];
     if (date != null) queryParams.add('date=$date');
     if (status != null) queryParams.add('status=$status');
     if (queryParams.isNotEmpty) {

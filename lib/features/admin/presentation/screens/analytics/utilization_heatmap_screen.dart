@@ -104,7 +104,7 @@ class _UtilizationHeatmapScreenState
   }
 
   Widget _buildContent(AnalyticsState<UtilizationModel> state) {
-    if (state is AnalyticsLoading) {
+    if (state is AnalyticsLoading<UtilizationModel>) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.xxl),
@@ -113,11 +113,11 @@ class _UtilizationHeatmapScreenState
       );
     }
 
-    if (state is AnalyticsError) {
+    if (state is AnalyticsError<UtilizationModel>) {
       return _buildError(state.error);
     }
 
-    if (state is AnalyticsLoaded) {
+    if (state is AnalyticsLoaded<UtilizationModel>) {
       return _buildHeatmap(state.data);
     }
 
@@ -302,7 +302,7 @@ class _UtilizationHeatmapScreenState
 
   int _maxPeakFromData() {
     final state = ref.read(utilizationProvider);
-    if (state is AnalyticsLoaded) {
+    if (state is AnalyticsLoaded<UtilizationModel>) {
       final hours = state.data.data ?? [];
       int max = 0;
       for (final h in hours) {

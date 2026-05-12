@@ -76,7 +76,7 @@ class _PricingRulesScreenState extends ConsumerState<PricingRulesScreen> {
   }
 
   Widget _buildContent(ManagementState<List<dynamic>> state, bool canEdit) {
-    if (state is ManagementLoading) {
+    if (state is ManagementLoading<List<dynamic>>) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.xxl),
@@ -85,11 +85,11 @@ class _PricingRulesScreenState extends ConsumerState<PricingRulesScreen> {
       );
     }
 
-    if (state is ManagementError) {
+    if (state is ManagementError<List<dynamic>>) {
       return _buildError(state.error);
     }
 
-    if (state is ManagementLoaded) {
+    if (state is ManagementLoaded<List<dynamic>>) {
       final rules = state.data;
       if (rules.isEmpty) {
         return Center(

@@ -59,15 +59,15 @@ class _StaffManagementScreenState
   }
 
   Widget _buildBody(ManagementState<List<dynamic>> state, bool isSuperAdmin) {
-    if (state is ManagementLoading) {
+    if (state is ManagementLoading<List<dynamic>>) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.rose),
       );
     }
-    if (state is ManagementError) {
+    if (state is ManagementError<List<dynamic>>) {
       return _buildError(state.error);
     }
-    if (state is ManagementLoaded) {
+    if (state is ManagementLoaded<List<dynamic>>) {
       final staff = state.data;
       if (staff.isEmpty) {
         return Center(

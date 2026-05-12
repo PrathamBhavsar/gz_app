@@ -190,7 +190,7 @@ class SessionDetailNotifier extends FamilyNotifier<SessionDetailState, String> {
   }
 }
 
-final sessionDetailProvider = FamilyNotifierProvider<SessionDetailNotifier,
+final sessionDetailProvider = NotifierProvider.family<SessionDetailNotifier,
     SessionDetailState, String>(SessionDetailNotifier.new);
 
 // ============================================================

@@ -109,7 +109,7 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
   }
 
   Widget _buildContent(AnalyticsState<AnalyticsDashboardModel> state, AdminPermissions perms) {
-    if (state is AnalyticsLoading) {
+    if (state is AnalyticsLoading<AnalyticsDashboardModel>) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.xxl),
@@ -118,11 +118,11 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
       );
     }
 
-    if (state is AnalyticsError) {
+    if (state is AnalyticsError<AnalyticsDashboardModel>) {
       return _buildError(state.error);
     }
 
-    if (state is AnalyticsLoaded) {
+    if (state is AnalyticsLoaded<AnalyticsDashboardModel>) {
       return _buildDashboard(state.data, perms);
     }
 
@@ -175,7 +175,7 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
           children: [
             if (canViewRevenue)
               _buildKpiCard('Revenue', '₹${data.totalRevenue ?? '--'}',
-                  HugeIcons.strokeRoundedCoin, AppColors.rose)
+                  HugeIcons.strokeRoundedCoinsDollar, AppColors.rose)
             else
               _buildKpiCard('Sessions', '${data.totalSessions ?? '--'}',
                   HugeIcons.strokeRoundedTimer01, AppColors.success),
@@ -194,7 +194,7 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
             _buildKpiCard(
               'Occupancy',
               '${data.occupancyRate ?? '--'}%',
-              HugeIcons.strokeRoundedDashboard,
+              HugeIcons.strokeRoundedDashboardSpeed01,
               const Color(0xFF2196F3),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -229,10 +229,10 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
         Text('Detailed Reports', style: AppTypography.headingSmall),
         const SizedBox(height: AppSpacing.md),
         if (canViewRevenue)
-          _buildNavTile('Revenue Analytics', HugeIcons.strokeRoundedCoin,
+          _buildNavTile('Revenue Analytics', HugeIcons.strokeRoundedCoinsDollar,
               AppRoutes.adminRevenue),
         _buildNavTile('Utilization Heatmap',
-            HugeIcons.strokeRoundedDashboard, AppRoutes.adminUtilization),
+            HugeIcons.strokeRoundedDashboardSpeed01, AppRoutes.adminUtilization),
         _buildNavTile('Session Statistics',
             HugeIcons.strokeRoundedTimer01, AppRoutes.adminSessionStats),
         _buildNavTile('Player Analytics', HugeIcons.strokeRoundedUserCircle,
@@ -246,7 +246,7 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
   Widget _buildKpiCard(
     String label,
     String value,
-    IconData icon,
+    List<List<dynamic>> icon,
     Color iconColor,
   ) {
     return Expanded(
@@ -283,7 +283,7 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
     );
   }
 
-  Widget _buildNavTile(String title, IconData icon, String route) {
+  Widget _buildNavTile(String title, List<List<dynamic>> icon, String route) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: GestureDetector(

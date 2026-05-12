@@ -107,7 +107,7 @@ class _RevenueAnalyticsScreenState
   }
 
   Widget _buildContent(AnalyticsState<RevenueAnalyticsModel> state) {
-    if (state is AnalyticsLoading) {
+    if (state is AnalyticsLoading<RevenueAnalyticsModel>) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.xxl),
@@ -116,11 +116,11 @@ class _RevenueAnalyticsScreenState
       );
     }
 
-    if (state is AnalyticsError) {
+    if (state is AnalyticsError<RevenueAnalyticsModel>) {
       return _buildError(state.error);
     }
 
-    if (state is AnalyticsLoaded) {
+    if (state is AnalyticsLoaded<RevenueAnalyticsModel>) {
       return _buildRevenueContent(state.data);
     }
 

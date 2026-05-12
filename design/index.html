@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GZ — Gaming Zone</title>
+
+  <link rel="stylesheet" href="src/tokens.css" />
+
+  <style>
+    html, body { margin: 0; padding: 0; background: #f0eee9; height: 100%; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+
+    /* tokens-card on canvas */
+    .gz-tokens {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+      padding: 28px; height: 100%;
+      font-family: 'Geist', system-ui, sans-serif;
+      color: var(--gz-fg); background: var(--gz-card);
+      box-sizing: border-box; overflow: hidden;
+    }
+    .gz-tokens h3 { margin: 0 0 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gz-fg-3); }
+    .swatch-row { display: flex; flex-direction: column; gap: 6px; }
+    .swatch { display: flex; align-items: center; gap: 10px; font-size: 11px; font-family: 'Geist Mono', monospace; color: var(--gz-fg-2); }
+    .swatch-tile { width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04); }
+    .type-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+    .type-row .lbl { font-size: 10px; font-family: 'Geist Mono', monospace; color: var(--gz-fg-3); width: 60px; flex-shrink: 0; }
+    .demo-card { background: var(--gz-card-tint); border-radius: 16px; padding: 12px; margin-top: 10px; font-size: 12px; }
+  </style>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="src/components.jsx"></script>
+  <script type="text/babel" src="src/screen-booking.jsx"></script>
+  <script type="text/babel" src="src/screen-session.jsx"></script>
+  <script type="text/babel" src="src/screen-activity.jsx"></script>
+  <script type="text/babel" src="src/screen-wallet.jsx"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const PHONE_W = 390;
+    const PHONE_H = 800;
+
+    function TokensArtboard() {
+      const swatch = (name, val) => (
+        <div className="swatch" key={name}>
+          <span className="swatch-tile" style={{ background: val }} />
+          <span style={{ minWidth: 80, color: 'var(--gz-fg)', fontWeight: 600 }}>{name}</span>
+          <span>{val}</span>
+        </div>
+      );
+      return (
+        <div className="gz-tokens">
+          <div>
+            <h3>Surfaces</h3>
+            <div className="swatch-row">
+              {swatch('bg',        '#F1F1EF')}
+              {swatch('card',      '#FFFFFF')}
+              {swatch('tint',      '#DDE9D2')}
+              {swatch('pill',      '#F4F4F1')}
+              {swatch('rule',      '#E4E4E0')}
+            </div>
+            <h3 style={{ marginTop: 22 }}>Text</h3>
+            <div className="swatch-row">
+              {swatch('fg',   '#0A0A0A')}
+              {swatch('fg-2', '#4C4C49')}
+              {swatch('fg-3', '#8A8A85')}
+              {swatch('fg-4', '#B5B5AF')}
+            </div>
+          </div>
+          <div>
+            <h3>Type</h3>
+            <div className="type-row"><span className="lbl">hero</span><span style={{ fontFamily: 'Geist Mono', fontSize: 32, fontWeight: 700, letterSpacing: '-0.04em' }}>1:37:04</span></div>
+            <div className="type-row"><span className="lbl">title</span><span style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.025em' }}>Wallet</span></div>
+            <div className="type-row"><span className="lbl">h2</span><span style={{ fontSize: 18, fontWeight: 600 }}>Apply campaign</span></div>
+            <div className="type-row"><span className="lbl">body</span><span style={{ fontSize: 14, fontWeight: 500 }}>Sat, 18 Apr · 4:00 PM</span></div>
+            <div className="type-row"><span className="lbl">meta</span><span style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gz-fg-3)' }}>BETBUILDER</span></div>
+
+            <h3 style={{ marginTop: 18 }}>Status & accent</h3>
+            <div className="swatch-row">
+              {swatch('ok',     '#DDEFD9')}
+              {swatch('warn',   '#F6E6C8')}
+              {swatch('err',    '#F2DAD5')}
+              {swatch('info',   '#DCE3F2')}
+              {swatch('purple', '#E5DCEE')}
+            </div>
+
+            <div className="demo-card">
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                <span className="gz-chip"><span className="gz-chip__k">O</span>1.91</span>
+                <span className="gz-chip"><span className="gz-chip__k">D</span>14.00</span>
+                <span className="gz-chip"><span className="gz-chip__k">B</span>2.09</span>
+              </div>
+              <div style={{ marginTop: 8, fontSize: 11, color: 'var(--gz-fg-3)' }}>
+                Chip pattern lifted from reference — applied as seat/odds-style metadata.
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      return (
+        <DesignCanvas>
+          <DCSection id="system" title="01 · Design system" subtitle="Tokens extracted from reference, mapped to a gaming-venue app">
+            <DCArtboard id="tokens" label="Tokens · type · chip pattern" width={620} height={PHONE_H}>
+              <TokensArtboard />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens" title="02 · Screens" subtitle="Same components, four contexts">
+            <DCArtboard id="booking"  label="Booking summary"  width={PHONE_W} height={PHONE_H}>
+              <BookingSummaryScreen />
+            </DCArtboard>
+            <DCArtboard id="session"  label="Active session"   width={PHONE_W} height={PHONE_H}>
+              <ActiveSessionScreen />
+            </DCArtboard>
+            <DCArtboard id="activity" label="Activity hub"     width={PHONE_W} height={PHONE_H}>
+              <ActivityHubScreen />
+            </DCArtboard>
+            <DCArtboard id="wallet"   label="Wallet home"      width={PHONE_W} height={PHONE_H}>
+              <WalletScreen />
+            </DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

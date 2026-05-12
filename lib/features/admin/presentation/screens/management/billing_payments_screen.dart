@@ -110,7 +110,7 @@ class _BillingPaymentsScreenState
 
   Widget _buildContent(
       ManagementState<List<dynamic>> state, bool isSuperAdmin) {
-    if (state is ManagementLoading) {
+    if (state is ManagementLoading<List<dynamic>>) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.xxl),
@@ -119,11 +119,11 @@ class _BillingPaymentsScreenState
       );
     }
 
-    if (state is ManagementError) {
+    if (state is ManagementError<List<dynamic>>) {
       return _buildError(state.error);
     }
 
-    if (state is ManagementLoaded) {
+    if (state is ManagementLoaded<List<dynamic>>) {
       final entries = state.data;
       if (entries.isEmpty) {
         return Center(

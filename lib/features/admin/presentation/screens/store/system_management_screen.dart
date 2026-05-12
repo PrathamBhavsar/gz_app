@@ -8,6 +8,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_store_provider.dart';
 import '../../providers/admin_auth_provider.dart';
+import '../../../data/services/admin_store_service.dart';
 
 /// System Management — Screen 57.
 /// Inventory management: system types tab + systems list, add system modal.
@@ -152,7 +153,7 @@ class _SystemManagementScreenState
   }
 
   Widget _buildSystemsList(ManagementState<List<dynamic>> state) {
-    if (state is ManagementLoading) {
+    if (state is ManagementLoading<List<dynamic>>) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.xxl),
@@ -160,10 +161,10 @@ class _SystemManagementScreenState
         ),
       );
     }
-    if (state is ManagementError) {
+    if (state is ManagementError<List<dynamic>>) {
       return _buildError(state.error, () => ref.read(systemsProvider.notifier).load());
     }
-    if (state is ManagementLoaded) {
+    if (state is ManagementLoaded<List<dynamic>>) {
       var systems = state.data;
       if (_platformFilter != null) {
         systems = systems
@@ -283,17 +284,17 @@ class _SystemManagementScreenState
         child: Column(
           children: [
             const SizedBox(height: AppSpacing.md),
-            if (state is ManagementLoading)
+            if (state is ManagementLoading<List<dynamic>>)
               const Center(
                 child: Padding(
                   padding: EdgeInsets.all(AppSpacing.xxl),
                   child: CircularProgressIndicator(color: AppColors.rose),
                 ),
               )
-            else if (state is ManagementError)
+            else if (state is ManagementError<List<dynamic>>)
               _buildError(state.error,
                   () => ref.read(systemTypesProvider.notifier).load())
-            else if (state is ManagementLoaded)
+            else if (state is ManagementLoaded<List<dynamic>>)
               ...state.data.map((t) =>
                   _buildTypeCard(t as Map<String, dynamic>)),
             const SizedBox(height: AppSpacing.xxl),

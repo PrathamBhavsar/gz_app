@@ -433,7 +433,7 @@ class _SessionManagementScreenState
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _buildActionButton(
-                icon: HugeIcons.strokeRoundedForward15Seconds,
+                icon: HugeIcons.strokeRoundedForward01,
                 label: 'Extend',
                 color: AppColors.textPrimary,
                 bgColor: AppColors.surface,
@@ -447,7 +447,7 @@ class _SessionManagementScreenState
   }
 
   Widget _buildActionButton({
-    required IconData icon,
+    required List<List<dynamic>> icon,
     required String label,
     required Color color,
     required Color bgColor,
