@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/errors/app_exception.dart';
@@ -123,13 +124,18 @@ class _GroupedList extends StatelessWidget {
               padding: 0,
               child: Column(
                 children: txList.asMap().entries.map((e) {
-                  return _TxRow(tx: e.value, first: e.key == 0);
+                  return _TxRow(tx: e.value, first: e.key == 0)
+                      .animate(delay: (e.key * 40).ms)
+                      .fadeIn(duration: 220.ms);
                 }).toList(),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
           ],
-        );
+        )
+            .animate(delay: (i * 60).ms)
+            .fadeIn(duration: 220.ms)
+            .slideY(begin: 0.04, end: 0, duration: 220.ms);
       },
     );
   }

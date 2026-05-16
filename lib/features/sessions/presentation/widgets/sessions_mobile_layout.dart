@@ -6,11 +6,14 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/navigation/routes.dart';
 import 'package:gz_app/features/notifications/presentation/widgets/notification_center_sheet.dart';
+import '../../../../shared/widgets/connectivity_banner.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../models/domain_systems.dart';
 import '../../../../models/enums.dart';
+import '../../../../shared/widgets/em_button.dart';
+import '../../../../shared/widgets/em_card.dart';
 import '../../../../shared/widgets/em_tag.dart';
 import '../../../../shared/widgets/em_chip.dart';
 import '../../../../shared/widgets/em_meta_row.dart';
@@ -35,14 +38,21 @@ class SessionsMobileLayout extends ConsumerWidget {
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Text('My games', style: AppTypography.title),
               Row(children: [
-                _IconBtn(icon: HugeIcons.strokeRoundedFilter, onTap: () {}),
+                _IconBtn(
+                  icon: HugeIcons.strokeRoundedFilter,
+                  onTap: () {},
+                  tooltip: 'Filter',
+                ),
                 _IconBtn(
                   icon: HugeIcons.strokeRoundedNotification01,
                   onTap: () => showNotificationCenter(context),
+                  tooltip: 'Notifications',
                 ),
               ]),
             ]),
           ),
+
+          const ConnectivityBanner(),
 
           // ── Tab bar ──
           Padding(
@@ -104,13 +114,17 @@ class SessionsMobileLayout extends ConsumerWidget {
                 error: AppPageError.from(e),
                 onRetry: () => ref.read(activityHubProvider.notifier).refresh(),
               ),
-              data: (data) => ListView(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.lg),
-                children: [
-                  if (s.tab == 'upcoming') ..._upcoming(context, n, data),
-                  if (s.tab == 'active')   ..._active(context, data),
-                  if (s.tab == 'history')  ..._history(context, s, n, data),
-                ],
+              data: (data) => RefreshIndicator(
+                onRefresh: () => ref.read(activityHubProvider.notifier).refresh(),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.lg),
+                  children: [
+                    if (s.tab == 'upcoming') ..._upcoming(context, n, data),
+                    if (s.tab == 'active')   ..._active(context, data),
+                    if (s.tab == 'history')  ..._history(context, s, n, data),
+                  ],
+                ),
               ),
             ),
           ),
@@ -161,42 +175,61 @@ class SessionsMobileLayout extends ConsumerWidget {
     }
 
     if (data.upcomingBookings.isEmpty && data.activeSession == null) {
-      // Empty state
       items.add(
-        Center(
-          child: Column(children: [
-            const SizedBox(height: AppSpacing.xl),
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.pillBg,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Center(child: HugeIcon(
-                icon: HugeIcons.strokeRoundedCalendar01,
-                color: AppColors.textTertiary,
-                size: 26,
-              )),
+        Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.lg),
+          child: EmCard(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    color: AppColors.pillBg,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedCalendar01,
+                    color: AppColors.textTertiary,
+                    size: 26,
+                  )),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text('No upcoming bookings', style: AppTypography.h2),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Book a slot to get started',
+                  style: AppTypography.bodyR,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                EmButtonFull(
+                  label: 'Book a slot',
+                  onPressed: () => context.go('/book'),
+                ),
+              ],
             ),
-            const SizedBox(height: 14),
-            Text('No upcoming bookings', style: AppTypography.h3),
-            const SizedBox(height: 4),
-            Text('Book a slot to get started', style: AppTypography.small),
-          ]).animate().fadeIn(duration: 300.ms),
+          ).animate().fadeIn(duration: 300.ms),
         ),
       );
     } else {
-      for (final booking in data.upcomingBookings) {
-        items.add(_BookingCard(
-          booking: booking,
-          onCardTap: () {
-            if (booking.id != null) {
-              final path = AppRoutes.bookingDetail.replaceAll(':id', booking.id!);
-              context.push(path);
-            }
-          },
-        ));
+      for (var i = 0; i < data.upcomingBookings.length; i++) {
+        final booking = data.upcomingBookings[i];
+        items.add(
+          _BookingCard(
+            booking: booking,
+            onCardTap: () {
+              if (booking.id != null) {
+                final path = AppRoutes.bookingDetail.replaceAll(':id', booking.id!);
+                context.push(path);
+              }
+            },
+          )
+              .animate(delay: (i * 60).ms)
+              .fadeIn(duration: 220.ms)
+              .slideY(begin: 0.05, end: 0, duration: 220.ms),
+        );
         items.add(const SizedBox(height: AppSpacing.sm + AppSpacing.xs));
       }
     }
@@ -208,27 +241,36 @@ class SessionsMobileLayout extends ConsumerWidget {
   List<Widget> _active(BuildContext context, ActivityHubData data) {
     if (data.activeSession == null && data.activeBooking == null) {
       return [
-        Center(
-          child: Column(children: [
-            const SizedBox(height: AppSpacing.xl),
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.pillBg,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Center(child: HugeIcon(
-                icon: HugeIcons.strokeRoundedGameController01,
-                color: AppColors.textTertiary,
-                size: 26,
-              )),
+        Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.lg),
+          child: EmCard(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    color: AppColors.pillBg,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedGameController01,
+                    color: AppColors.textTertiary,
+                    size: 26,
+                  )),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text('No active session', style: AppTypography.h2),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Check in to start playing',
+                  style: AppTypography.bodyR,
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            const SizedBox(height: 14),
-            Text('No active session', style: AppTypography.h3),
-            const SizedBox(height: 4),
-            Text('Check in to start playing', style: AppTypography.small),
-          ]).animate().fadeIn(duration: 300.ms),
+          ).animate().fadeIn(duration: 300.ms),
         ),
       ];
     }
@@ -295,27 +337,36 @@ class SessionsMobileLayout extends ConsumerWidget {
   ) {
     if (data.history.isEmpty) {
       return [
-        Center(
-          child: Column(children: [
-            const SizedBox(height: AppSpacing.xl),
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.pillBg,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Center(child: HugeIcon(
-                icon: HugeIcons.strokeRoundedClock01,
-                color: AppColors.textTertiary,
-                size: 26,
-              )),
+        Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.lg),
+          child: EmCard(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    color: AppColors.pillBg,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedClock01,
+                    color: AppColors.textTertiary,
+                    size: 26,
+                  )),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text('No activity yet', style: AppTypography.h2),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Completed sessions will appear here',
+                  style: AppTypography.bodyR,
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            const SizedBox(height: 14),
-            Text('No history yet', style: AppTypography.h3),
-            const SizedBox(height: 4),
-            Text('Completed sessions will appear here', style: AppTypography.small),
-          ]).animate().fadeIn(duration: 300.ms),
+          ).animate().fadeIn(duration: 300.ms),
         ),
       ];
     }
@@ -656,20 +707,27 @@ class _HistoryRow extends StatelessWidget {
 }
 
 class _IconBtn extends StatelessWidget {
-  const _IconBtn({required this.icon, required this.onTap});
+  const _IconBtn({required this.icon, required this.onTap, this.tooltip});
 
   final List<List<dynamic>> icon;
   final VoidCallback onTap;
+  final String? tooltip;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: SizedBox(
-      width: 38,
-      height: 38,
-      child: Center(
-        child: HugeIcon(icon: icon, color: AppColors.textPrimary, size: 22),
+  Widget build(BuildContext context) {
+    Widget btn = GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 38,
+        height: 38,
+        child: Center(
+          child: HugeIcon(icon: icon, color: AppColors.textPrimary, size: 22),
+        ),
       ),
-    ),
-  );
+    );
+    if (tooltip != null) {
+      btn = Tooltip(message: tooltip!, child: btn);
+    }
+    return btn;
+  }
 }

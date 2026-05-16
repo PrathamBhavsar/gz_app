@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -7,7 +8,9 @@ import '../../../../../core/theme/app_colors.dart';
 import 'package:gz_app/features/notifications/presentation/widgets/notification_center_sheet.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../shared/widgets/connectivity_banner.dart';
 import '../../../../../shared/widgets/em_avatar.dart';
+import '../../../../../shared/widgets/em_button.dart';
 import '../../../../../shared/widgets/em_card.dart';
 import '../../../../../shared/widgets/em_gz_logo.dart';
 import '../../../../../shared/widgets/em_icon_btn.dart';
@@ -53,31 +56,36 @@ class HomeMobileLayout extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          GestureDetector(
-            onTap: () => context.push(AppRoutes.storeSearch),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: EmCard(
-                variant: CardVariant.base,
-                padding: AppSpacing.sm + AppSpacing.xs,
-                child: Row(
-                  children: [
-                    const HugeIcon(
-                      icon: HugeIcons.strokeRoundedSearch01,
-                      color: AppColors.textTertiary,
-                      size: 18,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Text(
-                      'Search gaming stores...',
-                      style: AppTypography.bodyR,
-                    ),
-                  ],
+          Semantics(
+            label: 'Search gaming stores',
+            button: true,
+            child: GestureDetector(
+              onTap: () => context.push(AppRoutes.storeSearch),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                child: EmCard(
+                  variant: CardVariant.base,
+                  padding: AppSpacing.sm + AppSpacing.xs,
+                  child: Row(
+                    children: [
+                      const HugeIcon(
+                        icon: HugeIcons.strokeRoundedSearch01,
+                        color: AppColors.textTertiary,
+                        size: 18,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        'Search gaming stores...',
+                        style: AppTypography.bodyR,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const ConnectivityBanner(),
+          const SizedBox(height: AppSpacing.sm),
           homeState.when(
             loading: () => const Expanded(
               child: Center(child: CircularProgressIndicator()),
@@ -91,70 +99,102 @@ class HomeMobileLayout extends ConsumerWidget {
                 ),
               ),
             ),
-            data: (data) => EmScrollContent(
-              padded: false,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md),
-                    child: EmSectionHead(
-                      'Nearby stores',
-                      subtitle: '${data.stores.length} within 10km',
-                    ),
-                  ),
-                  if (data.stores.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md),
-                      child: EmCard(
-                        variant: CardVariant.inset,
-                        child: Center(
-                          child: Text(
-                            'No stores nearby. Pull to refresh.',
-                            style: AppTypography.bodyR,
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    SizedBox(
-                      height: 188,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
+            data: (data) => Expanded(
+              child: RefreshIndicator(
+                onRefresh: () =>
+                    ref.read(homeNotifierProvider.notifier).refresh(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: AppSpacing.md),
-                        itemCount: data.stores.length,
-                        itemBuilder: (_, i) => _StoreCardLg(
-                          store: data.stores[i],
-                          onTap: () => context
-                              .push('/home/store/${data.stores[i].slug}'),
+                        child: EmSectionHead(
+                          'Nearby stores',
+                          subtitle: '${data.stores.length} within 10km',
                         ),
                       ),
-                    ),
-                  const SizedBox(height: AppSpacing.lg),
-                  if (data.stores.isNotEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md),
-                      child: EmSectionHead(
-                        'New in your city',
-                        subtitle: '${data.stores.length} stores',
-                      ),
-                    ),
-                    ...List.generate(
-                      data.stores.length.clamp(0, 5),
-                      (i) => _NewStoreRow(
-                        store: data.stores[i],
-                        index: i,
-                        onTap: () => context
-                            .push('/home/store/${data.stores[i].slug}'),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: AppSpacing.xl),
-                ],
+                      if (data.stores.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md),
+                          child: EmCard(
+                            variant: CardVariant.inset,
+                            child: Column(
+                              children: [
+                                EmAvatar(
+                                  icon: const HugeIcon(
+                                    icon: HugeIcons.strokeRoundedStore01,
+                                    color: AppColors.textTertiary,
+                                    size: 24,
+                                  ),
+                                  size: AvatarSize.xl,
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                Text(
+                                  'No stores nearby',
+                                  style: AppTypography.h2,
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: AppSpacing.xs),
+                                Text(
+                                  'Pull to refresh and try again',
+                                  style: AppTypography.bodyR,
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                EmButtonFull(
+                                  label: 'Refresh',
+                                  onPressed: () => ref
+                                      .read(homeNotifierProvider.notifier)
+                                      .refresh(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      else
+                        SizedBox(
+                          height: 188,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.md),
+                            itemCount: data.stores.length,
+                            itemBuilder: (_, i) => _StoreCardLg(
+                              store: data.stores[i],
+                              index: i,
+                              onTap: () => context
+                                  .push('/home/store/${data.stores[i].slug}'),
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: AppSpacing.lg),
+                      if (data.stores.isNotEmpty) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md),
+                          child: EmSectionHead(
+                            'New in your city',
+                            subtitle: '${data.stores.length} stores',
+                          ),
+                        ),
+                        ...List.generate(
+                          data.stores.length.clamp(0, 5),
+                          (i) => _NewStoreRow(
+                            store: data.stores[i],
+                            index: i,
+                            onTap: () => context
+                                .push('/home/store/${data.stores[i].slug}'),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.xl),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -165,9 +205,14 @@ class HomeMobileLayout extends ConsumerWidget {
 }
 
 class _StoreCardLg extends StatelessWidget {
-  const _StoreCardLg({required this.store, required this.onTap});
+  const _StoreCardLg({
+    required this.store,
+    required this.index,
+    required this.onTap,
+  });
 
   final StoreModel store;
+  final int index;
   final VoidCallback onTap;
 
   @override
@@ -229,7 +274,10 @@ class _StoreCardLg extends StatelessWidget {
           ),
         ),
       ),
-    );
+    )
+        .animate(delay: (index * 60).ms)
+        .fadeIn(duration: 220.ms)
+        .slideX(begin: 0.04, end: 0, duration: 220.ms);
   }
 }
 
@@ -289,6 +337,9 @@ class _NewStoreRow extends StatelessWidget {
           ),
         ),
       ),
-    );
+    )
+        .animate(delay: (index * 60).ms)
+        .fadeIn(duration: 220.ms)
+        .slideY(begin: 0.05, end: 0, duration: 220.ms);
   }
 }

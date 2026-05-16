@@ -9,6 +9,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../models/domain_systems.dart';
 import '../../../../../models/enums.dart';
+import '../../../../../shared/widgets/connectivity_banner.dart';
 import '../../../../../shared/widgets/em_button.dart';
 import '../../../../../shared/widgets/em_store_selector_pill.dart';
 import '../../../../../shared/widgets/em_tag.dart';
@@ -103,6 +104,7 @@ class BookingSlotSelectionMobileLayout extends ConsumerWidget {
         ),
 
         const SizedBox(height: AppSpacing.sm),
+        const ConnectivityBanner(),
         const Divider(height: 1, color: AppColors.divider),
 
         // ── Systems list ──

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -99,7 +100,10 @@ class NotificationCenterContent extends ConsumerWidget {
                     ref,
                     data.items[i],
                   ),
-                ),
+                )
+                    .animate(delay: (i * 40).ms)
+                    .fadeIn(duration: 220.ms)
+                    .slideY(begin: 0.04, end: 0, duration: 220.ms),
               ),
       ),
     );

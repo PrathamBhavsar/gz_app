@@ -6,6 +6,7 @@ import '../../../../core/auth/token_storage.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/navigation/routes.dart';
 import 'package:gz_app/features/notifications/presentation/widgets/notification_center_sheet.dart';
+import 'package:gz_app/shared/widgets/connectivity_banner.dart';
 import 'package:gz_app/shared/widgets/store_selector_sheet.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -45,6 +46,7 @@ class WalletMobileLayout extends ConsumerWidget {
               children: [
                 const Text('Wallet', style: AppTypography.title),
                 EmIconBtn(
+                  tooltip: 'Notifications',
                   onTap: () => showNotificationCenter(context),
                   child: const HugeIcon(
                     icon: HugeIcons.strokeRoundedNotification01,
@@ -66,6 +68,7 @@ class WalletMobileLayout extends ConsumerWidget {
             ),
           ),
 
+          const ConnectivityBanner(),
           if (storeId == null)
             Expanded(
               child: Center(

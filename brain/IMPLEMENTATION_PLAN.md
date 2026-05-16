@@ -29,7 +29,7 @@ feature touched, and commit.
 | 7 | Profile + Settings (S-31 → S-37) | DONE |
 | 8 | Global Overlays (O-38, O-39, O-40, OTP sheet) | DONE |
 | 9 | Routes — complete AppRoutes + auth guard | DONE |
-| 10 | Polish — empty states, deep links, error surfaces | TODO |
+| 10 | Polish — empty states, deep links, error surfaces | DONE |
 
 ---
 
@@ -917,7 +917,10 @@ Update `brain/rules/navigation.md` with all new route constants (append section)
 
 ---
 
-## Phase 10 — Polish
+## Phase 10 — Polish ✓ DONE (2026-05-16)
+
+> **Completed**: `ConnectivityBanner` shared widget created (watches `connectivityStreamProvider`, shows slim errBg banner when offline). Empty states upgraded on S-11, S-12, S-19 (all 3 tabs), S-25 — all now use EmCard + icon container + h2 title + bodyR description, with Book CTA on upcoming tab. S-12 store search error state upgraded from raw EmCard to `PageErrorDisplay`. `RefreshIndicator` added to S-11 (replaced EmScrollContent for data case), S-19 activity hub, S-35 disputes list. ConnectivityBanner added to S-11, S-14, S-19, S-26. Entrance animations (fadeIn 220ms + slideY 0.05, staggered 60ms per item) added to: S-11 store cards and new-store rows, S-12 search results, S-19 booking cards, S-25 billing rows, S-27 credit tx rows, S-29 campaign cards, O-38 notification rows. Accessibility: `EmIconBtn tooltip` added to wallet bell, session filter/bell icons; `_IconBtn` in sessions upgraded with tooltip param; home search bar wrapped in `Semantics`. Registry at `brain/features/.registry/polish.md`.
+> **Deferred**: Deep-link path-parameter routing (e.g. `gzapp://bookings/:id` → overlay from push notification) and WS session.ended/session.extended event dispatch — both deferred from Phase 9, require app-level testing harness. Connectivity banner not added to S-27/S-29/S-35 (lower priority, no live auto-refresh). Sessions-inactive tab shows live-session banner without RefreshIndicator on that tab (active data always fresh).
 
 ### Deliverables
 

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../models/api_responses.dart';
+import '../../../../shared/widgets/em_card.dart';
 import '../../../../shared/widgets/em_section_head.dart';
 import '../../../../shared/widgets/em_tag.dart';
 import '../../../../shared/widgets/em_top_bar.dart';
@@ -31,19 +34,7 @@ class BillingHistoryMobileLayout extends ConsumerWidget {
                     ref.read(billingNotifierProvider.notifier).refresh(),
               ),
               data: (rows) => rows.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('No billing history yet', style: AppTypography.h3),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Completed sessions will appear here',
-                            style: AppTypography.small,
-                          ),
-                        ],
-                      ),
-                    )
+                  ? const _EmptyState()
                   : _BillingList(rows: rows),
             ),
           ),
@@ -96,10 +87,58 @@ class _BillingList extends StatelessWidget {
             entry.key,
             subtitle: 'Total ₹${_monthTotal(entry.value).toStringAsFixed(2)}',
           ),
-          ...entry.value.map((row) => _BillingRowWidget(row: row)),
+          ...entry.value.asMap().entries.map(
+                (e) => _BillingRowWidget(row: e.value)
+                    .animate(delay: (e.key * 60).ms)
+                    .fadeIn(duration: 220.ms)
+                    .slideY(begin: 0.05, end: 0, duration: 220.ms),
+              ),
           const SizedBox(height: AppSpacing.sm),
         ],
       ],
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: EmCard(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: const BoxDecoration(
+                  color: AppColors.pillBg,
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedCoins01,
+                    color: AppColors.textTertiary,
+                    size: 24,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              const Text('No billing records', style: AppTypography.h2),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Completed session bills will appear here',
+                style: AppTypography.bodyR,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

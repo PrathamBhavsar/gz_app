@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../../core/errors/app_exception.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/em_avatar.dart';
 import '../../../../../shared/widgets/em_card.dart';
 import '../../../../../shared/widgets/em_tag.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
 import '../providers/store_search_notifier.dart';
 
 const _filters = ['All', 'PC', 'PS5', 'VR', 'Xbox', 'Open Now'];
@@ -121,31 +124,25 @@ class StoreSearchMobileLayout extends ConsumerWidget {
           const Divider(height: 1, color: AppColors.divider),
           // Results
           Expanded(
-            child: _buildBody(context, searchState),
+            child: _buildBody(context, ref, searchState),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context, StoreSearchState state) {
+  Widget _buildBody(
+      BuildContext context, WidgetRef ref, StoreSearchState state) {
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (state.error != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: EmCard(
-            variant: CardVariant.inset,
-            child: Text(
-              'Something went wrong. Try again.',
-              style: AppTypography.bodyR,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
+      return PageErrorDisplay(
+        error: AppPageError.from(Exception(state.error)),
+        onRetry: () => ref
+            .read(storeSearchProvider.notifier)
+            .search(state.selectedFilter),
       );
     }
 
@@ -154,11 +151,33 @@ class StoreSearchMobileLayout extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: EmCard(
-            variant: CardVariant.inset,
-            child: Text(
-              'No stores found',
-              style: AppTypography.bodyR,
-              textAlign: TextAlign.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    color: AppColors.pillBg,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedSearch01,
+                      color: AppColors.textTertiary,
+                      size: 24,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                const Text('No stores found', style: AppTypography.h2),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Try a different name or filter',
+                  style: AppTypography.bodyR,
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
         ),
@@ -213,7 +232,10 @@ class StoreSearchMobileLayout extends ConsumerWidget {
               ),
             ),
           ),
-        );
+        )
+            .animate(delay: (i * 60).ms)
+            .fadeIn(duration: 220.ms)
+            .slideY(begin: 0.05, end: 0, duration: 220.ms);
       },
     );
   }

@@ -97,17 +97,21 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-class _DisputesList extends StatelessWidget {
+class _DisputesList extends ConsumerWidget {
   const _DisputesList({required this.disputes});
   final List<BillingDisputeModel> disputes;
 
   @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      itemCount: disputes.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-      itemBuilder: (ctx, i) => _DisputeRow(dispute: disputes[i]),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return RefreshIndicator(
+      onRefresh: () => ref.read(disputesListProvider.notifier).refresh(),
+      child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(AppSpacing.md),
+        itemCount: disputes.length,
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+        itemBuilder: (ctx, i) => _DisputeRow(dispute: disputes[i]),
+      ),
     );
   }
 }
