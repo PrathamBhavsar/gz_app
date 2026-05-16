@@ -5,8 +5,8 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/gz_top_bar.dart';
-import '../../../../shared/widgets/gz_meta_row.dart';
+import '../../../../shared/widgets/em_top_bar.dart';
+import '../../../../shared/widgets/em_meta_row.dart';
 import '../providers/create_dispute_notifier.dart';
 
 class CreateDisputeMobileLayout extends ConsumerWidget {
@@ -35,7 +35,7 @@ class _EditingView extends ConsumerWidget {
 
     return Column(
       children: [
-        const GzTopBar(title: 'File a dispute', subtitle: 'We\'ve got you'),
+        const EmTopBar(title: 'File a dispute', subtitle: 'We\'ve got you'),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.md),
@@ -243,10 +243,10 @@ class _EditingView extends ConsumerWidget {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('SUMMARY PREVIEW', style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
                   const SizedBox(height: 10),
-                  GzMetaRow(label: 'Session', value: state.session.label.split(' · ').first),
-                  GzMetaRow(label: 'Store',   value: state.session.label.split(' · ').elementAtOrNull(1) ?? '—'),
-                  GzMetaRow(label: 'System',  value: state.session.label.split(' · ').elementAtOrNull(2) ?? '—'),
-                  GzMetaRow(label: 'Disputing', value: '₹${state.amount} of ₹${state.session.amt}'),
+                  EmMetaRow(label: 'Session', value: state.session.label.split(' · ').first),
+                  EmMetaRow(label: 'Store',   value: state.session.label.split(' · ').elementAtOrNull(1) ?? '—'),
+                  EmMetaRow(label: 'System',  value: state.session.label.split(' · ').elementAtOrNull(2) ?? '—'),
+                  EmMetaRow(label: 'Disputing', value: '₹${state.amount} of ₹${state.session.amt}'),
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
@@ -325,7 +325,7 @@ class _SuccessView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      const GzTopBar(title: 'Submitted'),
+      const EmTopBar(title: 'Submitted'),
       Expanded(
         child: Center(
           child: Padding(

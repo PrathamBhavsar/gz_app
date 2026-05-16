@@ -4,7 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/gz_tag.dart';
+import '../../../../shared/widgets/em_tag.dart';
 import '../providers/notifications_notifier.dart';
 
 class NotificationsMobileLayout extends ConsumerWidget {
@@ -20,13 +20,13 @@ class NotificationsMobileLayout extends ConsumerWidget {
     _       => HugeIcons.strokeRoundedClock01,
   };
 
-  static GzTagKind _kindFor(String k) => switch (k) {
-    'ok'     => GzTagKind.ok,
-    'warn'   => GzTagKind.warn,
-    'err'    => GzTagKind.err,
-    'info'   => GzTagKind.info,
-    'purple' => GzTagKind.purple,
-    _        => GzTagKind.mute,
+  static EmTagKind _kindFor(String k) => switch (k) {
+    'ok'     => EmTagKind.ok,
+    'warn'   => EmTagKind.warn,
+    'err'    => EmTagKind.err,
+    'info'   => EmTagKind.info,
+    'purple' => EmTagKind.purple,
+    _        => EmTagKind.mute,
   };
 
   static ({Color bg, Color fg}) _palette(String kind) {
@@ -74,8 +74,8 @@ class NotificationsMobileLayout extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm + AppSpacing.xs, AppSpacing.md, AppSpacing.sm + AppSpacing.xs),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: GzTag(
-                kind: unread > 0 ? GzTagKind.info : GzTagKind.mute,
+              child: EmTag(
+                kind: unread > 0 ? EmTagKind.info : EmTagKind.mute,
                 label: '$unread unread',
               ),
             ),

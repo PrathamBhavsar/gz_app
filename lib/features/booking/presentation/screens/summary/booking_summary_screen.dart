@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/responsive/breakpoints.dart';
 import '../../../../../core/responsive/responsive_builder.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../../shared/widgets/em_top_bar.dart';
 import '../../widgets/booking_summary_mobile_layout.dart';
 import '../../widgets/booking_summary_tablet_layout.dart';
 

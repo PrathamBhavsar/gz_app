@@ -20,7 +20,7 @@ feature touched, and commit.
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 1 | Foundation — AppTheme + em_ widget library | TODO |
+| 1 | Foundation — AppTheme + em_ widget library | DONE |
 | 2 | Splash + Onboarding | TODO |
 | 3 | Home feature (S-11, S-12, S-13) | TODO |
 | 4 | Booking flow (S-14 → S-18) | TODO |
@@ -33,7 +33,10 @@ feature touched, and commit.
 
 ---
 
-## Phase 1 — Foundation
+## Phase 1 — Foundation ✓ DONE (2026-05-16)
+
+> **Completed**: AppTheme.light created + wired in main.dart. All 7 gz_ widgets renamed to em_ (shims kept for backward compat). 9 new em_ widgets added: EmAvatar, EmCard, EmIconBtn, EmCollapse, EmSectionHead, EmScrollContent, EmBottomNav (extracted from MainMobileLayout), EmStoreSelectorPill, EmGzLogo. All usage sites updated to import em_ files. Registry at brain/features/.registry/shared_widgets.md.
+> **Deferred**: Nothing — all Phase 1 deliverables complete.
 
 ### Goal
 Unblocks all subsequent phases. No screen code yet.

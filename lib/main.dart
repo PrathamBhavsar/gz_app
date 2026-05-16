@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/navigation/app_router.dart';
-import 'core/theme/app_colors.dart';
+import 'core/theme/app_theme.dart';
 
 void main() {
   runApp(
@@ -21,20 +21,7 @@ class GamingZoneApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Gaming Zone',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: AppColors.background,
-        colorScheme: ColorScheme.light(
-          primary: AppColors.buttonBg,
-          surface: AppColors.surface,
-          error: AppColors.err,
-          onPrimary: AppColors.buttonFg,
-          onSurface: AppColors.textPrimary,
-        ),
-        fontFamily: 'Geist',
-        useMaterial3: true,
-        splashFactory: NoSplash.splashFactory,
-        highlightColor: Colors.transparent,
-      ),
+      theme: AppTheme.light,
       routerConfig: goRouter,
     );
   }

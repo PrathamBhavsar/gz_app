@@ -4,9 +4,9 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/gz_top_bar.dart';
-import '../../../../shared/widgets/gz_meta_row.dart';
-import '../../../../shared/widgets/gz_chip.dart';
+import '../../../../shared/widgets/em_top_bar.dart';
+import '../../../../shared/widgets/em_meta_row.dart';
+import '../../../../shared/widgets/em_chip.dart';
 import '../providers/dispute_detail_notifier.dart';
 
 class DisputeDetailMobileLayout extends ConsumerWidget {
@@ -22,7 +22,7 @@ class DisputeDetailMobileLayout extends ConsumerWidget {
       children: [
         Column(
           children: [
-            GzTopBar(
+            EmTopBar(
               title: 'Dispute',
               subtitle: '#DIS-0042',
               trailing: const HugeIcon(
@@ -109,9 +109,9 @@ class DisputeDetailMobileLayout extends ConsumerWidget {
                       ]),
                       const SizedBox(height: 14),
                       Wrap(spacing: 6, runSpacing: 6, children: const [
-                        GzChip(keyLabel: 'WHEN', value: '18 Apr · 2h'),
-                        GzChip(keyLabel: 'PAID', value: '₹160'),
-                        GzChip(keyLabel: 'VIA',  value: 'UPI'),
+                        EmChip(keyLabel: 'WHEN', value: '18 Apr · 2h'),
+                        EmChip(keyLabel: 'PAID', value: '₹160'),
+                        EmChip(keyLabel: 'VIA',  value: 'UPI'),
                       ]),
                     ]),
                   ),
@@ -122,7 +122,7 @@ class DisputeDetailMobileLayout extends ConsumerWidget {
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text('AMOUNT IN DISPUTE', style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
                       const SizedBox(height: 12),
-                      const GzMetaRow(label: 'Original charge', value: '₹160'),
+                      const EmMetaRow(label: 'Original charge', value: '₹160'),
                       const SizedBox(height: 6),
                       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                         Text('Amount disputed', style: AppTypography.bodyR),

@@ -4,9 +4,9 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/gz_tag.dart';
-import '../../../../shared/widgets/gz_chip.dart';
-import '../../../../shared/widgets/gz_progress_bar.dart';
+import '../../../../shared/widgets/em_tag.dart';
+import '../../../../shared/widgets/em_chip.dart';
+import '../../../../shared/widgets/em_progress_bar.dart';
 import '../providers/wallet_ui_notifier.dart';
 
 // ── Store data (mock) ─────────────────────────────────────────────────────────
@@ -164,7 +164,7 @@ class WalletMobileLayout extends ConsumerWidget {
                         _CampCard(
                           title: 'Happy Hour',
                           sub: '30% off · Mon–Fri 10am–2pm',
-                          tag: const GzTag(kind: GzTagKind.ok, label: 'Eligible'),
+                          tag: const EmTag(kind: EmTagKind.ok, label: 'Eligible'),
                           footer: const Text('Ends 30 Apr', style: TextStyle(fontSize: 12)),
                           onTap: () => n.openCampDetail('Happy Hour'),
                         ),
@@ -172,9 +172,9 @@ class WalletMobileLayout extends ConsumerWidget {
                         _CampCard(
                           title: 'Double credits',
                           sub: 'Earn 2× credits this weekend',
-                          tag: const GzTag(kind: GzTagKind.warn, label: 'Limited'),
+                          tag: const EmTag(kind: EmTagKind.warn, label: 'Limited'),
                           footer: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
-                            GzProgressBar(value: 0.847, height: 4, fillColor: AppColors.warn),
+                            EmProgressBar(value: 0.847, height: 4, fillColor: AppColors.warn),
                             SizedBox(height: 5),
                             Text('847 / 1000 redeemed', style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
                           ]),
@@ -184,7 +184,7 @@ class WalletMobileLayout extends ConsumerWidget {
                         _CampCard(
                           title: 'Refer a friend',
                           sub: 'Get 500 credits per referral',
-                          tag: const GzTag(kind: GzTagKind.purple, label: 'New'),
+                          tag: const EmTag(kind: EmTagKind.purple, label: 'New'),
                           footer: Text('Share invite link →', style: AppTypography.small.copyWith(decoration: TextDecoration.underline)),
                           onTap: () => n.openCampDetail('Refer a Friend'),
                         ),
@@ -309,7 +309,7 @@ class WalletMobileLayout extends ConsumerWidget {
                     border: e.key == 0 ? null : Border(top: BorderSide(color: AppColors.rule)),
                   ),
                   child: Row(children: [
-                    GzChip(value: e.value.$1),
+                    EmChip(value: e.value.$1),
                     const SizedBox(width: 14),
                     Expanded(child: Text(e.value.$2, style: AppTypography.body)),
                   ]),

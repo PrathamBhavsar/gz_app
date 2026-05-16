@@ -4,9 +4,9 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/gz_tag.dart';
-import '../../../../shared/widgets/gz_top_bar.dart';
-import '../../../../shared/widgets/gz_meta_row.dart';
+import '../../../../shared/widgets/em_tag.dart';
+import '../../../../shared/widgets/em_top_bar.dart';
+import '../../../../shared/widgets/em_meta_row.dart';
 import '../providers/booking_summary_ui_notifier.dart';
 
 class BookingSummaryMobileLayout extends ConsumerWidget {
@@ -32,7 +32,7 @@ class BookingSummaryMobileLayout extends ConsumerWidget {
 
     return Column(
       children: [
-        GzTopBar(
+        EmTopBar(
           title: 'Confirm booking',
           subtitle: 'GameZone · Koramangala',
           trailing: const HugeIcon(
@@ -78,10 +78,10 @@ class BookingSummaryMobileLayout extends ConsumerWidget {
               _GzCard(child: Column(children: [
                 Align(alignment: Alignment.centerLeft, child: Text('BASE', style: AppTypography.meta)),
                 const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-                const GzMetaRow(label: '₹80/hr × 2 hrs', value: '₹160'),
-                const GzMetaRow(label: 'Peak hour surcharge', value: '+ ₹20'),
+                const EmMetaRow(label: '₹80/hr × 2 hrs', value: '₹160'),
+                const EmMetaRow(label: 'Peak hour surcharge', value: '+ ₹20'),
                 const _HRule(),
-                GzMetaRow(label: 'Subtotal', value: '₹$_subtotal'),
+                EmMetaRow(label: 'Subtotal', value: '₹$_subtotal'),
               ])),
               const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
 
@@ -90,23 +90,23 @@ class BookingSummaryMobileLayout extends ConsumerWidget {
                 title: 'Apply campaign',
                 open: s.campOpen,
                 onToggle: n.toggleCampSection,
-                badge: campAmt > 0 ? GzTag(kind: GzTagKind.ok, label: '−₹$campAmt') : null,
+                badge: campAmt > 0 ? EmTag(kind: EmTagKind.ok, label: '−₹$campAmt') : null,
                 emptyBadge: 'Optional',
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(children: [
                     _CampaignCard(title: 'Happy Hour', sub: '30% off · Mon–Fri 10–2',
-                      tag: const GzTag(kind: GzTagKind.ok, label: 'Eligible'),
+                      tag: const EmTag(kind: EmTagKind.ok, label: 'Eligible'),
                       selected: s.selectedCampaign == 'happy',
                       onTap: () => n.toggleCampaign('happy')),
                     const SizedBox(width: AppSpacing.sm),
                     _CampaignCard(title: 'First Visit Bonus', sub: '200 credits awarded',
-                      tag: const GzTag(kind: GzTagKind.info, label: 'Applied'),
+                      tag: const EmTag(kind: EmTagKind.info, label: 'Applied'),
                       selected: s.selectedCampaign == 'first',
                       onTap: () => n.toggleCampaign('first')),
                     const SizedBox(width: AppSpacing.sm),
                     _CampaignCard(title: 'Weekend Special', sub: '15% off · Sat–Sun',
-                      tag: const GzTag(kind: GzTagKind.mute, label: 'Not met'),
+                      tag: const EmTag(kind: EmTagKind.mute, label: 'Not met'),
                       disabled: true),
                   ]),
                 ),
@@ -118,7 +118,7 @@ class BookingSummaryMobileLayout extends ConsumerWidget {
                 title: 'Use credits',
                 open: s.credOpen,
                 onToggle: n.toggleCredSection,
-                badge: s.credits > 0 ? GzTag(kind: GzTagKind.ok, label: '−₹$credAmt') : null,
+                badge: s.credits > 0 ? EmTag(kind: EmTagKind.ok, label: '−₹$credAmt') : null,
                 emptyBadge: '$_maxCred available',
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -164,15 +164,15 @@ class BookingSummaryMobileLayout extends ConsumerWidget {
 
               // ── Total ──
               _GzCard(child: Column(children: [
-                GzMetaRow(label: 'Subtotal', value: '₹$_subtotal'),
+                EmMetaRow(label: 'Subtotal', value: '₹$_subtotal'),
                 if (campAmt > 0)
-                  GzMetaRow(
+                  EmMetaRow(
                     label: 'Campaign · ${_campMap[s.selectedCampaign]?.label ?? ''}',
                     value: '− ₹$campAmt',
                     valueStyle: AppTypography.num.copyWith(color: AppColors.ok, fontWeight: FontWeight.w600),
                   ),
                 if (credAmt > 0)
-                  GzMetaRow(
+                  EmMetaRow(
                     label: 'Credits · ${s.credits}',
                     value: '− ₹$credAmt',
                     valueStyle: AppTypography.num.copyWith(color: AppColors.ok, fontWeight: FontWeight.w600),

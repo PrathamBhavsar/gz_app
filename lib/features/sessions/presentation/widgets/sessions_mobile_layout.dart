@@ -7,10 +7,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/navigation/routes.dart';
-import '../../../../shared/widgets/gz_tag.dart';
-import '../../../../shared/widgets/gz_chip.dart';
-import '../../../../shared/widgets/gz_meta_row.dart';
-import '../../../../shared/widgets/gz_live_dot.dart';
+import '../../../../shared/widgets/em_tag.dart';
+import '../../../../shared/widgets/em_chip.dart';
+import '../../../../shared/widgets/em_meta_row.dart';
+import '../../../../shared/widgets/em_live_dot.dart';
 import '../providers/activity_hub_notifier.dart';
 
 class SessionsMobileLayout extends ConsumerWidget {
@@ -85,7 +85,7 @@ class SessionsMobileLayout extends ConsumerWidget {
           Container(
             width: 38, height: 38,
             decoration: const BoxDecoration(color: AppColors.buttonBg, shape: BoxShape.circle),
-            child: const Center(child: GzLiveDot(color: AppColors.surfaceTintStrong, size: 8)),
+            child: const Center(child: EmLiveDot(color: AppColors.surfaceTintStrong, size: 8)),
           ),
           const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -104,7 +104,7 @@ class SessionsMobileLayout extends ConsumerWidget {
       store: 'GameZone Koramangala',
       when: 'Tomorrow · 4:00 – 6:00 PM',
       duration: '2h',
-      statusTag: const GzTag(kind: GzTagKind.ok, label: 'Confirmed'),
+      statusTag: const EmTag(kind: EmTagKind.ok, label: 'Confirmed'),
       countdown: 'Starts in 18h 24m',
       actions: [
         _BookingAction(label: 'Check in', ghost: true, disabled: true, onTap: null),
@@ -119,7 +119,7 @@ class SessionsMobileLayout extends ConsumerWidget {
       store: 'GameZone MG Road',
       when: 'Sat, 20 Apr · 6:00 – 7:00 PM',
       duration: '1h',
-      statusTag: const GzTag(kind: GzTagKind.warn, label: 'Payment pending'),
+      statusTag: const EmTag(kind: EmTagKind.warn, label: 'Payment pending'),
       countdown: 'Pay before tomorrow 11 PM',
       countdownColor: AppColors.warn,
       actions: [
@@ -152,7 +152,7 @@ class SessionsMobileLayout extends ConsumerWidget {
       ),
       child: Column(children: [
         Row(children: [
-          const GzLiveDot(),
+          const EmLiveDot(),
           const SizedBox(width: AppSpacing.sm),
           Text('LIVE NOW', style: AppTypography.meta.copyWith(color: AppColors.ok)),
         ]),
@@ -247,7 +247,7 @@ class _Tab extends StatelessWidget {
         ),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           if (dot && active) ...[
-            const GzLiveDot(size: 6),
+            const EmLiveDot(size: 6),
             const SizedBox(width: 6),
           ],
           Text(label, style: AppTypography.small.copyWith(
@@ -322,8 +322,8 @@ class _BookingCard extends StatelessWidget {
       ]),
       const SizedBox(height: 14),
       Wrap(spacing: 6, runSpacing: 6, children: [
-        GzChip(keyLabel: 'WHEN', value: when),
-        GzChip(keyLabel: 'FOR', value: duration),
+        EmChip(keyLabel: 'WHEN', value: when),
+        EmChip(keyLabel: 'FOR', value: duration),
       ]),
       const SizedBox(height: 14),
       Text(countdown, style: AppTypography.small.copyWith(
@@ -416,8 +416,8 @@ class _HistoryRow extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.md),
           child: Column(children: const [
-            GzMetaRow(label: 'Session ID',     value: '#SES-20945'),
-            GzMetaRow(label: 'Payment method', value: 'UPI'),
+            EmMetaRow(label: 'Session ID',     value: '#SES-20945'),
+            EmMetaRow(label: 'Payment method', value: 'UPI'),
           ]),
         ),
       ],

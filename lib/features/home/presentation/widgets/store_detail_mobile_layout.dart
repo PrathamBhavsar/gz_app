@@ -6,8 +6,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/navigation/routes.dart';
-import '../../../../shared/widgets/gz_tag.dart';
-import '../../../../shared/widgets/gz_chip.dart';
+import '../../../../shared/widgets/em_tag.dart';
+import '../../../../shared/widgets/em_chip.dart';
 
 // ── UI state providers ──
 final _slideProvider = StateProvider<int>((ref) => 0);
@@ -132,7 +132,7 @@ class StoreDetailMobileLayout extends ConsumerWidget {
                         padding: const EdgeInsets.fromLTRB(0, 14, 0, 14),
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Row(children: [
-                            const GzTag(kind: GzTagKind.ok, label: 'Open now'),
+                            const EmTag(kind: EmTagKind.ok, label: 'Open now'),
                             const SizedBox(width: AppSpacing.sm),
                             const Text('·', style: TextStyle(color: AppColors.textTertiary)),
                             const SizedBox(width: AppSpacing.sm),
@@ -163,10 +163,10 @@ class StoreDetailMobileLayout extends ConsumerWidget {
                       Text('STATIONS', style: AppTypography.meta),
                       const SizedBox(height: 10),
                       Wrap(spacing: 6, runSpacing: 6, children: const [
-                        GzChip(value: '12', keyLabel: 'PC Gaming'),
-                        GzChip(value: '4',  keyLabel: 'PS5'),
-                        GzChip(value: '2',  keyLabel: 'VR'),
-                        GzChip(value: '3',  keyLabel: 'Xbox'),
+                        EmChip(value: '12', keyLabel: 'PC Gaming'),
+                        EmChip(value: '4',  keyLabel: 'PS5'),
+                        EmChip(value: '2',  keyLabel: 'VR'),
+                        EmChip(value: '3',  keyLabel: 'Xbox'),
                       ]),
                       const SizedBox(height: 18),
 
@@ -179,9 +179,9 @@ class StoreDetailMobileLayout extends ConsumerWidget {
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(children: const [
-                          _MiniCamp(title: 'Happy Hour',     sub: '30% off · Mon–Fri 10–2', tag: GzTag(kind: GzTagKind.ok,   label: 'Eligible')),
+                          _MiniCamp(title: 'Happy Hour',     sub: '30% off · Mon–Fri 10–2', tag: EmTag(kind: EmTagKind.ok,   label: 'Eligible')),
                           SizedBox(width: 10),
-                          _MiniCamp(title: 'Double Credits', sub: 'Earn 2× this weekend',   tag: GzTag(kind: GzTagKind.warn, label: 'Limited')),
+                          _MiniCamp(title: 'Double Credits', sub: 'Earn 2× this weekend',   tag: EmTag(kind: EmTagKind.warn, label: 'Limited')),
                         ]),
                       ),
                       const SizedBox(height: 18),
@@ -387,7 +387,7 @@ class _SystemCard extends StatelessWidget {
           ),
           child: Center(child: HugeIcon(icon: icon, color: AppColors.textPrimary, size: 18)),
         ),
-        GzTag(kind: available ? GzTagKind.ok : GzTagKind.mute, label: available ? 'Available' : 'In use'),
+        EmTag(kind: available ? EmTagKind.ok : EmTagKind.mute, label: available ? 'Available' : 'In use'),
       ]),
       const SizedBox(height: 10),
       Text(name, style: AppTypography.body.copyWith(fontWeight: FontWeight.w700)),
