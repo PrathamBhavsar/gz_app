@@ -37,8 +37,11 @@ class _SystemPerformanceScreenState
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowLeft01,
+            color: AppColors.textPrimary,
+            size: 20,
+          ),
           onPressed: () => context.go(AppRoutes.adminAnalytics),
         ),
         title: Text('System Performance', style: AppTypography.headingSmall),
@@ -72,19 +75,35 @@ class _SystemPerformanceScreenState
         ),
       );
     }
-
     if (state is AnalyticsError<SystemPerformanceModel>) {
-      return _buildError(state.error);
+      return _PerfError(onRetry: _load);
     }
-
     if (state is AnalyticsLoaded<SystemPerformanceModel>) {
-      return _buildPerformance(state.data);
+      return _PerformanceContent(data: state.data);
     }
-
     return const SizedBox.shrink();
   }
 
-  Widget _buildError(Object error) {
+  Future<void> _load() async {
+    final now = DateTime.now();
+    ref.read(systemPerformanceProvider.notifier).load(
+          dateFrom: _formatDate(now.subtract(const Duration(days: 7))),
+          dateTo: _formatDate(now),
+        );
+  }
+
+  String _formatDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+}
+
+// ─── Error View ───────────────────────────────────────────────────────────────
+
+class _PerfError extends StatelessWidget {
+  const _PerfError({required this.onRetry});
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -96,12 +115,14 @@ class _SystemPerformanceScreenState
               size: 48,
             ),
             const SizedBox(height: AppSpacing.md),
-            Text('Failed to load system performance',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary)),
+            Text(
+              'Failed to load system performance',
+              style: AppTypography.bodyMedium
+                  .copyWith(color: AppColors.textSecondary),
+            ),
             const SizedBox(height: AppSpacing.md),
             OutlinedButton(
-              onPressed: _load,
+              onPressed: onRetry,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
                 side: const BorderSide(color: AppColors.border),
@@ -116,29 +137,37 @@ class _SystemPerformanceScreenState
       ),
     );
   }
+}
 
-  Widget _buildPerformance(SystemPerformanceModel data) {
+// ─── Performance Content ──────────────────────────────────────────────────────
+
+class _PerformanceContent extends StatelessWidget {
+  const _PerformanceContent({required this.data});
+  final SystemPerformanceModel data;
+
+  @override
+  Widget build(BuildContext context) {
     final systems = data.systems ?? [];
 
     if (systems.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: Text('No system performance data available',
-              style: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textSecondary)),
+          child: Text(
+            'No system performance data available',
+            style: AppTypography.bodyMedium
+                .copyWith(color: AppColors.textSecondary),
+          ),
         ),
       );
     }
 
-    // Calculate averages for alerts
     double totalUtil = 0;
     for (final s in systems) {
       totalUtil += double.tryParse(s.utilizationRate ?? '0') ?? 0;
     }
     final avgUtil = totalUtil / systems.length;
 
-    // Sort by utilization rate descending
     final sorted = List<SystemPerformanceEntry>.from(systems)
       ..sort((a, b) {
         final aRate = double.tryParse(a.utilizationRate ?? '0') ?? 0;
@@ -146,33 +175,38 @@ class _SystemPerformanceScreenState
         return bRate.compareTo(aRate);
       });
 
+    final lowPerformers = sorted
+        .where((s) =>
+            (double.tryParse(s.utilizationRate ?? '0') ?? 0) < avgUtil * 0.6)
+        .toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Low utilization alerts
-        ...sorted
-            .where((s) =>
-                (double.tryParse(s.utilizationRate ?? '0') ?? 0) <
-                avgUtil * 0.6)
-            .map((s) => _buildAlertCard(s, avgUtil)),
-        if (sorted.any((s) =>
-            (double.tryParse(s.utilizationRate ?? '0') ?? 0) < avgUtil * 0.6))
-          const SizedBox(height: AppSpacing.lg),
-
-        // Summary header
+        ...lowPerformers.map((s) => _AlertCard(entry: s, avgUtil: avgUtil)),
+        if (lowPerformers.isNotEmpty) const SizedBox(height: AppSpacing.lg),
         Text('All Systems', style: AppTypography.headingSmall),
-        Text('${systems.length} systems · Avg ${(avgUtil).toStringAsFixed(0)}% utilization',
-            style: AppTypography.caption),
+        Text(
+          '${systems.length} systems · Avg ${avgUtil.toStringAsFixed(0)}% utilization',
+          style: AppTypography.caption,
+        ),
         const SizedBox(height: AppSpacing.md),
-
-        // System list sorted by utilization (ROI)
-        ...sorted.map((s) => _buildSystemCard(s)),
+        ...sorted.map((s) => _SystemCard(entry: s)),
       ],
     );
   }
+}
 
-  Widget _buildAlertCard(SystemPerformanceEntry s, double avgUtil) {
-    final rate = double.tryParse(s.utilizationRate ?? '0') ?? 0;
+// ─── Alert Card ───────────────────────────────────────────────────────────────
+
+class _AlertCard extends StatelessWidget {
+  const _AlertCard({required this.entry, required this.avgUtil});
+  final SystemPerformanceEntry entry;
+  final double avgUtil;
+
+  @override
+  Widget build(BuildContext context) {
+    final rate = double.tryParse(entry.utilizationRate ?? '0') ?? 0;
     final diff = ((avgUtil - rate) / avgUtil * 100).toStringAsFixed(0);
 
     return Container(
@@ -196,7 +230,7 @@ class _SystemPerformanceScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${s.name ?? 'Unknown'} utilization is $diff% lower than average',
+                  '${entry.name ?? 'Unknown'} utilization is $diff% lower than average',
                   style: AppTypography.bodySmall,
                 ),
                 const SizedBox(height: AppSpacing.xs),
@@ -211,15 +245,23 @@ class _SystemPerformanceScreenState
       ),
     );
   }
+}
 
-  Widget _buildSystemCard(SystemPerformanceEntry s) {
-    final rate = double.tryParse(s.utilizationRate ?? '0') ?? 0;
+// ─── System Card ──────────────────────────────────────────────────────────────
+
+class _SystemCard extends StatelessWidget {
+  const _SystemCard({required this.entry});
+  final SystemPerformanceEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final rate = double.tryParse(entry.utilizationRate ?? '0') ?? 0;
     final rateColor = rate > 75
-        ? const Color(0xFF4CAF50)
+        ? AppColors.ok
         : rate > 50
             ? AppColors.gold
             : rate > 25
-                ? const Color(0xFFFF9800)
+                ? AppColors.warn
                 : AppColors.error;
 
     return Container(
@@ -233,24 +275,19 @@ class _SystemPerformanceScreenState
         children: [
           Row(
             children: [
-              // System info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      s.name ?? 'Unknown',
-                      style: AppTypography.bodyMedium,
-                    ),
+                    Text(entry.name ?? 'Unknown', style: AppTypography.bodyMedium),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      '${s.platform ?? '--'} · Station ${s.stationNumber ?? '--'}',
+                      '${entry.platform ?? '--'} · Station ${entry.stationNumber ?? '--'}',
                       style: AppTypography.caption,
                     ),
                   ],
                 ),
               ),
-              // Utilization badge
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.sm,
@@ -258,7 +295,8 @@ class _SystemPerformanceScreenState
                 ),
                 decoration: BoxDecoration(
                   color: rateColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
+                  borderRadius:
+                      BorderRadius.circular(AppSpacing.borderRadiusSm),
                 ),
                 child: Text(
                   '${rate.toStringAsFixed(0)}%',
@@ -271,7 +309,6 @@ class _SystemPerformanceScreenState
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          // Utilization bar
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
@@ -281,13 +318,14 @@ class _SystemPerformanceScreenState
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          // Stats row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildMiniStat('Sessions', '${s.totalSessions ?? 0}'),
-              _buildMiniStat('Hours', ((s.totalMinutes ?? 0) / 60).toStringAsFixed(1)),
-              _buildMiniStat('Revenue', '₹${s.totalRevenue ?? '0'}'),
+              _stat('Sessions', '${entry.totalSessions ?? 0}'),
+              _stat(
+                  'Hours',
+                  ((entry.totalMinutes ?? 0) / 60).toStringAsFixed(1)),
+              _stat('Revenue', '₹${entry.totalRevenue ?? '0'}'),
             ],
           ),
         ],
@@ -295,7 +333,7 @@ class _SystemPerformanceScreenState
     );
   }
 
-  Widget _buildMiniStat(String label, String value) {
+  Widget _stat(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -304,15 +342,4 @@ class _SystemPerformanceScreenState
       ],
     );
   }
-
-  Future<void> _load() async {
-    final now = DateTime.now();
-    ref.read(systemPerformanceProvider.notifier).load(
-          dateFrom: _formatDate(now.subtract(const Duration(days: 7))),
-          dateTo: _formatDate(now),
-        );
-  }
-
-  String _formatDate(DateTime d) =>
-      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gz_app/core/navigation/routes.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -30,7 +31,7 @@ class HomeTabletLayout extends ConsumerWidget {
               color: AppColors.textPrimary,
               size: 28,
             ),
-            onPressed: () => context.push('/home/search'),
+            onPressed: () => context.push(AppRoutes.storeSearch),
           ),
           const SizedBox(width: AppSpacing.lg),
         ],
@@ -84,7 +85,7 @@ class HomeTabletLayout extends ConsumerWidget {
       itemBuilder: (context, index) {
         final store = stores[index];
         return GestureDetector(
-          onTap: () => context.push('/home/store/${store.slug}'),
+          onTap: () => context.push(AppRoutes.storeDetailPath(store.slug ?? '')),
           child: Container(
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(

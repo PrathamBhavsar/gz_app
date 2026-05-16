@@ -9,6 +9,8 @@ import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_management_provider.dart';
 import '../../providers/admin_permissions.dart';
 
+final _billingStatusProvider = StateProvider.autoDispose<String?>((ref) => null);
+
 /// Billing & Payments — Screen 53.
 /// Ledger view with status filters, override panel (super_admin), refund.
 class BillingPaymentsScreen extends ConsumerStatefulWidget {
@@ -21,17 +23,15 @@ class BillingPaymentsScreen extends ConsumerStatefulWidget {
 
 class _BillingPaymentsScreenState
     extends ConsumerState<BillingPaymentsScreen> {
-  String? _statusFilter;
-
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-        () => ref.read(billingProvider.notifier).load(status: _statusFilter));
+    Future.microtask(() => ref.read(billingProvider.notifier).load());
   }
 
   @override
   Widget build(BuildContext context) {
+    final statusFilter = ref.watch(_billingStatusProvider);
     final state = ref.watch(billingProvider);
     final perms = ref.watch(adminPermissionsProvider);
     final isSuperAdmin = perms.canBillingOverride;
@@ -42,8 +42,7 @@ class _BillingPaymentsScreenState
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: AppColors.textPrimary, size: 20),
           onPressed: () => context.go(AppRoutes.adminPricing),
         ),
         title: Text('Billing', style: AppTypography.headingSmall),
@@ -52,7 +51,7 @@ class _BillingPaymentsScreenState
         color: AppColors.rose,
         backgroundColor: AppColors.surface,
         onRefresh: () =>
-            ref.read(billingProvider.notifier).load(status: _statusFilter),
+            ref.read(billingProvider.notifier).load(status: statusFilter),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -60,7 +59,7 @@ class _BillingPaymentsScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: AppSpacing.md),
-              _buildStatusChips(),
+              _buildStatusChips(statusFilter),
               const SizedBox(height: AppSpacing.lg),
               _buildContent(state, isSuperAdmin),
               const SizedBox(height: AppSpacing.xxl),
@@ -71,18 +70,18 @@ class _BillingPaymentsScreenState
     );
   }
 
-  Widget _buildStatusChips() {
+  Widget _buildStatusChips(String? statusFilter) {
     final options = [null, 'unpaid', 'paid', 'overridden'];
     final labels = ['All', 'Unpaid', 'Paid', 'Overridden'];
     return Row(
       children: List.generate(options.length, (i) {
-        final isActive = _statusFilter == options[i];
+        final isActive = statusFilter == options[i];
         return Padding(
           padding: const EdgeInsets.only(right: AppSpacing.sm),
           child: GestureDetector(
             onTap: () {
-              setState(() => _statusFilter = options[i]);
-              ref.read(billingProvider.notifier).load(status: _statusFilter);
+              ref.read(_billingStatusProvider.notifier).state = options[i];
+              ref.read(billingProvider.notifier).load(status: options[i]);
             },
             child: Container(
               padding: const EdgeInsets.symmetric(
@@ -164,7 +163,7 @@ class _BillingPaymentsScreenState
             OutlinedButton(
               onPressed: () => ref
                   .read(billingProvider.notifier)
-                  .load(status: _statusFilter),
+                  .load(status: ref.read(_billingStatusProvider)),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
                 side: const BorderSide(color: AppColors.border),
@@ -189,7 +188,7 @@ class _BillingPaymentsScreenState
     final userId = entry['user_id']?.toString() ?? '';
 
     final statusColor = switch (status.toString().toLowerCase()) {
-      'paid' => const Color(0xFF4CAF50),
+      'paid' => AppColors.ok,
       'unpaid' => AppColors.rose,
       'overridden' => AppColors.gold,
       _ => AppColors.textSecondary,
@@ -334,7 +333,7 @@ class _BillingPaymentsScreenState
                 onPressed: () async {
                   final amount = double.tryParse(amountCtrl.text);
                   if (amount == null || reasonCtrl.text.trim().isEmpty) return;
-                  Navigator.pop(context);
+                  context.pop();
                   await ref.read(billingProvider.notifier).overrideBilling(
                     billingId: billingId,
                     reason: reasonCtrl.text.trim(),

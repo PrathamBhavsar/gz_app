@@ -70,34 +70,73 @@ class _BillingList extends StatelessWidget {
   double _monthTotal(List<BillingRow> rows) =>
       rows.fold(0.0, (sum, r) => sum + r.amount);
 
+  /// Flatten grouped data into a single render list so we can use ListView.builder.
+  List<_BillingItem> _flatten() {
+    final grouped = _groupByMonth();
+    final out = <_BillingItem>[];
+    for (final entry in grouped.entries) {
+      out.add(_BillingHeaderItem(
+        label: entry.key,
+        total: _monthTotal(entry.value),
+      ));
+      for (var i = 0; i < entry.value.length; i++) {
+        out.add(_BillingRowItem(row: entry.value[i], indexInGroup: i));
+      }
+      out.add(const _BillingGapItem());
+    }
+    return out;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final grouped = _groupByMonth();
+    final items = _flatten();
 
-    return ListView(
+    return ListView.builder(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,
         AppSpacing.xs,
         AppSpacing.md,
         AppSpacing.lg,
       ),
-      children: [
-        for (final entry in grouped.entries) ...[
-          EmSectionHead(
-            entry.key,
-            subtitle: 'Total ₹${_monthTotal(entry.value).toStringAsFixed(2)}',
-          ),
-          ...entry.value.asMap().entries.map(
-                (e) => _BillingRowWidget(row: e.value)
-                    .animate(delay: (e.key * 60).ms)
-                    .fadeIn(duration: 220.ms)
-                    .slideY(begin: 0.05, end: 0, duration: 220.ms),
-              ),
-          const SizedBox(height: AppSpacing.sm),
-        ],
-      ],
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        if (item is _BillingHeaderItem) {
+          return EmSectionHead(
+            item.label,
+            subtitle: 'Total ₹${item.total.toStringAsFixed(2)}',
+          );
+        }
+        if (item is _BillingRowItem) {
+          return _BillingRowWidget(row: item.row)
+              .animate(delay: (item.indexInGroup * 60).ms)
+              .fadeIn(duration: 220.ms)
+              .slideY(begin: 0.05, end: 0, duration: 220.ms);
+        }
+        return const SizedBox(height: AppSpacing.sm);
+      },
     );
   }
+}
+
+sealed class _BillingItem {
+  const _BillingItem();
+}
+
+class _BillingHeaderItem extends _BillingItem {
+  const _BillingHeaderItem({required this.label, required this.total});
+  final String label;
+  final double total;
+}
+
+class _BillingRowItem extends _BillingItem {
+  const _BillingRowItem({required this.row, required this.indexInGroup});
+  final BillingRow row;
+  final int indexInGroup;
+}
+
+class _BillingGapItem extends _BillingItem {
+  const _BillingGapItem();
 }
 
 class _EmptyState extends StatelessWidget {

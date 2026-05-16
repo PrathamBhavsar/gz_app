@@ -10,6 +10,8 @@ import '../../providers/admin_analytics_provider.dart';
 import '../../providers/admin_permissions.dart';
 import '../../../../../../models/domain_analytics.dart';
 
+final _analyticsDateRangeProvider = StateProvider.autoDispose<int>((ref) => 0);
+
 /// Analytics Dashboard — Screen 46.
 /// High-level store health overview with KPI widgets and quick navigation.
 class AdminAnalyticsScreen extends ConsumerStatefulWidget {
@@ -21,10 +23,9 @@ class AdminAnalyticsScreen extends ConsumerStatefulWidget {
 }
 
 class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
-  int _dateRangeIndex = 0; // 0=Today, 1=7 Days, 2=Custom
-
   @override
   Widget build(BuildContext context) {
+    final dateRangeIndex = ref.watch(_analyticsDateRangeProvider);
     final perms = ref.watch(adminPermissionsProvider);
     final state = ref.watch(dashboardProvider);
 
@@ -56,10 +57,28 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: AppSpacing.md),
-              // Date range selector
-              _buildDateRangeChips(),
+              Row(
+                children: [
+                  _FilterChip(
+                    label: 'Today',
+                    isActive: dateRangeIndex == 0,
+                    onTap: () => _selectRange(0),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  _FilterChip(
+                    label: '7 Days',
+                    isActive: dateRangeIndex == 1,
+                    onTap: () => _selectRange(1),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  _FilterChip(
+                    label: 'Custom',
+                    isActive: dateRangeIndex == 2,
+                    onTap: () => _selectRange(2),
+                  ),
+                ],
+              ),
               const SizedBox(height: AppSpacing.lg),
-              // Content based on state
               _buildContent(state, perms),
               const SizedBox(height: AppSpacing.xxl),
             ],
@@ -69,25 +88,78 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
     );
   }
 
-  Widget _buildDateRangeChips() {
-    return Row(
-      children: [
-        _buildChip('Today', 0),
-        const SizedBox(width: AppSpacing.sm),
-        _buildChip('7 Days', 1),
-        const SizedBox(width: AppSpacing.sm),
-        _buildChip('Custom', 2),
-      ],
-    );
+  void _selectRange(int index) {
+    ref.read(_analyticsDateRangeProvider.notifier).state = index;
+    _loadForRange(index);
   }
 
-  Widget _buildChip(String label, int index) {
-    final isActive = _dateRangeIndex == index;
+  Widget _buildContent(
+    AnalyticsState<AnalyticsDashboardModel> state,
+    AdminPermissions perms,
+  ) {
+    if (state is AnalyticsLoading<AnalyticsDashboardModel>) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(AppSpacing.xxl),
+          child: CircularProgressIndicator(color: AppColors.rose),
+        ),
+      );
+    }
+    if (state is AnalyticsError<AnalyticsDashboardModel>) {
+      return _AnalyticsError(
+        message: 'Failed to load analytics',
+        onRetry: _loadForRange,
+      );
+    }
+    if (state is AnalyticsLoaded<AnalyticsDashboardModel>) {
+      return _AnalyticsDashboard(data: state.data, perms: perms);
+    }
+    return const SizedBox.shrink();
+  }
+
+  Future<void> _loadForRange([int? overrideIndex]) async {
+    final now = DateTime.now();
+    final rangeIndex = overrideIndex ?? ref.read(_analyticsDateRangeProvider);
+    String? dateFrom;
+    String? dateTo;
+
+    switch (rangeIndex) {
+      case 0:
+        dateFrom = _formatDate(now);
+        dateTo = _formatDate(now);
+      case 1:
+        dateFrom = _formatDate(now.subtract(const Duration(days: 6)));
+        dateTo = _formatDate(now);
+      case 2:
+        dateFrom = _formatDate(now.subtract(const Duration(days: 30)));
+        dateTo = _formatDate(now);
+    }
+
+    ref
+        .read(dashboardProvider.notifier)
+        .load(dateFrom: dateFrom, dateTo: dateTo);
+  }
+
+  String _formatDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+}
+
+// ─── Filter Chip ──────────────────────────────────────────────────────────────
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        setState(() => _dateRangeIndex = index);
-        _loadForRange();
-      },
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
@@ -107,29 +179,17 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
       ),
     );
   }
+}
 
-  Widget _buildContent(AnalyticsState<AnalyticsDashboardModel> state, AdminPermissions perms) {
-    if (state is AnalyticsLoading<AnalyticsDashboardModel>) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.xxl),
-          child: CircularProgressIndicator(color: AppColors.rose),
-        ),
-      );
-    }
+// ─── Analytics Error ──────────────────────────────────────────────────────────
 
-    if (state is AnalyticsError<AnalyticsDashboardModel>) {
-      return _buildError(state.error);
-    }
+class _AnalyticsError extends StatelessWidget {
+  const _AnalyticsError({required this.message, required this.onRetry});
+  final String message;
+  final VoidCallback onRetry;
 
-    if (state is AnalyticsLoaded<AnalyticsDashboardModel>) {
-      return _buildDashboard(state.data, perms);
-    }
-
-    return const SizedBox.shrink();
-  }
-
-  Widget _buildError(Object error) {
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -142,13 +202,13 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Failed to load analytics',
+              message,
               style: AppTypography.bodyMedium
                   .copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.md),
             OutlinedButton(
-              onPressed: _loadForRange,
+              onPressed: onRetry,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
                 side: const BorderSide(color: AppColors.border),
@@ -163,52 +223,66 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
       ),
     );
   }
+}
 
-  Widget _buildDashboard(AnalyticsDashboardModel data, AdminPermissions perms) {
+// ─── Analytics Dashboard ──────────────────────────────────────────────────────
+
+class _AnalyticsDashboard extends StatelessWidget {
+  const _AnalyticsDashboard({required this.data, required this.perms});
+  final AnalyticsDashboardModel data;
+  final AdminPermissions perms;
+
+  @override
+  Widget build(BuildContext context) {
     final canViewRevenue = perms.canViewRevenueTotals;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // KPI grid — 2x2
         Row(
           children: [
             if (canViewRevenue)
-              _buildKpiCard('Revenue', '₹${data.totalRevenue ?? '--'}',
-                  HugeIcons.strokeRoundedCoinsDollar, AppColors.rose)
+              _KpiCard(
+                label: 'Revenue',
+                value: '₹${data.totalRevenue ?? '--'}',
+                icon: HugeIcons.strokeRoundedCoinsDollar,
+                iconColor: AppColors.rose,
+              )
             else
-              _buildKpiCard('Sessions', '${data.totalSessions ?? '--'}',
-                  HugeIcons.strokeRoundedTimer01, AppColors.success),
+              _KpiCard(
+                label: 'Sessions',
+                value: '${data.totalSessions ?? '--'}',
+                icon: HugeIcons.strokeRoundedTimer01,
+                iconColor: AppColors.success,
+              ),
             const SizedBox(width: AppSpacing.sm),
-            _buildKpiCard(
-              'Net Revenue',
-              '₹${data.totalNetRevenue ?? '--'}',
-              HugeIcons.strokeRoundedWallet01,
-              const Color(0xFF4CAF50),
+            _KpiCard(
+              label: 'Net Revenue',
+              value: '₹${data.totalNetRevenue ?? '--'}',
+              icon: HugeIcons.strokeRoundedWallet01,
+              iconColor: AppColors.ok,
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
         Row(
           children: [
-            _buildKpiCard(
-              'Occupancy',
-              '${data.occupancyRate ?? '--'}%',
-              HugeIcons.strokeRoundedDashboardSpeed01,
-              const Color(0xFF2196F3),
+            _KpiCard(
+              label: 'Occupancy',
+              value: '${data.occupancyRate ?? '--'}%',
+              icon: HugeIcons.strokeRoundedDashboardSpeed01,
+              iconColor: AppColors.info,
             ),
             const SizedBox(width: AppSpacing.sm),
-            _buildKpiCard(
-              'Sessions',
-              '${data.totalSessions ?? '--'}',
-              HugeIcons.strokeRoundedGameboy,
-              AppColors.primary,
+            _KpiCard(
+              label: 'Sessions',
+              value: '${data.totalSessions ?? '--'}',
+              icon: HugeIcons.strokeRoundedGameboy,
+              iconColor: AppColors.primary,
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
-
-        // Player insights
         Text('Players', style: AppTypography.headingSmall),
         const SizedBox(height: AppSpacing.md),
         Row(
@@ -224,31 +298,65 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
-
-        // Quick navigation tiles
         Text('Detailed Reports', style: AppTypography.headingSmall),
         const SizedBox(height: AppSpacing.md),
         if (canViewRevenue)
-          _buildNavTile('Revenue Analytics', HugeIcons.strokeRoundedCoinsDollar,
-              AppRoutes.adminRevenue),
-        _buildNavTile('Utilization Heatmap',
-            HugeIcons.strokeRoundedDashboardSpeed01, AppRoutes.adminUtilization),
-        _buildNavTile('Session Statistics',
-            HugeIcons.strokeRoundedTimer01, AppRoutes.adminSessionStats),
-        _buildNavTile('Player Analytics', HugeIcons.strokeRoundedUserCircle,
-            AppRoutes.adminPlayers),
-        _buildNavTile('System Performance',
-            HugeIcons.strokeRoundedGameboy, AppRoutes.adminSystems),
+          _NavTile(
+            title: 'Revenue Analytics',
+            icon: HugeIcons.strokeRoundedCoinsDollar,
+            route: AppRoutes.adminRevenue,
+          ),
+        _NavTile(
+          title: 'Utilization Heatmap',
+          icon: HugeIcons.strokeRoundedDashboardSpeed01,
+          route: AppRoutes.adminUtilization,
+        ),
+        _NavTile(
+          title: 'Session Statistics',
+          icon: HugeIcons.strokeRoundedTimer01,
+          route: AppRoutes.adminSessionStats,
+        ),
+        _NavTile(
+          title: 'Player Analytics',
+          icon: HugeIcons.strokeRoundedUserCircle,
+          route: AppRoutes.adminPlayers,
+        ),
+        _NavTile(
+          title: 'System Performance',
+          icon: HugeIcons.strokeRoundedGameboy,
+          route: AppRoutes.adminSystems,
+        ),
       ],
     );
   }
 
-  Widget _buildKpiCard(
-    String label,
-    String value,
-    List<List<dynamic>> icon,
-    Color iconColor,
-  ) {
+  Widget _buildMiniStat(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(value, style: AppTypography.headingSmall),
+        Text(label, style: AppTypography.caption),
+      ],
+    );
+  }
+}
+
+// ─── KPI Card ─────────────────────────────────────────────────────────────────
+
+class _KpiCard extends StatelessWidget {
+  const _KpiCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.iconColor,
+  });
+  final String label;
+  final String value;
+  final List<List<dynamic>> icon;
+  final Color iconColor;
+
+  @override
+  Widget build(BuildContext context) {
     return Expanded(
       child: GestureDetector(
         onTap: () {},
@@ -272,18 +380,22 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
       ),
     );
   }
+}
 
-  Widget _buildMiniStat(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(value, style: AppTypography.headingSmall),
-        Text(label, style: AppTypography.caption),
-      ],
-    );
-  }
+// ─── Nav Tile ─────────────────────────────────────────────────────────────────
 
-  Widget _buildNavTile(String title, List<List<dynamic>> icon, String route) {
+class _NavTile extends StatelessWidget {
+  const _NavTile({
+    required this.title,
+    required this.icon,
+    required this.route,
+  });
+  final String title;
+  final List<List<dynamic>> icon;
+  final String route;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: GestureDetector(
@@ -298,9 +410,7 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
             children: [
               HugeIcon(icon: icon, color: AppColors.textSecondary, size: 20),
               const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(title, style: AppTypography.bodyMedium),
-              ),
+              Expanded(child: Text(title, style: AppTypography.bodyMedium)),
               const HugeIcon(
                 icon: HugeIcons.strokeRoundedArrowUpRight01,
                 color: AppColors.textSecondary,
@@ -312,27 +422,4 @@ class _AdminAnalyticsScreenState extends ConsumerState<AdminAnalyticsScreen> {
       ),
     );
   }
-
-  Future<void> _loadForRange() async {
-    final now = DateTime.now();
-    String? dateFrom;
-    String? dateTo;
-
-    switch (_dateRangeIndex) {
-      case 0: // Today
-        dateFrom = _formatDate(now);
-        dateTo = _formatDate(now);
-      case 1: // 7 Days
-        dateFrom = _formatDate(now.subtract(const Duration(days: 6)));
-        dateTo = _formatDate(now);
-      case 2: // Custom — for now default to last 30 days
-        dateFrom = _formatDate(now.subtract(const Duration(days: 30)));
-        dateTo = _formatDate(now);
-    }
-
-    ref.read(dashboardProvider.notifier).load(dateFrom: dateFrom, dateTo: dateTo);
-  }
-
-  String _formatDate(DateTime d) =>
-      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 }

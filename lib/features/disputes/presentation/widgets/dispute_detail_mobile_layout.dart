@@ -395,7 +395,7 @@ class _StatusBanner extends StatelessWidget {
           width: 38,
           height: 38,
           decoration: const BoxDecoration(
-            color: Color(0x80FFFFFF),
+            color: AppColors.overlayLight,
             shape: BoxShape.circle,
           ),
           child: Center(child: HugeIcon(icon: icon, color: fg, size: 20)),
@@ -530,11 +530,10 @@ class _TimelineStep extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(label,
-                      style: TextStyle(
+                      style: AppTypography.num.copyWith(
                           color: dotFg,
                           fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: 'GeistMono')),
+                          fontWeight: FontWeight.w700)),
                 ),
               ),
               if (!last)

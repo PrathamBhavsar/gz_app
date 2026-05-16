@@ -20,10 +20,10 @@ class MainMobileLayout extends StatelessWidget {
   void _onTap(BuildContext context, int index) {
     switch (index) {
       case 0: context.go(AppRoutes.home);
-      case 1: context.go('/book');
-      case 2: context.go('/sessions');
-      case 3: context.go('/wallet');
-      case 4: context.go('/profile');
+      case 1: context.go(AppRoutes.book);
+      case 2: context.go(AppRoutes.sessions);
+      case 3: context.go(AppRoutes.wallet);
+      case 4: context.go(AppRoutes.profile);
     }
   }
 

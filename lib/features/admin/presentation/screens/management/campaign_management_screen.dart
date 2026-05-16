@@ -39,8 +39,7 @@ class _CampaignManagementScreenState
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: AppColors.textPrimary, size: 20),
           onPressed: () => context.go(AppRoutes.adminPricing),
         ),
         title: Text('Campaigns', style: AppTypography.headingSmall),
@@ -147,10 +146,10 @@ class _CampaignManagementScreenState
     final currentRedemptions = campaign['current_redemptions'] as int? ?? 0;
 
     final statusColor = switch (status.toLowerCase()) {
-      'active' => const Color(0xFF4CAF50),
+      'active' => AppColors.ok,
       'paused' => AppColors.gold,
       'expired' => AppColors.textSecondary,
-      'scheduled' => const Color(0xFF2196F3),
+      'scheduled' => AppColors.info,
       'draft' => AppColors.textSecondary,
       _ => AppColors.textSecondary,
     };
@@ -242,7 +241,7 @@ class _CampaignManagementScreenState
                           .resumeCampaign(id),
                       child: Text('Resume',
                           style: AppTypography.bodySmall.copyWith(
-                              color: const Color(0xFF4CAF50))),
+                              color: AppColors.ok)),
                     ),
                 ],
               ),

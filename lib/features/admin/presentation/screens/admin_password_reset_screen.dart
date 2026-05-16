@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -6,6 +7,11 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../data/services/admin_auth_service.dart';
+
+final _adminPwResetObscureProvider = StateProvider.autoDispose<bool>((ref) => true);
+final _adminPwResetSubmittingProvider = StateProvider.autoDispose<bool>((ref) => false);
+final _adminPwResetSuccessProvider = StateProvider.autoDispose<String?>((ref) => null);
+final _adminPwResetErrorProvider = StateProvider.autoDispose<String?>((ref) => null);
 
 class AdminPasswordResetScreen extends ConsumerStatefulWidget {
   const AdminPasswordResetScreen({super.key});
@@ -21,10 +27,6 @@ class _AdminPasswordResetScreenState
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _obscurePassword = true;
-  bool _isSubmitting = false;
-  String? _successMessage;
-  String? _errorMessage;
 
   @override
   void dispose() {
@@ -45,38 +47,33 @@ class _AdminPasswordResetScreenState
 
   Future<void> _handleRequestReset() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() {
-      _isSubmitting = true;
-      _errorMessage = null;
-    });
+    ref.read(_adminPwResetSubmittingProvider.notifier).state = true;
+    ref.read(_adminPwResetErrorProvider.notifier).state = null;
 
     try {
       await ref
           .read(adminAuthServiceProvider)
           .requestPasswordReset(_emailController.text.trim());
       if (mounted) {
-        setState(() {
-          _successMessage =
-              'If an account exists with this email, a reset link has been sent.';
-        });
+        ref.read(_adminPwResetSuccessProvider.notifier).state =
+            'If an account exists with this email, a reset link has been sent.';
       }
     } catch (e) {
       if (mounted) {
-        setState(
-          () => _errorMessage = 'Failed to send reset email. Try again.',
-        );
+        ref.read(_adminPwResetErrorProvider.notifier).state =
+            'Failed to send reset email. Try again.';
       }
     } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+      if (mounted) {
+        ref.read(_adminPwResetSubmittingProvider.notifier).state = false;
+      }
     }
   }
 
   Future<void> _handleConfirmReset() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() {
-      _isSubmitting = true;
-      _errorMessage = null;
-    });
+    ref.read(_adminPwResetSubmittingProvider.notifier).state = true;
+    ref.read(_adminPwResetErrorProvider.notifier).state = null;
 
     try {
       // TODO: Get actual token from deep link
@@ -88,23 +85,30 @@ class _AdminPasswordResetScreenState
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _errorMessage = 'Failed to reset password. Try again.');
+        ref.read(_adminPwResetErrorProvider.notifier).state =
+            'Failed to reset password. Try again.';
       }
     } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+      if (mounted) {
+        ref.read(_adminPwResetSubmittingProvider.notifier).state = false;
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final obscurePassword = ref.watch(_adminPwResetObscureProvider);
+    final isSubmitting = ref.watch(_adminPwResetSubmittingProvider);
+    final successMessage = ref.watch(_adminPwResetSuccessProvider);
+    final errorMessage = ref.watch(_adminPwResetErrorProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
+          icon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowLeft01,
             color: AppColors.textPrimary,
             size: 20,
           ),
@@ -138,7 +142,7 @@ class _AdminPasswordResetScreenState
                 const SizedBox(height: AppSpacing.xxl),
 
                 // Success message
-                if (_successMessage != null) ...[
+                if (successMessage != null) ...[
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
@@ -148,7 +152,7 @@ class _AdminPasswordResetScreenState
                       ),
                     ),
                     child: Text(
-                      _successMessage!,
+                      successMessage,
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.success,
                       ),
@@ -159,7 +163,7 @@ class _AdminPasswordResetScreenState
                 ],
 
                 // Error message
-                if (_errorMessage != null) ...[
+                if (errorMessage != null) ...[
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
@@ -169,7 +173,7 @@ class _AdminPasswordResetScreenState
                       ),
                     ),
                     child: Text(
-                      _errorMessage!,
+                      errorMessage,
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.error,
                       ),
@@ -224,7 +228,7 @@ class _AdminPasswordResetScreenState
                   // New password field (confirm mode)
                   TextFormField(
                     controller: _passwordController,
-                    obscureText: _obscurePassword,
+                    obscureText: obscurePassword,
                     style: AppTypography.bodyLarge,
                     decoration: InputDecoration(
                       labelText: 'New password',
@@ -252,15 +256,16 @@ class _AdminPasswordResetScreenState
                         borderSide: const BorderSide(color: AppColors.primary),
                       ),
                       suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                        icon: HugeIcon(
+                          icon: obscurePassword
+                              ? HugeIcons.strokeRoundedViewOff
+                              : HugeIcons.strokeRoundedView,
                           color: AppColors.textSecondary,
+                          size: 20,
                         ),
-                        onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword,
-                        ),
+                        onPressed: () => ref
+                            .read(_adminPwResetObscureProvider.notifier)
+                            .state = !obscurePassword,
                       ),
                     ),
                     validator: (value) {
@@ -274,7 +279,7 @@ class _AdminPasswordResetScreenState
                   const SizedBox(height: AppSpacing.md),
                   TextFormField(
                     controller: _confirmController,
-                    obscureText: _obscurePassword,
+                    obscureText: obscurePassword,
                     style: AppTypography.bodyLarge,
                     decoration: InputDecoration(
                       labelText: 'Confirm password',
@@ -317,7 +322,7 @@ class _AdminPasswordResetScreenState
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _isSubmitting
+                    onPressed: isSubmitting
                         ? null
                         : (_hasToken
                               ? _handleConfirmReset
@@ -336,7 +341,7 @@ class _AdminPasswordResetScreenState
                       ),
                       disabledBackgroundColor: AppColors.textSecondary,
                     ),
-                    child: _isSubmitting
+                    child: isSubmitting
                         ? const SizedBox(
                             height: 20,
                             width: 20,

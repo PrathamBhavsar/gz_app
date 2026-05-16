@@ -9,6 +9,8 @@ import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_analytics_provider.dart';
 import '../../../../../../models/domain_analytics.dart';
 
+final _utilizationViewModeProvider = StateProvider.autoDispose<int>((ref) => 0);
+
 /// Utilization Heatmap — Screen 48.
 /// Hourly grid showing occupancy density with peak hour indicator.
 class UtilizationHeatmapScreen extends ConsumerStatefulWidget {
@@ -21,16 +23,9 @@ class UtilizationHeatmapScreen extends ConsumerStatefulWidget {
 
 class _UtilizationHeatmapScreenState
     extends ConsumerState<UtilizationHeatmapScreen> {
-  int _viewMode = 0; // 0=Day, 1=Week
-
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() => _load());
-  }
-
   @override
   Widget build(BuildContext context) {
+    final viewMode = ref.watch(_utilizationViewModeProvider);
     final state = ref.watch(utilizationProvider);
 
     return Scaffold(
@@ -39,8 +34,11 @@ class _UtilizationHeatmapScreenState
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowLeft01,
+            color: AppColors.textPrimary,
+            size: 20,
+          ),
           onPressed: () => context.go(AppRoutes.adminAnalytics),
         ),
         title: Text('Utilization', style: AppTypography.headingSmall),
@@ -56,7 +54,23 @@ class _UtilizationHeatmapScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: AppSpacing.md),
-              _buildViewModeChips(),
+              Row(
+                children: [
+                  _ViewModeChip(
+                    label: 'Day',
+                    index: 0,
+                    activeIndex: viewMode,
+                    onTap: () => _selectMode(0),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  _ViewModeChip(
+                    label: 'Week',
+                    index: 1,
+                    activeIndex: viewMode,
+                    onTap: () => _selectMode(1),
+                  ),
+                ],
+              ),
               const SizedBox(height: AppSpacing.lg),
               _buildContent(state),
               const SizedBox(height: AppSpacing.xxl),
@@ -67,23 +81,72 @@ class _UtilizationHeatmapScreenState
     );
   }
 
-  Widget _buildViewModeChips() {
-    return Row(
-      children: [
-        _buildChip('Day', 0),
-        const SizedBox(width: AppSpacing.sm),
-        _buildChip('Week', 1),
-      ],
-    );
+  void _selectMode(int index) {
+    ref.read(_utilizationViewModeProvider.notifier).state = index;
+    _load(index);
   }
 
-  Widget _buildChip(String label, int index) {
-    final isActive = _viewMode == index;
+  Widget _buildContent(AnalyticsState<UtilizationModel> state) {
+    if (state is AnalyticsLoading<UtilizationModel>) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(AppSpacing.xxl),
+          child: CircularProgressIndicator(color: AppColors.rose),
+        ),
+      );
+    }
+    if (state is AnalyticsError<UtilizationModel>) {
+      return _UtilizationError(onRetry: _load);
+    }
+    if (state is AnalyticsLoaded<UtilizationModel>) {
+      return _UtilizationHeatmap(data: state.data);
+    }
+    return const SizedBox.shrink();
+  }
+
+  Future<void> _load([int? overrideMode]) async {
+    final now = DateTime.now();
+    final viewMode = overrideMode ?? ref.read(_utilizationViewModeProvider);
+    final String dateFrom;
+    final String dateTo;
+
+    if (viewMode == 0) {
+      dateFrom = _formatDate(now);
+      dateTo = _formatDate(now);
+    } else {
+      dateFrom = _formatDate(now.subtract(const Duration(days: 6)));
+      dateTo = _formatDate(now);
+    }
+
+    ref.read(utilizationProvider.notifier).load(
+          dateFrom: dateFrom,
+          dateTo: dateTo,
+        );
+  }
+
+  String _formatDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+}
+
+// ─── View Mode Chip ───────────────────────────────────────────────────────────
+
+class _ViewModeChip extends StatelessWidget {
+  const _ViewModeChip({
+    required this.label,
+    required this.index,
+    required this.activeIndex,
+    required this.onTap,
+  });
+  final String label;
+  final int index;
+  final int activeIndex;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isActive = activeIndex == index;
     return GestureDetector(
-      onTap: () {
-        setState(() => _viewMode = index);
-        _load();
-      },
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
@@ -102,29 +165,16 @@ class _UtilizationHeatmapScreenState
       ),
     );
   }
+}
 
-  Widget _buildContent(AnalyticsState<UtilizationModel> state) {
-    if (state is AnalyticsLoading<UtilizationModel>) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.xxl),
-          child: CircularProgressIndicator(color: AppColors.rose),
-        ),
-      );
-    }
+// ─── Error View ───────────────────────────────────────────────────────────────
 
-    if (state is AnalyticsError<UtilizationModel>) {
-      return _buildError(state.error);
-    }
+class _UtilizationError extends StatelessWidget {
+  const _UtilizationError({required this.onRetry});
+  final VoidCallback onRetry;
 
-    if (state is AnalyticsLoaded<UtilizationModel>) {
-      return _buildHeatmap(state.data);
-    }
-
-    return const SizedBox.shrink();
-  }
-
-  Widget _buildError(Object error) {
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -136,12 +186,14 @@ class _UtilizationHeatmapScreenState
               size: 48,
             ),
             const SizedBox(height: AppSpacing.md),
-            Text('Failed to load utilization data',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary)),
+            Text(
+              'Failed to load utilization data',
+              style: AppTypography.bodyMedium
+                  .copyWith(color: AppColors.textSecondary),
+            ),
             const SizedBox(height: AppSpacing.md),
             OutlinedButton(
-              onPressed: _load,
+              onPressed: onRetry,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
                 side: const BorderSide(color: AppColors.border),
@@ -156,33 +208,49 @@ class _UtilizationHeatmapScreenState
       ),
     );
   }
+}
 
-  Widget _buildHeatmap(UtilizationModel data) {
+// ─── Heatmap Content ──────────────────────────────────────────────────────────
+
+class _UtilizationHeatmap extends StatelessWidget {
+  const _UtilizationHeatmap({required this.data});
+  final UtilizationModel data;
+
+  @override
+  Widget build(BuildContext context) {
     final hours = data.data ?? [];
 
     if (hours.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: Text('No utilization data available',
-              style: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textSecondary)),
+          child: Text(
+            'No utilization data available',
+            style: AppTypography.bodyMedium
+                .copyWith(color: AppColors.textSecondary),
+          ),
         ),
       );
     }
 
-    // Find peak hour
     UtilizationHourModel? peak;
     for (final h in hours) {
-      if (peak == null || (h.activeSessionsPeak ?? 0) > (peak.activeSessionsPeak ?? 0)) {
+      if (peak == null ||
+          (h.activeSessionsPeak ?? 0) > (peak.activeSessionsPeak ?? 0)) {
         peak = h;
+      }
+    }
+
+    int maxPeak = 1;
+    for (final h in hours) {
+      if ((h.activeSessionsPeak ?? 0) > maxPeak) {
+        maxPeak = h.activeSessionsPeak!;
       }
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Peak hour indicator
         if (peak != null && peak.hourOfDay != null)
           Container(
             width: double.infinity,
@@ -190,7 +258,9 @@ class _UtilizationHeatmapScreenState
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-              border: Border.all(color: AppColors.rose.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: AppColors.rose.withValues(alpha: 0.3),
+              ),
             ),
             child: Row(
               children: [
@@ -210,43 +280,62 @@ class _UtilizationHeatmapScreenState
             ),
           ),
         const SizedBox(height: AppSpacing.lg),
-
-        // Hourly grid
         Text('Hourly Breakdown', style: AppTypography.headingSmall),
         const SizedBox(height: AppSpacing.md),
-        // Table header
-        _buildGridHeader(),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          child: Row(
+            children: [
+              Expanded(
+                  flex: 2, child: Text('Hour', style: AppTypography.caption)),
+              Expanded(
+                  flex: 2,
+                  child: Text('Active',
+                      style: AppTypography.caption,
+                      textAlign: TextAlign.center)),
+              Expanded(
+                  flex: 2,
+                  child: Text('Started',
+                      style: AppTypography.caption,
+                      textAlign: TextAlign.center)),
+              Expanded(
+                  flex: 2,
+                  child: Text('Usage',
+                      style: AppTypography.caption,
+                      textAlign: TextAlign.right)),
+            ],
+          ),
+        ),
         const Divider(color: AppColors.border, height: 1),
-        ...hours.map((h) => _buildHourRow(h)),
+        ...hours.map((h) => _HourRow(h: h, maxPeak: maxPeak)),
       ],
     );
   }
 
-  Widget _buildGridHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      child: Row(
-        children: [
-          const Expanded(flex: 2, child: Text('Hour', style: AppTypography.caption)),
-          const Expanded(flex: 2, child: Text('Active', style: AppTypography.caption, textAlign: TextAlign.center)),
-          const Expanded(flex: 2, child: Text('Started', style: AppTypography.caption, textAlign: TextAlign.center)),
-          const Expanded(flex: 2, child: Text('Usage', style: AppTypography.caption, textAlign: TextAlign.right)),
-        ],
-      ),
-    );
+  static String _formatHour(int hour) {
+    if (hour == 0) return '12 AM';
+    if (hour < 12) return '$hour AM';
+    if (hour == 12) return '12 PM';
+    return '${hour - 12} PM';
   }
+}
 
-  Widget _buildHourRow(UtilizationHourModel h) {
-    final peakSessions = _maxPeakFromData();
-    final utilizationPct = peakSessions > 0
-        ? (h.activeSessionsPeak ?? 0) / peakSessions
-        : 0.0;
+// ─── Hour Row ─────────────────────────────────────────────────────────────────
+
+class _HourRow extends StatelessWidget {
+  const _HourRow({required this.h, required this.maxPeak});
+  final UtilizationHourModel h;
+  final int maxPeak;
+
+  @override
+  Widget build(BuildContext context) {
+    final utilizationPct =
+        maxPeak > 0 ? (h.activeSessionsPeak ?? 0) / maxPeak : 0.0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
-          // Hour label
           Expanded(
             flex: 2,
             child: Text(
@@ -254,7 +343,6 @@ class _UtilizationHeatmapScreenState
               style: AppTypography.bodySmall,
             ),
           ),
-          // Active sessions peak
           Expanded(
             flex: 2,
             child: Text(
@@ -263,7 +351,6 @@ class _UtilizationHeatmapScreenState
               textAlign: TextAlign.center,
             ),
           ),
-          // Sessions started
           Expanded(
             flex: 2,
             child: Text(
@@ -272,7 +359,6 @@ class _UtilizationHeatmapScreenState
               textAlign: TextAlign.center,
             ),
           ),
-          // Usage bar
           Expanded(
             flex: 2,
             child: Row(
@@ -300,56 +386,17 @@ class _UtilizationHeatmapScreenState
     );
   }
 
-  int _maxPeakFromData() {
-    final state = ref.read(utilizationProvider);
-    if (state is AnalyticsLoaded<UtilizationModel>) {
-      final hours = state.data.data ?? [];
-      int max = 0;
-      for (final h in hours) {
-        if ((h.activeSessionsPeak ?? 0) > max) {
-          max = h.activeSessionsPeak!;
-        }
-      }
-      return max;
-    }
-    return 1;
-  }
-
-  Color _heatColor(double pct) {
-    if (pct > 0.75) return AppColors.rose;
-    if (pct > 0.5) return AppColors.gold;
-    if (pct > 0.25) return const Color(0xFF4CAF50);
-    return AppColors.textSecondary;
-  }
-
-  String _formatHour(int hour) {
+  static String _formatHour(int hour) {
     if (hour == 0) return '12 AM';
     if (hour < 12) return '$hour AM';
     if (hour == 12) return '12 PM';
     return '${hour - 12} PM';
   }
 
-  Future<void> _load() async {
-    final now = DateTime.now();
-    String dateFrom;
-    String dateTo;
-
-    if (_viewMode == 0) {
-      // Day view — today
-      dateFrom = _formatDate(now);
-      dateTo = _formatDate(now);
-    } else {
-      // Week view — last 7 days
-      dateFrom = _formatDate(now.subtract(const Duration(days: 6)));
-      dateTo = _formatDate(now);
-    }
-
-    ref.read(utilizationProvider.notifier).load(
-          dateFrom: dateFrom,
-          dateTo: dateTo,
-        );
+  static Color _heatColor(double pct) {
+    if (pct > 0.75) return AppColors.rose;
+    if (pct > 0.5) return AppColors.gold;
+    if (pct > 0.25) return AppColors.ok;
+    return AppColors.textSecondary;
   }
-
-  String _formatDate(DateTime d) =>
-      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 }

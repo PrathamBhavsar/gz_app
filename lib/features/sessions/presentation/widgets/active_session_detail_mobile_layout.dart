@@ -13,6 +13,11 @@ import '../../../../shared/widgets/em_top_bar.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../providers/active_session_notifier.dart';
 
+final _sessionDetailElapsedProvider =
+    StateProvider.autoDispose<int>((ref) => 0);
+final _sessionDetailShowEventsProvider =
+    StateProvider.autoDispose<bool>((ref) => false);
+
 class ActiveSessionDetailMobileLayout extends ConsumerWidget {
   final String id;
   const ActiveSessionDetailMobileLayout({super.key, required this.id});
@@ -59,28 +64,26 @@ class _ActiveSessionBody extends ConsumerStatefulWidget {
 
 class _ActiveSessionBodyState extends ConsumerState<_ActiveSessionBody> {
   late int _totalSecs;
-  late int _elapsed;
   Timer? _timer;
-  bool _showEvents = false;
 
   @override
   void initState() {
     super.initState();
     _initTimerFromSession(widget.session);
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (_elapsed < _totalSecs) setState(() => _elapsed++);
+      if (ref.read(_sessionDetailElapsedProvider) < _totalSecs) {
+        ref.read(_sessionDetailElapsedProvider.notifier).state++;
+      }
     });
   }
 
   void _initTimerFromSession(SessionModel session) {
     final durationMin = session.durationMinutes ?? 120;
     _totalSecs = durationMin * 60;
-    if (session.startedAt != null) {
-      final elapsedDur = DateTime.now().difference(session.startedAt!);
-      _elapsed = elapsedDur.inSeconds.clamp(0, _totalSecs);
-    } else {
-      _elapsed = 0;
-    }
+    final initial = session.startedAt != null
+        ? DateTime.now().difference(session.startedAt!).inSeconds.clamp(0, _totalSecs)
+        : 0;
+    ref.read(_sessionDetailElapsedProvider.notifier).state = initial;
   }
 
   @override
@@ -101,17 +104,19 @@ class _ActiveSessionBodyState extends ConsumerState<_ActiveSessionBody> {
 
   @override
   Widget build(BuildContext context) {
+    final elapsed = ref.watch(_sessionDetailElapsedProvider);
+    final showEvents = ref.watch(_sessionDetailShowEventsProvider);
     final session = widget.session;
-    final remain = (_totalSecs - _elapsed).clamp(0, _totalSecs);
-    final pct = _totalSecs > 0 ? _elapsed / _totalSecs : 0.0;
+    final remain = (_totalSecs - elapsed).clamp(0, _totalSecs);
+    final pct = _totalSecs > 0 ? elapsed / _totalSecs : 0.0;
 
     final hh = remain ~/ 3600;
     final mm = (remain % 3600) ~/ 60;
     final ss = remain % 60;
     final remainStr = '${_pad(hh)}:${_pad(mm)}:${_pad(ss)}';
 
-    final em = _elapsed ~/ 60;
-    final es = _elapsed % 60;
+    final em = elapsed ~/ 60;
+    final es = elapsed % 60;
 
     return SafeArea(
       child: Column(
@@ -249,8 +254,9 @@ class _ActiveSessionBodyState extends ConsumerState<_ActiveSessionBody> {
                   child: Column(
                     children: [
                       GestureDetector(
-                        onTap: () =>
-                            setState(() => _showEvents = !_showEvents),
+                        onTap: () => ref
+                            .read(_sessionDetailShowEventsProvider.notifier)
+                            .state = !showEvents,
                         behavior: HitTestBehavior.opaque,
                         child: Padding(
                           padding: const EdgeInsets.all(AppSpacing.md),
@@ -270,7 +276,7 @@ class _ActiveSessionBodyState extends ConsumerState<_ActiveSessionBody> {
                               ),
                               const Spacer(),
                               AnimatedRotation(
-                                turns: _showEvents ? 0.5 : 0,
+                                turns: showEvents ? 0.5 : 0,
                                 duration: const Duration(milliseconds: 200),
                                 child: const HugeIcon(
                                   icon: HugeIcons.strokeRoundedArrowDown01,
@@ -282,7 +288,7 @@ class _ActiveSessionBodyState extends ConsumerState<_ActiveSessionBody> {
                           ),
                         ),
                       ),
-                      if (_showEvents)
+                      if (showEvents)
                         Padding(
                           padding: const EdgeInsets.fromLTRB(
                             AppSpacing.md,

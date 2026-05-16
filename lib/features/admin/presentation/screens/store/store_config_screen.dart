@@ -9,6 +9,10 @@ import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_store_provider.dart';
 import '../../providers/admin_auth_provider.dart';
 
+final _allowWalkInsProvider = StateProvider.autoDispose<bool>((ref) => true);
+final _autoStartProvider = StateProvider.autoDispose<bool>((ref) => true);
+final _configSavingProvider = StateProvider.autoDispose<bool>((ref) => false);
+
 /// Store Config — Screen 59.
 /// Super Admin only. Operational settings and store profile.
 class StoreConfigScreen extends ConsumerStatefulWidget {
@@ -26,14 +30,30 @@ class _StoreConfigScreenState extends ConsumerState<StoreConfigScreen> {
   final _maxDurationCtrl = TextEditingController();
   final _hoursStartCtrl = TextEditingController();
   final _hoursEndCtrl = TextEditingController();
-  bool _allowWalkIns = true;
-  bool _autoStart = true;
-  bool _saving = false;
+  bool _controllersPopulated = false;
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(storeConfigProvider.notifier).load());
+    Future.microtask(() {
+      ref.read(storeConfigProvider.notifier).load();
+      ref.listenManual(storeConfigProvider, (_, next) {
+        if (next is ManagementLoaded<Map<String, dynamic>> && !_controllersPopulated) {
+          _controllersPopulated = true;
+          final c = next.data;
+          _bookingWindowCtrl.text = (c['booking_window_minutes'] ?? '').toString();
+          _paymentWindowCtrl.text = (c['payment_window_minutes'] ?? '').toString();
+          _noShowGraceCtrl.text = (c['no_show_grace_minutes'] ?? '').toString();
+          _maxDurationCtrl.text = (c['max_booking_duration_minutes'] ?? '').toString();
+          _hoursStartCtrl.text = (c['operating_hours_start'] ?? '').toString();
+          _hoursEndCtrl.text = (c['operating_hours_end'] ?? '').toString();
+          ref.read(_allowWalkInsProvider.notifier).state =
+              c['allow_walk_ins'] as bool? ?? true;
+          ref.read(_autoStartProvider.notifier).state =
+              c['auto_start_session_on_check_in'] as bool? ?? true;
+        }
+      });
+    });
   }
 
   @override
@@ -51,6 +71,9 @@ class _StoreConfigScreenState extends ConsumerState<StoreConfigScreen> {
   Widget build(BuildContext context) {
     final isSuperAdmin = ref.watch(adminRoleProvider) == 'super_admin';
     final state = ref.watch(storeConfigProvider);
+    final allowWalkIns = ref.watch(_allowWalkInsProvider);
+    final autoStart = ref.watch(_autoStartProvider);
+    final saving = ref.watch(_configSavingProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -58,14 +81,13 @@ class _StoreConfigScreenState extends ConsumerState<StoreConfigScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: AppColors.textPrimary, size: 20),
           onPressed: () => context.go(AppRoutes.adminSystemsMgmt),
         ),
         title: Text('Store Config', style: AppTypography.headingSmall),
       ),
       body: state is ManagementLoaded<Map<String, dynamic>>
-          ? _buildForm(state.data, isSuperAdmin)
+          ? _buildForm(state.data, isSuperAdmin, allowWalkIns, autoStart, saving)
           : state is ManagementError<Map<String, dynamic>>
               ? _buildError(state.error)
               : const Center(
@@ -74,24 +96,8 @@ class _StoreConfigScreenState extends ConsumerState<StoreConfigScreen> {
     );
   }
 
-  Widget _buildForm(Map<String, dynamic> config, bool isSuperAdmin) {
-    // Populate controllers from config on first load
-    if (_bookingWindowCtrl.text.isEmpty) {
-      _bookingWindowCtrl.text =
-          (config['booking_window_minutes'] ?? '').toString();
-      _paymentWindowCtrl.text =
-          (config['payment_window_minutes'] ?? '').toString();
-      _noShowGraceCtrl.text =
-          (config['no_show_grace_minutes'] ?? '').toString();
-      _maxDurationCtrl.text =
-          (config['max_booking_duration_minutes'] ?? '').toString();
-      _hoursStartCtrl.text =
-          (config['operating_hours_start'] ?? '').toString();
-      _hoursEndCtrl.text =
-          (config['operating_hours_end'] ?? '').toString();
-      _allowWalkIns = config['allow_walk_ins'] as bool? ?? true;
-      _autoStart = config['auto_start_session_on_check_in'] as bool? ?? true;
-    }
+  Widget _buildForm(Map<String, dynamic> config, bool isSuperAdmin,
+      bool allowWalkIns, bool autoStart, bool saving) {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -127,11 +133,11 @@ class _StoreConfigScreenState extends ConsumerState<StoreConfigScreen> {
           // Toggles
           Text('Behavior', style: AppTypography.headingSmall),
           const SizedBox(height: AppSpacing.md),
-          _buildToggle('Allow Walk-ins', _allowWalkIns, (v) {
-            if (isSuperAdmin) setState(() => _allowWalkIns = v);
+          _buildToggle('Allow Walk-ins', allowWalkIns, (v) {
+            if (isSuperAdmin) ref.read(_allowWalkInsProvider.notifier).state = v;
           }),
-          _buildToggle('Auto-start session on check-in', _autoStart, (v) {
-            if (isSuperAdmin) setState(() => _autoStart = v);
+          _buildToggle('Auto-start session on check-in', autoStart, (v) {
+            if (isSuperAdmin) ref.read(_autoStartProvider.notifier).state = v;
           }),
           const SizedBox(height: AppSpacing.xl),
 
@@ -140,7 +146,7 @@ class _StoreConfigScreenState extends ConsumerState<StoreConfigScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _saving ? null : _save,
+                onPressed: saving ? null : _save,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.rose,
                   foregroundColor: AppColors.background,
@@ -150,7 +156,7 @@ class _StoreConfigScreenState extends ConsumerState<StoreConfigScreen> {
                         BorderRadius.circular(AppSpacing.borderRadius),
                   ),
                 ),
-                child: _saving
+                child: saving
                     ? const SizedBox(
                         width: 20,
                         height: 20,
@@ -250,7 +256,7 @@ class _StoreConfigScreenState extends ConsumerState<StoreConfigScreen> {
   }
 
   Future<void> _save() async {
-    setState(() => _saving = true);
+    ref.read(_configSavingProvider.notifier).state = true;
     final success = await ref.read(storeConfigProvider.notifier).updateConfig({
       'booking_window_minutes': int.tryParse(_bookingWindowCtrl.text),
       'payment_window_minutes': int.tryParse(_paymentWindowCtrl.text),
@@ -258,16 +264,16 @@ class _StoreConfigScreenState extends ConsumerState<StoreConfigScreen> {
       'max_booking_duration_minutes': int.tryParse(_maxDurationCtrl.text),
       'operating_hours_start': _hoursStartCtrl.text.trim(),
       'operating_hours_end': _hoursEndCtrl.text.trim(),
-      'allow_walk_ins': _allowWalkIns,
-      'auto_start_session_on_check_in': _autoStart,
+      'allow_walk_ins': ref.read(_allowWalkInsProvider),
+      'auto_start_session_on_check_in': ref.read(_autoStartProvider),
     });
     if (mounted) {
-      setState(() => _saving = false);
+      ref.read(_configSavingProvider.notifier).state = false;
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Config updated'),
-            backgroundColor: Color(0xFF4CAF50),
+            backgroundColor: AppColors.ok,
           ),
         );
       }

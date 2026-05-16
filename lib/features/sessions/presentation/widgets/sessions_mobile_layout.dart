@@ -206,7 +206,7 @@ class SessionsMobileLayout extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.md),
                 EmButtonFull(
                   label: 'Book a slot',
-                  onPressed: () => context.go('/book'),
+                  onPressed: () => context.go(AppRoutes.book),
                 ),
               ],
             ),

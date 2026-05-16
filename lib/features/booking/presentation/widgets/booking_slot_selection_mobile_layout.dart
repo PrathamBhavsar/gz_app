@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gz_app/core/navigation/routes.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/auth/token_storage.dart';
 import '../../../../../core/errors/app_exception.dart';
@@ -167,7 +168,7 @@ class BookingSlotSelectionMobileLayout extends ConsumerWidget {
               label: 'Check Availability',
               onPressed: storeId == null
                   ? null
-                  : () => context.push('/book/availability'),
+                  : () => context.push(AppRoutes.bookAvailability),
             ),
           ),
         ),

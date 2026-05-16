@@ -38,8 +38,7 @@ class _PricingRulesScreenState extends ConsumerState<PricingRulesScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: AppColors.textPrimary, size: 20),
           onPressed: () => context.go(AppRoutes.adminPricing),
         ),
         title: Text('Pricing Rules', style: AppTypography.headingSmall),
@@ -183,7 +182,7 @@ class _PricingRulesScreenState extends ConsumerState<PricingRulesScreen> {
             ),
             decoration: BoxDecoration(
               color: isActive
-                  ? const Color(0xFF4CAF50).withValues(alpha: 0.15)
+                  ? AppColors.ok.withValues(alpha: 0.15)
                   : AppColors.surface2,
               borderRadius:
                   BorderRadius.circular(AppSpacing.borderRadiusSm),
@@ -191,7 +190,7 @@ class _PricingRulesScreenState extends ConsumerState<PricingRulesScreen> {
             child: Text(
               isActive ? 'Active' : 'Inactive',
               style: AppTypography.bodySmall.copyWith(
-                color: isActive ? const Color(0xFF4CAF50) : AppColors.textSecondary,
+                color: isActive ? AppColors.ok : AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -215,6 +214,9 @@ class _PricingRulesScreenState extends ConsumerState<PricingRulesScreen> {
   }
 }
 
+final _addRuleTypeProvider = StateProvider.autoDispose<String>((ref) => 'peak');
+final _addRuleSavingProvider = StateProvider.autoDispose<bool>((ref) => false);
+
 class _AddRuleSheet extends ConsumerStatefulWidget {
   const _AddRuleSheet();
 
@@ -225,8 +227,6 @@ class _AddRuleSheet extends ConsumerStatefulWidget {
 class _AddRuleSheetState extends ConsumerState<_AddRuleSheet> {
   final _nameCtrl = TextEditingController();
   final _multiplierCtrl = TextEditingController(text: '1.0');
-  String _ruleType = 'peak';
-  bool _saving = false;
 
   @override
   void dispose() {
@@ -237,6 +237,8 @@ class _AddRuleSheetState extends ConsumerState<_AddRuleSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final ruleType = ref.watch(_addRuleTypeProvider);
+    final saving = ref.watch(_addRuleSavingProvider);
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
@@ -268,11 +270,11 @@ class _AddRuleSheetState extends ConsumerState<_AddRuleSheet> {
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              _buildTypeChip('Peak', 'peak'),
+              _buildTypeChip('Peak', 'peak', ruleType),
               const SizedBox(width: AppSpacing.sm),
-              _buildTypeChip('Off-Peak', 'off_peak'),
+              _buildTypeChip('Off-Peak', 'off_peak', ruleType),
               const SizedBox(width: AppSpacing.sm),
-              _buildTypeChip('Custom', 'custom'),
+              _buildTypeChip('Custom', 'custom', ruleType),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -301,7 +303,7 @@ class _AddRuleSheetState extends ConsumerState<_AddRuleSheet> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _saving ? null : _save,
+              onPressed: saving ? null : _save,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.rose,
                 foregroundColor: AppColors.background,
@@ -311,7 +313,7 @@ class _AddRuleSheetState extends ConsumerState<_AddRuleSheet> {
                       BorderRadius.circular(AppSpacing.borderRadius),
                 ),
               ),
-              child: _saving
+              child: saving
                   ? const SizedBox(
                       width: 20,
                       height: 20,
@@ -329,10 +331,10 @@ class _AddRuleSheetState extends ConsumerState<_AddRuleSheet> {
     );
   }
 
-  Widget _buildTypeChip(String label, String value) {
-    final isActive = _ruleType == value;
+  Widget _buildTypeChip(String label, String value, String ruleType) {
+    final isActive = ruleType == value;
     return GestureDetector(
-      onTap: () => setState(() => _ruleType = value),
+      onTap: () => ref.read(_addRuleTypeProvider.notifier).state = value,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
@@ -355,19 +357,19 @@ class _AddRuleSheetState extends ConsumerState<_AddRuleSheet> {
 
   Future<void> _save() async {
     if (_nameCtrl.text.trim().isEmpty) return;
-    setState(() => _saving = true);
+    ref.read(_addRuleSavingProvider.notifier).state = true;
 
     final success = await ref.read(pricingRulesProvider.notifier).createRule({
       'name': _nameCtrl.text.trim(),
-      'rule_type': _ruleType,
+      'rule_type': ref.read(_addRuleTypeProvider),
       'multiplier': double.tryParse(_multiplierCtrl.text) ?? 1.0,
       'is_active': true,
     });
 
     if (mounted) {
-      setState(() => _saving = false);
+      ref.read(_addRuleSavingProvider.notifier).state = false;
       if (success) {
-        Navigator.pop(context);
+        context.pop();
       }
     }
   }

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 
 /// Management Hub — Tab 3 root.
-/// Placeholder screen with navigation tiles to Pricing, Billing, Campaigns, Credits, Disputes.
-/// Full implementation in Phase 6.
 class AdminManagementScreen extends StatelessWidget {
   const AdminManagementScreen({super.key});
 
@@ -23,62 +22,69 @@ class AdminManagementScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         child: Column(
-          children: [
-            const SizedBox(height: AppSpacing.md),
-            _buildTile(
-              context,
-              'Pricing Rules',
-              Icons.sell_outlined,
-              AppRoutes.adminPricing,
+          children: const [
+            SizedBox(height: AppSpacing.md),
+            _ManagementTile(
+              title: 'Pricing Rules',
+              icon: HugeIcons.strokeRoundedTags,
+              route: AppRoutes.adminPricing,
             ),
-            const SizedBox(height: AppSpacing.sm),
-            _buildTile(
-              context,
-              'Billing & Payments',
-              Icons.receipt_long_outlined,
-              AppRoutes.adminBilling,
+            SizedBox(height: AppSpacing.sm),
+            _ManagementTile(
+              title: 'Billing & Payments',
+              icon: HugeIcons.strokeRoundedInvoice01,
+              route: AppRoutes.adminBilling,
             ),
-            const SizedBox(height: AppSpacing.sm),
-            _buildTile(
-              context,
-              'Campaigns',
-              Icons.campaign_outlined,
-              AppRoutes.adminCampaigns,
+            SizedBox(height: AppSpacing.sm),
+            _ManagementTile(
+              title: 'Campaigns',
+              icon: HugeIcons.strokeRoundedMegaphone01,
+              route: AppRoutes.adminCampaigns,
             ),
-            const SizedBox(height: AppSpacing.sm),
-            _buildTile(
-              context,
-              'Credits',
-              Icons.stars_outlined,
-              AppRoutes.adminCredits,
+            SizedBox(height: AppSpacing.sm),
+            _ManagementTile(
+              title: 'Credits',
+              icon: HugeIcons.strokeRoundedStar,
+              route: AppRoutes.adminCredits,
             ),
-            const SizedBox(height: AppSpacing.sm),
-            _buildTile(
-              context,
-              'Disputes',
-              Icons.gavel_outlined,
-              AppRoutes.adminDisputes,
+            SizedBox(height: AppSpacing.sm),
+            _ManagementTile(
+              title: 'Disputes',
+              icon: HugeIcons.strokeRoundedJusticeScale01,
+              route: AppRoutes.adminDisputes,
             ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildTile(
-    BuildContext context,
-    String title,
-    IconData icon,
-    String route,
-  ) {
+class _ManagementTile extends StatelessWidget {
+  const _ManagementTile({
+    required this.title,
+    required this.icon,
+    required this.route,
+  });
+
+  final String title;
+  final dynamic icon;
+  final String route;
+
+  @override
+  Widget build(BuildContext context) {
     return ListTile(
       tileColor: AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
       ),
-      leading: Icon(icon, color: AppColors.textPrimary),
+      leading: HugeIcon(icon: icon, color: AppColors.textPrimary, size: 22),
       title: Text(title, style: AppTypography.bodyLarge),
-      trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+      trailing: const HugeIcon(
+        icon: HugeIcons.strokeRoundedArrowRight01,
+        color: AppColors.textSecondary,
+        size: 20,
+      ),
       onTap: () => context.go(route),
     );
   }

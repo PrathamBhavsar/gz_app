@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../core/auth/token_storage.dart';
@@ -47,7 +48,7 @@ class _StoreSelectorSheetState extends ConsumerState<StoreSelectorSheet> {
     if (store.id == null) return;
     ref.read(activeStoreIdProvider.notifier).state = store.id;
     ref.read(tokenStorageProvider).saveActiveStoreId(store.id!);
-    Navigator.of(context).pop();
+    context.pop();
   }
 
   @override
@@ -146,38 +147,40 @@ class _StoreSelectorSheetState extends ConsumerState<StoreSelectorSheet> {
               final current = stores.where((s) => s.id == currentId).toList();
               final others = stores.where((s) => s.id != currentId).toList();
 
-              return ListView(
-                padding: const EdgeInsets.only(
-                    bottom: AppSpacing.xl),
-                children: [
-                  if (current.isNotEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.xs),
-                      child: Text('Current',
-                          style: AppTypography.meta),
-                    ),
-                    ...current.map((s) => _StoreSelectRow(
-                          store: s,
-                          isActive: true,
-                          onTap: () => _selectStore(s),
-                        )),
-                  ],
-                  if (others.isNotEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.xs),
-                      child: Text(
-                          current.isEmpty ? 'All Stores' : 'Other Stores',
-                          style: AppTypography.meta),
-                    ),
-                    ...others.map((s) => _StoreSelectRow(
-                          store: s,
-                          isActive: false,
-                          onTap: () => _selectStore(s),
-                        )),
-                  ],
-                ],
+              final items = <_StoreSheetItem>[];
+              if (current.isNotEmpty) {
+                items.add(const _StoreSheetHeader('Current'));
+                for (final s in current) {
+                  items.add(_StoreSheetRow(store: s, isActive: true));
+                }
+              }
+              if (others.isNotEmpty) {
+                items.add(_StoreSheetHeader(
+                    current.isEmpty ? 'All Stores' : 'Other Stores'));
+                for (final s in others) {
+                  items.add(_StoreSheetRow(store: s, isActive: false));
+                }
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  if (item is _StoreSheetHeader) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.md,
+                          AppSpacing.sm, AppSpacing.md, AppSpacing.xs),
+                      child: Text(item.label, style: AppTypography.meta),
+                    );
+                  }
+                  final row = item as _StoreSheetRow;
+                  return _StoreSelectRow(
+                    store: row.store,
+                    isActive: row.isActive,
+                    onTap: () => _selectStore(row.store),
+                  );
+                },
               );
             },
           ),
@@ -185,6 +188,21 @@ class _StoreSelectorSheetState extends ConsumerState<StoreSelectorSheet> {
       ],
     );
   }
+}
+
+sealed class _StoreSheetItem {
+  const _StoreSheetItem();
+}
+
+class _StoreSheetHeader extends _StoreSheetItem {
+  const _StoreSheetHeader(this.label);
+  final String label;
+}
+
+class _StoreSheetRow extends _StoreSheetItem {
+  const _StoreSheetRow({required this.store, required this.isActive});
+  final StoreModel store;
+  final bool isActive;
 }
 
 class _StoreSelectRow extends StatelessWidget {

@@ -31,6 +31,8 @@ const _pages = [
   ),
 ];
 
+final _onboardingPageProvider = StateProvider.autoDispose<int>((ref) => 0);
+
 class OnboardingMobileLayout extends ConsumerStatefulWidget {
   const OnboardingMobileLayout({super.key});
 
@@ -42,7 +44,6 @@ class OnboardingMobileLayout extends ConsumerStatefulWidget {
 class _OnboardingMobileLayoutState
     extends ConsumerState<OnboardingMobileLayout> {
   final PageController _controller = PageController();
-  int _currentPage = 0;
 
   @override
   void dispose() {
@@ -55,10 +56,12 @@ class _OnboardingMobileLayoutState
     if (mounted) context.go(AppRoutes.authLanding);
   }
 
-  void _onPageChanged(int index) => setState(() => _currentPage = index);
+  void _onPageChanged(int index) =>
+      ref.read(_onboardingPageProvider.notifier).state = index;
 
   @override
   Widget build(BuildContext context) {
+    final currentPage = ref.watch(_onboardingPageProvider);
     return SafeArea(
       child: Column(
         children: [
@@ -122,7 +125,7 @@ class _OnboardingMobileLayoutState
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(_pages.length, (i) {
-              final active = i == _currentPage;
+              final active = i == currentPage;
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
@@ -144,7 +147,7 @@ class _OnboardingMobileLayoutState
               AppSpacing.md,
               AppSpacing.xxl,
             ),
-            child: _currentPage == _pages.length - 1
+            child: currentPage == _pages.length - 1
                 ? EmButtonFull(label: 'Get Started', onPressed: _finish)
                 : EmButtonFull(
                     label: 'Next',

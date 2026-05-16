@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gz_app/core/navigation/routes.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/errors/app_exception.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -193,7 +194,7 @@ class StoreSearchMobileLayout extends ConsumerWidget {
         final initial =
             store.name?.isNotEmpty == true ? store.name![0] : 'S';
         return GestureDetector(
-          onTap: () => context.push('/home/store/${store.slug}'),
+          onTap: () => context.push(AppRoutes.storeDetailPath(store.slug ?? '')),
           child: Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: EmCard(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -16,7 +17,7 @@ class EmailVerificationPendingMobileLayout extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Spacer(),
-          Icon(Icons.mark_email_unread_outlined, size: 80, color: AppColors.rose),
+          const HugeIcon(icon: HugeIcons.strokeRoundedMail01, size: 80, color: AppColors.rose),
           const SizedBox(height: AppSpacing.lg),
           Text('Check your inbox', style: AppTypography.headingLarge),
           const SizedBox(height: AppSpacing.md),

@@ -146,7 +146,7 @@ class _DisputeRow extends StatelessWidget {
         : '—';
 
     return GestureDetector(
-      onTap: () => context.push('/profile/disputes/$id'),
+      onTap: () => context.push(AppRoutes.disputeDetailPath(id)),
       child: EmCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

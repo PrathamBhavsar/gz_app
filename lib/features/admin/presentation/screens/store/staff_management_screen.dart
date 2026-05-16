@@ -38,8 +38,7 @@ class _StaffManagementScreenState
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: AppColors.textPrimary, size: 20),
           onPressed: () => context.go(AppRoutes.adminSystemsMgmt),
         ),
         title: Text('Staff', style: AppTypography.headingSmall),
@@ -101,7 +100,7 @@ class _StaffManagementScreenState
 
     final roleColor = switch (role.toLowerCase()) {
       'super_admin' => AppColors.rose,
-      'admin' => const Color(0xFF2196F3),
+      'admin' => AppColors.info,
       'staff' => AppColors.textSecondary,
       _ => AppColors.textSecondary,
     };
@@ -229,12 +228,12 @@ class _StaffManagementScreenState
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => ctx.pop(),
             child: Text('Cancel', style: AppTypography.bodyMedium),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(ctx);
+              ctx.pop();
               ref.read(staffProvider.notifier).deactivateStaff(id);
             },
             child: Text('Revoke',
@@ -354,7 +353,7 @@ class _StaffManagementScreenState
                 child: ElevatedButton(
                   onPressed: () async {
                     if (emailCtrl.text.trim().isEmpty) return;
-                    Navigator.pop(ctx);
+                    ctx.pop();
                     await ref.read(staffProvider.notifier).addStaff({
                       'email': emailCtrl.text.trim(),
                       'name': nameCtrl.text.trim(),

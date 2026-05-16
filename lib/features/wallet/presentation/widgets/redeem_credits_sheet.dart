@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -7,6 +8,8 @@ import '../../../../shared/widgets/em_button.dart';
 import '../../../../shared/widgets/em_card.dart';
 import '../../../../shared/widgets/em_tag.dart';
 import '../providers/redeem_credits_notifier.dart';
+
+final _redeemAmountProvider = StateProvider.autoDispose<double>((ref) => 0);
 
 void showRedeemCreditsSheet(BuildContext context, double balance) {
   showModalBottomSheet(
@@ -31,7 +34,6 @@ class _RedeemCreditsSheet extends ConsumerStatefulWidget {
 
 class _RedeemCreditsSheetState extends ConsumerState<_RedeemCreditsSheet> {
   late final TextEditingController _controller;
-  double _amount = 0;
 
   @override
   void initState() {
@@ -48,7 +50,7 @@ class _RedeemCreditsSheetState extends ConsumerState<_RedeemCreditsSheet> {
 
   void _setAmount(double v) {
     final clamped = v.clamp(0.0, widget.balance);
-    setState(() => _amount = clamped);
+    ref.read(_redeemAmountProvider.notifier).state = clamped;
     _controller.text = clamped.toStringAsFixed(0);
   }
 
@@ -56,19 +58,20 @@ class _RedeemCreditsSheetState extends ConsumerState<_RedeemCreditsSheet> {
   Widget build(BuildContext context) {
     ref.listen(redeemCreditsNotifierProvider, (_, next) {
       if (next is RedeemCreditsSuccess) {
-        Navigator.pop(context);
+        context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Credits redeemed successfully!')),
         );
       }
     });
 
+    final amount = ref.watch(_redeemAmountProvider);
     final state = ref.watch(redeemCreditsNotifierProvider);
     final notifier = ref.read(redeemCreditsNotifierProvider.notifier);
     final isConfirming = state is RedeemCreditsConfirming;
     final isLoading = state is RedeemCreditsLoading;
     final errorState = state is RedeemCreditsError ? state : null;
-    final rupees = (_amount / 10).toStringAsFixed(2);
+    final rupees = (amount / 10).toStringAsFixed(2);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -118,7 +121,7 @@ class _RedeemCreditsSheetState extends ConsumerState<_RedeemCreditsSheet> {
                         textBaseline: TextBaseline.alphabetic,
                         children: [
                           Text(
-                            _amount.toStringAsFixed(0),
+                            amount.toStringAsFixed(0),
                             style: AppTypography.heroMd,
                           ),
                           const SizedBox(width: 8),
@@ -184,13 +187,13 @@ class _RedeemCreditsSheetState extends ConsumerState<_RedeemCreditsSheet> {
           if (!isConfirming)
             EmButtonFull(
               label: 'Redeem',
-              onPressed: _amount > 0 ? () => notifier.requestConfirm(_amount) : null,
+              onPressed: amount > 0 ? () => notifier.requestConfirm(amount) : null,
             )
           else
             Column(
               children: [
                 Text(
-                  'Are you sure? This will apply ${_amount.toStringAsFixed(0)} credits.',
+                  'Are you sure? This will apply ${amount.toStringAsFixed(0)} credits.',
                   style: AppTypography.bodyR,
                 ),
                 const SizedBox(height: AppSpacing.sm),

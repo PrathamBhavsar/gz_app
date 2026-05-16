@@ -9,6 +9,11 @@ import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_operations_provider.dart';
 import '../../providers/admin_permissions.dart';
 
+final _bookingDateProvider =
+    StateProvider.autoDispose<DateTime>((ref) => DateTime.now());
+final _bookingStatusFilterProvider =
+    StateProvider.autoDispose<String>((ref) => 'All');
+
 /// Booking Management — Screen 45.
 /// Centralized view of all scheduled reservations.
 class BookingManagementScreen extends ConsumerStatefulWidget {
@@ -21,10 +26,14 @@ class BookingManagementScreen extends ConsumerStatefulWidget {
 
 class _BookingManagementScreenState
     extends ConsumerState<BookingManagementScreen> {
-  DateTime _selectedDate = DateTime.now();
-  String _statusFilter = 'All';
-
-  static const _statusOptions = ['All', 'unpaid', 'paid', 'checked_in', 'no_show', 'cancelled'];
+  static const _statusOptions = [
+    'All',
+    'unpaid',
+    'paid',
+    'checked_in',
+    'no_show',
+    'cancelled',
+  ];
 
   @override
   void initState() {
@@ -32,16 +41,20 @@ class _BookingManagementScreenState
     Future.microtask(() => _loadBookings());
   }
 
-  void _loadBookings() {
+  void _loadBookings([DateTime? overrideDate, String? overrideStatus]) {
+    final DateTime date = overrideDate ?? ref.read(_bookingDateProvider);
+    final status = overrideStatus ?? ref.read(_bookingStatusFilterProvider);
     final dateStr =
-        '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
+        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
     ref
         .read(bookingsProvider.notifier)
-        .loadBookings(date: dateStr, status: _statusFilter == 'All' ? null : _statusFilter);
+        .loadBookings(date: dateStr, status: status == 'All' ? null : status);
   }
 
   @override
   Widget build(BuildContext context) {
+    final selectedDate = ref.watch(_bookingDateProvider);
+    final statusFilter = ref.watch(_bookingStatusFilterProvider);
     final perms = ref.watch(adminPermissionsProvider);
     final canCancel = perms.canCancelBooking;
     final bookingsState = ref.watch(bookingsProvider);
@@ -52,368 +65,49 @@ class _BookingManagementScreenState
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowLeft01,
+            color: AppColors.textPrimary,
+            size: 20,
+          ),
           onPressed: () => context.go(AppRoutes.adminDashboard),
         ),
         title: Text('Bookings', style: AppTypography.headingSmall),
       ),
       body: Column(
         children: [
-          // Date strip
-          _buildDateStrip(),
+          _DateStrip(
+            selectedDate: selectedDate,
+            onDateSelected: (date) {
+              ref.read(_bookingDateProvider.notifier).state = date;
+              _loadBookings(date);
+            },
+          ),
           const SizedBox(height: AppSpacing.md),
-          // Status filter chips
-          _buildStatusFilters(),
+          _StatusFilters(
+            statusFilter: statusFilter,
+            statusOptions: _statusOptions,
+            onStatusSelected: (status) {
+              ref.read(_bookingStatusFilterProvider.notifier).state = status;
+              _loadBookings(null, status);
+            },
+          ),
           const SizedBox(height: AppSpacing.md),
-          // Bookings list
-          Expanded(child: _buildBookingsList(bookingsState, canCancel)),
+          Expanded(
+            child: _BookingsList(
+              state: bookingsState,
+              canCancel: canCancel,
+              onRetry: _loadBookings,
+              onRefresh: () async => _loadBookings(),
+              onStartWalkIn: () => context.go(AppRoutes.adminWalkIn),
+              onCheckIn: _handleCheckIn,
+              onCancel: _handleCancel,
+            ),
+          ),
         ],
       ),
     );
   }
-
-  // ─── Date Strip ─────────────────────────────────────────────────────
-
-  Widget _buildDateStrip() {
-    final dates = List.generate(
-      7,
-      (i) => DateTime.now().add(Duration(days: i - 3)),
-    );
-
-    return SizedBox(
-      height: 64,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        itemCount: dates.length,
-        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-        itemBuilder: (context, index) {
-          final date = dates[index];
-          final isToday = _isSameDay(date, DateTime.now());
-          final isSelected = _isSameDay(date, _selectedDate);
-          final dayName = _getDayName(date);
-          final dayNum = date.day.toString();
-
-          return GestureDetector(
-            onTap: () {
-              setState(() => _selectedDate = date);
-              _loadBookings();
-            },
-            child: Container(
-              width: 52,
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.rose : AppColors.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    dayName,
-                    style: AppTypography.caption.copyWith(
-                      color: isSelected
-                          ? AppColors.background
-                          : AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    dayNum,
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: isSelected
-                          ? AppColors.background
-                          : AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  if (isToday && !isSelected)
-                    Container(
-                      margin: const EdgeInsets.only(top: 2),
-                      width: 4,
-                      height: 4,
-                      decoration: const BoxDecoration(
-                        color: AppColors.rose,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  // ─── Status Filters ─────────────────────────────────────────────────
-
-  Widget _buildStatusFilters() {
-    return SizedBox(
-      height: 36,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        itemCount: _statusOptions.length,
-        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-        itemBuilder: (context, index) {
-          final status = _statusOptions[index];
-          final isSelected = status == _statusFilter;
-          return GestureDetector(
-            onTap: () {
-              setState(() => _statusFilter = status);
-              _loadBookings();
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.rose : AppColors.surface,
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.borderRadiusSm),
-                border: Border.all(
-                  color: isSelected ? AppColors.rose : AppColors.border,
-                ),
-              ),
-              child: Text(
-                _formatStatusLabel(status),
-                style: AppTypography.bodySmall.copyWith(
-                  color: isSelected
-                      ? AppColors.background
-                      : AppColors.textSecondary,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  // ─── Bookings List ──────────────────────────────────────────────────
-
-  Widget _buildBookingsList(BookingsState state, bool canCancel) {
-    if (state is BookingsLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.rose),
-      );
-    }
-
-    if (state is BookingsError) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedAlert01,
-              color: AppColors.error,
-              size: 48,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text('Failed to load bookings',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary)),
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: _loadBookings,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(color: AppColors.border),
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadius),
-                ),
-              ),
-              child: Text('Retry', style: AppTypography.button),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (state is BookingsLoaded) {
-      if (state.bookings.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const HugeIcon(
-                icon: HugeIcons.strokeRoundedCalendar03,
-                color: AppColors.textSecondary,
-                size: 64,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                'No bookings for this date',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextButton(
-                onPressed: () => context.go(AppRoutes.adminWalkIn),
-                child: Text(
-                  'Start a walk-in?',
-                  style: AppTypography.bodyMedium
-                      .copyWith(color: AppColors.rose),
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-
-      return RefreshIndicator(
-        color: AppColors.rose,
-        backgroundColor: AppColors.surface,
-        onRefresh: () async => _loadBookings(),
-        child: ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          itemCount: state.bookings.length,
-          separatorBuilder: (_, _) =>
-              const SizedBox(height: AppSpacing.sm),
-          itemBuilder: (context, index) {
-            final booking = state.bookings[index];
-            return _buildBookingCard(booking, canCancel);
-          },
-        ),
-      );
-    }
-
-    return const SizedBox.shrink();
-  }
-
-  Widget _buildBookingCard(Map<String, dynamic> booking, bool canCancel) {
-    final playerName = booking['userName']?.toString() ?? 'Unknown Player';
-    final systemId = booking['systemId']?.toString() ?? '--';
-    final systemName = booking['systemName']?.toString() ?? systemId;
-    final startTime = booking['startTime']?.toString() ?? '--';
-    final duration = booking['durationMinutes']?.toString() ?? '--';
-    final status = booking['status']?.toString() ?? 'unknown';
-    final bookingId = booking['id']?.toString() ?? booking['bookingId']?.toString() ?? '';
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Top row: name + status pill
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  playerName,
-                  style: AppTypography.bodyMedium
-                      .copyWith(fontWeight: FontWeight.w600),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              _buildStatusPill(status),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          // Details row
-          Row(
-            children: [
-              const HugeIcon(
-                icon: HugeIcons.strokeRoundedGameboy,
-                color: AppColors.textSecondary,
-                size: 14,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                systemName,
-                style: AppTypography.caption
-                    .copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              const HugeIcon(
-                icon: HugeIcons.strokeRoundedClock01,
-                color: AppColors.textSecondary,
-                size: 14,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                '$startTime · ${duration}m',
-                style: AppTypography.caption
-                    .copyWith(color: AppColors.textSecondary),
-              ),
-            ],
-          ),
-          // Action buttons
-          if (status == 'unpaid' || status == 'paid') ...[
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (status == 'paid')
-                  TextButton(
-                    onPressed: () => _handleCheckIn(bookingId),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.success,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                      ),
-                    ),
-                    child: Text('Check-in', style: AppTypography.bodySmall),
-                  ),
-                if (canCancel && status != 'cancelled')
-                  TextButton(
-                    onPressed: () => _handleCancel(bookingId),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                      ),
-                    ),
-                    child: Text('Cancel', style: AppTypography.bodySmall),
-                  ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusPill(String status) {
-    final (color, label) = switch (status) {
-      'paid' => (AppColors.success, 'Paid'),
-      'unpaid' => (const Color(0xFFFFC107), 'Unpaid'),
-      'checked_in' => (const Color(0xFF2196F3), 'Checked In'),
-      'no_show' => (AppColors.error, 'No Show'),
-      'cancelled' => (AppColors.textSecondary, 'Cancelled'),
-      _ => (AppColors.textSecondary, status),
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: 2,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
-      ),
-      child: Text(
-        label,
-        style: AppTypography.caption.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  // ─── Actions ────────────────────────────────────────────────────────
 
   Future<void> _handleCheckIn(String bookingId) async {
     final success =
@@ -422,8 +116,7 @@ class _BookingManagementScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(success ? 'Player checked in' : 'Check-in failed'),
-          backgroundColor:
-              success ? AppColors.success : AppColors.error,
+          backgroundColor: success ? AppColors.success : AppColors.error,
         ),
       );
     }
@@ -436,9 +129,11 @@ class _BookingManagementScreenState
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text('Cancel Booking?',
-            style: AppTypography.headingSmall
-                .copyWith(color: AppColors.textPrimary)),
+        title: Text(
+          'Cancel Booking?',
+          style: AppTypography.headingSmall
+              .copyWith(color: AppColors.textPrimary),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -471,8 +166,7 @@ class _BookingManagementScreenState
                 focusedBorder: OutlineInputBorder(
                   borderRadius:
                       BorderRadius.circular(AppSpacing.borderRadius),
-                  borderSide:
-                      const BorderSide(color: AppColors.primary),
+                  borderSide: const BorderSide(color: AppColors.primary),
                 ),
               ),
             ),
@@ -480,15 +174,19 @@ class _BookingManagementScreenState
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Go back',
-                style: AppTypography.button
-                    .copyWith(color: AppColors.textSecondary)),
+            onPressed: () => ctx.pop(false),
+            child: Text(
+              'Go back',
+              style:
+                  AppTypography.button.copyWith(color: AppColors.textSecondary),
+            ),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Cancel Booking',
-                style: AppTypography.button.copyWith(color: AppColors.error)),
+            onPressed: () => ctx.pop(true),
+            child: Text(
+              'Cancel Booking',
+              style: AppTypography.button.copyWith(color: AppColors.error),
+            ),
           ),
         ],
       ),
@@ -501,36 +199,430 @@ class _BookingManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text(success ? 'Booking cancelled' : 'Cancel failed'),
-            backgroundColor:
-                success ? AppColors.success : AppColors.error,
+            content: Text(success ? 'Booking cancelled' : 'Cancel failed'),
+            backgroundColor: success ? AppColors.success : AppColors.error,
           ),
         );
       }
     }
     reasonController.dispose();
   }
+}
 
-  // ─── Helpers ────────────────────────────────────────────────────────
+// ─── Date Strip ───────────────────────────────────────────────────────────────
 
-  bool _isSameDay(DateTime a, DateTime b) =>
+class _DateStrip extends StatelessWidget {
+  const _DateStrip({
+    required this.selectedDate,
+    required this.onDateSelected,
+  });
+  final DateTime selectedDate;
+  final void Function(DateTime) onDateSelected;
+
+  static bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
-  String _getDayName(DateTime date) {
+  static String _getDayName(DateTime date) {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return days[date.weekday - 1];
   }
 
-  String _formatStatusLabel(String status) {
-    return switch (status) {
-      'All' => 'All',
-      'unpaid' => 'Unpaid',
-      'paid' => 'Paid',
-      'checked_in' => 'Checked-in',
-      'no_show' => 'No-show',
-      'cancelled' => 'Cancelled',
-      _ => status,
+  @override
+  Widget build(BuildContext context) {
+    final dates = List.generate(7, (i) => DateTime.now().add(Duration(days: i - 3)));
+
+    return SizedBox(
+      height: 64,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        itemCount: dates.length,
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+        itemBuilder: (context, index) {
+          final date = dates[index];
+          final isToday = _isSameDay(date, DateTime.now());
+          final isSelected = _isSameDay(date, selectedDate);
+
+          return GestureDetector(
+            onTap: () => onDateSelected(date),
+            child: Container(
+              width: 52,
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.rose : AppColors.surface,
+                borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _getDayName(date),
+                    style: AppTypography.caption.copyWith(
+                      color: isSelected
+                          ? AppColors.background
+                          : AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    date.day.toString(),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: isSelected
+                          ? AppColors.background
+                          : AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (isToday && !isSelected)
+                    Container(
+                      margin: const EdgeInsets.only(top: 2),
+                      width: 4,
+                      height: 4,
+                      decoration: const BoxDecoration(
+                        color: AppColors.rose,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ─── Status Filters ───────────────────────────────────────────────────────────
+
+class _StatusFilters extends StatelessWidget {
+  const _StatusFilters({
+    required this.statusFilter,
+    required this.statusOptions,
+    required this.onStatusSelected,
+  });
+  final String statusFilter;
+  final List<String> statusOptions;
+  final void Function(String) onStatusSelected;
+
+  static String _formatLabel(String status) => switch (status) {
+        'All' => 'All',
+        'unpaid' => 'Unpaid',
+        'paid' => 'Paid',
+        'checked_in' => 'Checked-in',
+        'no_show' => 'No-show',
+        'cancelled' => 'Cancelled',
+        _ => status,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 36,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        itemCount: statusOptions.length,
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+        itemBuilder: (context, index) {
+          final status = statusOptions[index];
+          final isSelected = status == statusFilter;
+          return GestureDetector(
+            onTap: () => onStatusSelected(status),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.rose : AppColors.surface,
+                borderRadius:
+                    BorderRadius.circular(AppSpacing.borderRadiusSm),
+                border: Border.all(
+                  color: isSelected ? AppColors.rose : AppColors.border,
+                ),
+              ),
+              child: Text(
+                _formatLabel(status),
+                style: AppTypography.bodySmall.copyWith(
+                  color: isSelected
+                      ? AppColors.background
+                      : AppColors.textSecondary,
+                  fontWeight:
+                      isSelected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ─── Bookings List ────────────────────────────────────────────────────────────
+
+class _BookingsList extends StatelessWidget {
+  const _BookingsList({
+    required this.state,
+    required this.canCancel,
+    required this.onRetry,
+    required this.onRefresh,
+    required this.onStartWalkIn,
+    required this.onCheckIn,
+    required this.onCancel,
+  });
+  final BookingsState state;
+  final bool canCancel;
+  final VoidCallback onRetry;
+  final Future<void> Function() onRefresh;
+  final VoidCallback onStartWalkIn;
+  final Future<void> Function(String) onCheckIn;
+  final Future<void> Function(String) onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    if (state is BookingsLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.rose),
+      );
+    }
+
+    if (state is BookingsError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const HugeIcon(
+              icon: HugeIcons.strokeRoundedAlert01,
+              color: AppColors.error,
+              size: 48,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Failed to load bookings',
+              style: AppTypography.bodyMedium
+                  .copyWith(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            OutlinedButton(
+              onPressed: onRetry,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.textPrimary,
+                side: const BorderSide(color: AppColors.border),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+                ),
+              ),
+              child: Text('Retry', style: AppTypography.button),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (state is BookingsLoaded) {
+      final bookings = (state as BookingsLoaded).bookings;
+
+      if (bookings.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedCalendar03,
+                color: AppColors.textSecondary,
+                size: 64,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'No bookings for this date',
+                style: AppTypography.bodyMedium
+                    .copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              TextButton(
+                onPressed: onStartWalkIn,
+                child: Text(
+                  'Start a walk-in?',
+                  style: AppTypography.bodyMedium
+                      .copyWith(color: AppColors.rose),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return RefreshIndicator(
+        color: AppColors.rose,
+        backgroundColor: AppColors.surface,
+        onRefresh: onRefresh,
+        child: ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          itemCount: bookings.length,
+          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+          itemBuilder: (context, index) {
+            final booking = bookings[index];
+            return _BookingCard(
+              booking: booking,
+              canCancel: canCancel,
+              onCheckIn: onCheckIn,
+              onCancel: onCancel,
+            );
+          },
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+}
+
+// ─── Booking Card ─────────────────────────────────────────────────────────────
+
+class _BookingCard extends StatelessWidget {
+  const _BookingCard({
+    required this.booking,
+    required this.canCancel,
+    required this.onCheckIn,
+    required this.onCancel,
+  });
+  final Map<String, dynamic> booking;
+  final bool canCancel;
+  final Future<void> Function(String) onCheckIn;
+  final Future<void> Function(String) onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    final playerName = booking['userName']?.toString() ?? 'Unknown Player';
+    final systemId = booking['systemId']?.toString() ?? '--';
+    final systemName = booking['systemName']?.toString() ?? systemId;
+    final startTime = booking['startTime']?.toString() ?? '--';
+    final duration = booking['durationMinutes']?.toString() ?? '--';
+    final status = booking['status']?.toString() ?? 'unknown';
+    final bookingId = booking['id']?.toString() ??
+        booking['bookingId']?.toString() ??
+        '';
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  playerName,
+                  style: AppTypography.bodyMedium
+                      .copyWith(fontWeight: FontWeight.w600),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              _StatusPill(status: status),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedGameboy,
+                color: AppColors.textSecondary,
+                size: 14,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                systemName,
+                style: AppTypography.caption
+                    .copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedClock01,
+                color: AppColors.textSecondary,
+                size: 14,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '$startTime · ${duration}m',
+                style: AppTypography.caption
+                    .copyWith(color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+          if (status == 'unpaid' || status == 'paid') ...[
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (status == 'paid')
+                  TextButton(
+                    onPressed: () => onCheckIn(bookingId),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.success,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm),
+                    ),
+                    child: Text('Check-in', style: AppTypography.bodySmall),
+                  ),
+                if (canCancel && status != 'cancelled')
+                  TextButton(
+                    onPressed: () => onCancel(bookingId),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm),
+                    ),
+                    child: Text('Cancel', style: AppTypography.bodySmall),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Status Pill ──────────────────────────────────────────────────────────────
+
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.status});
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final (color, label) = switch (status) {
+      'paid' => (AppColors.success, 'Paid'),
+      'unpaid' => (AppColors.warn, 'Unpaid'),
+      'checked_in' => (AppColors.info, 'Checked In'),
+      'no_show' => (AppColors.error, 'No Show'),
+      'cancelled' => (AppColors.textSecondary, 'Cancelled'),
+      _ => (AppColors.textSecondary, status),
     };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
+      ),
+      child: Text(
+        label,
+        style: AppTypography.caption.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
   }
 }

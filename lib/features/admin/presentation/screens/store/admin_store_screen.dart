@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 
 /// Store Hub — Tab 4 root.
-/// Placeholder screen with navigation tiles to Systems, Staff, Config, Notifications.
-/// Full implementation in Phase 7.
 class AdminStoreScreen extends StatelessWidget {
   const AdminStoreScreen({super.key});
 
@@ -23,55 +22,63 @@ class AdminStoreScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         child: Column(
-          children: [
-            const SizedBox(height: AppSpacing.md),
-            _buildTile(
-              context,
-              'System Management',
-              Icons.computer_outlined,
-              AppRoutes.adminSystemsMgmt,
+          children: const [
+            SizedBox(height: AppSpacing.md),
+            _StoreTile(
+              title: 'System Management',
+              icon: HugeIcons.strokeRoundedComputer,
+              route: AppRoutes.adminSystemsMgmt,
             ),
-            const SizedBox(height: AppSpacing.sm),
-            _buildTile(
-              context,
-              'Staff Management',
-              Icons.people_outlined,
-              AppRoutes.adminStaff,
+            SizedBox(height: AppSpacing.sm),
+            _StoreTile(
+              title: 'Staff Management',
+              icon: HugeIcons.strokeRoundedUserGroup,
+              route: AppRoutes.adminStaff,
             ),
-            const SizedBox(height: AppSpacing.sm),
-            _buildTile(
-              context,
-              'Store Config',
-              Icons.settings_outlined,
-              AppRoutes.adminConfig,
+            SizedBox(height: AppSpacing.sm),
+            _StoreTile(
+              title: 'Store Config',
+              icon: HugeIcons.strokeRoundedSettings01,
+              route: AppRoutes.adminConfig,
             ),
-            const SizedBox(height: AppSpacing.sm),
-            _buildTile(
-              context,
-              'Notifications',
-              Icons.notifications_outlined,
-              AppRoutes.adminNotifications,
+            SizedBox(height: AppSpacing.sm),
+            _StoreTile(
+              title: 'Notifications',
+              icon: HugeIcons.strokeRoundedNotification01,
+              route: AppRoutes.adminNotifications,
             ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildTile(
-    BuildContext context,
-    String title,
-    IconData icon,
-    String route,
-  ) {
+class _StoreTile extends StatelessWidget {
+  const _StoreTile({
+    required this.title,
+    required this.icon,
+    required this.route,
+  });
+
+  final String title;
+  final dynamic icon;
+  final String route;
+
+  @override
+  Widget build(BuildContext context) {
     return ListTile(
       tileColor: AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
       ),
-      leading: Icon(icon, color: AppColors.textPrimary),
+      leading: HugeIcon(icon: icon, color: AppColors.textPrimary, size: 22),
       title: Text(title, style: AppTypography.bodyLarge),
-      trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+      trailing: const HugeIcon(
+        icon: HugeIcons.strokeRoundedArrowRight01,
+        color: AppColors.textSecondary,
+        size: 20,
+      ),
       onTap: () => context.go(route),
     );
   }

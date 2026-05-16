@@ -75,29 +75,34 @@ class ActivityHubNotifier extends Notifier<ActivityHubState> {
   @override
   ActivityHubState build() {
     const initialState = ActivityHubState();
-    _fetch(initialState);
+    final storeId = ref.watch(activeStoreIdProvider);
+    _fetch(currentState: initialState, storeId: storeId);
     return initialState;
   }
 
-  Future<void> _fetch([ActivityHubState? currentState]) async {
+  Future<void> _fetch({ActivityHubState? currentState, String? storeId}) async {
     state = (currentState ?? state).copyWith(data: const AsyncLoading());
     try {
-      final storeId = ref.read(activeStoreIdProvider) ?? '';
+      final effectiveStoreId = storeId ?? ref.read(activeStoreIdProvider);
+      if (effectiveStoreId == null || effectiveStoreId.isEmpty) {
+        state = state.copyWith(data: const AsyncData(ActivityHubData()));
+        return;
+      }
       final bookingRepo = ref.read(bookingRepositoryProvider);
       final sessionRepo = ref.read(sessionsRepositoryProvider);
 
       // Run booking fetches in parallel
       final bookingResults = await Future.wait([
-        bookingRepo.fetchMyBookings(storeId, status: 'confirmed'),
-        bookingRepo.fetchMyBookings(storeId, status: 'pending'),
-        bookingRepo.fetchMyBookings(storeId, status: 'checked_in'),
+        bookingRepo.fetchMyBookings(effectiveStoreId, status: 'confirmed'),
+        bookingRepo.fetchMyBookings(effectiveStoreId, status: 'pending'),
+        bookingRepo.fetchMyBookings(effectiveStoreId, status: 'checked_in'),
       ]);
 
       // Run session fetches in parallel
       final sessionResults = await Future.wait([
-        sessionRepo.fetchSessions(storeId, status: 'in_progress'),
-        sessionRepo.fetchSessions(storeId, status: 'completed'),
-        sessionRepo.fetchSessions(storeId, status: 'cancelled'),
+        sessionRepo.fetchSessions(effectiveStoreId, status: 'in_progress'),
+        sessionRepo.fetchSessions(effectiveStoreId, status: 'completed'),
+        sessionRepo.fetchSessions(effectiveStoreId, status: 'cancelled'),
       ]);
 
       final confirmedBookings = bookingResults[0].data ?? [];

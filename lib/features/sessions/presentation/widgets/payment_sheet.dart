@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -7,6 +8,9 @@ import '../../../../shared/widgets/em_button.dart';
 import '../../../../shared/widgets/em_card.dart';
 import '../../../../shared/widgets/em_section_head.dart';
 import '../providers/payment_notifier.dart';
+
+final _paymentMethodProvider =
+    StateProvider.autoDispose<String>((ref) => 'cash');
 
 /// Shows the payment bottom sheet for a given booking.
 void showPaymentSheet(BuildContext context, WidgetRef ref, String bookingId) {
@@ -30,8 +34,6 @@ class _PaymentSheet extends ConsumerStatefulWidget {
 }
 
 class _PaymentSheetState extends ConsumerState<_PaymentSheet> {
-  String _selectedMethod = 'cash';
-
   static const _methods = [
     (id: 'cash', label: 'Cash', sub: 'Pay at counter'),
     (id: 'upi', label: 'UPI', sub: 'Google Pay, PhonePe, etc.'),
@@ -43,10 +45,11 @@ class _PaymentSheetState extends ConsumerState<_PaymentSheet> {
   Widget build(BuildContext context) {
     ref.listen<PaymentState>(paymentNotifierProvider, (_, next) {
       if (next is PaymentSuccess) {
-        Navigator.of(context).pop();
+        context.pop();
       }
     });
 
+    final selectedMethod = ref.watch(_paymentMethodProvider);
     final payState = ref.watch(paymentNotifierProvider);
     final isLoading = payState is PaymentLoading;
     final errorMsg = payState is PaymentError ? payState.message : null;
@@ -104,9 +107,11 @@ class _PaymentSheetState extends ConsumerState<_PaymentSheet> {
                 EmCard(
                   child: Column(
                     children: _methods.map((m) {
-                      final selected = _selectedMethod == m.id;
+                      final selected = selectedMethod == m.id;
                       return GestureDetector(
-                        onTap: () => setState(() => _selectedMethod = m.id),
+                        onTap: () => ref
+                            .read(_paymentMethodProvider.notifier)
+                            .state = m.id,
                         behavior: HitTestBehavior.opaque,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10),
@@ -166,7 +171,7 @@ class _PaymentSheetState extends ConsumerState<_PaymentSheet> {
                       ? null
                       : () => ref
                           .read(paymentNotifierProvider.notifier)
-                          .pay(widget.bookingId, _selectedMethod),
+                          .pay(widget.bookingId, selectedMethod),
                 ),
                 const SizedBox(height: AppSpacing.lg),
               ],

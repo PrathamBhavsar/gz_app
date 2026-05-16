@@ -193,14 +193,14 @@ class _ProfileContent extends ConsumerWidget {
             style: AppTypography.bodyR),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
+            onPressed: () => ctx.pop(),
             child: Text('Cancel',
                 style: AppTypography.body
                     .copyWith(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.of(ctx).pop();
+              ctx.pop();
               await ref.read(authNotifierProvider.notifier).logout();
               if (context.mounted) context.go(AppRoutes.authLanding);
             },

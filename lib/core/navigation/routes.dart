@@ -53,6 +53,16 @@ class AppRoutes {
   // Notifications (full-screen push)
   static const notifications = '/notifications';
 
+  // ── Path builders (interpolate :param placeholders) ──
+  static String storeDetailPath(String slug) => '/home/store/$slug';
+  static String bookingDetailPath(String id) => '/sessions/booking/$id';
+  static String paymentSheetPath(String id) => '/sessions/booking/$id/pay';
+  static String checkInPath(String id) => '/sessions/booking/$id/check-in';
+  static String activeSessionDetailPath(String id) => '/sessions/active/$id';
+  static String sessionHistoryDetailPath(String id) => '/sessions/history/$id';
+  static String campaignDetailPath(String id) => '/wallet/campaigns/$id';
+  static String disputeDetailPath(String id) => '/profile/disputes/$id';
+
   // Admin Auth Stack
   static const adminLogin         = '/auth/admin-login';
   static const adminPasswordReset = '/auth/admin-password-reset';

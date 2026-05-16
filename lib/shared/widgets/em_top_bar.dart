@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
@@ -35,7 +36,9 @@ class EmTopBar extends StatelessWidget implements PreferredSizeWidget {
               child: disableBack
                   ? const SizedBox.shrink()
                   : GestureDetector(
-                      onTap: onBack ?? () => Navigator.of(context).maybePop(),
+                      onTap: onBack ?? () {
+                        if (context.canPop()) context.pop();
+                      },
                       child: const SizedBox(
                         width: 38,
                         height: 38,

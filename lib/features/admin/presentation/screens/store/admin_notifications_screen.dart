@@ -8,6 +8,10 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_auth_provider.dart';
 import '../../../data/services/admin_store_service.dart';
+final _notifChannelProvider = StateProvider.autoDispose<String>((ref) => 'push');
+final _notifTargetProvider = StateProvider.autoDispose<String>((ref) => 'all');
+final _notifSendingProvider = StateProvider.autoDispose<bool>((ref) => false);
+
 /// Admin Notifications — Screen 60.
 /// Broadcast console with channel/target selector.
 class AdminNotificationsScreen extends ConsumerStatefulWidget {
@@ -22,9 +26,6 @@ class _AdminNotificationsScreenState
     extends ConsumerState<AdminNotificationsScreen> {
   final _titleCtrl = TextEditingController();
   final _bodyCtrl = TextEditingController();
-  String _channel = 'push';
-  String _target = 'all';
-  bool _sending = false;
 
   @override
   void dispose() {
@@ -37,6 +38,9 @@ class _AdminNotificationsScreenState
   Widget build(BuildContext context) {
     final role = ref.watch(adminRoleProvider);
     final canSend = role == 'super_admin' || role == 'admin';
+    final channel = ref.watch(_notifChannelProvider);
+    final target = ref.watch(_notifTargetProvider);
+    final sending = ref.watch(_notifSendingProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -44,8 +48,7 @@ class _AdminNotificationsScreenState
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: AppColors.textPrimary, size: 20),
           onPressed: () => context.go(AppRoutes.adminSystemsMgmt),
         ),
         title: Text('Notifications', style: AppTypography.headingSmall),
@@ -136,9 +139,9 @@ class _AdminNotificationsScreenState
             Wrap(
               spacing: AppSpacing.sm,
               children: [
-                _buildChip('Push', 'push', canSend),
-                _buildChip('Email', 'email', canSend),
-                _buildChip('In-App', 'in_app', canSend),
+                _buildChip('Push', 'push', canSend, channel),
+                _buildChip('Email', 'email', canSend, channel),
+                _buildChip('In-App', 'in_app', canSend, channel),
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -149,8 +152,8 @@ class _AdminNotificationsScreenState
             Wrap(
               spacing: AppSpacing.sm,
               children: [
-                _buildTargetChip('All Users', 'all', canSend),
-                _buildTargetChip('On-Floor Players', 'on_floor', canSend),
+                _buildTargetChip('All Users', 'all', canSend, target),
+                _buildTargetChip('On-Floor Players', 'on_floor', canSend, target),
               ],
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -160,7 +163,7 @@ class _AdminNotificationsScreenState
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _sending ? null : _send,
+                  onPressed: sending ? null : _send,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.rose,
                     foregroundColor: AppColors.background,
@@ -170,7 +173,7 @@ class _AdminNotificationsScreenState
                           BorderRadius.circular(AppSpacing.borderRadius),
                     ),
                   ),
-                  child: _sending
+                  child: sending
                       ? const SizedBox(
                           width: 20,
                           height: 20,
@@ -189,10 +192,10 @@ class _AdminNotificationsScreenState
     );
   }
 
-  Widget _buildChip(String label, String value, bool enabled) {
-    final isActive = _channel == value;
+  Widget _buildChip(String label, String value, bool enabled, String channel) {
+    final isActive = channel == value;
     return GestureDetector(
-      onTap: enabled ? () => setState(() => _channel = value) : null,
+      onTap: enabled ? () => ref.read(_notifChannelProvider.notifier).state = value : null,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
@@ -216,10 +219,10 @@ class _AdminNotificationsScreenState
     );
   }
 
-  Widget _buildTargetChip(String label, String value, bool enabled) {
-    final isActive = _target == value;
+  Widget _buildTargetChip(String label, String value, bool enabled, String target) {
+    final isActive = target == value;
     return GestureDetector(
-      onTap: enabled ? () => setState(() => _target = value) : null,
+      onTap: enabled ? () => ref.read(_notifTargetProvider.notifier).state = value : null,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
@@ -248,22 +251,24 @@ class _AdminNotificationsScreenState
       return;
     }
 
-    setState(() => _sending = true);
+    ref.read(_notifSendingProvider.notifier).state = true;
+    final channel = ref.read(_notifChannelProvider);
+    final target = ref.read(_notifTargetProvider);
 
     try {
       final service = ref.read(adminStoreServiceProvider);
-      if (_target == 'on_floor') {
+      if (target == 'on_floor') {
         await service.sendNotification({
           'title': _titleCtrl.text.trim(),
           'body': _bodyCtrl.text.trim(),
-          'channel': _channel,
-          'target': _target,
+          'channel': channel,
+          'target': target,
         });
       } else {
         await service.sendTopicNotification({
           'title': _titleCtrl.text.trim(),
           'body': _bodyCtrl.text.trim(),
-          'channel': _channel,
+          'channel': channel,
           'topic': 'all_users',
         });
       }
@@ -274,7 +279,7 @@ class _AdminNotificationsScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Broadcast sent'),
-            backgroundColor: Color(0xFF4CAF50),
+            backgroundColor: AppColors.ok,
           ),
         );
       }
@@ -288,7 +293,7 @@ class _AdminNotificationsScreenState
         );
       }
     } finally {
-      if (mounted) setState(() => _sending = false);
+      if (mounted) ref.read(_notifSendingProvider.notifier).state = false;
     }
   }
 }

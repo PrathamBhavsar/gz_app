@@ -26,10 +26,6 @@ class _CreateDisputeMobileLayoutState
   final _reasonCtrl  = TextEditingController();
   final _amountCtrl  = TextEditingController();
 
-  bool get _canSubmit =>
-      _sessionCtrl.text.trim().isNotEmpty &&
-      _reasonCtrl.text.trim().length >= 20;
-
   @override
   void dispose() {
     _sessionCtrl.dispose();
@@ -60,7 +56,6 @@ class _CreateDisputeMobileLayoutState
           errorMsg:    state is CreateDisputeError
               ? state.message
               : null,
-          canSubmit: _canSubmit,
           onSubmit:  _submit,
         ),
     };
@@ -69,13 +64,12 @@ class _CreateDisputeMobileLayoutState
 
 // ── Form view ─────────────────────────────────────────────────────────────────
 
-class _FormView extends StatefulWidget {
+class _FormView extends StatelessWidget {
   const _FormView({
     required this.sessionCtrl,
     required this.reasonCtrl,
     required this.amountCtrl,
     required this.isLoading,
-    required this.canSubmit,
     required this.onSubmit,
     this.errorMsg,
   });
@@ -83,250 +77,238 @@ class _FormView extends StatefulWidget {
   final TextEditingController reasonCtrl;
   final TextEditingController amountCtrl;
   final bool isLoading;
-  final bool canSubmit;
   final VoidCallback onSubmit;
   final String? errorMsg;
 
   @override
-  State<_FormView> createState() => _FormViewState();
-}
-
-class _FormViewState extends State<_FormView> {
-  @override
-  void initState() {
-    super.initState();
-    widget.sessionCtrl.addListener(_rebuild);
-    widget.reasonCtrl.addListener(_rebuild);
-  }
-
-  void _rebuild() => setState(() {});
-
-  @override
-  void dispose() {
-    widget.sessionCtrl.removeListener(_rebuild);
-    widget.reasonCtrl.removeListener(_rebuild);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final reasonLen = widget.reasonCtrl.text.length;
+    return ListenableBuilder(
+      listenable: Listenable.merge([sessionCtrl, reasonCtrl]),
+      builder: (context, _) {
+        final reasonLen = reasonCtrl.text.length;
+        final canSubmit = sessionCtrl.text.trim().isNotEmpty &&
+            reasonCtrl.text.trim().length >= 20;
 
-    return Column(
-      children: [
-        const EmTopBar(title: 'File a Dispute', subtitle: "We've got you"),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.md),
-            children: [
-              // Explainer banner
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                margin: const EdgeInsets.only(bottom: 14),
-                decoration: BoxDecoration(
-                  color: AppColors.infoBg,
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusCard),
-                ),
-                child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+        return Column(
+          children: [
+            const EmTopBar(title: 'File a Dispute', subtitle: "We've got you"),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.md),
+                children: [
+                  // Explainer banner
                   Container(
-                    width: 36,
-                    height: 36,
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    margin: const EdgeInsets.only(bottom: 14),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.55),
-                      shape: BoxShape.circle,
+                      color: AppColors.infoBg,
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.borderRadiusCard),
                     ),
-                    child: const Center(
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedInformationCircle,
-                        color: AppColors.info,
-                        size: 18,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                  Expanded(
-                    child: Column(
+                    child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                      Text('Reviewed in 2–3 business days',
-                          style:
-                              AppTypography.h3.copyWith(color: AppColors.info)),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Provide the session ID and describe the billing issue. Logs are pulled automatically.',
-                        style: AppTypography.bodyR.copyWith(
-                            color: AppColors.info, fontSize: 13, height: 1.4),
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.55),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Center(
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedInformationCircle,
+                            color: AppColors.info,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+                      Expanded(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                          Text('Reviewed in 2–3 business days',
+                              style: AppTypography.h3
+                                  .copyWith(color: AppColors.info)),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Provide the session ID and describe the billing issue. Logs are pulled automatically.',
+                            style: AppTypography.bodyR.copyWith(
+                                color: AppColors.info,
+                                fontSize: 13,
+                                height: 1.4),
+                          ),
+                        ]),
                       ),
                     ]),
                   ),
-                ]),
-              ),
 
-              // Session ID field
-              _FormField(
-                label: 'SESSION ID',
-                isRequired: true,
-                child: _InputBox(
-                  controller: widget.sessionCtrl,
-                  hint: 'e.g. sess_abc123',
-                  keyboardType: TextInputType.text,
-                ),
-              ),
-
-              // Reason field
-              _FormField(
-                label: 'WHAT HAPPENED?',
-                isRequired: true,
-                trailing: Text(
-                  '$reasonLen / 500',
-                  style: AppTypography.num.copyWith(
-                    fontSize: 12,
-                    color: reasonLen >= 20
-                        ? AppColors.ok
-                        : (reasonLen > 0 ? AppColors.warn : AppColors.textTertiary),
-                  ),
-                ),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(14),
-                      border: (reasonLen > 0 && reasonLen < 20)
-                          ? Border.all(color: AppColors.warn, width: 1.5)
-                          : null,
+                  // Session ID field
+                  _FormField(
+                    label: 'SESSION ID',
+                    isRequired: true,
+                    child: _InputBox(
+                      controller: sessionCtrl,
+                      hint: 'e.g. sess_abc123',
+                      keyboardType: TextInputType.text,
                     ),
-                    child: TextField(
-                      controller: widget.reasonCtrl,
-                      maxLength: 500,
-                      maxLines: 5,
-                      style: AppTypography.body,
-                      decoration: InputDecoration(
-                        counterText: '',
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
-                        hintText:
-                            'Describe what happened — include time, system, and what went wrong',
-                        hintStyle: AppTypography.bodyR
-                            .copyWith(color: AppColors.textTertiary),
+                  ),
+
+                  // Reason field
+                  _FormField(
+                    label: 'WHAT HAPPENED?',
+                    isRequired: true,
+                    trailing: Text(
+                      '$reasonLen / 500',
+                      style: AppTypography.num.copyWith(
+                        fontSize: 12,
+                        color: reasonLen >= 20
+                            ? AppColors.ok
+                            : (reasonLen > 0
+                                ? AppColors.warn
+                                : AppColors.textTertiary),
                       ),
                     ),
-                  ),
-                  if (reasonLen > 0 && reasonLen < 20)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Text(
-                        'At least 20 characters — help us understand what happened',
-                        style:
-                            AppTypography.small.copyWith(color: AppColors.warn),
-                      ),
-                    ),
-                ]),
-              ),
-
-              // Amount field (optional)
-              _FormField(
-                label: 'AMOUNT DISPUTED',
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 14),
-                      child: Text('₹',
-                          style: AppTypography.h2.copyWith(
-                              color: AppColors.textTertiary,
-                              fontWeight: FontWeight.w500)),
-                    ),
-                    Expanded(
-                      child: TextField(
-                        controller: widget.amountCtrl,
-                        keyboardType: TextInputType.number,
-                        style: AppTypography.num
-                            .copyWith(fontSize: 18, fontWeight: FontWeight.w700),
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: AppSpacing.sm, vertical: 14),
-                          hintText: '0',
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(14),
+                          border: (reasonLen > 0 && reasonLen < 20)
+                              ? Border.all(color: AppColors.warn, width: 1.5)
+                              : null,
+                        ),
+                        child: TextField(
+                          controller: reasonCtrl,
+                          maxLength: 500,
+                          maxLines: 5,
+                          style: AppTypography.body,
+                          decoration: InputDecoration(
+                            counterText: '',
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.all(
+                                AppSpacing.sm + AppSpacing.xs),
+                            hintText:
+                                'Describe what happened — include time, system, and what went wrong',
+                            hintStyle: AppTypography.bodyR
+                                .copyWith(color: AppColors.textTertiary),
+                          ),
                         ),
                       ),
-                    ),
-                  ]),
-                ),
-              ),
-
-              // Error
-              if (widget.errorMsg != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: AppColors.errBg,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.borderRadiusCard),
+                      if (reasonLen > 0 && reasonLen < 20)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            'At least 20 characters — help us understand what happened',
+                            style: AppTypography.small
+                                .copyWith(color: AppColors.warn),
+                          ),
+                        ),
+                    ]),
                   ),
-                  child: Row(children: [
-                    const HugeIcon(
-                      icon: HugeIcons.strokeRoundedAlert01,
-                      color: AppColors.err,
-                      size: 16,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(widget.errorMsg!,
-                          style: AppTypography.small
-                              .copyWith(color: AppColors.err)),
-                    ),
-                  ]),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-              ],
 
-              const SizedBox(height: AppSpacing.md),
-            ],
-          ),
-        ),
-
-        // Sticky submit
-        Container(
-          padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md, AppSpacing.sm + AppSpacing.xs, AppSpacing.md, AppSpacing.lg),
-          color: AppColors.background,
-          child: Column(children: [
-            EmButtonFull(
-              label: 'Submit Dispute',
-              loading: widget.isLoading,
-              onPressed: (widget.canSubmit && !widget.isLoading)
-                  ? widget.onSubmit
-                  : null,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                style: AppTypography.small,
-                children: [
-                  const TextSpan(text: 'Need help first?  '),
-                  TextSpan(
-                    text: 'Contact support',
-                    style: AppTypography.small.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                        decoration: TextDecoration.underline),
+                  // Amount field (optional)
+                  _FormField(
+                    label: 'AMOUNT DISPUTED',
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 14),
+                          child: Text('₹',
+                              style: AppTypography.h2.copyWith(
+                                  color: AppColors.textTertiary,
+                                  fontWeight: FontWeight.w500)),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: amountCtrl,
+                            keyboardType: TextInputType.number,
+                            style: AppTypography.num.copyWith(
+                                fontSize: 18, fontWeight: FontWeight.w700),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.sm, vertical: 14),
+                              hintText: '0',
+                            ),
+                          ),
+                        ),
+                      ]),
+                    ),
                   ),
+
+                  // Error
+                  if (errorMsg != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      decoration: BoxDecoration(
+                        color: AppColors.errBg,
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.borderRadiusCard),
+                      ),
+                      child: Row(children: [
+                        const HugeIcon(
+                          icon: HugeIcons.strokeRoundedAlert01,
+                          color: AppColors.err,
+                          size: 16,
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: Text(errorMsg!,
+                              style: AppTypography.small
+                                  .copyWith(color: AppColors.err)),
+                        ),
+                      ]),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                  ],
+
+                  const SizedBox(height: AppSpacing.md),
                 ],
               ),
             ),
-          ]),
-        ),
-      ],
+
+            // Sticky submit
+            Container(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md,
+                  AppSpacing.sm + AppSpacing.xs, AppSpacing.md, AppSpacing.lg),
+              color: AppColors.background,
+              child: Column(children: [
+                EmButtonFull(
+                  label: 'Submit Dispute',
+                  loading: isLoading,
+                  onPressed: (canSubmit && !isLoading) ? onSubmit : null,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: AppTypography.small,
+                    children: [
+                      const TextSpan(text: 'Need help first?  '),
+                      TextSpan(
+                        text: 'Contact support',
+                        style: AppTypography.small.copyWith(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline),
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -389,7 +371,7 @@ class _SuccessView extends StatelessWidget {
               EmButtonFull(
                 label: 'View Dispute',
                 onPressed: id.isNotEmpty
-                    ? () => context.pushReplacement('/profile/disputes/$id')
+                    ? () => context.pushReplacement(AppRoutes.disputeDetailPath(id))
                     : null,
               ),
               const SizedBox(height: AppSpacing.sm),

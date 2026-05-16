@@ -9,6 +9,8 @@ import '../../../../../core/navigation/routes.dart';
 import '../providers/admin_auth_provider.dart';
 import '../providers/admin_auth_state.dart';
 
+final _adminLoginObscureProvider = StateProvider.autoDispose<bool>((ref) => true);
+
 class AdminLoginScreen extends ConsumerStatefulWidget {
   const AdminLoginScreen({super.key});
 
@@ -20,8 +22,6 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _obscurePassword = true;
-  String? _errorMessage;
 
   @override
   void dispose() {
@@ -33,7 +33,6 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _errorMessage = null);
     await ref
         .read(adminAuthNotifierProvider.notifier)
         .login(_emailController.text.trim(), _passwordController.text);
@@ -43,8 +42,6 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
     final state = ref.read(adminAuthNotifierProvider);
     if (state is AdminAuthAuthenticated) {
       context.go(AppRoutes.adminDashboard);
-    } else if (state is AdminAuthError) {
-      setState(() => _errorMessage = _formatError(state.error));
     }
   }
 
@@ -63,6 +60,10 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(adminAuthNotifierProvider);
     final isLoading = authState is AdminAuthLoading;
+    final obscurePassword = ref.watch(_adminLoginObscureProvider);
+    final errorMessage = authState is AdminAuthError
+        ? _formatError(authState.error)
+        : null;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -70,8 +71,8 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
+          icon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowLeft01,
             color: AppColors.textPrimary,
             size: 20,
           ),
@@ -156,7 +157,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                 // Password field
                 TextFormField(
                   controller: _passwordController,
-                  obscureText: _obscurePassword,
+                  obscureText: obscurePassword,
                   style: AppTypography.bodyLarge,
                   decoration: InputDecoration(
                     labelText: 'Password',
@@ -184,14 +185,15 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                       borderSide: const BorderSide(color: AppColors.primary),
                     ),
                     suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                      icon: HugeIcon(
+                        icon: obscurePassword
+                            ? HugeIcons.strokeRoundedViewOff
+                            : HugeIcons.strokeRoundedView,
                         color: AppColors.textSecondary,
+                        size: 20,
                       ),
                       onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
+                          ref.read(_adminLoginObscureProvider.notifier).state = !obscurePassword,
                     ),
                   ),
                   validator: (value) {
@@ -220,7 +222,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                 ),
 
                 // Error message
-                if (_errorMessage != null) ...[
+                if (errorMessage != null) ...[
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
@@ -230,7 +232,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                       ),
                     ),
                     child: Text(
-                      _errorMessage!,
+                      errorMessage,
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.error,
                       ),

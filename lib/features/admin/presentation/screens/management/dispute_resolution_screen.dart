@@ -9,6 +9,9 @@ import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_management_provider.dart';
 import '../../providers/admin_permissions.dart';
 
+final _disputeStatusFilterProvider = StateProvider.autoDispose<String?>((ref) => null);
+final _selectedResolutionProvider = StateProvider.autoDispose<String>((ref) => 'full_refund');
+
 /// Dispute Resolution — Screen 56.
 /// Dispute inbox with status filters, resolution actions.
 class DisputeResolutionScreen extends ConsumerStatefulWidget {
@@ -21,17 +24,15 @@ class DisputeResolutionScreen extends ConsumerStatefulWidget {
 
 class _DisputeResolutionScreenState
     extends ConsumerState<DisputeResolutionScreen> {
-  String? _statusFilter;
-
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-        () => ref.read(disputesProvider.notifier).load(status: _statusFilter));
+    Future.microtask(() => ref.read(disputesProvider.notifier).load());
   }
 
   @override
   Widget build(BuildContext context) {
+    final statusFilter = ref.watch(_disputeStatusFilterProvider);
     final state = ref.watch(disputesProvider);
     final perms = ref.watch(adminPermissionsProvider);
     final canResolve = perms.canResolveDisputes;
@@ -42,8 +43,7 @@ class _DisputeResolutionScreenState
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: AppColors.textPrimary, size: 20),
           onPressed: () => context.go(AppRoutes.adminPricing),
         ),
         title: Text('Disputes', style: AppTypography.headingSmall),
@@ -52,7 +52,7 @@ class _DisputeResolutionScreenState
         color: AppColors.rose,
         backgroundColor: AppColors.surface,
         onRefresh: () =>
-            ref.read(disputesProvider.notifier).load(status: _statusFilter),
+            ref.read(disputesProvider.notifier).load(status: statusFilter),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -60,7 +60,7 @@ class _DisputeResolutionScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: AppSpacing.md),
-              _buildStatusChips(),
+              _buildStatusChips(statusFilter),
               const SizedBox(height: AppSpacing.lg),
               _buildContent(state, canResolve),
               const SizedBox(height: AppSpacing.xxl),
@@ -71,18 +71,18 @@ class _DisputeResolutionScreenState
     );
   }
 
-  Widget _buildStatusChips() {
+  Widget _buildStatusChips(String? statusFilter) {
     final options = [null, 'open', 'in_review', 'resolved'];
     final labels = ['All', 'Open', 'In Review', 'Resolved'];
     return Row(
       children: List.generate(options.length, (i) {
-        final isActive = _statusFilter == options[i];
+        final isActive = statusFilter == options[i];
         return Padding(
           padding: const EdgeInsets.only(right: AppSpacing.sm),
           child: GestureDetector(
             onTap: () {
-              setState(() => _statusFilter = options[i]);
-              ref.read(disputesProvider.notifier).load(status: _statusFilter);
+              ref.read(_disputeStatusFilterProvider.notifier).state = options[i];
+              ref.read(disputesProvider.notifier).load(status: options[i]);
             },
             child: Container(
               padding: const EdgeInsets.symmetric(
@@ -165,7 +165,7 @@ class _DisputeResolutionScreenState
             OutlinedButton(
               onPressed: () => ref
                   .read(disputesProvider.notifier)
-                  .load(status: _statusFilter),
+                  .load(status: ref.read(_disputeStatusFilterProvider)),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
                 side: const BorderSide(color: AppColors.border),
@@ -192,8 +192,8 @@ class _DisputeResolutionScreenState
 
     final statusColor = switch (status.toLowerCase()) {
       'open' => AppColors.rose,
-      'in_review' => const Color(0xFF2196F3),
-      'resolved' => const Color(0xFF4CAF50),
+      'in_review' => AppColors.info,
+      'resolved' => AppColors.ok,
       'withdrawn' => AppColors.textSecondary,
       _ => AppColors.textSecondary,
     };
@@ -299,14 +299,19 @@ class _DisputeResolutionScreenState
             Text('This action is being logged under your name.',
                 style: AppTypography.caption),
             const SizedBox(height: AppSpacing.lg),
-            Wrap(
-              spacing: AppSpacing.sm,
-              children: [
-                _buildResolveChip('Full Refund', 'full_refund'),
-                _buildResolveChip('Partial Refund', 'partial_refund'),
-                _buildResolveChip('Credit Issued', 'credit_issued'),
-                _buildResolveChip('Upheld', 'upheld'),
-              ],
+            Consumer(
+              builder: (context, ref, _) {
+                final selectedResolution = ref.watch(_selectedResolutionProvider);
+                return Wrap(
+                  spacing: AppSpacing.sm,
+                  children: [
+                    _buildResolveChip('Full Refund', 'full_refund', selectedResolution),
+                    _buildResolveChip('Partial Refund', 'partial_refund', selectedResolution),
+                    _buildResolveChip('Credit Issued', 'credit_issued', selectedResolution),
+                    _buildResolveChip('Upheld', 'upheld', selectedResolution),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: AppSpacing.md),
             TextField(
@@ -335,10 +340,11 @@ class _DisputeResolutionScreenState
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
-                  Navigator.pop(context);
+                  final resolution = ref.read(_selectedResolutionProvider);
+                  context.pop();
                   await ref.read(disputesProvider.notifier).resolveDispute(
                         disputeId: disputeId,
-                        resolution: 'full_refund',
+                        resolution: resolution,
                         notes: notesCtrl.text.trim().isEmpty
                             ? null
                             : notesCtrl.text.trim(),
@@ -363,12 +369,10 @@ class _DisputeResolutionScreenState
     );
   }
 
-  String _selectedResolution = 'full_refund';
-
-  Widget _buildResolveChip(String label, String value) {
-    final isActive = _selectedResolution == value;
+  Widget _buildResolveChip(String label, String value, String selectedResolution) {
+    final isActive = selectedResolution == value;
     return GestureDetector(
-      onTap: () => setState(() => _selectedResolution = value),
+      onTap: () => ref.read(_selectedResolutionProvider.notifier).state = value,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,

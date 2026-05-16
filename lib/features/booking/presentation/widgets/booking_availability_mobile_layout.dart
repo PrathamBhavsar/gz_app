@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gz_app/core/navigation/routes.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/errors/app_exception.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -14,6 +15,9 @@ import '../../../../../shared/widgets/page_error_display.dart';
 import '../providers/availability_notifier.dart';
 import '../providers/booking_notifier.dart';
 
+final _availabilityDateProvider =
+    StateProvider.autoDispose<DateTime>((ref) => DateTime.now());
+
 class BookingAvailabilityMobileLayout extends ConsumerStatefulWidget {
   const BookingAvailabilityMobileLayout({super.key});
 
@@ -24,17 +28,15 @@ class BookingAvailabilityMobileLayout extends ConsumerStatefulWidget {
 
 class _BookingAvailabilityMobileLayoutState
     extends ConsumerState<BookingAvailabilityMobileLayout> {
-  late DateTime _selectedDate;
   final _today = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    _selectedDate = _today;
     Future.microtask(
       () => ref
           .read(availabilityNotifierProvider.notifier)
-          .fetchForDate(_selectedDate),
+          .fetchForDate(ref.read(_availabilityDateProvider)),
     );
   }
 
@@ -53,12 +55,13 @@ class _BookingAvailabilityMobileLayoutState
   String _monthLabel(DateTime d) => _monthAbbr[d.month - 1];
 
   void _onDateSelected(DateTime date) {
-    setState(() => _selectedDate = date);
+    ref.read(_availabilityDateProvider.notifier).state = date;
     ref.read(availabilityNotifierProvider.notifier).fetchForDate(date);
   }
 
   @override
   Widget build(BuildContext context) {
+    final selectedDate = ref.watch(_availabilityDateProvider);
     final availAsync = ref.watch(availabilityNotifierProvider);
     final selectedSlot = availAsync.valueOrNull?.selectedSlotStart;
 
@@ -76,8 +79,8 @@ class _BookingAvailabilityMobileLayoutState
             itemCount: 7,
             itemBuilder: (_, i) {
               final date = _next7Days[i];
-              final isSelected = date.day == _selectedDate.day &&
-                  date.month == _selectedDate.month;
+              final isSelected = date.day == selectedDate.day &&
+                  date.month == selectedDate.month;
               return GestureDetector(
                 onTap: () => _onDateSelected(date),
                 child: Container(
@@ -139,7 +142,7 @@ class _BookingAvailabilityMobileLayoutState
               error: AppPageError.from(e),
               onRetry: () => ref
                   .read(availabilityNotifierProvider.notifier)
-                  .fetchForDate(_selectedDate),
+                  .fetchForDate(selectedDate),
             ),
             data: (data) {
               if (data.slots.isEmpty) {
@@ -216,7 +219,7 @@ class _BookingAvailabilityMobileLayoutState
                             .read(bookingNotifierProvider.notifier)
                             .selectSlot(start, end);
                       }
-                      context.push('/book/systems');
+                      context.push(AppRoutes.bookSystems);
                     },
             ),
           ),

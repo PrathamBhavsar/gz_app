@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -18,8 +19,8 @@ class EmailVerificationPendingTabletLayout extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.mark_email_unread_outlined,
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedMail01,
                 size: 100,
                 color: AppColors.rose,
               ),

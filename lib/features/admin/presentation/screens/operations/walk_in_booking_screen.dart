@@ -10,6 +10,24 @@ import '../../providers/admin_operations_provider.dart';
 import '../../../data/services/admin_operations_service.dart';
 import '../../providers/admin_auth_provider.dart';
 
+final _walkInStepProvider = StateProvider.autoDispose<int>((ref) => 0);
+final _walkInShowNewUserProvider = StateProvider.autoDispose<bool>((ref) => false);
+final _walkInSelectedSystemIdProvider = StateProvider.autoDispose<String?>((ref) => null);
+final _walkInSelectedSystemNameProvider = StateProvider.autoDispose<String?>((ref) => null);
+final _walkInDurationProvider = StateProvider.autoDispose<double>((ref) => 60);
+final _walkInPlatformFilterProvider = StateProvider.autoDispose<String>((ref) => 'All');
+final _walkInPayUpfrontProvider = StateProvider.autoDispose<bool>((ref) => true);
+final _walkInPaymentMethodProvider = StateProvider.autoDispose<String?>((ref) => null);
+final _walkInSystemsProvider =
+    StateProvider.autoDispose<List<Map<String, dynamic>>>((ref) => []);
+
+String _formatDuration(int minutes) {
+  if (minutes < 60) return '${minutes}m';
+  final h = minutes ~/ 60;
+  final m = minutes % 60;
+  return m > 0 ? '${h}h ${m}m' : '${h}h';
+}
+
 /// Walk-in Booking — Screen 44.
 /// Rapidly create a session for a customer at the counter.
 class WalkInBookingScreen extends ConsumerStatefulWidget {
@@ -21,27 +39,15 @@ class WalkInBookingScreen extends ConsumerStatefulWidget {
 }
 
 class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
-  int _currentStep = 0;
-
-  // Step 1: User
   final _searchController = TextEditingController();
-  String? _selectedUserId;
   final _newNameController = TextEditingController();
   final _newPhoneController = TextEditingController();
-  bool _showNewUserForm = false;
 
-  // Step 2: System & Duration
-  String? _selectedSystemId;
-  String? _selectedSystemName;
-  double _durationMinutes = 60;
-  String _platformFilter = 'All';
-
-  // Step 3: Payment
-  bool _payUpfront = true;
-  String? _paymentMethod;
-
-  // Available systems cache
-  List<Map<String, dynamic>> _availableSystems = [];
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => _loadAvailableSystems());
+  }
 
   @override
   void dispose() {
@@ -49,12 +55,6 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
     _newNameController.dispose();
     _newPhoneController.dispose();
     super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() => _loadAvailableSystems());
   }
 
   Future<void> _loadAvailableSystems() async {
@@ -65,10 +65,8 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
           .read(adminOperationsServiceProvider)
           .getAvailableSystems(storeId);
       if (data is List && mounted) {
-        setState(() {
-          _availableSystems =
-              data.cast<Map<String, dynamic>>();
-        });
+        ref.read(_walkInSystemsProvider.notifier).state =
+            data.cast<Map<String, dynamic>>();
       }
     } catch (_) {}
   }
@@ -76,6 +74,7 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
   @override
   Widget build(BuildContext context) {
     final walkInState = ref.watch(walkInProvider);
+    final currentStep = ref.watch(_walkInStepProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -83,56 +82,113 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowLeft01,
+            color: AppColors.textPrimary,
+            size: 20,
+          ),
           onPressed: () => context.go(AppRoutes.adminDashboard),
         ),
         title: Text('Walk-in Booking', style: AppTypography.headingSmall),
       ),
       body: Column(
         children: [
-          // Step indicator
-          _buildStepIndicator(),
+          _WalkInStepIndicator(currentStep: currentStep),
           const SizedBox(height: AppSpacing.md),
-          // Step content
           Expanded(
             child: SingleChildScrollView(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: switch (_currentStep) {
-                0 => _buildUserStep(),
-                1 => _buildSystemStep(),
-                2 => _buildPaymentStep(),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: switch (currentStep) {
+                0 => _UserStep(
+                    searchCtrl: _searchController,
+                    nameCtrl: _newNameController,
+                    phoneCtrl: _newPhoneController,
+                  ),
+                1 => const _SystemStep(),
+                2 => const _PaymentStep(),
                 _ => const SizedBox.shrink(),
               },
             ),
           ),
-          // Bottom action
-          _buildBottomAction(walkInState),
+          _WalkInBottomAction(
+            walkInState: walkInState,
+            onNext: _handleNext,
+          ),
         ],
       ),
     );
   }
 
-  // ─── Step Indicator ─────────────────────────────────────────────────
+  void _handleNext() {
+    final currentStep = ref.read(_walkInStepProvider);
+    if (currentStep < 2) {
+      ref.read(_walkInStepProvider.notifier).state = currentStep + 1;
+    } else {
+      _submitWalkIn();
+    }
+  }
 
-  Widget _buildStepIndicator() {
+  Future<void> _submitWalkIn() async {
+    const userId = 'guest';
+    final systemId = ref.read(_walkInSelectedSystemIdProvider);
+    if (systemId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a system'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    final durationMinutes = ref.read(_walkInDurationProvider);
+    final payUpfront = ref.read(_walkInPayUpfrontProvider);
+    final paymentMethod = ref.read(_walkInPaymentMethodProvider);
+
+    ref.read(walkInProvider.notifier).createWalkIn(
+      userId: userId,
+      systemId: systemId,
+      durationMinutes: durationMinutes.round(),
+      paymentMethod: payUpfront ? paymentMethod : null,
+    );
+  }
+}
+
+// ─── Step Indicator ──────────────────────────────────────────────────────────
+
+class _WalkInStepIndicator extends StatelessWidget {
+  const _WalkInStepIndicator({required this.currentStep});
+  final int currentStep;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       child: Row(
         children: [
-          _buildStepDot(0, 'User'),
+          _StepDot(step: 0, label: 'User', isActive: currentStep >= 0),
           Expanded(child: Container(height: 2, color: AppColors.border)),
-          _buildStepDot(1, 'System'),
+          _StepDot(step: 1, label: 'System', isActive: currentStep >= 1),
           Expanded(child: Container(height: 2, color: AppColors.border)),
-          _buildStepDot(2, 'Payment'),
+          _StepDot(step: 2, label: 'Payment', isActive: currentStep >= 2),
         ],
       ),
     );
   }
+}
 
-  Widget _buildStepDot(int step, String label) {
-    final isActive = _currentStep >= step;
+class _StepDot extends StatelessWidget {
+  const _StepDot({
+    required this.step,
+    required this.label,
+    required this.isActive,
+  });
+  final int step;
+  final String label;
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
@@ -147,12 +203,15 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
           ),
           child: Center(
             child: isActive
-                ? const Icon(Icons.check, color: AppColors.background, size: 16)
+                ? const HugeIcon(
+                    icon: HugeIcons.strokeRoundedTick01,
+                    color: AppColors.background,
+                    size: 16,
+                  )
                 : Text(
                     '${step + 1}',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                    style: AppTypography.caption
+                        .copyWith(color: AppColors.textSecondary),
                   ),
           ),
         ),
@@ -166,55 +225,68 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
       ],
     );
   }
+}
 
-  // ─── Step 1: User ───────────────────────────────────────────────────
+// ─── Step 1: User ────────────────────────────────────────────────────────────
 
-  Widget _buildUserStep() {
+class _UserStep extends ConsumerWidget {
+  const _UserStep({
+    required this.searchCtrl,
+    required this.nameCtrl,
+    required this.phoneCtrl,
+  });
+  final TextEditingController searchCtrl;
+  final TextEditingController nameCtrl;
+  final TextEditingController phoneCtrl;
+
+  static InputDecoration _decor(String hint, {bool isLabel = false}) =>
+      InputDecoration(
+        hintText: isLabel ? null : hint,
+        labelText: isLabel ? hint : null,
+        labelStyle:
+            AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+        hintStyle:
+            AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+        filled: true,
+        fillColor: AppColors.surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+          borderSide: const BorderSide(color: AppColors.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+          borderSide: const BorderSide(color: AppColors.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+          borderSide: const BorderSide(color: AppColors.primary),
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showNewUserForm = ref.watch(_walkInShowNewUserProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Find or create a player',
-            style: AppTypography.headingSmall),
+        Text('Find or create a player', style: AppTypography.headingSmall),
         const SizedBox(height: AppSpacing.lg),
-        // Search field
         TextField(
-          controller: _searchController,
+          controller: searchCtrl,
           style: AppTypography.bodyLarge,
-          decoration: InputDecoration(
-            hintText: 'Phone or email',
-            hintStyle: AppTypography.bodyMedium
-                .copyWith(color: AppColors.textSecondary),
+          decoration: _decor('Phone or email').copyWith(
             prefixIcon: const HugeIcon(
               icon: HugeIcons.strokeRoundedSearch01,
               color: AppColors.textSecondary,
               size: 20,
             ),
-            filled: true,
-            fillColor: AppColors.surface,
-            border: OutlineInputBorder(
-              borderRadius:
-                  BorderRadius.circular(AppSpacing.borderRadius),
-              borderSide: const BorderSide(color: AppColors.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius:
-                  BorderRadius.circular(AppSpacing.borderRadius),
-              borderSide: const BorderSide(color: AppColors.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius:
-                  BorderRadius.circular(AppSpacing.borderRadius),
-              borderSide:
-                  const BorderSide(color: AppColors.primary),
-            ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        // New user button
-        if (!_showNewUserForm)
+        if (!showNewUserForm)
           TextButton.icon(
             onPressed: () =>
-                setState(() => _showNewUserForm = true),
+                ref.read(_walkInShowNewUserProvider.notifier).state = true,
             icon: const HugeIcon(
               icon: HugeIcons.strokeRoundedUserCircle,
               color: AppColors.rose,
@@ -222,106 +294,69 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
             ),
             label: Text(
               'New User',
-              style:
-                  AppTypography.bodyMedium.copyWith(color: AppColors.rose),
+              style: AppTypography.bodyMedium.copyWith(color: AppColors.rose),
             ),
           ),
-        if (_showNewUserForm) ...[
+        if (showNewUserForm) ...[
           const SizedBox(height: AppSpacing.md),
           Text('New Player', style: AppTypography.headingSmall),
           const SizedBox(height: AppSpacing.sm),
           TextField(
-            controller: _newNameController,
+            controller: nameCtrl,
             style: AppTypography.bodyLarge,
-            decoration: InputDecoration(
-              labelText: 'Name',
-              labelStyle: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textSecondary),
-              filled: true,
-              fillColor: AppColors.surface,
-              border: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.borderRadius),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.borderRadius),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.borderRadius),
-                borderSide:
-                    const BorderSide(color: AppColors.primary),
-              ),
-            ),
+            decoration: _decor('Name', isLabel: true),
           ),
           const SizedBox(height: AppSpacing.sm),
           TextField(
-            controller: _newPhoneController,
+            controller: phoneCtrl,
             keyboardType: TextInputType.phone,
             style: AppTypography.bodyLarge,
-            decoration: InputDecoration(
-              labelText: 'Phone',
-              labelStyle: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textSecondary),
-              filled: true,
-              fillColor: AppColors.surface,
-              border: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.borderRadius),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.borderRadius),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.borderRadius),
-                borderSide:
-                    const BorderSide(color: AppColors.primary),
-              ),
-            ),
+            decoration: _decor('Phone', isLabel: true),
           ),
         ],
       ],
     );
   }
+}
 
-  // ─── Step 2: System & Duration ──────────────────────────────────────
+// ─── Step 2: System & Duration ───────────────────────────────────────────────
 
-  Widget _buildSystemStep() {
-    final filteredSystems = _platformFilter == 'All'
-        ? _availableSystems
-        : _availableSystems
+class _SystemStep extends ConsumerWidget {
+  const _SystemStep();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final platformFilter = ref.watch(_walkInPlatformFilterProvider);
+    final availableSystems = ref.watch(_walkInSystemsProvider);
+    final selectedSystemId = ref.watch(_walkInSelectedSystemIdProvider);
+    final durationMinutes = ref.watch(_walkInDurationProvider);
+
+    final filteredSystems = platformFilter == 'All'
+        ? availableSystems
+        : availableSystems
             .where((s) =>
                 (s['platform'] as String?)?.toLowerCase() ==
-                _platformFilter.toLowerCase())
+                platformFilter.toLowerCase())
             .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Select system & duration',
-            style: AppTypography.headingSmall),
+        Text('Select system & duration', style: AppTypography.headingSmall),
         const SizedBox(height: AppSpacing.lg),
-        // Platform filters
         SizedBox(
           height: 36,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 4,
-            separatorBuilder: (_, _) =>
-                const SizedBox(width: AppSpacing.sm),
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
             itemBuilder: (ctx, i) {
               final filters = ['All', 'PC', 'Console', 'VR'];
-              final isSelected = filters[i] == _platformFilter;
+              final isSelected = filters[i] == platformFilter;
               return GestureDetector(
-                onTap: () =>
-                    setState(() => _platformFilter = filters[i]),
+                onTap: () => ref
+                    .read(_walkInPlatformFilterProvider.notifier)
+                    .state = filters[i],
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
@@ -329,8 +364,8 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.rose : AppColors.surface,
-                    borderRadius: BorderRadius.circular(
-                        AppSpacing.borderRadiusSm),
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.borderRadiusSm),
                     border: Border.all(
                       color: isSelected ? AppColors.rose : AppColors.border,
                     ),
@@ -349,7 +384,6 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        // System grid
         if (filteredSystems.isEmpty)
           Center(
             child: Padding(
@@ -377,12 +411,14 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
               final system = filteredSystems[i];
               final sysId = system['systemId']?.toString();
               final sysName = system['name']?.toString() ?? 'System';
-              final isSelected = sysId == _selectedSystemId;
+              final isSelected = sysId == selectedSystemId;
               return GestureDetector(
-                onTap: () => setState(() {
-                  _selectedSystemId = sysId;
-                  _selectedSystemName = sysName;
-                }),
+                onTap: () {
+                  ref.read(_walkInSelectedSystemIdProvider.notifier).state =
+                      sysId;
+                  ref.read(_walkInSelectedSystemNameProvider.notifier).state =
+                      sysName;
+                },
                 child: Container(
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
@@ -412,9 +448,8 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
                       if (system['platform'] != null)
                         Text(
                           system['platform'].toString(),
-                          style: AppTypography.caption.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          style: AppTypography.caption
+                              .copyWith(color: AppColors.textSecondary),
                         ),
                     ],
                   ),
@@ -423,60 +458,74 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
             },
           ),
         const SizedBox(height: AppSpacing.lg),
-        // Duration presets
         Text('Duration', style: AppTypography.headingSmall),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children: [
-            _buildDurationPreset('30m', 30),
-            _buildDurationPreset('1h', 60),
-            _buildDurationPreset('2h', 120),
-            _buildDurationPreset('4h', 240),
-            _buildDurationPreset('8h', 480),
+            _DurationPreset(label: '30m', minutes: 30, selected: durationMinutes),
+            _DurationPreset(label: '1h', minutes: 60, selected: durationMinutes),
+            _DurationPreset(label: '2h', minutes: 120, selected: durationMinutes),
+            _DurationPreset(label: '4h', minutes: 240, selected: durationMinutes),
+            _DurationPreset(label: '8h', minutes: 480, selected: durationMinutes),
           ],
         ),
         const SizedBox(height: AppSpacing.md),
-        // Duration slider
         Row(
           children: [
-            Text('15m',
-                style: AppTypography.caption
-                    .copyWith(color: AppColors.textSecondary)),
+            Text(
+              '15m',
+              style: AppTypography.caption
+                  .copyWith(color: AppColors.textSecondary),
+            ),
             Expanded(
               child: Slider(
-                value: _durationMinutes,
+                value: durationMinutes,
                 min: 15,
                 max: 480,
                 divisions: 31,
                 activeColor: AppColors.rose,
                 inactiveColor: AppColors.secondary,
-                label: _formatDuration(_durationMinutes.round()),
+                label: _formatDuration(durationMinutes.round()),
                 onChanged: (v) =>
-                    setState(() => _durationMinutes = v),
+                    ref.read(_walkInDurationProvider.notifier).state = v,
               ),
             ),
-            Text('8h',
-                style: AppTypography.caption
-                    .copyWith(color: AppColors.textSecondary)),
+            Text(
+              '8h',
+              style: AppTypography.caption
+                  .copyWith(color: AppColors.textSecondary),
+            ),
           ],
         ),
         Center(
           child: Text(
-            _formatDuration(_durationMinutes.round()),
-            style: AppTypography.headingSmall
-                .copyWith(color: AppColors.rose),
+            _formatDuration(durationMinutes.round()),
+            style: AppTypography.headingSmall.copyWith(color: AppColors.rose),
           ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildDurationPreset(String label, int minutes) {
-    final isSelected = _durationMinutes.round() == minutes;
+class _DurationPreset extends ConsumerWidget {
+  const _DurationPreset({
+    required this.label,
+    required this.minutes,
+    required this.selected,
+  });
+  final String label;
+  final int minutes;
+  final double selected;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isSelected = selected.round() == minutes;
     return GestureDetector(
-      onTap: () => setState(() => _durationMinutes = minutes.toDouble()),
+      onTap: () =>
+          ref.read(_walkInDurationProvider.notifier).state = minutes.toDouble(),
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
@@ -492,46 +541,54 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
         child: Text(
           label,
           style: AppTypography.bodySmall.copyWith(
-            color: isSelected
-                ? AppColors.background
-                : AppColors.textSecondary,
+            color: isSelected ? AppColors.background : AppColors.textSecondary,
           ),
         ),
       ),
     );
   }
+}
 
-  // ─── Step 3: Payment ────────────────────────────────────────────────
+// ─── Step 3: Payment ─────────────────────────────────────────────────────────
 
-  Widget _buildPaymentStep() {
+class _PaymentStep extends ConsumerWidget {
+  const _PaymentStep();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final payUpfront = ref.watch(_walkInPayUpfrontProvider);
+    final paymentMethod = ref.watch(_walkInPaymentMethodProvider);
+    final selectedSystemName = ref.watch(_walkInSelectedSystemNameProvider);
+    final durationMinutes = ref.watch(_walkInDurationProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Payment method', style: AppTypography.headingSmall),
         const SizedBox(height: AppSpacing.lg),
-        // Pay toggle
         Row(
           children: [
             Expanded(
               child: GestureDetector(
-                onTap: () => setState(() => _payUpfront = true),
+                onTap: () =>
+                    ref.read(_walkInPayUpfrontProvider.notifier).state = true,
                 child: Container(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: _payUpfront
+                    color: payUpfront
                         ? AppColors.rose.withValues(alpha: 0.15)
                         : AppColors.surface,
                     borderRadius:
                         BorderRadius.circular(AppSpacing.borderRadius),
                     border: Border.all(
-                      color: _payUpfront ? AppColors.rose : AppColors.border,
+                      color: payUpfront ? AppColors.rose : AppColors.border,
                     ),
                   ),
                   child: Center(
                     child: Text(
                       'Pay Upfront',
                       style: AppTypography.bodyMedium.copyWith(
-                        color: _payUpfront
+                        color: payUpfront
                             ? AppColors.rose
                             : AppColors.textSecondary,
                       ),
@@ -543,28 +600,27 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: GestureDetector(
-                onTap: () => setState(() {
-                  _payUpfront = false;
-                  _paymentMethod = null;
-                }),
+                onTap: () {
+                  ref.read(_walkInPayUpfrontProvider.notifier).state = false;
+                  ref.read(_walkInPaymentMethodProvider.notifier).state = null;
+                },
                 child: Container(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: !_payUpfront
+                    color: !payUpfront
                         ? AppColors.rose.withValues(alpha: 0.15)
                         : AppColors.surface,
                     borderRadius:
                         BorderRadius.circular(AppSpacing.borderRadius),
                     border: Border.all(
-                      color:
-                          !_payUpfront ? AppColors.rose : AppColors.border,
+                      color: !payUpfront ? AppColors.rose : AppColors.border,
                     ),
                   ),
                   child: Center(
                     child: Text(
                       'Pay at End',
                       style: AppTypography.bodyMedium.copyWith(
-                        color: !_payUpfront
+                        color: !payUpfront
                             ? AppColors.rose
                             : AppColors.textSecondary,
                       ),
@@ -575,20 +631,31 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
             ),
           ],
         ),
-        if (_payUpfront) ...[
+        if (payUpfront) ...[
           const SizedBox(height: AppSpacing.lg),
           Wrap(
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.sm,
             children: [
-              _buildPaymentChip('Cash', 'cash'),
-              _buildPaymentChip('UPI', 'upi'),
-              _buildPaymentChip('Card', 'card'),
+              _PaymentChip(
+                label: 'Cash',
+                method: 'cash',
+                selected: paymentMethod,
+              ),
+              _PaymentChip(
+                label: 'UPI',
+                method: 'upi',
+                selected: paymentMethod,
+              ),
+              _PaymentChip(
+                label: 'Card',
+                method: 'card',
+                selected: paymentMethod,
+              ),
             ],
           ),
         ],
         const SizedBox(height: AppSpacing.xl),
-        // Summary
         Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
@@ -597,14 +664,16 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
           ),
           child: Column(
             children: [
-              _buildSummaryRow('System', _selectedSystemName ?? '--'),
-              _buildSummaryRow(
-                'Duration',
-                _formatDuration(_durationMinutes.round()),
+              _SummaryRow(label: 'System', value: selectedSystemName ?? '--'),
+              _SummaryRow(
+                label: 'Duration',
+                value: _formatDuration(durationMinutes.round()),
               ),
-              _buildSummaryRow(
-                'Payment',
-                _payUpfront ? (_paymentMethod?.toUpperCase() ?? 'Select') : 'At end',
+              _SummaryRow(
+                label: 'Payment',
+                value: payUpfront
+                    ? (paymentMethod?.toUpperCase() ?? 'Select')
+                    : 'At end',
               ),
             ],
           ),
@@ -612,11 +681,24 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
       ],
     );
   }
+}
 
-  Widget _buildPaymentChip(String label, String method) {
-    final isSelected = _paymentMethod == method;
+class _PaymentChip extends ConsumerWidget {
+  const _PaymentChip({
+    required this.label,
+    required this.method,
+    required this.selected,
+  });
+  final String label;
+  final String method;
+  final String? selected;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isSelected = selected == method;
     return GestureDetector(
-      onTap: () => setState(() => _paymentMethod = method),
+      onTap: () =>
+          ref.read(_walkInPaymentMethodProvider.notifier).state = method,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
@@ -632,34 +714,52 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
         child: Text(
           label,
           style: AppTypography.bodyMedium.copyWith(
-            color: isSelected
-                ? AppColors.background
-                : AppColors.textSecondary,
+            color: isSelected ? AppColors.background : AppColors.textSecondary,
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildSummaryRow(String label, String value) {
+class _SummaryRow extends StatelessWidget {
+  const _SummaryRow({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textSecondary)),
+          Text(
+            label,
+            style: AppTypography.bodyMedium
+                .copyWith(color: AppColors.textSecondary),
+          ),
           Text(value, style: AppTypography.bodyMedium),
         ],
       ),
     );
   }
+}
 
-  // ─── Bottom Action ──────────────────────────────────────────────────
+// ─── Bottom Action ───────────────────────────────────────────────────────────
 
-  Widget _buildBottomAction(WalkInState walkInState) {
+class _WalkInBottomAction extends ConsumerWidget {
+  const _WalkInBottomAction({
+    required this.walkInState,
+    required this.onNext,
+  });
+  final WalkInState walkInState;
+  final VoidCallback onNext;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final isLoading = walkInState is WalkInLoading;
+    final currentStep = ref.watch(_walkInStepProvider);
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -670,10 +770,12 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
       child: SafeArea(
         child: Row(
           children: [
-            if (_currentStep > 0)
+            if (currentStep > 0)
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => setState(() => _currentStep--),
+                  onPressed: () => ref
+                      .read(_walkInStepProvider.notifier)
+                      .state = currentStep - 1,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.textPrimary,
                     side: const BorderSide(color: AppColors.border),
@@ -687,12 +789,11 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
                   child: Text('Back', style: AppTypography.button),
                 ),
               ),
-            if (_currentStep > 0)
-              const SizedBox(width: AppSpacing.sm),
+            if (currentStep > 0) const SizedBox(width: AppSpacing.sm),
             Expanded(
               flex: 2,
               child: ElevatedButton(
-                onPressed: isLoading ? null : _handleNext,
+                onPressed: isLoading ? null : onNext,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.rose,
                   foregroundColor: AppColors.background,
@@ -713,7 +814,7 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
                         ),
                       )
                     : Text(
-                        _currentStep < 2 ? 'Continue' : 'Start Session',
+                        currentStep < 2 ? 'Continue' : 'Start Session',
                         style: AppTypography.button
                             .copyWith(color: AppColors.background),
                       ),
@@ -723,42 +824,5 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
         ),
       ),
     );
-  }
-
-  void _handleNext() {
-    if (_currentStep < 2) {
-      setState(() => _currentStep++);
-    } else {
-      _submitWalkIn();
-    }
-  }
-
-  Future<void> _submitWalkIn() async {
-    // For demo: use "guest" user if none selected
-    final userId = _selectedUserId ?? 'guest';
-    final systemId = _selectedSystemId;
-    if (systemId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a system'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-      return;
-    }
-
-    ref.read(walkInProvider.notifier).createWalkIn(
-      userId: userId,
-      systemId: systemId,
-      durationMinutes: _durationMinutes.round(),
-      paymentMethod: _payUpfront ? _paymentMethod : null,
-    );
-  }
-
-  String _formatDuration(int minutes) {
-    if (minutes < 60) return '${minutes}m';
-    final h = minutes ~/ 60;
-    final m = minutes % 60;
-    return m > 0 ? '${h}h ${m}m' : '${h}h';
   }
 }

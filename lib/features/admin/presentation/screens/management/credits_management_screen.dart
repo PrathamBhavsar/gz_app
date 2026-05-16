@@ -9,6 +9,8 @@ import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_management_provider.dart';
 import '../../providers/admin_permissions.dart';
 
+final _creditsUserIdProvider = StateProvider.autoDispose<String?>((ref) => null);
+
 /// Credits Management — Screen 55.
 /// Player search, balance card, transaction history, manual adjustment.
 class CreditsManagementScreen extends ConsumerStatefulWidget {
@@ -22,7 +24,6 @@ class CreditsManagementScreen extends ConsumerStatefulWidget {
 class _CreditsManagementScreenState
     extends ConsumerState<CreditsManagementScreen> {
   final _searchCtrl = TextEditingController();
-  String? _selectedUserId;
 
   @override
   void dispose() {
@@ -32,6 +33,7 @@ class _CreditsManagementScreenState
 
   @override
   Widget build(BuildContext context) {
+    final selectedUserId = ref.watch(_creditsUserIdProvider);
     final state = ref.watch(creditsProvider);
     final perms = ref.watch(adminPermissionsProvider);
     final canAdjust = perms.canAdjustCreditBalance;
@@ -42,8 +44,7 @@ class _CreditsManagementScreenState
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: AppColors.textPrimary, size: 20),
           onPressed: () => context.go(AppRoutes.adminPricing),
         ),
         title: Text('Credits', style: AppTypography.headingSmall),
@@ -75,16 +76,16 @@ class _CreditsManagementScreenState
                 ),
               ),
               onSubmitted: (value) {
-                // Use search value as userId placeholder (real app would search)
-                setState(() => _selectedUserId = value.trim().isEmpty ? null : value.trim());
-                if (_selectedUserId != null) {
-                  ref.read(creditsProvider.notifier).load(userId: _selectedUserId!);
+                final userId = value.trim().isEmpty ? null : value.trim();
+                ref.read(_creditsUserIdProvider.notifier).state = userId;
+                if (userId != null) {
+                  ref.read(creditsProvider.notifier).load(userId: userId);
                 }
               },
             ),
             const SizedBox(height: AppSpacing.lg),
-            if (_selectedUserId != null) _buildContent(state, canAdjust),
-            if (_selectedUserId == null)
+            if (selectedUserId != null) _buildContent(state, canAdjust),
+            if (selectedUserId == null)
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -230,7 +231,7 @@ class _CreditsManagementScreenState
           Text(
             '${isPositive ? '+' : ''}₹$amount',
             style: AppTypography.bodySmall.copyWith(
-              color: isPositive ? const Color(0xFF4CAF50) : AppColors.rose,
+              color: isPositive ? AppColors.ok : AppColors.rose,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -311,10 +312,11 @@ class _CreditsManagementScreenState
               child: ElevatedButton(
                 onPressed: () async {
                   final amount = double.tryParse(amountCtrl.text);
-                  if (amount == null || _selectedUserId == null) return;
-                  Navigator.pop(context);
+                  final selectedUserId = ref.read(_creditsUserIdProvider);
+                  if (amount == null || selectedUserId == null) return;
+                  context.pop();
                   await ref.read(creditsProvider.notifier).adjustCredits(
-                        userId: _selectedUserId!,
+                        userId: selectedUserId,
                         amount: amount,
                         reason: reasonCtrl.text.trim().isEmpty
                             ? null

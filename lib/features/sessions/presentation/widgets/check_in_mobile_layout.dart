@@ -10,6 +10,9 @@ import '../../../../features/booking/data/repositories/booking_repository.dart';
 import '../../../../shared/widgets/em_button.dart';
 import '../../../../shared/widgets/em_top_bar.dart';
 
+final _checkInLoadingProvider = StateProvider.autoDispose<bool>((ref) => false);
+final _checkInErrorProvider = StateProvider.autoDispose<String?>((ref) => null);
+
 class CheckInMobileLayout extends ConsumerStatefulWidget {
   final String id;
   const CheckInMobileLayout({super.key, required this.id});
@@ -20,14 +23,9 @@ class CheckInMobileLayout extends ConsumerStatefulWidget {
 }
 
 class _CheckInMobileLayoutState extends ConsumerState<CheckInMobileLayout> {
-  bool _loading = false;
-  String? _error;
-
   Future<void> _tapCheckIn() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+    ref.read(_checkInLoadingProvider.notifier).state = true;
+    ref.read(_checkInErrorProvider.notifier).state = null;
     try {
       final storeId = ref.read(activeStoreIdProvider) ?? '';
       final repo = ref.read(bookingRepositoryProvider);
@@ -37,16 +35,16 @@ class _CheckInMobileLayoutState extends ConsumerState<CheckInMobileLayout> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _loading = false;
-          _error = e.toString();
-        });
+        ref.read(_checkInLoadingProvider.notifier).state = false;
+        ref.read(_checkInErrorProvider.notifier).state = e.toString();
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final loading = ref.watch(_checkInLoadingProvider);
+    final error = ref.watch(_checkInErrorProvider);
     return SafeArea(
       child: Column(
         children: [
@@ -94,13 +92,13 @@ class _CheckInMobileLayoutState extends ConsumerState<CheckInMobileLayout> {
                     const SizedBox(height: AppSpacing.md),
                     EmButtonFull(
                       label: 'Tap to Check In',
-                      loading: _loading,
-                      onPressed: _loading ? null : _tapCheckIn,
+                      loading: loading,
+                      onPressed: loading ? null : _tapCheckIn,
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    if (_error != null)
+                    if (error != null)
                       Text(
-                        _error!,
+                        error,
                         style: AppTypography.small.copyWith(color: AppColors.err),
                         textAlign: TextAlign.center,
                       )

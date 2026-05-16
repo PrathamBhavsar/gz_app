@@ -43,6 +43,10 @@ abstract class AppColors {
   static const Color purple   = Color(0xFF5A3A82);
   static const Color purpleBg = Color(0xFFE5DCEE);
 
+  // ── Overlays / shadows ──
+  static const Color overlayLight  = Color(0x80FFFFFF); // semi-transparent white over tinted bg
+  static const Color shadowSubtle  = Color(0x0A000000); // 4% black ambient shadow
+
   // ── Legacy aliases (keep existing call-sites compiling) ──
   static const Color primary       = buttonBg;
   static const Color secondary     = pillBg;

@@ -6,6 +6,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../providers/store_search_notifier.dart';
+import '../../../../../core/navigation/routes.dart';
 
 class StoreSearchTabletLayout extends ConsumerWidget {
   const StoreSearchTabletLayout({super.key});
@@ -20,8 +21,8 @@ class StoreSearchTabletLayout extends ConsumerWidget {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
+          icon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowLeft01,
             color: AppColors.textPrimary,
             size: 28,
           ),
@@ -116,11 +117,12 @@ class StoreSearchTabletLayout extends ConsumerWidget {
               color: AppColors.textSecondary,
             ),
           ),
-          trailing: const Icon(
-            Icons.arrow_forward_ios,
+          trailing: const HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowRight01,
             color: AppColors.textSecondary,
+            size: 18,
           ),
-          onTap: () => context.push('/home/store/${store.slug}'),
+          onTap: () => context.push(AppRoutes.storeDetailPath(store.slug ?? '')),
         );
       },
     );

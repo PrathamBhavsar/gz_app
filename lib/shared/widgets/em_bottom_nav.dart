@@ -20,7 +20,7 @@ class EmBottomNav extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: Color(0x0A000000),
+            color: AppColors.shadowSubtle,
             blurRadius: 16,
             offset: Offset(0, -4),
           ),

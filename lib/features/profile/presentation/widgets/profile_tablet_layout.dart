@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
+import '../../../../core/navigation/routes.dart';
 
 class ProfileTabletLayout extends ConsumerWidget {
   const ProfileTabletLayout({super.key});
@@ -29,7 +30,7 @@ class ProfileTabletLayout extends ConsumerWidget {
                   child: OutlinedButton.icon(
                     onPressed: () {
                       ref.read(authNotifierProvider.notifier).logout();
-                      context.go('/auth_landing');
+                      context.go(AppRoutes.authLanding);
                     },
                     icon: const HugeIcon(
                       icon: HugeIcons.strokeRoundedLogout01,
@@ -189,9 +190,10 @@ class ProfileTabletLayout extends ConsumerWidget {
             color: AppColors.textSecondary,
           ),
         ),
-        trailing: const Icon(
-          Icons.chevron_right,
+        trailing: const HugeIcon(
+          icon: HugeIcons.strokeRoundedArrowRight01,
           color: AppColors.textSecondary,
+          size: 20,
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,

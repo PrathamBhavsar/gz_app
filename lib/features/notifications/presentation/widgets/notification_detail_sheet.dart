@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -56,7 +57,7 @@ class NotificationDetailSheet extends StatelessWidget {
           child: Row(
             children: [
               GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
+                onTap: () => context.pop(),
                 child: const SizedBox(
                   width: 38,
                   height: 38,
@@ -105,7 +106,7 @@ class NotificationDetailSheet extends StatelessWidget {
                     notification.referenceId != null)
                   EmButtonFull(
                     label: _actionLabel(notification.referenceType),
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => context.pop(),
                   ),
                 const SizedBox(height: AppSpacing.xl),
               ],

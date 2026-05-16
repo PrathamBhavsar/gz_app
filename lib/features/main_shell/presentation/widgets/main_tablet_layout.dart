@@ -25,16 +25,16 @@ class MainTabletLayout extends StatelessWidget {
         context.go(AppRoutes.home);
         break;
       case 1:
-        context.go('/book');
+        context.go(AppRoutes.book);
         break;
       case 2:
-        context.go('/sessions');
+        context.go(AppRoutes.sessions);
         break;
       case 3:
-        context.go('/wallet');
+        context.go(AppRoutes.wallet);
         break;
       case 4:
-        context.go('/profile');
+        context.go(AppRoutes.profile);
         break;
     }
   }
@@ -54,7 +54,7 @@ class MainTabletLayout extends StatelessWidget {
           labelType: NavigationRailLabelType.all,
           leading: Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
-            child: Icon(Icons.gamepad, color: AppColors.rose, size: 32),
+            child: const HugeIcon(icon: HugeIcons.strokeRoundedGameController01, color: AppColors.rose, size: 32),
           ),
           destinations: const [
             NavigationRailDestination(

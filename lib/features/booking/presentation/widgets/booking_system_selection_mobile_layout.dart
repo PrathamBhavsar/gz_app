@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gz_app/core/navigation/routes.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/errors/app_exception.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -125,7 +126,7 @@ class BookingSystemSelectionMobileLayout extends ConsumerWidget {
                     ref
                         .read(bookingNotifierProvider.notifier)
                         .selectSystem(available[i]);
-                    context.push('/book/summary');
+                    context.push(AppRoutes.bookSummary);
                   },
                 ),
               );

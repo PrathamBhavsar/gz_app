@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -61,9 +62,10 @@ class EmailLoginTabletLayout extends StatelessWidget {
                     ),
                     borderSide: BorderSide.none,
                   ),
-                  suffixIcon: const Icon(
-                    Icons.visibility_off,
+                  suffixIcon: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedViewOff,
                     color: AppColors.textSecondary,
+                    size: 20,
                   ),
                 ),
               ),

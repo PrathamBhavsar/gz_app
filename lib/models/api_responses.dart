@@ -404,12 +404,21 @@ class NotificationListResponse
   const NotificationListResponse({super.message, super.data, this.unreadCount});
 
   factory NotificationListResponse.fromJson(Map<String, dynamic> json) {
-    final rawNotifications =
-        json['notifications'] as List<dynamic>? ??
-        json['data'] as List<dynamic>?;
+    final data = json['data'];
+    final dataMap = data is Map<String, dynamic> ? data : null;
+    final meta = dataMap?['meta'] is Map<String, dynamic>
+        ? dataMap!['meta'] as Map<String, dynamic>
+        : null;
+    final rawNotifications = json['notifications'] is List<dynamic>
+        ? json['notifications'] as List<dynamic>
+        : dataMap?['notifications'] is List<dynamic>
+        ? dataMap!['notifications'] as List<dynamic>
+        : data is List<dynamic>
+        ? data
+        : null;
     return NotificationListResponse(
       message: json['message'] as String?,
-      unreadCount: json['unreadCount'] as int?,
+      unreadCount: (json['unreadCount'] ?? meta?['unreadCount']) as int?,
       data: rawNotifications
           ?.map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
           .toList(),

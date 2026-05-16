@@ -11,6 +11,11 @@ import '../../../../shared/widgets/em_top_bar.dart';
 import '../../../../shared/widgets/em_live_dot.dart';
 import '../../../../shared/widgets/em_progress_bar.dart';
 
+final _activeSessionElapsedProvider =
+    StateProvider.autoDispose<int>((ref) => 23 * 60 + 56);
+final _activeSessionShowEventsProvider =
+    StateProvider.autoDispose<bool>((ref) => false);
+
 // StatefulWidget allowed here: owns Timer lifecycle (= AnimationController equivalent)
 class ActiveSessionMobileLayout extends ConsumerStatefulWidget {
   const ActiveSessionMobileLayout({super.key});
@@ -22,18 +27,17 @@ class ActiveSessionMobileLayout extends ConsumerStatefulWidget {
 
 class _ActiveSessionMobileLayoutState
     extends ConsumerState<ActiveSessionMobileLayout> {
-  static const _totalSecs  = 2 * 60 * 60; // 2h
-  static const _startElapsed = 23 * 60 + 56; // 23m 56s
+  static const _totalSecs = 2 * 60 * 60; // 2h
 
-  int _elapsed = _startElapsed;
-  bool _showEvents = false;
   late Timer _timer;
 
   @override
   void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (_elapsed < _totalSecs) setState(() => _elapsed++);
+      if (ref.read(_activeSessionElapsedProvider) < _totalSecs) {
+        ref.read(_activeSessionElapsedProvider.notifier).state++;
+      }
     });
   }
 
@@ -47,17 +51,20 @@ class _ActiveSessionMobileLayoutState
 
   @override
   Widget build(BuildContext context) {
-    final remain = (_totalSecs - _elapsed).clamp(0, _totalSecs);
-    final pct    = _elapsed / _totalSecs;
-    final cost   = (_elapsed / 3600) * 80;
+    final elapsed = ref.watch(_activeSessionElapsedProvider);
+    final showEvents = ref.watch(_activeSessionShowEventsProvider);
+
+    final remain = (_totalSecs - elapsed).clamp(0, _totalSecs);
+    final pct    = elapsed / _totalSecs;
+    final cost   = (elapsed / 3600) * 80;
 
     final hh = remain ~/ 3600;
     final mm = (remain % 3600) ~/ 60;
     final ss = remain % 60;
     final remainStr = '${_pad(hh)}:${_pad(mm)}:${_pad(ss)}';
 
-    final em = _elapsed ~/ 60;
-    final es = _elapsed % 60;
+    final em = elapsed ~/ 60;
+    final es = elapsed % 60;
     final elapsedStr = '${_pad(em)}:${_pad(es)}';
 
     return SafeArea(
@@ -165,7 +172,9 @@ class _ActiveSessionMobileLayoutState
                   ),
                   child: Column(children: [
                     GestureDetector(
-                      onTap: () => setState(() => _showEvents = !_showEvents),
+                      onTap: () => ref
+                          .read(_activeSessionShowEventsProvider.notifier)
+                          .state = !showEvents,
                       behavior: HitTestBehavior.opaque,
                       child: Padding(
                         padding: const EdgeInsets.all(AppSpacing.md),
@@ -175,14 +184,14 @@ class _ActiveSessionMobileLayoutState
                           Text('4 events logged', style: AppTypography.body.copyWith(fontWeight: FontWeight.w600)),
                           const Spacer(),
                           AnimatedRotation(
-                            turns: _showEvents ? 0.5 : 0,
+                            turns: showEvents ? 0.5 : 0,
                             duration: const Duration(milliseconds: 200),
                             child: const HugeIcon(icon: HugeIcons.strokeRoundedArrowDown01, color: AppColors.textTertiary, size: 18),
                           ),
                         ]),
                       ),
                     ),
-                    if (_showEvents)
+                    if (showEvents)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
                         child: Column(children: const [

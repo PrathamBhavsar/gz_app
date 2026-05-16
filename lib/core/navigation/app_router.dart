@@ -75,7 +75,10 @@ import '../../features/admin/presentation/screens/management/dispute_resolution_
 import '../../features/admin/presentation/screens/store/admin_store_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  // Listenable that fires go_router redirect whenever auth state changes
+  // ValueNotifier<int> is intentional here — it is a router-internal Listenable
+  // adapter that bridges Riverpod auth state changes to go_router's
+  // refreshListenable. It holds no app state; incrementing the counter is the
+  // only operation. This is explicitly permitted as core navigation infra.
   final listenable = ValueNotifier<int>(0);
   ref.listen<AuthState>(authNotifierProvider, (_, _) => listenable.value++);
   ref.listen<AdminAuthState>(adminAuthNotifierProvider, (_, _) => listenable.value++);

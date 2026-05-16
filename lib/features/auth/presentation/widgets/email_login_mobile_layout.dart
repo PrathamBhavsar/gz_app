@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -9,6 +10,8 @@ import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/errors/app_exception.dart';
 import '../providers/auth_notifier.dart';
 import '../providers/auth_state.dart';
+
+final _emailLoginObscureProvider = StateProvider.autoDispose<bool>((ref) => false);
 
 class EmailLoginMobileLayout extends ConsumerStatefulWidget {
   const EmailLoginMobileLayout({super.key});
@@ -50,26 +53,16 @@ class _EmailLoginMobileLayoutState
     extends ConsumerState<EmailLoginMobileLayout> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _passwordVisible = false;
-  String? _errorMessage;
   bool _navigated = false;
 
   @override
   void initState() {
     super.initState();
-    // Listen once for auth state changes to navigate on success
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.listenManual(authNotifierProvider, (previous, next) {
         if (next is AuthAuthenticated && !_navigated) {
           _navigated = true;
           context.go(AppRoutes.home);
-        } else if (next is AuthError) {
-          final err = next.error;
-          if (mounted) {
-            setState(() {
-              _errorMessage = _formatError(err);
-            });
-          }
         }
       });
     });
@@ -94,19 +87,13 @@ class _EmailLoginMobileLayoutState
   void _fillCredentials(String email) {
     _emailController.text = email;
     _passwordController.text = 'password123';
-    setState(() => _errorMessage = null);
   }
 
   Future<void> _submit() async {
-    setState(() => _errorMessage = null);
-
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    if (email.isEmpty || password.isEmpty) {
-      setState(() => _errorMessage = 'Please enter your email and password.');
-      return;
-    }
+    if (email.isEmpty || password.isEmpty) return;
 
     await ref
         .read(authNotifierProvider.notifier)
@@ -117,6 +104,8 @@ class _EmailLoginMobileLayoutState
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     final isLoading = authState is AuthLoading;
+    final passwordVisible = ref.watch(_emailLoginObscureProvider);
+    final errorMessage = authState is AuthError ? _formatError(authState.error) : null;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -154,7 +143,7 @@ class _EmailLoginMobileLayoutState
           const SizedBox(height: AppSpacing.md),
           TextField(
             controller: _passwordController,
-            obscureText: !_passwordVisible,
+            obscureText: !passwordVisible,
             style: AppTypography.bodyLarge,
             enabled: !isLoading,
             onSubmitted: (_) => _submit(),
@@ -170,19 +159,22 @@ class _EmailLoginMobileLayoutState
                 borderSide: BorderSide.none,
               ),
               suffixIcon: IconButton(
-                icon: Icon(
-                  _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                icon: HugeIcon(
+                  icon: passwordVisible
+                      ? HugeIcons.strokeRoundedView
+                      : HugeIcons.strokeRoundedViewOff,
                   color: AppColors.textSecondary,
+                  size: 20,
                 ),
                 onPressed: () =>
-                    setState(() => _passwordVisible = !_passwordVisible),
+                    ref.read(_emailLoginObscureProvider.notifier).state = !passwordVisible,
               ),
             ),
           ),
-          if (_errorMessage != null) ...[
+          if (errorMessage != null) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(
-              _errorMessage!,
+              errorMessage,
               style: AppTypography.bodySmall.copyWith(color: AppColors.rose),
             ),
           ],

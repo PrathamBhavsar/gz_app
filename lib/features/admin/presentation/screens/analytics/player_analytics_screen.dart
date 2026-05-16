@@ -37,8 +37,11 @@ class _PlayerAnalyticsScreenState
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary, size: 20),
+          icon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowLeft01,
+            color: AppColors.textPrimary,
+            size: 20,
+          ),
           onPressed: () => context.go(AppRoutes.adminAnalytics),
         ),
         title: Text('Players', style: AppTypography.headingSmall),
@@ -72,19 +75,35 @@ class _PlayerAnalyticsScreenState
         ),
       );
     }
-
     if (state is AnalyticsError<PlayerAnalyticsModel>) {
-      return _buildError(state.error);
+      return _PlayerError(onRetry: _load);
     }
-
     if (state is AnalyticsLoaded<PlayerAnalyticsModel>) {
-      return _buildPlayerStats(state.data);
+      return _PlayerStatsContent(data: state.data);
     }
-
     return const SizedBox.shrink();
   }
 
-  Widget _buildError(Object error) {
+  Future<void> _load() async {
+    final now = DateTime.now();
+    ref.read(playersProvider.notifier).load(
+          dateFrom: _formatDate(now.subtract(const Duration(days: 30))),
+          dateTo: _formatDate(now),
+        );
+  }
+
+  String _formatDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+}
+
+// ─── Error View ───────────────────────────────────────────────────────────────
+
+class _PlayerError extends StatelessWidget {
+  const _PlayerError({required this.onRetry});
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -96,12 +115,14 @@ class _PlayerAnalyticsScreenState
               size: 48,
             ),
             const SizedBox(height: AppSpacing.md),
-            Text('Failed to load player analytics',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary)),
+            Text(
+              'Failed to load player analytics',
+              style: AppTypography.bodyMedium
+                  .copyWith(color: AppColors.textSecondary),
+            ),
             const SizedBox(height: AppSpacing.md),
             OutlinedButton(
-              onPressed: _load,
+              onPressed: onRetry,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textPrimary,
                 side: const BorderSide(color: AppColors.border),
@@ -116,8 +137,16 @@ class _PlayerAnalyticsScreenState
       ),
     );
   }
+}
 
-  Widget _buildPlayerStats(PlayerAnalyticsModel data) {
+// ─── Player Stats Content ─────────────────────────────────────────────────────
+
+class _PlayerStatsContent extends StatelessWidget {
+  const _PlayerStatsContent({required this.data});
+  final PlayerAnalyticsModel data;
+
+  @override
+  Widget build(BuildContext context) {
     final unique = data.uniquePlayers ?? 0;
     final newPlayers = data.newPlayers ?? 0;
     final returning = data.returningPlayers ?? 0;
@@ -126,60 +155,68 @@ class _PlayerAnalyticsScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Player segments overview
         Text('Player Segments', style: AppTypography.headingSmall),
         const SizedBox(height: AppSpacing.md),
         Row(
           children: [
-            _buildSegmentCard(
-              'Unique',
-              '$unique',
-              HugeIcons.strokeRoundedUserGroup,
-              AppColors.rose,
+            _SegmentCard(
+              label: 'Unique',
+              value: '$unique',
+              icon: HugeIcons.strokeRoundedUserGroup,
+              iconColor: AppColors.rose,
             ),
             const SizedBox(width: AppSpacing.sm),
-            _buildSegmentCard(
-              'New',
-              '$newPlayers',
-              HugeIcons.strokeRoundedUserAdd01,
-              const Color(0xFF4CAF50),
+            _SegmentCard(
+              label: 'New',
+              value: '$newPlayers',
+              icon: HugeIcons.strokeRoundedUserAdd01,
+              iconColor: AppColors.ok,
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
         Row(
           children: [
-            _buildSegmentCard(
-              'Returning',
-              '$returning',
-              HugeIcons.strokeRoundedUserCircle,
-              const Color(0xFF2196F3),
+            _SegmentCard(
+              label: 'Returning',
+              value: '$returning',
+              icon: HugeIcons.strokeRoundedUserCircle,
+              iconColor: AppColors.info,
             ),
             const SizedBox(width: AppSpacing.sm),
-            _buildSegmentCard(
-              'Top Minutes',
-              '${_formatHours(topMinutes)}h',
-              HugeIcons.strokeRoundedStar,
-              AppColors.gold,
+            _SegmentCard(
+              label: 'Top Minutes',
+              value: '${(topMinutes / 60).toStringAsFixed(1)}h',
+              icon: HugeIcons.strokeRoundedStar,
+              iconColor: AppColors.gold,
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
-
-        // Retention ratio bar
         Text('New vs Returning', style: AppTypography.headingSmall),
         const SizedBox(height: AppSpacing.md),
-        _buildRetentionBar(newPlayers, returning),
+        _RetentionBar(newPlayers: newPlayers, returning: returning),
       ],
     );
   }
+}
 
-  Widget _buildSegmentCard(
-    String label,
-    String value,
-    List<List<dynamic>> icon,
-    Color iconColor,
-  ) {
+// ─── Segment Card ─────────────────────────────────────────────────────────────
+
+class _SegmentCard extends StatelessWidget {
+  const _SegmentCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.iconColor,
+  });
+  final String label;
+  final String value;
+  final List<List<dynamic>> icon;
+  final Color iconColor;
+
+  @override
+  Widget build(BuildContext context) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -200,11 +237,22 @@ class _PlayerAnalyticsScreenState
       ),
     );
   }
+}
 
-  Widget _buildRetentionBar(int newPlayers, int returning) {
+// ─── Retention Bar ────────────────────────────────────────────────────────────
+
+class _RetentionBar extends StatelessWidget {
+  const _RetentionBar({required this.newPlayers, required this.returning});
+  final int newPlayers;
+  final int returning;
+
+  @override
+  Widget build(BuildContext context) {
     final total = newPlayers + returning;
-    final newPct = total > 0 ? (newPlayers / total * 100).toStringAsFixed(0) : '0';
-    final retPct = total > 0 ? (returning / total * 100).toStringAsFixed(0) : '0';
+    final newPct =
+        total > 0 ? (newPlayers / total * 100).toStringAsFixed(0) : '0';
+    final retPct =
+        total > 0 ? (returning / total * 100).toStringAsFixed(0) : '0';
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -221,7 +269,7 @@ class _PlayerAnalyticsScreenState
                 child: Container(
                   height: 8,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4CAF50),
+                    color: AppColors.ok,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -231,7 +279,7 @@ class _PlayerAnalyticsScreenState
                 child: Container(
                   height: 8,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2196F3),
+                    color: AppColors.info,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -242,8 +290,8 @@ class _PlayerAnalyticsScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildSegmentLabel('New', '$newPlayers ($newPct%)', const Color(0xFF4CAF50)),
-              _buildSegmentLabel('Returning', '$returning ($retPct%)', const Color(0xFF2196F3)),
+              _label('New', '$newPlayers ($newPct%)', AppColors.ok),
+              _label('Returning', '$returning ($retPct%)', AppColors.info),
             ],
           ),
         ],
@@ -251,7 +299,7 @@ class _PlayerAnalyticsScreenState
     );
   }
 
-  Widget _buildSegmentLabel(String label, String value, Color color) {
+  Widget _label(String text, String value, Color color) {
     return Row(
       children: [
         Container(
@@ -263,23 +311,8 @@ class _PlayerAnalyticsScreenState
           ),
         ),
         const SizedBox(width: AppSpacing.xs),
-        Text('$label: $value', style: AppTypography.bodySmall),
+        Text('$text: $value', style: AppTypography.bodySmall),
       ],
     );
   }
-
-  String _formatHours(int minutes) {
-    return (minutes / 60).toStringAsFixed(1);
-  }
-
-  Future<void> _load() async {
-    final now = DateTime.now();
-    ref.read(playersProvider.notifier).load(
-          dateFrom: _formatDate(now.subtract(const Duration(days: 30))),
-          dateTo: _formatDate(now),
-        );
-  }
-
-  String _formatDate(DateTime d) =>
-      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 }

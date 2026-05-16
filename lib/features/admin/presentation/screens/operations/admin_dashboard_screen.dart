@@ -14,6 +14,24 @@ import '../../providers/admin_operations_provider.dart';
 import '../../providers/admin_live_provider.dart';
 import '../../../../../../models/domain_admin.dart';
 
+final _dashboardFilterProvider =
+    StateProvider.autoDispose<String>((ref) => 'All');
+
+Color _systemStatusColor(String? status) => switch (status) {
+      'available' => AppColors.ok,
+      'in_use' => AppColors.info,
+      'maintenance' => AppColors.warn,
+      'offline' => AppColors.error,
+      _ => AppColors.textSecondary,
+    };
+
+String _formatSessionDuration(Duration d) {
+  final hours = d.inHours;
+  final minutes = d.inMinutes.remainder(60);
+  if (hours > 0) return '${hours}h ${minutes}m';
+  return '${minutes}m';
+}
+
 /// Admin Dashboard / Floor Map — Screen 42.
 /// Real-time visualization of the gaming floor with system availability.
 class AdminDashboardScreen extends ConsumerStatefulWidget {
@@ -25,16 +43,13 @@ class AdminDashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
-  String _selectedFilter = 'All';
   StreamSubscription<WsEvent>? _wsSubscription;
-  bool _isWsConnected = false;
 
   static const _filterOptions = ['All', 'PC', 'Console', 'VR', 'Maintenance'];
 
   @override
   void initState() {
     super.initState();
-    // Trigger initial load
     Future.microtask(
       () => ref.read(floorMapProvider.notifier).loadSystems(),
     );
@@ -46,25 +61,23 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     super.dispose();
   }
 
-  /// Listen to WebSocket events and refresh floor data on relevant events.
   void _listenToWsEvents() {
     _wsSubscription?.cancel();
-    _wsSubscription = ref.read(adminLiveServiceProvider).events.listen((event) {
+    _wsSubscription =
+        ref.read(adminLiveServiceProvider).events.listen((event) {
       if (!mounted) return;
       switch (event.type) {
         case WsEventType.systemStatusChange:
         case WsEventType.sessionStarted:
         case WsEventType.sessionEnded:
         case WsEventType.agentHeartbeat:
-          // Refresh the floor map with latest data from server
           ref.read(floorMapProvider.notifier).loadSystems();
         case WsEventType.bookingNew:
-          // Could show a toast notification
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text('New booking received'),
               backgroundColor: AppColors.surface,
-              duration: const Duration(seconds: 2),
+              duration: Duration(seconds: 2),
             ),
           );
         case WsEventType.unknown:
@@ -80,15 +93,12 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         ? adminState.admin.role ?? ''
         : '';
     final floorState = ref.watch(floorMapProvider);
+    final selectedFilter = ref.watch(_dashboardFilterProvider);
 
-    // Watch WS connection state
     final wsConnection = ref.watch(liveConnectionProvider);
-    _isWsConnected = wsConnection.valueOrNull ?? false;
+    final isWsConnected = wsConnection.valueOrNull ?? false;
 
-    // Subscribe to live events
     _listenToWsEvents();
-
-    // Ensure WS is connected when this screen is active
     ref.watch(wsAutoConnectProvider);
 
     return Scaffold(
@@ -107,7 +117,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                   style: AppTypography.caption,
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                _buildLivePill(),
+                _LivePill(isConnected: isWsConnected),
               ],
             ),
           ],
@@ -128,42 +138,58 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       body: RefreshIndicator(
         color: AppColors.rose,
         backgroundColor: AppColors.surface,
-        onRefresh: () =>
-            ref.read(floorMapProvider.notifier).loadSystems(),
+        onRefresh: () => ref.read(floorMapProvider.notifier).loadSystems(),
         child: CustomScrollView(
           slivers: [
-            // KPI Ribbon
-            SliverToBoxAdapter(child: _buildKpiRibbon(floorState)),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: AppSpacing.md),
+            SliverToBoxAdapter(
+              child: _KpiRibbon(floorState: floorState),
             ),
-            // Filter Chips
-            SliverToBoxAdapter(child: _buildFilterChips()),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: AppSpacing.md),
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
+            SliverToBoxAdapter(
+              child: _FilterChips(
+                filterOptions: _filterOptions,
+                selectedFilter: selectedFilter,
+              ),
             ),
-            // Floor Map Grid
-            _buildFloorGrid(floorState),
-            // Bottom padding for FAB
-            const SliverToBoxAdapter(
-              child: SizedBox(height: AppSpacing.xxl),
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
+            _FloorGrid(
+              floorState: floorState,
+              selectedFilter: selectedFilter,
             ),
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go(AppRoutes.adminWalkIn),
         backgroundColor: AppColors.rose,
-        child: const Icon(Icons.add, color: AppColors.background),
+        child: const HugeIcon(
+          icon: HugeIcons.strokeRoundedAdd01,
+          color: AppColors.background,
+          size: 24,
+        ),
       ),
     );
   }
 
-  // ─── Live Pill ──────────────────────────────────────────────────────
+  String _formatRole(String role) => switch (role) {
+        'super_admin' => 'Super Admin',
+        'admin' => 'Admin',
+        'staff' => 'Staff',
+        _ => role,
+      };
+}
 
-  Widget _buildLivePill() {
-    final color = _isWsConnected ? AppColors.success : AppColors.error;
-    final label = _isWsConnected ? 'Live' : 'Offline';
+// ─── Live Pill ────────────────────────────────────────────────────────────────
+
+class _LivePill extends StatelessWidget {
+  const _LivePill({required this.isConnected});
+  final bool isConnected;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isConnected ? AppColors.success : AppColors.error;
+    final label = isConnected ? 'Live' : 'Offline';
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
@@ -179,10 +205,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
           Container(
             width: 6,
             height: 6,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 4),
           Text(
@@ -196,59 +219,73 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       ),
     );
   }
+}
 
-  // ─── KPI Ribbon ─────────────────────────────────────────────────────
+// ─── KPI Ribbon ───────────────────────────────────────────────────────────────
 
-  Widget _buildKpiRibbon(FloorMapState state) {
+class _KpiRibbon extends StatelessWidget {
+  const _KpiRibbon({required this.floorState});
+  final FloorMapState floorState;
+
+  @override
+  Widget build(BuildContext context) {
     int totalSystems = 0;
     int inUseSystems = 0;
     int activeSessions = 0;
 
-    if (state is FloorMapLoaded) {
-      totalSystems = state.systems.length;
-      inUseSystems = state.systems
-          .where((s) => s.status == 'in_use')
-          .length;
-      activeSessions = state.systems
-          .where((s) => s.currentSession != null)
-          .length;
+    if (floorState is FloorMapLoaded) {
+      final loaded = floorState as FloorMapLoaded;
+      totalSystems = loaded.systems.length;
+      inUseSystems =
+          loaded.systems.where((s) => s.status == 'in_use').length;
+      activeSessions =
+          loaded.systems.where((s) => s.currentSession != null).length;
     }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       child: Row(
         children: [
-          _buildKpiCard(
-            'Occupancy',
-            totalSystems > 0 ? '$inUseSystems/$totalSystems' : '--',
-            HugeIcons.strokeRoundedDashboardSpeed01,
-            AppColors.rose,
+          _DashKpiCard(
+            label: 'Occupancy',
+            value: totalSystems > 0 ? '$inUseSystems/$totalSystems' : '--',
+            icon: HugeIcons.strokeRoundedDashboardSpeed01,
+            iconColor: AppColors.rose,
           ),
           const SizedBox(width: AppSpacing.sm),
-          _buildKpiCard(
-            'Sessions',
-            '$activeSessions',
-            HugeIcons.strokeRoundedTimer01,
-            AppColors.success,
+          _DashKpiCard(
+            label: 'Sessions',
+            value: '$activeSessions',
+            icon: HugeIcons.strokeRoundedTimer01,
+            iconColor: AppColors.success,
           ),
           const SizedBox(width: AppSpacing.sm),
-          _buildKpiCard(
-            'Available',
-            '${totalSystems - inUseSystems}',
-            HugeIcons.strokeRoundedGameboy,
-            const Color(0xFF4CAF50),
+          _DashKpiCard(
+            label: 'Available',
+            value: '${totalSystems - inUseSystems}',
+            icon: HugeIcons.strokeRoundedGameboy,
+            iconColor: AppColors.ok,
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildKpiCard(
-    String label,
-    String value,
-    List<List<dynamic>> icon,
-    Color iconColor,
-  ) {
+class _DashKpiCard extends StatelessWidget {
+  const _DashKpiCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.iconColor,
+  });
+  final String label;
+  final String value;
+  final List<List<dynamic>> icon;
+  final Color iconColor;
+
+  @override
+  Widget build(BuildContext context) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.sm),
@@ -268,22 +305,35 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       ),
     );
   }
+}
 
-  // ─── Filter Chips ───────────────────────────────────────────────────
+// ─── Filter Chips ─────────────────────────────────────────────────────────────
 
-  Widget _buildFilterChips() {
+class _FilterChips extends ConsumerWidget {
+  const _FilterChips({
+    required this.filterOptions,
+    required this.selectedFilter,
+  });
+  final List<String> filterOptions;
+  final String selectedFilter;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
       height: 36,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        itemCount: _filterOptions.length,
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        itemCount: filterOptions.length,
         separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (context, index) {
-          final filter = _filterOptions[index];
-          final isSelected = filter == _selectedFilter;
+          final filter = filterOptions[index];
+          final isSelected = filter == selectedFilter;
           return GestureDetector(
-            onTap: () => setState(() => _selectedFilter = filter),
+            onTap: () => ref
+                .read(_dashboardFilterProvider.notifier)
+                .state = filter,
             child: Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
@@ -291,7 +341,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               ),
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.rose : AppColors.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
+                borderRadius:
+                    BorderRadius.circular(AppSpacing.borderRadiusSm),
                 border: Border.all(
                   color: isSelected ? AppColors.rose : AppColors.border,
                 ),
@@ -299,9 +350,11 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               child: Text(
                 filter,
                 style: AppTypography.bodySmall.copyWith(
-                  color:
-                      isSelected ? AppColors.background : AppColors.textSecondary,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: isSelected
+                      ? AppColors.background
+                      : AppColors.textSecondary,
+                  fontWeight:
+                      isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
             ),
@@ -310,19 +363,41 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       ),
     );
   }
+}
 
-  // ─── Floor Grid ─────────────────────────────────────────────────────
+// ─── Floor Grid ───────────────────────────────────────────────────────────────
 
-  Widget _buildFloorGrid(FloorMapState state) {
-    if (state is FloorMapLoading) {
+class _FloorGrid extends ConsumerWidget {
+  const _FloorGrid({
+    required this.floorState,
+    required this.selectedFilter,
+  });
+  final FloorMapState floorState;
+  final String selectedFilter;
+
+  List<LiveSystemStatusModel> _filterSystems(
+    List<LiveSystemStatusModel> systems,
+    String filter,
+  ) {
+    if (filter == 'All') return systems;
+    if (filter == 'Maintenance') {
+      return systems.where((s) => s.status == 'maintenance').toList();
+    }
+    return systems
+        .where(
+            (s) => s.platform?.toLowerCase() == filter.toLowerCase())
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (floorState is FloorMapLoading) {
       return const SliverFillRemaining(
-        child: Center(
-          child: CircularProgressIndicator(color: AppColors.rose),
-        ),
+        child: Center(child: CircularProgressIndicator(color: AppColors.rose)),
       );
     }
 
-    if (state is FloorMapError) {
+    if (floorState is FloorMapError) {
       return SliverFillRemaining(
         child: Center(
           child: Column(
@@ -336,9 +411,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               const SizedBox(height: AppSpacing.md),
               Text(
                 'Failed to load floor data',
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                style: AppTypography.bodyMedium
+                    .copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: AppSpacing.md),
               OutlinedButton(
@@ -360,8 +434,12 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       );
     }
 
-    if (state is FloorMapLoaded) {
-      final filtered = _filterSystems(state.systems);
+    if (floorState is FloorMapLoaded) {
+      final filtered = _filterSystems(
+        (floorState as FloorMapLoaded).systems,
+        selectedFilter,
+      );
+
       if (filtered.isEmpty) {
         return SliverFillRemaining(
           child: Center(
@@ -376,9 +454,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   'No systems found',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                  style: AppTypography.bodyMedium
+                      .copyWith(color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -387,7 +464,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       }
 
       return SliverPadding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         sliver: SliverGrid(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
@@ -396,62 +474,50 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
             childAspectRatio: 0.75,
           ),
           delegate: SliverChildBuilderDelegate(
-            (context, index) => _buildSystemTile(filtered[index]),
+            (context, index) => _SystemTile(system: filtered[index]),
             childCount: filtered.length,
           ),
         ),
       );
     }
 
-    // Initial state
     return const SliverFillRemaining(
-      child: Center(
-        child: CircularProgressIndicator(color: AppColors.rose),
-      ),
+      child: Center(child: CircularProgressIndicator(color: AppColors.rose)),
     );
   }
+}
 
-  List<LiveSystemStatusModel> _filterSystems(
-    List<LiveSystemStatusModel> systems,
-  ) {
-    if (_selectedFilter == 'All') return systems;
-    if (_selectedFilter == 'Maintenance') {
-      return systems
-          .where((s) => s.status == 'maintenance')
-          .toList();
-    }
-    return systems
-        .where((s) => s.platform?.toLowerCase() == _selectedFilter.toLowerCase())
-        .toList();
-  }
+// ─── System Tile ──────────────────────────────────────────────────────────────
 
-  // ─── System Tile ────────────────────────────────────────────────────
+class _SystemTile extends StatelessWidget {
+  const _SystemTile({required this.system});
+  final LiveSystemStatusModel system;
 
-  Widget _buildSystemTile(LiveSystemStatusModel system) {
-    final statusColor = _getStatusColor(system.status);
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = _systemStatusColor(system.status);
     final isAvailable = system.status == 'available';
     final isInUse = system.status == 'in_use';
     final isMaintenance = system.status == 'maintenance';
     final isOffline = system.status == 'offline';
 
-    // Calculate elapsed time for in-use sessions
     String? elapsed;
     bool endingSoon = false;
-    if (isInUse && system.currentSession?.startedAt != null && system.currentSession?.durationMinutes != null) {
-      final elapsedDuration = DateTime.now().difference(system.currentSession!.startedAt!);
-      elapsed = _formatDuration(elapsedDuration);
+    if (isInUse &&
+        system.currentSession?.startedAt != null &&
+        system.currentSession?.durationMinutes != null) {
+      final elapsedDuration =
+          DateTime.now().difference(system.currentSession!.startedAt!);
+      elapsed = _formatSessionDuration(elapsedDuration);
       final remaining = (system.currentSession!.durationMinutes! * 60) -
           elapsedDuration.inSeconds;
-      endingSoon = remaining < 600 && remaining > 0; // < 10 min
+      endingSoon = remaining < 600 && remaining > 0;
     }
 
     return GestureDetector(
-      onTap: () {
-        // Navigate to session management with systemId
-        context.go(
-          '${AppRoutes.adminSessions}?systemId=${system.systemId}',
-        );
-      },
+      onTap: () => context.go(
+        '${AppRoutes.adminSessions}?systemId=${system.systemId}',
+      ),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
@@ -465,7 +531,6 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header row: name + status dot
             Row(
               children: [
                 Expanded(
@@ -491,36 +556,29 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               ],
             ),
             const SizedBox(height: AppSpacing.xs),
-            // Type badge
             Text(
               system.systemTypeName ?? system.platform ?? '',
-              style: AppTypography.caption.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style:
+                  AppTypography.caption.copyWith(color: AppColors.textSecondary),
             ),
             const Spacer(),
-            // Status-specific content
             if (isAvailable)
               Text(
                 'Available',
-                style: AppTypography.bodySmall.copyWith(
-                  color: const Color(0xFF4CAF50),
-                ),
+                style: AppTypography.bodySmall.copyWith(color: AppColors.ok),
               ),
             if (isInUse && system.currentSession != null) ...[
               Text(
                 system.currentSession?.userName ?? 'Player',
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textPrimary,
-                ),
+                style:
+                    AppTypography.bodySmall.copyWith(color: AppColors.textPrimary),
                 overflow: TextOverflow.ellipsis,
               ),
               if (elapsed != null)
                 Text(
                   elapsed,
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                  style: AppTypography.caption
+                      .copyWith(color: AppColors.textSecondary),
                 ),
               if (endingSoon)
                 Container(
@@ -554,50 +612,20 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                   const SizedBox(width: 4),
                   Text(
                     'Maintenance',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                    style: AppTypography.caption
+                        .copyWith(color: AppColors.textSecondary),
                   ),
                 ],
               ),
             if (isOffline)
               Text(
                 'Offline',
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.error,
-                ),
+                style:
+                    AppTypography.caption.copyWith(color: AppColors.error),
               ),
           ],
         ),
       ),
     );
-  }
-
-  Color _getStatusColor(String? status) {
-    return switch (status) {
-      'available' => const Color(0xFF4CAF50),
-      'in_use' => const Color(0xFF2196F3),
-      'maintenance' => const Color(0xFFFFC107),
-      'offline' => AppColors.error,
-      _ => AppColors.textSecondary,
-    };
-  }
-
-  String _formatDuration(Duration d) {
-    final hours = d.inHours;
-    final minutes = d.inMinutes.remainder(60);
-    if (hours > 0) {
-      return '${hours}h ${minutes}m';
-    }
-    return '${minutes}m';
-  }
-
-  String _formatRole(String role) {
-    return switch (role) {
-      'super_admin' => 'Super Admin',
-      'admin' => 'Admin',
-      'staff' => 'Staff',
-      _ => role,
-    };
   }
 }
