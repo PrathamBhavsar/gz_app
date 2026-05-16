@@ -101,7 +101,7 @@ class CampaignsMobileLayout extends ConsumerWidget {
                       onTap: () {
                         final id = campaigns[i].id ?? '';
                         context.push(
-                          AppRoutes.campaignDetail.replaceAll(':id', id),
+                          AppRoutes.campaignDetailPath(id),
                           extra: campaigns[i],
                         );
                       },

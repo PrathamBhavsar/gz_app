@@ -221,8 +221,7 @@ class SessionsMobileLayout extends ConsumerWidget {
             booking: booking,
             onCardTap: () {
               if (booking.id != null) {
-                final path = AppRoutes.bookingDetail.replaceAll(':id', booking.id!);
-                context.push(path);
+                context.push(AppRoutes.bookingDetailPath(booking.id!));
               }
             },
           )
@@ -306,8 +305,7 @@ class SessionsMobileLayout extends ConsumerWidget {
         if (session.id != null)
           GestureDetector(
             onTap: () {
-              final path = AppRoutes.activeSessionDetail.replaceAll(':id', session.id!);
-              context.push(path);
+              context.push(AppRoutes.activeSessionDetailPath(session.id!));
             },
             child: Container(
               height: 56,
@@ -396,8 +394,7 @@ class SessionsMobileLayout extends ConsumerWidget {
           onTap: n.toggleHist,
           onDetailTap: session.id != null
               ? () {
-                  final path = AppRoutes.sessionHistoryDetail.replaceAll(':id', session.id!);
-                  context.push(path);
+                  context.push(AppRoutes.sessionHistoryDetailPath(session.id!));
                 }
               : null,
         ));

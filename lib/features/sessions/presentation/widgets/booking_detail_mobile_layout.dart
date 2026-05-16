@@ -272,8 +272,7 @@ class _BottomCta extends ConsumerWidget {
               child: EmButton(
                 label: 'Check In',
                 onPressed: () {
-                  final path = AppRoutes.checkIn.replaceAll(':id', bookingId);
-                  context.push(path);
+                  context.push(AppRoutes.checkInPath(bookingId));
                 },
               ),
             ),

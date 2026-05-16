@@ -288,8 +288,7 @@ class _WalletContent extends ConsumerWidget {
                                 campaign: c,
                                 onTap: () {
                                   context.push(
-                                    AppRoutes.campaignDetail
-                                        .replaceAll(':id', c.id ?? ''),
+                                    AppRoutes.campaignDetailPath(c.id ?? ''),
                                     extra: c,
                                   );
                                 },
