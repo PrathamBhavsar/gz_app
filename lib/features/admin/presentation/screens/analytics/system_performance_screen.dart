@@ -181,7 +181,7 @@ class _SystemPerformanceScreenState
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-        border: Border.all(color: AppColors.error.withOpacity(0.3)),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -196,7 +196,7 @@ class _SystemPerformanceScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${s.name ?? 'Unknown'} utilization is ${diff}% lower than average',
+                  '${s.name ?? 'Unknown'} utilization is $diff% lower than average',
                   style: AppTypography.bodySmall,
                 ),
                 const SizedBox(height: AppSpacing.xs),
@@ -257,7 +257,7 @@ class _SystemPerformanceScreenState
                   vertical: AppSpacing.xs,
                 ),
                 decoration: BoxDecoration(
-                  color: rateColor.withOpacity(0.15),
+                  color: rateColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
                 ),
                 child: Text(
@@ -286,7 +286,7 @@ class _SystemPerformanceScreenState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildMiniStat('Sessions', '${s.totalSessions ?? 0}'),
-              _buildMiniStat('Hours', '${((s.totalMinutes ?? 0) / 60).toStringAsFixed(1)}'),
+              _buildMiniStat('Hours', ((s.totalMinutes ?? 0) / 60).toStringAsFixed(1)),
               _buildMiniStat('Revenue', '₹${s.totalRevenue ?? '0'}'),
             ],
           ),

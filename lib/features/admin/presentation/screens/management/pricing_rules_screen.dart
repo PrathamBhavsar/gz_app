@@ -183,7 +183,7 @@ class _PricingRulesScreenState extends ConsumerState<PricingRulesScreen> {
             ),
             decoration: BoxDecoration(
               color: isActive
-                  ? const Color(0xFF4CAF50).withOpacity(0.15)
+                  ? const Color(0xFF4CAF50).withValues(alpha: 0.15)
                   : AppColors.surface2,
               borderRadius:
                   BorderRadius.circular(AppSpacing.borderRadiusSm),

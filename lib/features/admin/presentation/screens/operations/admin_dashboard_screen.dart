@@ -170,7 +170,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
       ),
       child: Row(
@@ -278,7 +278,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         itemCount: _filterOptions.length,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (context, index) {
           final filter = _filterOptions[index];
           final isSelected = filter == _selectedFilter;
@@ -458,7 +458,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
           border: Border.all(
-            color: statusColor.withOpacity(0.6),
+            color: statusColor.withValues(alpha: 0.6),
             width: 2,
           ),
         ),
@@ -530,7 +530,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.rose.withOpacity(0.15),
+                    color: AppColors.rose.withValues(alpha: 0.15),
                     borderRadius:
                         BorderRadius.circular(AppSpacing.borderRadiusSm),
                   ),

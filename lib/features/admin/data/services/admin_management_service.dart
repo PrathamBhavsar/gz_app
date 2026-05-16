@@ -67,7 +67,7 @@ class AdminManagementService {
       body: {
         'systemType': systemType,
         'durationMinutes': durationMinutes,
-        if (startTime != null) 'startTime': startTime,
+        'startTime': ?startTime,
       },
     );
     return PriceCalculationResponse.fromJson(data as Map<String, dynamic>);
@@ -139,7 +139,7 @@ class AdminManagementService {
     final endpoint =
         _resolve(ApiConstants.paymentRefund, storeId, paymentId);
     return await _apiClient.post(endpoint, body: {
-      if (reason != null) 'reason': reason,
+      'reason': ?reason,
     });
   }
 
@@ -219,7 +219,7 @@ class AdminManagementService {
     return await _apiClient.post(endpoint, body: {
       'userId': userId,
       'amount': amount,
-      if (reason != null) 'reason': reason,
+      'reason': ?reason,
     });
   }
 
@@ -256,7 +256,7 @@ class AdminManagementService {
         _resolve(ApiConstants.disputeResolve, storeId, disputeId);
     return await _apiClient.post(endpoint, body: {
       'resolution': resolution,
-      if (notes != null) 'notes': notes,
+      'notes': ?notes,
     });
   }
 }

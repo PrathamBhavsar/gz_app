@@ -10,11 +10,11 @@ class FailureResponse extends BaseApiResponse {
   final int? statusCode;
 
   const FailureResponse({
-    bool? success = false,
-    String? message,
+    super.success = false,
+    super.message,
     this.error,
     this.statusCode,
-  }) : super(success: success, message: message);
+  });
 
   factory FailureResponse.fromJson(Map<String, dynamic> json) {
     return FailureResponse(
@@ -71,19 +71,19 @@ abstract class SuccessResponse<T> extends BaseApiResponse {
   final T? data;
 
   const SuccessResponse({
-    bool? success = true,
-    String? message,
+    super.success = true,
+    super.message,
     this.data,
-  }) : super(success: success, message: message);
+  });
 }
 
 abstract class PaginatedSuccessResponse<T> extends SuccessResponse<List<T>> {
   final PaginationMeta? pagination;
 
   const PaginatedSuccessResponse({
-    bool? success = true,
-    String? message,
-    List<T>? data,
+    super.success = true,
+    super.message,
+    super.data,
     this.pagination,
-  }) : super(success: success, message: message, data: data);
+  });
 }

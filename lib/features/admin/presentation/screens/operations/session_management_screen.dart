@@ -201,7 +201,7 @@ class _SessionManagementScreenState
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.15),
+        color: AppColors.success.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
       ),
       child: Row(

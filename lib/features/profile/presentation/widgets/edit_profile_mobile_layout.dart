@@ -65,7 +65,7 @@ class _EditProfileMobileLayoutState
     return profileState.when(
       loading: () =>
           const Center(child: CircularProgressIndicator()),
-      error: (_, __) => Column(children: [
+      error: (_, _) => Column(children: [
         const EmTopBar(title: 'Edit Profile'),
         Expanded(
           child: Center(

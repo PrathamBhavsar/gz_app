@@ -15,7 +15,7 @@ class SessionsService {
     int? limit,
   }) async {
     final queryParams = <String, String>{
-      if (status != null) 'status': status,
+      'status': ?status,
       if (page != null) 'page': page.toString(),
       if (limit != null) 'limit': limit.toString(),
     };

@@ -109,7 +109,7 @@ class _DisputesList extends ConsumerWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(AppSpacing.md),
         itemCount: disputes.length,
-        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
         itemBuilder: (ctx, i) => _DisputeRow(dispute: disputes[i]),
       ),
     );

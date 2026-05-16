@@ -139,7 +139,7 @@ class _StaffManagementScreenState
                       vertical: AppSpacing.xs,
                     ),
                     decoration: BoxDecoration(
-                      color: roleColor.withOpacity(0.15),
+                      color: roleColor.withValues(alpha: 0.15),
                       borderRadius:
                           BorderRadius.circular(AppSpacing.borderRadiusSm),
                     ),

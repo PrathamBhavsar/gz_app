@@ -87,7 +87,7 @@ class _BookingManagementScreenState
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         itemCount: dates.length,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (context, index) {
           final date = dates[index];
           final isToday = _isSameDay(date, DateTime.now());
@@ -157,7 +157,7 @@ class _BookingManagementScreenState
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         itemCount: _statusOptions.length,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (context, index) {
           final status = _statusOptions[index];
           final isSelected = status == _statusFilter;
@@ -274,7 +274,7 @@ class _BookingManagementScreenState
         child: ListView.separated(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           itemCount: state.bookings.length,
-          separatorBuilder: (_, __) =>
+          separatorBuilder: (_, _) =>
               const SizedBox(height: AppSpacing.sm),
           itemBuilder: (context, index) {
             final booking = state.bookings[index];
@@ -400,7 +400,7 @@ class _BookingManagementScreenState
         vertical: 2,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
       ),
       child: Text(

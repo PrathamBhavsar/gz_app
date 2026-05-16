@@ -30,7 +30,7 @@ class AdminAuthService {
     await _apiClient.post(
       ApiConstants.authAdminLogout,
       body: {
-        if (refreshToken != null) 'refreshToken': refreshToken,
+        'refreshToken': ?refreshToken,
         if (allDevices) 'all': true,
       },
     );

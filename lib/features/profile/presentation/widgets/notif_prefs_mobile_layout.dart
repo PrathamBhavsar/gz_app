@@ -189,7 +189,7 @@ class _ToggleRow extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.buttonBg,
+            activeThumbColor: AppColors.buttonBg,
             inactiveThumbColor: AppColors.textMuted,
             inactiveTrackColor: AppColors.rule,
           ),

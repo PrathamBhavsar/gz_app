@@ -16,8 +16,8 @@ class StoreService {
     int? limit,
   }) async {
     final queryParams = <String, String>{
-      if (search != null) 'search': search,
-      if (platform != null) 'platform': platform,
+      'search': ?search,
+      'platform': ?platform,
       if (isOpen != null) 'isOpen': isOpen.toString(),
       if (page != null) 'page': page.toString(),
       if (limit != null) 'limit': limit.toString(),
@@ -49,9 +49,9 @@ class StoreService {
     String? endTime,
   }) async {
     final queryParams = <String, String>{
-      if (systemTypeId != null) 'systemTypeId': systemTypeId,
-      if (startTime != null) 'startTime': startTime,
-      if (endTime != null) 'endTime': endTime,
+      'systemTypeId': ?systemTypeId,
+      'startTime': ?startTime,
+      'endTime': ?endTime,
     };
     final queryString = queryParams.isNotEmpty
         ? '?${_encodeQuery(queryParams)}'

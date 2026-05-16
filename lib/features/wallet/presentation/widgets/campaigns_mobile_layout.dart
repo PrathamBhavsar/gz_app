@@ -44,7 +44,7 @@ class CampaignsMobileLayout extends ConsumerWidget {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               itemCount: _filterOptions.length,
-              separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
+              separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
               itemBuilder: (_, i) {
                 final opt = _filterOptions[i];
                 final selected = state.selectedFilter == opt.value;
@@ -95,7 +95,7 @@ class CampaignsMobileLayout extends ConsumerWidget {
                     padding: const EdgeInsets.fromLTRB(
                         AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.lg),
                     itemCount: campaigns.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+                    separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
                     itemBuilder: (_, i) => _CampaignCard(
                       campaign: campaigns[i],
                       onTap: () {

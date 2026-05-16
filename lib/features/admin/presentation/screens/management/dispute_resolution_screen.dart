@@ -228,7 +228,7 @@ class _DisputeResolutionScreenState
                   vertical: AppSpacing.xs,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius:
                       BorderRadius.circular(AppSpacing.borderRadiusSm),
                 ),

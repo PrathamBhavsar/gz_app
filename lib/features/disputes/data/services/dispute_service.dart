@@ -29,7 +29,7 @@ class DisputeService {
     final body = <String, dynamic>{
       'sessionId': sessionId,
       'reason': reason,
-      if (disputedAmount != null) 'disputedAmount': disputedAmount,
+      'disputedAmount': ?disputedAmount,
     };
     final data = await _apiClient.post('/stores/$storeId/disputes', body: body);
     return DisputeResponse.fromJson(data as Map<String, dynamic>);

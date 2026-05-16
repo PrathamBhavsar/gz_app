@@ -434,7 +434,7 @@ class _FormField extends StatelessWidget {
                   Text(' *',
                       style: AppTypography.meta.copyWith(color: AppColors.err)),
               ]),
-              if (trailing != null) trailing!,
+              ?trailing,
             ]),
           ),
           child,

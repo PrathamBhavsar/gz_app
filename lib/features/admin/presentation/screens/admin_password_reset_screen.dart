@@ -142,7 +142,7 @@ class _AdminPasswordResetScreenState
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.1),
+                      color: AppColors.success.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(
                         AppSpacing.borderRadiusSm,
                       ),
@@ -163,7 +163,7 @@ class _AdminPasswordResetScreenState
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: AppColors.error.withOpacity(0.1),
+                      color: AppColors.error.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(
                         AppSpacing.borderRadiusSm,
                       ),
@@ -264,8 +264,9 @@ class _AdminPasswordResetScreenState
                       ),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty)
+                      if (value == null || value.isEmpty) {
                         return 'Password is required';
+                      }
                       if (value.length < 8) return 'At least 8 characters';
                       return null;
                     },

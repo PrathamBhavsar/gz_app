@@ -206,7 +206,7 @@ class _StoreConfigScreenState extends ConsumerState<StoreConfigScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.rose,
+            activeThumbColor: AppColors.rose,
           ),
         ],
       ),

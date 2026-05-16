@@ -195,10 +195,12 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                     ),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return 'Password is required';
-                    if (value.length < 8)
+                    }
+                    if (value.length < 8) {
                       return 'Password must be at least 8 characters';
+                    }
                     return null;
                   },
                 ),
@@ -222,7 +224,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: AppColors.error.withOpacity(0.1),
+                      color: AppColors.error.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(
                         AppSpacing.borderRadiusSm,
                       ),

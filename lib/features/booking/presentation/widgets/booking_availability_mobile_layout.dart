@@ -72,7 +72,7 @@ class _BookingAvailabilityMobileLayoutState
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
             itemCount: 7,
             itemBuilder: (_, i) {
               final date = _next7Days[i];

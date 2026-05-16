@@ -16,7 +16,7 @@ class BookingService {
   }) async {
     final queryParams = <String, String>{
       'date': date,
-      if (systemTypeId != null) 'systemTypeId': systemTypeId,
+      'systemTypeId': ?systemTypeId,
       if (duration != null) 'duration': duration.toString(),
     };
     final qs = _encodeQuery(queryParams);
@@ -34,7 +34,7 @@ class BookingService {
     int? limit,
   }) async {
     final queryParams = <String, String>{
-      if (status != null) 'status': status,
+      'status': ?status,
       if (page != null) 'page': page.toString(),
       if (limit != null) 'limit': limit.toString(),
     };
@@ -65,9 +65,9 @@ class BookingService {
       'startTime': startTime,
       'endTime': endTime,
       'systemTypeId': systemTypeId,
-      if (campaignId != null) 'campaignId': campaignId,
-      if (creditsToRedeem != null) 'creditsToRedeem': creditsToRedeem,
-      if (paymentMethod != null) 'paymentMethod': paymentMethod,
+      'campaignId': ?campaignId,
+      'creditsToRedeem': ?creditsToRedeem,
+      'paymentMethod': ?paymentMethod,
     };
     final data = await _apiClient.post('/stores/$storeId/bookings', body: body);
     return BookingResponse.fromJson(data as Map<String, dynamic>);

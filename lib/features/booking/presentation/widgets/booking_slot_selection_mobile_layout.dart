@@ -70,7 +70,7 @@ class BookingSlotSelectionMobileLayout extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             itemCount: _filters.length,
-            separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
             itemBuilder: (_, i) {
               final (key, label) = _filters[i];
               final isSelected = selectedFilter == key;

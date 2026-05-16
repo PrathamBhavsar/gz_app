@@ -190,7 +190,7 @@ class _UtilizationHeatmapScreenState
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-              border: Border.all(color: AppColors.rose.withOpacity(0.3)),
+              border: Border.all(color: AppColors.rose.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [

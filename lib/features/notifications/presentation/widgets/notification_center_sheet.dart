@@ -143,7 +143,7 @@ class _SheetShell extends StatelessWidget {
             children: [
               Text(title, style: AppTypography.h2),
               const Spacer(),
-              if (trailing != null) trailing!,
+              ?trailing,
             ],
           ),
         ),

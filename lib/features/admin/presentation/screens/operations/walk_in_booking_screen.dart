@@ -314,7 +314,7 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 4,
-            separatorBuilder: (_, __) =>
+            separatorBuilder: (_, _) =>
                 const SizedBox(width: AppSpacing.sm),
             itemBuilder: (ctx, i) {
               final filters = ['All', 'PC', 'Console', 'VR'];
@@ -387,7 +387,7 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AppColors.rose.withOpacity(0.15)
+                        ? AppColors.rose.withValues(alpha: 0.15)
                         : AppColors.surface,
                     borderRadius:
                         BorderRadius.circular(AppSpacing.borderRadius),
@@ -519,7 +519,7 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
                     color: _payUpfront
-                        ? AppColors.rose.withOpacity(0.15)
+                        ? AppColors.rose.withValues(alpha: 0.15)
                         : AppColors.surface,
                     borderRadius:
                         BorderRadius.circular(AppSpacing.borderRadius),
@@ -551,7 +551,7 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
                     color: !_payUpfront
-                        ? AppColors.rose.withOpacity(0.15)
+                        ? AppColors.rose.withValues(alpha: 0.15)
                         : AppColors.surface,
                     borderRadius:
                         BorderRadius.circular(AppSpacing.borderRadius),

@@ -102,7 +102,7 @@ class AdminOperationsService {
         'userId': userId,
         'systemId': systemId,
         'durationMinutes': durationMinutes,
-        if (paymentMethod != null) 'paymentMethod': paymentMethod,
+        'paymentMethod': ?paymentMethod,
       },
     );
     return WalkInBookingResponseWrapper.fromJson(
@@ -149,7 +149,7 @@ class AdminOperationsService {
         .replaceAll('{id}', bookingId);
     return await _apiClient.post(
       resolved,
-      body: {if (reason != null) 'reason': reason},
+      body: {'reason': ?reason},
     );
   }
 
@@ -169,7 +169,7 @@ class AdminOperationsService {
       body: {
         'systemType': systemType,
         'durationMinutes': durationMinutes,
-        if (startTime != null) 'startTime': startTime,
+        'startTime': ?startTime,
       },
     );
     return PriceCalculationResponse.fromJson(
