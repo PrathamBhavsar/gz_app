@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaming Zone — Disputes List</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0f1419;
+      --bg-secondary: #1a1f2e;
+      --surface-card: #242a3a;
+      --text-primary: #ffffff;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --primary-purple: #8b5cf6;
+      --primary-purple-light: #a78bfa;
+      --accent-teal: #14b8a6;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-pink: #ec4899;
+      --accent-blue: #3b82f6;
+      --divider: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* iPhone 14 Frame */
+    .iphone-frame {
+      width: 390px;
+      height: 844px;
+      background: black;
+      border-radius: 44px;
+      border: 12px solid black;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      margin: 40px auto;
+    }
+
+    .status-bar {
+      height: 47px;
+      background-color: var(--bg-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 12px;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .status-bar-time {
+      font-weight: 600;
+    }
+
+    .screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-primary);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      padding: 16px;
+      border-bottom: 1px solid var(--divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--bg-primary);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .header-back {
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .header-right {
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+
+    /* Store Filter Pill */
+    .store-filter-pill {
+      margin: 12px 16px 0 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background-color: var(--surface-card);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: background-color 0.2s ease;
+    }
+
+    .store-filter-pill:active {
+      background-color: var(--bg-secondary);
+    }
+
+    /* File Dispute Button */
+    .file-dispute-btn {
+      margin: 12px 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid var(--primary-purple);
+      background-color: transparent;
+      color: var(--primary-purple);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .file-dispute-btn:active {
+      background-color: rgba(139, 92, 246, 0.1);
+    }
+
+    /* Status Summary */
+    .status-summary {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin: 12px;
+      padding: 12px;
+      background-color: var(--surface-card);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 13px;
+    }
+
+    .summary-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      text-align: center;
+    }
+
+    .summary-number {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .summary-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .summary-divider {
+      width: 1px;
+      height: 32px;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Dispute Card */
+    .dispute-card {
+      background-color: var(--surface-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      margin: 0 12px 12px 12px;
+      padding: 12px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .dispute-card:active {
+      transform: scale(0.98);
+    }
+
+    .dispute-card.muted {
+      opacity: 0.65;
+    }
+
+    .dispute-card.resolved {
+      opacity: 0.75;
+    }
+
+    .dispute-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .dispute-ref {
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .status-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+
+    .status-open {
+      background-color: rgba(245, 158, 11, 0.2);
+      color: var(--accent-amber);
+    }
+
+    .status-under-review {
+      background-color: rgba(59, 130, 246, 0.2);
+      color: var(--accent-blue);
+    }
+
+    .status-resolved {
+      background-color: rgba(16, 185, 129, 0.2);
+      color: var(--accent-green);
+    }
+
+    .status-withdrawn {
+      background-color: rgba(107, 114, 128, 0.2);
+      color: var(--text-muted);
+    }
+
+    .dispute-store {
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .dispute-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .dispute-amount {
+      font-size: 14px;
+      color: var(--text-primary);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .dispute-resolution {
+      font-size: 12px;
+      margin-bottom: 0;
+    }
+
+    .resolution-green {
+      color: var(--accent-green);
+    }
+
+    .resolution-red {
+      color: var(--text-muted);
+    }
+
+    .dispute-chevron {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    /* Scroll Container */
+    .scroll-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-bottom: 12px;
+    }
+
+    .scroll-container::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .scroll-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .scroll-container::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    .empty-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .empty-subtext {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .empty-cta {
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      background-color: var(--primary-purple);
+      color: var(--text-primary);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .empty-cta:active {
+      background-color: #7c3aed;
+    }
+
+    /* Store Filter Overlay */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: flex-end;
+      z-index: 100;
+    }
+
+    .filter-sheet {
+      width: 100%;
+      background-color: var(--surface-card);
+      border-radius: 16px 16px 0 0;
+      padding: 16px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .filter-sheet-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .filter-option {
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--text-primary);
+      background-color: var(--bg-secondary);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      margin-bottom: 8px;
+      transition: background-color 0.2s ease;
+    }
+
+    .filter-option:active {
+      background-color: rgba(139, 92, 246, 0.1);
+    }
+
+    .filter-option.selected {
+      color: var(--primary-purple);
+      border-left: 3px solid var(--primary-purple);
+      padding-left: 13px;
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      height: 60px;
+      background-color: var(--bg-secondary);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid var(--divider);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      flex: 1;
+      height: 100%;
+    }
+
+    .nav-item.active {
+      color: var(--primary-purple);
+    }
+
+    .nav-icon {
+      font-size: 24px;
+    }
+
+    .home-indicator {
+      height: 34px;
+      background-color: black;
+      border-radius: 21px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 8px;
+    }
+
+    .home-indicator::after {
+      content: '';
+      width: 120px;
+      height: 4px;
+      background-color: black;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const DisputesListScreen = () => {
+      const [showEmpty, setShowEmpty] = useState(false);
+      const [selectedStore, setSelectedStore] = useState('all');
+      const [showFilterOverlay, setShowFilterOverlay] = useState(false);
+
+      const disputes = [
+        {
+          id: 1,
+          ref: '#SES-20941',
+          store: 'GameZone Koramangala',
+          system: 'RTX 4090',
+          status: 'Open',
+          filed: '18 Apr 2025',
+          amount: 30,
+          resolution: null,
+          storeId: 'koramangala',
+        },
+        {
+          id: 2,
+          ref: '#SES-20939',
+          store: 'GameZone MG Road',
+          system: 'PS5',
+          status: 'Under Review',
+          filed: '15 Apr 2025',
+          amount: 90,
+          resolution: null,
+          storeId: 'mgroad',
+        },
+        {
+          id: 3,
+          ref: '#SES-20921',
+          store: 'GameZone Koramangala',
+          system: 'VR Rig',
+          status: 'Resolved',
+          filed: '2 Apr 2025',
+          amount: 48,
+          resolution: 'Full refund issued · +₹48 to wallet',
+          resolutionType: 'green',
+          storeId: 'koramangala',
+        },
+        {
+          id: 4,
+          ref: '#SES-20918',
+          store: 'GameZone Koramangala',
+          system: 'Xbox',
+          status: 'Resolved',
+          filed: '28 Mar 2025',
+          amount: 20,
+          resolution: 'Partial refund · +₹10 to wallet',
+          resolutionType: 'green',
+          storeId: 'koramangala',
+        },
+        {
+          id: 5,
+          ref: '#SES-20902',
+          store: 'GameZone Whitefield',
+          system: 'PC',
+          status: 'Resolved',
+          filed: '10 Mar 2025',
+          amount: 100,
+          resolution: 'Upheld — no refund issued',
+          resolutionType: 'red',
+          storeId: 'whitefield',
+        },
+        {
+          id: 6,
+          ref: '#SES-20897',
+          store: 'GameZone MG Road',
+          system: 'RTX 4090',
+          status: 'Withdrawn',
+          filed: '2 Mar 2025',
+          amount: 60,
+          resolution: 'Withdrawn by you on 5 Mar 2025',
+          resolutionType: 'grey',
+          storeId: 'mgroad',
+        },
+      ];
+
+      const filteredDisputes = selectedStore === 'all' 
+        ? disputes 
+        : disputes.filter(d => d.storeId === selectedStore);
+
+      const countByStatus = (status) => {
+        return filteredDisputes.filter(d => d.status === status).length;
+      };
+
+      const getStatusPillClass = (status) => {
+        switch(status) {
+          case 'Open': return 'status-open';
+          case 'Under Review': return 'status-under-review';
+          case 'Resolved': return 'status-resolved';
+          case 'Withdrawn': return 'status-withdrawn';
+          default: return '';
+        }
+      };
+
+      const stores = [
+        { id: 'all', name: 'All stores' },
+        { id: 'koramangala', name: 'GameZone Koramangala' },
+        { id: 'mgroad', name: 'GameZone MG Road' },
+        { id: 'whitefield', name: 'GameZone Whitefield' },
+      ];
+
+      return (
+        <div className="iphone-frame">
+          <div className="status-bar">
+            <span className="status-bar-time">9:41</span>
+            <span>📶</span>
+          </div>
+
+          <div className="screen">
+            <div className="header">
+              <div className="header-left">
+                <div className="header-back">←</div>
+                <div className="header-title">My Disputes</div>
+              </div>
+              <div className="header-right" onClick={() => setShowFilterOverlay(true)}>
+                ⚙️
+              </div>
+            </div>
+
+            <div className="store-filter-pill" onClick={() => setShowFilterOverlay(true)}>
+              {stores.find(s => s.id === selectedStore)?.name} ▼
+            </div>
+
+            <button className="file-dispute-btn">+ File a New Dispute</button>
+
+            {!showEmpty && (
+              <>
+                <div className="status-summary">
+                  <div className="summary-item">
+                    <div className="summary-number">{countByStatus('Open')}</div>
+                    <div className="summary-label">Open</div>
+                  </div>
+                  <div className="summary-divider"></div>
+                  <div className="summary-item">
+                    <div className="summary-number">{countByStatus('Under Review')}</div>
+                    <div className="summary-label">Under Review</div>
+                  </div>
+                  <div className="summary-divider"></div>
+                  <div className="summary-item">
+                    <div className="summary-number">{countByStatus('Resolved')}</div>
+                    <div className="summary-label">Resolved</div>
+                  </div>
+                </div>
+
+                <div className="scroll-container">
+                  {filteredDisputes.map(dispute => (
+                    <div key={dispute.id} className={`dispute-card ${dispute.status === 'Resolved' || dispute.status === 'Withdrawn' ? 'resolved' : ''}`}>
+                      <div className="dispute-top-row">
+                        <span className="dispute-ref">{dispute.ref}</span>
+                        <span className={`status-pill ${getStatusPillClass(dispute.status)}`}>
+                          {dispute.status}
+                        </span>
+                      </div>
+                      <div className="dispute-store">{dispute.store} · {dispute.system}</div>
+                      <div className="dispute-meta">
+                        <span>Filed {dispute.filed}</span>
+                      </div>
+                      <div className="dispute-amount">₹{dispute.amount} disputed</div>
+                      {dispute.resolution && (
+                        <div className={`dispute-resolution resolution-${dispute.resolutionType}`}>
+                          {dispute.resolution}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {showEmpty && (
+              <div className="scroll-container">
+                <div className="empty-state">
+                  <div className="empty-icon">📋</div>
+                  <div className="empty-title">No disputes filed</div>
+                  <div className="empty-subtext">
+                    If you believe you were incorrectly charged, you can file a dispute from your session history.
+                  </div>
+                  <button className="empty-cta">File a Dispute</button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="bottom-nav">
+            <div className="nav-item"><span className="nav-icon">🏠</span><span>Home</span></div>
+            <div className="nav-item"><span className="nav-icon">📅</span><span>Book</span></div>
+            <div className="nav-item"><span className="nav-icon">🎮</span><span>My Games</span></div>
+            <div className="nav-item"><span className="nav-icon">💳</span><span>Wallet</span></div>
+            <div className="nav-item active"><span className="nav-icon">👤</span><span>Profile</span></div>
+          </div>
+
+          <div className="home-indicator"></div>
+
+          {showFilterOverlay && (
+            <div className="overlay" onClick={() => setShowFilterOverlay(false)}>
+              <div className="filter-sheet" onClick={e => e.stopPropagation()}>
+                <div className="filter-sheet-title">Select store</div>
+                {stores.map(store => (
+                  <button
+                    key={store.id}
+                    className={`filter-option ${selectedStore === store.id ? 'selected' : ''}`}
+                    onClick={() => {
+                      setSelectedStore(store.id);
+                      setShowFilterOverlay(false);
+                    }}
+                  >
+                    {selectedStore === store.id ? '✓ ' : ''}{store.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<DisputesListScreen />);
+  </script>
+</body>
+</html>

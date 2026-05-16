@@ -42,6 +42,39 @@
   <script type="text/babel" src="src/screen-notifications.jsx"></script>
   <script type="text/babel" src="src/screen-dispute-detail.jsx"></script>
   <script type="text/babel" src="src/screen-dispute-create.jsx"></script>
+  <script type="text/babel" src="src/screen-session-history.jsx"></script>
+  <script type="text/babel" src="src/screen-profile.jsx"></script>
+  <script type="text/babel" src="src/screen-systems.jsx"></script>
+  <script type="text/babel" src="src/screen-home.jsx"></script>
+  <script type="text/babel" src="src/screen-otp.jsx"></script>
+  <script type="text/babel" src="src/screen-campaign.jsx"></script>
+  <script type="text/babel" src="src/screen-auth.jsx"></script>
+  <script type="text/babel" src="src/screen-profile-home.jsx"></script>
+  <script type="text/babel" src="src/screen-checkin.jsx"></script>
+  <script type="text/babel" src="src/screen-payment.jsx"></script>
+  <script type="text/babel" src="src/screen-storesearch.jsx"></script>
+  <script type="text/babel" src="src/screen-onboarding.jsx"></script>
+  <script type="text/babel" src="src/screen-forgot-password.jsx"></script>
+  <script type="text/babel" src="src/screen-booking-confirmation.jsx"></script>
+  <script type="text/babel" src="src/screen-billing-history.jsx"></script>
+  <script type="text/babel" src="src/screen-credit-transactions.jsx"></script>
+  <script type="text/babel" src="src/screen-disputes-list.jsx"></script>
+  <script type="text/babel" src="src/screen-redeem-credits.jsx"></script>
+  <script type="text/babel" src="src/screen-campaigns-list.jsx"></script>
+  <script type="text/babel" src="src/screen-system-picker.jsx"></script>
+  <script type="text/babel" src="src/screen-email-login.jsx"></script>
+  <script type="text/babel" src="src/screen-email-verify-pending.jsx"></script>
+  <script type="text/babel" src="src/screen-oauth-handler.jsx"></script>
+  <script type="text/babel" src="src/screen-booking-detail.jsx"></script>
+  <script type="text/babel" src="src/screen-reset-password.jsx"></script>
+  <script type="text/babel" src="src/screen-store-selector.jsx"></script>
+  <script type="text/babel" src="src/screen-splash.jsx"></script>
+  <script type="text/babel" src="src/screen-sheet-overlays.jsx"></script>
+  <script type="text/babel" src="src/screen-change-phone.jsx"></script>
+  <script type="text/babel" src="src/screen-session-logs.jsx"></script>
+  <script type="text/babel" src="src/screen-email-verify-success.jsx"></script>
+  <script type="text/babel" src="src/screen-app-flow-demo.jsx"></script>
+  <script type="text/babel" src="src/screen-notification-prefs.jsx"></script>
 </head>
 <body>
   <div id="root"></div>
@@ -145,6 +178,137 @@
             </DCArtboard>
             <DCArtboard id="dispute-create" label="File dispute"        width={PHONE_W} height={PHONE_H}>
               <CreateDisputeScreen />
+            </DCArtboard>
+          </DCSection>
+          <DCSection id="screens3" title="04 · Discovery & receipts" subtitle="Home feed, system browse, session receipt, profile">
+            <DCArtboard id="home"     label="Home feed"             width={PHONE_W} height={PHONE_H}>
+              <HomeFeedScreen />
+            </DCArtboard>
+            <DCArtboard id="systems"  label="Systems → calendar"     width={PHONE_W} height={PHONE_H}>
+              <SystemsBrowserScreen />
+            </DCArtboard>
+            <DCArtboard id="history"  label="Session receipt"        width={PHONE_W} height={PHONE_H}>
+              <SessionHistoryScreen />
+            </DCArtboard>
+            <DCArtboard id="profile"  label="Edit profile"           width={PHONE_W} height={PHONE_H}>
+              <EditProfileScreen />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens4" title="05 · Auth & settings" subtitle="OTP verification, campaign detail, auth landing, profile hub + notification prefs">
+            <DCArtboard id="otp"          label="OTP verification"      width={PHONE_W} height={PHONE_H}>
+              <OtpScreen />
+            </DCArtboard>
+            <DCArtboard id="campaign"     label="Campaign detail"        width={PHONE_W} height={PHONE_H}>
+              <CampaignDetailScreen />
+            </DCArtboard>
+            <DCArtboard id="auth"         label="Auth landing → register" width={PHONE_W} height={PHONE_H}>
+              <AuthScreen />
+            </DCArtboard>
+            <DCArtboard id="profilehome"  label="Profile hub → notif prefs" width={PHONE_W} height={PHONE_H}>
+              <ProfileHomeScreen />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens5" title="06 · Checkout & discovery" subtitle="Check-in, payment, store search, onboarding">
+            <DCArtboard id="checkin"      label="Check-in"              width={PHONE_W} height={PHONE_H}>
+              <CheckInScreen />
+            </DCArtboard>
+            <DCArtboard id="payment"      label="Complete payment"      width={PHONE_W} height={PHONE_H}>
+              <PaymentScreen />
+            </DCArtboard>
+            <DCArtboard id="storesearch"  label="Store search"          width={PHONE_W} height={PHONE_H}>
+              <StoreSearchScreen />
+            </DCArtboard>
+            <DCArtboard id="onboarding"   label="Onboarding"            width={PHONE_W} height={PHONE_H}>
+              <OnboardingScreen />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens6" title="07 · Auth & financial" subtitle="Forgot password, booking confirmation, billing & credit history">
+            <DCArtboard id="forgot"       label="Forgot password"       width={PHONE_W} height={PHONE_H}>
+              <ForgotPasswordScreen />
+            </DCArtboard>
+            <DCArtboard id="confirmation" label="Booking confirmation"   width={PHONE_W} height={PHONE_H}>
+              <BookingConfirmationScreen />
+            </DCArtboard>
+            <DCArtboard id="billing"      label="Billing history"       width={PHONE_W} height={PHONE_H}>
+              <BillingHistoryScreen />
+            </DCArtboard>
+            <DCArtboard id="credits"      label="Credit transactions"   width={PHONE_W} height={PHONE_H}>
+              <CreditTransactionHistoryScreen />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens7" title="08 · Disputes & campaigns" subtitle="Dispute history, redeem credits, campaigns discovery, system selection">
+            <DCArtboard id="disputes-list" label="My disputes"           width={PHONE_W} height={PHONE_H}>
+              <DisputesListScreen />
+            </DCArtboard>
+            <DCArtboard id="redeem"        label="Redeem credits"       width={PHONE_W} height={PHONE_H}>
+              <RedeemCreditsScreen />
+            </DCArtboard>
+            <DCArtboard id="campaigns"     label="Campaigns list"       width={PHONE_W} height={PHONE_H}>
+              <CampaignsListScreen />
+            </DCArtboard>
+            <DCArtboard id="system-picker" label="System picker"        width={PHONE_W} height={PHONE_H}>
+              <SystemPickerScreen />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens8" title="09 · Auth variants & detail" subtitle="Email login, verify pending, OAuth handler, booking detail with status variants">
+            <DCArtboard id="email-login"    label="Email login"           width={PHONE_W} height={PHONE_H}>
+              <EmailLoginScreen />
+            </DCArtboard>
+            <DCArtboard id="verify-pending" label="Verify pending"        width={PHONE_W} height={PHONE_H}>
+              <EmailVerifyPendingScreen />
+            </DCArtboard>
+            <DCArtboard id="oauth-handler"  label="OAuth handler"         width={PHONE_W} height={PHONE_H}>
+              <OAuthHandlerScreen />
+            </DCArtboard>
+            <DCArtboard id="booking-detail" label="Booking detail"        width={PHONE_W} height={PHONE_H}>
+              <BookingDetailScreen />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens9" title="10 · Password reset & overlays" subtitle="Reset password, store selector sheet, splash screen, notification & OTP sheets">
+            <DCArtboard id="reset-password" label="Reset password"         width={PHONE_W} height={PHONE_H}>
+              <ResetPasswordScreen />
+            </DCArtboard>
+            <DCArtboard id="store-selector" label="Store selector sheet"   width={PHONE_W} height={PHONE_H}>
+              <StoreSelectorSheet />
+            </DCArtboard>
+            <DCArtboard id="splash"         label="Splash screen"          width={PHONE_W} height={PHONE_H}>
+              <SplashScreen />
+            </DCArtboard>
+            <DCArtboard id="sheets"         label="Notification & OTP sheets" width={PHONE_W} height={PHONE_H * 1.5}>
+              <NotificationDetailSheet />
+            </DCArtboard>
+            <DCArtboard id="otp-sheet"      label="OTP input sheet"        width={PHONE_W} height={PHONE_H}>
+              <OTPInputSheet />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens11" title="12 · Notification Preferences" subtitle="S-34 — standalone pushed screen with channel toggles and per-topic controls">
+            <DCArtboard id="notif-prefs-default" label="Notification prefs — default" width={PHONE_W} height={PHONE_H}>
+              <NotificationPrefsScreen />
+            </DCArtboard>
+            <DCArtboard id="notif-prefs-pushoff" label="Push OFF variant" width={PHONE_W} height={PHONE_H}>
+              <NotificationPrefsScreen initialPushOff={true} />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens10" title="11 · Account & logs" subtitle="Change phone number, session logs, email verify success, full app demo">
+            <DCArtboard id="change-phone"   label="Change phone number"    width={PHONE_W} height={PHONE_H}>
+              <ChangePhoneScreen />
+            </DCArtboard>
+            <DCArtboard id="session-logs"   label="Session logs"           width={PHONE_W} height={PHONE_H}>
+              <SessionLogsScreen />
+            </DCArtboard>
+            <DCArtboard id="email-verify-success" label="Email verify success" width={PHONE_W} height={PHONE_H}>
+              <EmailVerifySuccessScreen />
+            </DCArtboard>
+            <DCArtboard id="app-flow-demo" label="Full app flow demo"      width={PHONE_W} height={PHONE_H}>
+              <FullAppFlowDemo />
             </DCArtboard>
           </DCSection>
         </DesignCanvas>

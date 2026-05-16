@@ -35,7 +35,7 @@ function ActiveSessionScreen() {
         {/* hero timer card — mint tint, the focal point */}
         <div className="gz-card gz-card--tint" style={{ padding: 24, marginBottom: 12, textAlign: 'center' }}>
           <div className="gz-meta" style={{ marginBottom: 14, color: 'var(--gz-fg-2)' }}>TIME REMAINING</div>
-          <div className="gz-hero" style={{ fontSize: 64, marginBottom: 6 }}>{remainStr}</div>
+          <div className="gz-hero" style={{ marginBottom: 6 }}>{remainStr}</div>
           <div className="gz-body" style={{ color: 'var(--gz-fg-2)', marginBottom: 18 }}>
             <span className="gz-num">{elapsedStr}</span> elapsed of <span className="gz-num">2:00:00</span>
           </div>

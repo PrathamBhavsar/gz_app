@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaming Zone — Booking Detail</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0f1419;
+      --bg-secondary: #1a1f2e;
+      --surface-card: #242a3a;
+      --text-primary: #ffffff;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --primary-purple: #8b5cf6;
+      --primary-purple-light: #a78bfa;
+      --accent-teal: #14b8a6;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-pink: #ec4899;
+      --accent-blue: #3b82f6;
+      --divider: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* iPhone 14 Frame */
+    .iphone-frame {
+      width: 390px;
+      height: 844px;
+      background: black;
+      border-radius: 44px;
+      border: 12px solid black;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      margin: 40px auto;
+    }
+
+    .status-bar {
+      height: 47px;
+      background-color: var(--bg-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 12px;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .status-bar-time {
+      font-weight: 600;
+    }
+
+    .screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-primary);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      padding: 16px;
+      border-bottom: 1px solid var(--divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--bg-primary);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .header-back {
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .header-right {
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+
+    /* Status Selector (Demo) */
+    .status-selector {
+      display: flex;
+      gap: 6px;
+      padding: 8px 12px;
+      background-color: var(--bg-secondary);
+      overflow-x: auto;
+      font-size: 11px;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .status-selector-btn {
+      padding: 4px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background-color: transparent;
+      color: var(--text-secondary);
+      border-radius: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+
+    .status-selector-btn.active {
+      background-color: var(--primary-purple);
+      color: var(--text-primary);
+      border-color: var(--primary-purple);
+    }
+
+    /* Status Banner */
+    .status-banner {
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      text-align: center;
+      color: var(--text-primary);
+      animation: bannerPulse 2s infinite;
+    }
+
+    .status-banner.pending {
+      background-color: rgba(245, 158, 11, 0.2);
+      color: var(--accent-amber);
+      animation: none;
+    }
+
+    .status-banner.confirmed {
+      background-color: rgba(16, 185, 129, 0.2);
+      color: var(--accent-green);
+      animation: none;
+    }
+
+    .status-banner.checkin-open {
+      background-color: rgba(16, 185, 129, 0.3);
+      color: var(--accent-green);
+      animation: bannerPulse 2s infinite;
+    }
+
+    .status-banner.cancelled {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: var(--accent-red);
+      animation: none;
+    }
+
+    .status-banner.completed {
+      background-color: rgba(107, 114, 128, 0.2);
+      color: var(--text-muted);
+      animation: none;
+    }
+
+    @keyframes bannerPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Scroll Container */
+    .scroll-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 16px;
+    }
+
+    .scroll-container::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .scroll-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .scroll-container::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+    }
+
+    /* Cards */
+    .card {
+      background-color: var(--surface-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .card-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .card-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .card-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card-value {
+      font-size: 14px;
+      color: var(--text-primary);
+      font-weight: 500;
+      text-align: right;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    /* Pricing Section */
+    .pricing-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .pricing-label {
+      color: var(--text-secondary);
+    }
+
+    .pricing-value {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .pricing-discount {
+      color: var(--accent-green);
+    }
+
+    .pricing-divider {
+      height: 1px;
+      background-color: var(--divider);
+      margin: 12px 0;
+    }
+
+    .pricing-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Payment Block */
+    .payment-block {
+      border-left: 3px solid;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .payment-pending {
+      border-left-color: var(--accent-amber);
+      background-color: rgba(245, 158, 11, 0.1);
+      color: var(--accent-amber);
+    }
+
+    .payment-paid {
+      border-left-color: var(--accent-green);
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--accent-green);
+    }
+
+    .payment-refunding {
+      border-left-color: var(--accent-amber);
+      background-color: rgba(245, 158, 11, 0.1);
+      color: var(--accent-amber);
+    }
+
+    .payment-amount {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .payment-time {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .countdown {
+      font-size: 12px;
+      background-color: rgba(245, 158, 11, 0.1);
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-top: 8px;
+      font-weight: 500;
+    }
+
+    /* Countdown Timer */
+    .countdown-timer {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent-amber);
+      text-align: center;
+      margin: 12px 0;
+    }
+
+    .countdown-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Check-in Info */
+    .checkin-info {
+      background-color: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid var(--accent-green);
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-purple);
+      color: var(--text-primary);
+    }
+
+    .btn-primary:active {
+      background-color: #7c3aed;
+    }
+
+    .btn-primary.pulse {
+      animation: buttonPulse 1.5s infinite;
+    }
+
+    @keyframes buttonPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .btn-danger {
+      background-color: transparent;
+      color: var(--accent-red);
+      border: 1px solid var(--accent-red);
+    }
+
+    .btn-danger:active {
+      background-color: rgba(239, 68, 68, 0.1);
+    }
+
+    .btn-secondary {
+      background-color: var(--surface-card);
+      color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:active {
+      background-color: var(--bg-secondary);
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      height: 60px;
+      background-color: var(--bg-secondary);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid var(--divider);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      flex: 1;
+      height: 100%;
+    }
+
+    .nav-item.active {
+      color: var(--primary-purple);
+    }
+
+    .nav-icon {
+      font-size: 24px;
+    }
+
+    .home-indicator {
+      height: 34px;
+      background-color: black;
+      border-radius: 21px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 8px;
+    }
+
+    .home-indicator::after {
+      content: '';
+      width: 120px;
+      height: 4px;
+      background-color: black;
+      border-radius: 2px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const BookingDetailScreen = () => {
+      const [status, setStatus] = useState('pending');
+      const [countdownTime, setCountdownTime] = useState('18:24');
+
+      useEffect(() => {
+        const timer = setInterval(() => {
+          setCountdownTime(prev => {
+            const [h, m] = prev.split(':').map(Number);
+            let newM = m - 1;
+            let newH = h;
+            if (newM < 0) {
+              newH--;
+              newM = 59;
+            }
+            if (newH < 0) return '0:00';
+            return `${newH}:${newM.toString().padStart(2, '0')}`;
+          });
+        }, 1000);
+        return () => clearInterval(timer);
+      }, []);
+
+      const statuses = ['Pending', 'Confirmed', 'Check-in Open', 'Cancelled', 'Completed'];
+      const statusMap = {
+        'Pending': 'pending',
+        'Confirmed': 'confirmed',
+        'Check-in Open': 'checkin-open',
+        'Cancelled': 'cancelled',
+        'Completed': 'completed',
+      };
+
+      const getStatusBannerText = () => {
+        switch(status) {
+          case 'pending':
+            return 'Payment required before 11:00 PM tonight';
+          case 'confirmed':
+            return "You're all set · Check-in opens at 5:45 PM";
+          case 'checkin-open':
+            return 'Check-in is open now · Go to Seat 3';
+          case 'cancelled':
+            return 'This booking was cancelled';
+          case 'completed':
+            return 'Session completed · 18 Apr 2025';
+          default:
+            return '';
+        }
+      };
+
+      const renderPaymentBlock = () => {
+        switch(status) {
+          case 'pending':
+            return (
+              <div className="payment-block payment-pending">
+                <div className="payment-amount">₹82 due · Pay before 11:00 PM tonight</div>
+                <div className="countdown">Expires in 4h 12m</div>
+              </div>
+            );
+          case 'confirmed':
+          case 'checkin-open':
+          case 'completed':
+            return (
+              <div className="payment-block payment-paid">
+                <div className="payment-amount">₹82 paid via UPI · 18 Apr 6:00 PM ✓</div>
+              </div>
+            );
+          case 'cancelled':
+            return (
+              <div className="payment-block payment-refunding">
+                <div className="payment-amount">₹82 refunded to UPI</div>
+                <div className="payment-time">Processing 3–5 days</div>
+              </div>
+            );
+          default:
+            return null;
+        }
+      };
+
+      const renderActionButtons = () => {
+        switch(status) {
+          case 'pending':
+            return (
+              <div className="action-buttons">
+                <button className="btn btn-primary">Pay Now</button>
+                <button className="btn btn-danger">Cancel Booking</button>
+              </div>
+            );
+          case 'confirmed':
+            return (
+              <div className="action-buttons">
+                <button className="btn btn-danger">Cancel Booking</button>
+              </div>
+            );
+          case 'checkin-open':
+            return (
+              <div className="action-buttons">
+                <button className="btn btn-primary pulse">Check In Now</button>
+                <button className="btn btn-danger">Cancel Booking</button>
+              </div>
+            );
+          case 'cancelled':
+            return null;
+          case 'completed':
+            return (
+              <div className="action-buttons">
+                <button className="btn btn-secondary">View Session Receipt</button>
+                <button className="btn btn-danger">File a Dispute</button>
+              </div>
+            );
+          default:
+            return null;
+        }
+      };
+
+      return (
+        <div className="iphone-frame">
+          <div className="status-bar">
+            <span className="status-bar-time">9:41</span>
+            <span>📶</span>
+          </div>
+
+          <div className="screen">
+            <div className="status-selector">
+              {statuses.map(s => (
+                <button
+                  key={s}
+                  className={`status-selector-btn ${statusMap[s] === status ? 'active' : ''}`}
+                  onClick={() => setStatus(statusMap[s])}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+
+            <div className="header">
+              <div className="header-left">
+                <div className="header-back">←</div>
+                <div className="header-title">Booking detail</div>
+              </div>
+              <div className="header-right">📤</div>
+            </div>
+
+            <div className={`status-banner ${status}`}>
+              {getStatusBannerText()}
+            </div>
+
+            <div className="scroll-container">
+              <div className="card">
+                <div className="card-title">Booking Info</div>
+                <div className="card-row">
+                  <div>
+                    <div className="card-label">Store</div>
+                    <div className="card-value">GameZone Koramangala</div>
+                  </div>
+                </div>
+                <div className="card-row">
+                  <div>
+                    <div className="card-label">System</div>
+                    <div className="card-value">RTX 4090 Gaming PC</div>
+                  </div>
+                </div>
+                <div className="card-row">
+                  <div>
+                    <div className="card-label">Seat</div>
+                    <div className="card-value">Seat 3</div>
+                  </div>
+                </div>
+                <div className="card-row">
+                  <div>
+                    <div className="card-label">Type</div>
+                    <div className="card-value">🖥️ PC Gaming</div>
+                  </div>
+                </div>
+                <div className="card-row">
+                  <div>
+                    <div className="card-label">Date</div>
+                    <div className="card-value">Saturday, 19 Apr 2025</div>
+                  </div>
+                </div>
+                <div className="card-row">
+                  <div>
+                    <div className="card-label">Time</div>
+                    <div className="card-value">6:00 PM – 8:00 PM</div>
+                  </div>
+                </div>
+                <div className="card-row">
+                  <div>
+                    <div className="card-label">Duration</div>
+                    <div className="card-value">2 hours</div>
+                  </div>
+                </div>
+                <div className="card-row">
+                  <div>
+                    <div className="card-label">Booking Reference</div>
+                    <div className="card-value" style={{ fontFamily: "'Monaco', 'Courier New', monospace" }}>
+                      BKG-20948
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card">
+                <div className="card-title">Pricing</div>
+                <div className="pricing-item">
+                  <span className="pricing-label">Base rate</span>
+                  <span className="pricing-value">₹160</span>
+                </div>
+                <div className="pricing-item">
+                  <span className="pricing-label">Campaign discount</span>
+                  <span className="pricing-value pricing-discount">−₹48</span>
+                </div>
+                <div className="pricing-item">
+                  <span className="pricing-label">Credits applied</span>
+                  <span className="pricing-value pricing-discount">−₹30</span>
+                </div>
+                <div className="pricing-item">
+                  <span className="pricing-label">Subtotal</span>
+                  <span className="pricing-value">₹82</span>
+                </div>
+                <div className="pricing-divider"></div>
+                <div className="pricing-total">
+                  <span>Total</span>
+                  <span>₹82</span>
+                </div>
+              </div>
+
+              {renderPaymentBlock()}
+
+              {(status === 'confirmed' || status === 'checkin-open') && (
+                <div className="checkin-info">
+                  {status === 'confirmed' && (
+                    <>Check-in opens 15 min before your session at 5:45 PM</>
+                  )}
+                  {status === 'checkin-open' && (
+                    <>Check-in is open right now — go to Seat 3 and tap Check In</>
+                  )}
+                </div>
+              )}
+
+              {(status === 'pending' || status === 'confirmed') && (
+                <div>
+                  <div className="countdown-label">Session starts in</div>
+                  <div className="countdown-timer">{countdownTime}</div>
+                </div>
+              )}
+
+              {renderActionButtons()}
+            </div>
+          </div>
+
+          <div className="bottom-nav">
+            <div className="nav-item"><span className="nav-icon">🏠</span><span>Home</span></div>
+            <div className="nav-item"><span className="nav-icon">📅</span><span>Book</span></div>
+            <div className="nav-item active"><span className="nav-icon">🎮</span><span>My Games</span></div>
+            <div className="nav-item"><span className="nav-icon">💳</span><span>Wallet</span></div>
+            <div className="nav-item"><span className="nav-icon">👤</span><span>Profile</span></div>
+          </div>
+
+          <div className="home-indicator"></div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<BookingDetailScreen />);
+  </script>
+</body>
+</html>

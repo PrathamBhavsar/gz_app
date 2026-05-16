@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaming Zone — Campaigns List</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0f1419;
+      --bg-secondary: #1a1f2e;
+      --surface-card: #242a3a;
+      --text-primary: #ffffff;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --primary-purple: #8b5cf6;
+      --primary-purple-light: #a78bfa;
+      --accent-teal: #14b8a6;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-pink: #ec4899;
+      --accent-blue: #3b82f6;
+      --divider: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* iPhone 14 Frame */
+    .iphone-frame {
+      width: 390px;
+      height: 844px;
+      background: black;
+      border-radius: 44px;
+      border: 12px solid black;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      margin: 40px auto;
+    }
+
+    .status-bar {
+      height: 47px;
+      background-color: var(--bg-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 12px;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .status-bar-time {
+      font-weight: 600;
+    }
+
+    .screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-primary);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      padding: 16px;
+      border-bottom: 1px solid var(--divider);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background-color: var(--bg-primary);
+    }
+
+    .header-back {
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .store-context-pill {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--divider);
+      padding: 0;
+      background-color: var(--bg-primary);
+      overflow-x: auto;
+      scroll-behavior: smooth;
+    }
+
+    .filter-tab {
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--text-secondary);
+      border: none;
+      background: none;
+      white-space: nowrap;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+
+    .filter-tab.active {
+      color: var(--primary-purple);
+    }
+
+    .filter-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: var(--primary-purple);
+    }
+
+    /* Campaign Card */
+    .campaign-card {
+      background-color: var(--surface-card);
+      border-radius: 12px;
+      margin: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .campaign-card:active {
+      transform: scale(0.98);
+    }
+
+    .campaign-card.muted {
+      opacity: 0.6;
+    }
+
+    .card-gradient-banner {
+      height: 4px;
+      width: 100%;
+    }
+
+    .card-content {
+      padding: 16px;
+    }
+
+    .card-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .badge-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    .badge-purple {
+      background-color: rgba(139, 92, 246, 0.2);
+      color: var(--primary-purple-light);
+    }
+
+    .badge-amber {
+      background-color: rgba(245, 158, 11, 0.2);
+      color: var(--accent-amber);
+    }
+
+    .badge-teal {
+      background-color: rgba(20, 184, 166, 0.2);
+      color: var(--accent-teal);
+    }
+
+    .badge-pink {
+      background-color: rgba(236, 72, 153, 0.2);
+      color: var(--accent-pink);
+    }
+
+    .card-description {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-validity {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .card-time-restriction {
+      font-size: 12px;
+      color: var(--accent-amber);
+      margin-bottom: 12px;
+    }
+
+    .card-progress {
+      margin: 12px 0;
+    }
+
+    .progress-bar-container {
+      height: 6px;
+      background-color: var(--bg-secondary);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background-color: var(--primary-purple);
+      transition: width 0.3s ease;
+    }
+
+    .progress-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .card-bottom-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .eligibility-badge {
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .eligibility-green {
+      color: var(--accent-green);
+    }
+
+    .eligibility-amber {
+      color: var(--accent-amber);
+    }
+
+    .eligibility-grey {
+      color: var(--text-muted);
+    }
+
+    .view-details-link {
+      font-size: 13px;
+      color: var(--primary-purple);
+      cursor: pointer;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .view-details-link:hover {
+      color: var(--primary-purple-light);
+    }
+
+    /* Scroll Container */
+    .scroll-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .scroll-container::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .scroll-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .scroll-container::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      height: 60px;
+      background-color: var(--bg-secondary);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid var(--divider);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      flex: 1;
+      height: 100%;
+    }
+
+    .nav-item.active {
+      color: var(--primary-purple);
+    }
+
+    .nav-icon {
+      font-size: 24px;
+    }
+
+    .home-indicator {
+      height: 34px;
+      background-color: black;
+      border-radius: 21px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 8px;
+    }
+
+    .home-indicator::after {
+      content: '';
+      width: 120px;
+      height: 4px;
+      background-color: black;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useRef, useEffect } = React;
+
+    const CampaignsListScreen = () => {
+      const [activeTab, setActiveTab] = useState('all');
+      const tabsRef = useRef(null);
+
+      const campaigns = [
+        {
+          id: 1,
+          name: 'Happy Hour Blast',
+          type: 'Happy Hour',
+          badge: '30% Off',
+          badgeStyle: 'amber',
+          description: '30% off all sessions Monday–Friday 10am–2pm',
+          validUntil: '30 Apr 2025',
+          timeRestriction: 'Mon–Fri · 10:00 AM – 2:00 PM only',
+          progressCurrent: 47,
+          progressTotal: 100,
+          eligible: true,
+          gradient: 'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)',
+        },
+        {
+          id: 2,
+          name: 'First Visit Bonus',
+          type: 'First Visit',
+          badge: 'Bonus Credits',
+          badgeStyle: 'pink',
+          description: 'Get 200 bonus credits on your first session at this store',
+          validUntil: '31 May 2025',
+          timeRestriction: null,
+          progressCurrent: null,
+          progressTotal: null,
+          eligible: false,
+          eligibleText: 'Already redeemed',
+          gradient: 'linear-gradient(90deg, #ec4899 0%, #db2777 100%)',
+          muted: true,
+        },
+        {
+          id: 3,
+          name: 'Weekend Warrior',
+          type: 'Discounts',
+          badge: '20% Off',
+          badgeStyle: 'teal',
+          description: '20% off sessions booked on weekends',
+          validUntil: '30 Apr 2025',
+          timeRestriction: 'Sat–Sun only',
+          progressCurrent: 12,
+          progressTotal: 50,
+          eligible: true,
+          gradient: 'linear-gradient(90deg, #14b8a6 0%, #0d9488 100%)',
+        },
+        {
+          id: 4,
+          name: 'Credit Multiplier',
+          type: 'Bonus Credits',
+          badge: 'Bonus Credits',
+          badgeStyle: 'purple',
+          description: 'Earn 2x credits on RTX 4090 sessions this month',
+          validUntil: '30 Apr 2025',
+          timeRestriction: null,
+          progressCurrent: null,
+          progressTotal: null,
+          eligible: true,
+          gradient: 'linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%)',
+        },
+        {
+          id: 5,
+          name: 'Night Owl',
+          type: 'Happy Hour',
+          badge: '25% Off',
+          badgeStyle: 'blue',
+          description: '25% off sessions after 9:00 PM on any day',
+          validUntil: '15 May 2025',
+          timeRestriction: 'Daily after 9:00 PM',
+          progressCurrent: 88,
+          progressTotal: 200,
+          eligible: true,
+          gradient: 'linear-gradient(90deg, #1e40af 0%, #1e3a8a 100%)',
+        },
+      ];
+
+      const tabFilters = [
+        { id: 'all', label: 'All' },
+        { id: 'discounts', label: 'Discounts' },
+        { id: 'bonus', label: 'Bonus Credits' },
+        { id: 'happyhour', label: 'Happy Hour' },
+        { id: 'firstvisit', label: 'First Visit' },
+      ];
+
+      const filterCampaigns = () => {
+        if (activeTab === 'all') return campaigns;
+        if (activeTab === 'discounts') return campaigns.filter(c => c.type === 'Discounts');
+        if (activeTab === 'bonus') return campaigns.filter(c => c.type === 'Bonus Credits');
+        if (activeTab === 'happyhour') return campaigns.filter(c => c.type === 'Happy Hour');
+        if (activeTab === 'firstvisit') return campaigns.filter(c => c.type === 'First Visit');
+        return campaigns;
+      };
+
+      const filtered = filterCampaigns();
+
+      return (
+        <div className="iphone-frame">
+          <div className="status-bar">
+            <span className="status-bar-time">9:41</span>
+            <span>📶</span>
+          </div>
+
+          <div className="screen">
+            <div className="header">
+              <div className="header-back">←</div>
+              <div>
+                <div className="header-title">Campaigns</div>
+                <div className="store-context-pill">
+                  📍 GameZone Koramangala
+                </div>
+              </div>
+            </div>
+
+            <div className="filter-tabs" ref={tabsRef}>
+              {tabFilters.map(tab => (
+                <button
+                  key={tab.id}
+                  className={`filter-tab ${activeTab === tab.id ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="scroll-container">
+              {filtered.map(campaign => (
+                <div key={campaign.id} className={`campaign-card ${campaign.muted ? 'muted' : ''}`}>
+                  <div className="card-gradient-banner" style={{ background: campaign.gradient }}></div>
+                  <div className="card-content">
+                    <div className="card-top-row">
+                      <div className="card-title">{campaign.name}</div>
+                      <div className={`badge-pill badge-${campaign.badgeStyle}`}>
+                        {campaign.badge}
+                      </div>
+                    </div>
+                    <div className="card-description">{campaign.description}</div>
+                    <div className="card-validity">
+                      🕐 Valid until {campaign.validUntil}
+                    </div>
+                    {campaign.timeRestriction && (
+                      <div className="card-time-restriction">
+                        {campaign.timeRestriction}
+                      </div>
+                    )}
+                    {campaign.progressCurrent !== null && (
+                      <div className="card-progress">
+                        <div className="progress-bar-container">
+                          <div
+                            className="progress-bar-fill"
+                            style={{ width: `${(campaign.progressCurrent / campaign.progressTotal) * 100}%` }}
+                          ></div>
+                        </div>
+                        <div className="progress-label">
+                          {campaign.progressCurrent} / {campaign.progressTotal} redeemed
+                        </div>
+                      </div>
+                    )}
+                    <div className="card-bottom-row">
+                      <div className={`eligibility-badge ${campaign.eligible ? 'eligibility-green' : (campaign.eligibleText === 'Already redeemed' ? 'eligibility-grey' : 'eligibility-amber')}`}>
+                        {campaign.eligible ? '✓ Eligible for you' : campaign.eligibleText}
+                      </div>
+                      <div className="view-details-link">View details →</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bottom-nav">
+            <div className="nav-item"><span className="nav-icon">🏠</span><span>Home</span></div>
+            <div className="nav-item"><span className="nav-icon">📅</span><span>Book</span></div>
+            <div className="nav-item"><span className="nav-icon">🎮</span><span>My Games</span></div>
+            <div className="nav-item active"><span className="nav-icon">💳</span><span>Wallet</span></div>
+            <div className="nav-item"><span className="nav-icon">👤</span><span>Profile</span></div>
+          </div>
+
+          <div className="home-indicator"></div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<CampaignsListScreen />);
+  </script>
+</body>
+</html>

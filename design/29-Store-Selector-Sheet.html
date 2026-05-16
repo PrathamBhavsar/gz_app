@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaming Zone — Store Selector Sheet</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0f1419;
+      --bg-secondary: #1a1f2e;
+      --surface-card: #242a3a;
+      --text-primary: #ffffff;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --primary-purple: #8b5cf6;
+      --primary-purple-light: #a78bfa;
+      --accent-teal: #14b8a6;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-pink: #ec4899;
+      --accent-blue: #3b82f6;
+      --divider: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* iPhone 14 Frame */
+    .iphone-frame {
+      width: 390px;
+      height: 844px;
+      background: black;
+      border-radius: 44px;
+      border: 12px solid black;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      margin: 40px auto;
+      position: relative;
+    }
+
+    .status-bar {
+      height: 47px;
+      background-color: var(--bg-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 12px;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .status-bar-time {
+      font-weight: 600;
+    }
+
+    .screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-primary);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Background Screen Content */
+    .background-content {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .bg-card {
+      background-color: var(--surface-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      height: 60px;
+    }
+
+    .open-sheet-btn {
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      background-color: var(--primary-purple);
+      color: var(--text-primary);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 12px;
+      transition: background-color 0.2s ease;
+    }
+
+    .open-sheet-btn:active {
+      background-color: #7c3aed;
+    }
+
+    /* Overlay */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: flex-end;
+      z-index: 100;
+      animation: overlayFadeIn 0.3s ease;
+    }
+
+    @keyframes overlayFadeIn {
+      from {
+        background-color: rgba(0, 0, 0, 0);
+      }
+      to {
+        background-color: rgba(0, 0, 0, 0.6);
+      }
+    }
+
+    /* Sheet */
+    .sheet {
+      width: 100%;
+      height: 60%;
+      background-color: var(--surface-card);
+      border-radius: 24px 24px 0 0;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    /* Sheet Header */
+    .sheet-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--divider);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .sheet-handle {
+      height: 4px;
+      width: 40px;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      align-self: center;
+      margin-top: 8px;
+    }
+
+    .sheet-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sheet-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .sheet-close-btn {
+      font-size: 18px;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Search Bar */
+    .search-container {
+      padding: 0 16px;
+      margin-bottom: 12px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 12px;
+      background-color: var(--bg-secondary);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Sheet Content */
+    .sheet-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 16px 16px 16px;
+    }
+
+    .sheet-content::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sheet-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sheet-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+    }
+
+    /* Section Labels */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 16px 0 8px 0;
+      padding: 0;
+    }
+
+    /* Store Row */
+    .store-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      margin-bottom: 8px;
+      background-color: var(--bg-secondary);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .store-row:active {
+      background-color: rgba(139, 92, 246, 0.1);
+    }
+
+    .store-row.selected {
+      border-left-color: var(--primary-purple);
+    }
+
+    .store-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+
+    .avatar-koramangala {
+      background-color: #8b5cf6;
+    }
+
+    .avatar-mgroad {
+      background-color: #ec4899;
+    }
+
+    .avatar-whitefield {
+      background-color: #14b8a6;
+    }
+
+    .avatar-indiranagar {
+      background-color: #f59e0b;
+    }
+
+    .avatar-hsrlayout {
+      background-color: #3b82f6;
+    }
+
+    .store-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .store-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .store-location {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+    }
+
+    .store-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 12px;
+    }
+
+    .store-status {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--accent-green);
+    }
+
+    .store-action {
+      font-size: 18px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    /* Empty Results */
+    .empty-results {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-results-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .empty-results-text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Toast */
+    .toast {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: var(--text-primary);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      animation: toastSlideUp 0.3s ease forwards;
+      z-index: 200;
+    }
+
+    @keyframes toastSlideUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    .toast.fade-out {
+      animation: toastSlideDown 0.3s ease forwards;
+    }
+
+    @keyframes toastSlideDown {
+      from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      height: 60px;
+      background-color: var(--bg-secondary);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid var(--divider);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      flex: 1;
+      height: 100%;
+    }
+
+    .nav-item.active {
+      color: var(--primary-purple);
+    }
+
+    .nav-icon {
+      font-size: 24px;
+    }
+
+    .home-indicator {
+      height: 34px;
+      background-color: black;
+      border-radius: 21px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 8px;
+    }
+
+    .home-indicator::after {
+      content: '';
+      width: 120px;
+      height: 4px;
+      background-color: black;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useRef, useEffect } = React;
+
+    const StoreSelectorSheet = () => {
+      const [showSheet, setShowSheet] = useState(false);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [selectedStore, setSelectedStore] = useState('koramangala');
+      const [toast, setToast] = useState(null);
+      const searchInputRef = useRef(null);
+
+      const recentlyVisited = [
+        {
+          id: 'koramangala',
+          name: 'GameZone Koramangala',
+          location: 'Koramangala, Bengaluru',
+          meta: 'Last visited today',
+          avatar: 'K',
+          avatarClass: 'avatar-koramangala',
+        },
+        {
+          id: 'mgroad',
+          name: 'GameZone MG Road',
+          location: 'MG Road, Bengaluru',
+          meta: 'Last visited 3 days ago',
+          avatar: 'M',
+          avatarClass: 'avatar-mgroad',
+        },
+        {
+          id: 'whitefield',
+          name: 'GameZone Whitefield',
+          location: 'Whitefield, Bengaluru',
+          meta: 'Last visited 12 days ago',
+          avatar: 'W',
+          avatarClass: 'avatar-whitefield',
+        },
+      ];
+
+      const nearby = [
+        {
+          id: 'indiranagar',
+          name: 'GameZone Indiranagar',
+          location: 'Indiranagar, Bengaluru',
+          distance: '1.2 km away',
+          rating: '4.8',
+          status: 'Open now',
+          avatar: 'I',
+          avatarClass: 'avatar-indiranagar',
+        },
+        {
+          id: 'hsrlayout',
+          name: 'GameZone HSR Layout',
+          location: 'HSR Layout, Bengaluru',
+          distance: '2.8 km away',
+          rating: '4.6',
+          status: 'Open now',
+          avatar: 'H',
+          avatarClass: 'avatar-hsrlayout',
+        },
+      ];
+
+      const allStores = [...recentlyVisited, ...nearby];
+
+      const filteredStores = searchQuery
+        ? allStores.filter(store =>
+            store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            store.location.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : null;
+
+      useEffect(() => {
+        if (showSheet && searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, [showSheet]);
+
+      const handleStoreSelect = (storeId) => {
+        if (storeId === selectedStore) {
+          setShowSheet(false);
+          return;
+        }
+        const store = allStores.find(s => s.id === storeId);
+        setSelectedStore(storeId);
+        setShowSheet(false);
+        
+        // Show toast
+        setToast(`Store changed to ${store.name}`);
+        setTimeout(() => {
+          setToast(null);
+        }, 1500);
+      };
+
+      const renderStoreRows = (stores, isNearby = false) => {
+        return stores.map(store => (
+          <div
+            key={store.id}
+            className={`store-row ${selectedStore === store.id ? 'selected' : ''}`}
+            onClick={() => handleStoreSelect(store.id)}
+          >
+            <div className={`store-avatar ${store.avatarClass}`}>
+              {store.avatar}
+            </div>
+            <div className="store-info">
+              <div className="store-name">{store.name}</div>
+              <div className="store-location">{store.location}</div>
+              <div className="store-meta">
+                {isNearby ? (
+                  <>
+                    <span>{store.distance}</span>
+                    <span>⭐ {store.rating}</span>
+                    <div className="store-status">
+                      <div className="status-dot"></div>
+                      <span>{store.status}</span>
+                    </div>
+                  </>
+                ) : (
+                  <span>{store.meta}</span>
+                )}
+              </div>
+            </div>
+            <div className="store-action">
+              {selectedStore === store.id ? '✓' : '→'}
+            </div>
+          </div>
+        ));
+      };
+
+      return (
+        <div className="iphone-frame">
+          <div className="status-bar">
+            <span className="status-bar-time">9:41</span>
+            <span>📶</span>
+          </div>
+
+          <div className="screen">
+            <div className="background-content">
+              <h2 style={{ fontSize: '14px', marginBottom: '12px' }}>Wallet Home (Background)</h2>
+              <div className="bg-card"></div>
+              <div className="bg-card"></div>
+              <div className="bg-card"></div>
+              <button className="open-sheet-btn" onClick={() => setShowSheet(true)}>
+                Open Store Selector
+              </button>
+            </div>
+
+            {showSheet && (
+              <div className="overlay" onClick={() => setShowSheet(false)}>
+                <div className="sheet" onClick={e => e.stopPropagation()}>
+                  <div className="sheet-header">
+                    <div className="sheet-handle"></div>
+                    <div className="sheet-title-row">
+                      <div className="sheet-title">Select store</div>
+                      <button className="sheet-close-btn" onClick={() => setShowSheet(false)}>
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                  <div className="search-container">
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      className="search-input"
+                      placeholder="Search stores..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <div className="sheet-content">
+                    {!searchQuery ? (
+                      <>
+                        <div className="section-label">Recently visited</div>
+                        {renderStoreRows(recentlyVisited)}
+                        <div className="section-label">Nearby</div>
+                        {renderStoreRows(nearby, true)}
+                      </>
+                    ) : filteredStores.length > 0 ? (
+                      <>
+                        <div className="section-label">Results for "{searchQuery}"</div>
+                        {renderStoreRows(filteredStores)}
+                      </>
+                    ) : (
+                      <div className="empty-results">
+                        <div className="empty-results-title">No stores found</div>
+                        <div className="empty-results-text">
+                          Try a different name or location
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="bottom-nav">
+            <div className="nav-item"><span className="nav-icon">🏠</span><span>Home</span></div>
+            <div className="nav-item"><span className="nav-icon">📅</span><span>Book</span></div>
+            <div className="nav-item"><span className="nav-icon">🎮</span><span>My Games</span></div>
+            <div className="nav-item active"><span className="nav-icon">💳</span><span>Wallet</span></div>
+            <div className="nav-item"><span className="nav-icon">👤</span><span>Profile</span></div>
+          </div>
+
+          <div className="home-indicator"></div>
+
+          {toast && (
+            <div className="toast">
+              {toast}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<StoreSelectorSheet />);
+  </script>
+</body>
+</html>

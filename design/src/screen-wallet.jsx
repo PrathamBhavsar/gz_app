@@ -92,14 +92,12 @@ function WalletScreen() {
           {txList.map((tx, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px',
               borderTop: i === 0 ? 0 : '1px solid var(--gz-rule)' }}>
-              <div className="gz-tile" style={{
-                width: 34, height: 34,
-                background: tx.kind === 'ok' ? 'var(--gz-ok-bg)' : 'var(--gz-err-bg)',
-                color: tx.kind === 'ok' ? 'var(--gz-ok)' : 'var(--gz-err)',
-                flexShrink: 0,
-              }}>
-                {React.cloneElement(tx.icon, { style: { width: 16, height: 16 } })}
-              </div>
+              <Avatar 
+                size="md" 
+                bg={tx.kind === 'ok' ? 'var(--gz-ok-bg)' : 'var(--gz-err-bg)'}
+                iconColor={tx.kind === 'ok' ? 'var(--gz-ok)' : 'var(--gz-err)'}
+                icon={tx.icon}
+              />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div className="gz-body" style={{ fontWeight: 600 }}>{tx.label}</div>
                 <div className="gz-small" style={{ marginTop: 1 }}>{tx.sub}</div>
@@ -196,7 +194,7 @@ function WalletScreen() {
             <div className="gz-card gz-card--inset" style={{ marginBottom: 16, textAlign: 'center' }}>
               <div className="gz-meta" style={{ marginBottom: 8 }}>REDEEM</div>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 12 }}>
-                <span className="gz-hero" style={{ fontSize: 44 }}>{redeemAmt}</span>
+                <span className="gz-hero-md">{redeemAmt}</span>
                 <span className="gz-body-r">= ₹{(redeemAmt / 10).toFixed(0)}</span>
               </div>
               <input className="gz-slider" type="range" min="0" max={credits} step="10"

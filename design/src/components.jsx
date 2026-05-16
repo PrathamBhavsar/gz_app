@@ -47,6 +47,8 @@ const I = {
   scale:  <svg viewBox="0 0 24 24" className="gz-ic"><path d="M12 4v16M5 8h14M5 8l-2 6h4l-2-6zM19 8l-2 6h4l-2-6z"/></svg>,
   x:      <svg viewBox="0 0 24 24" className="gz-ic"><path d="M6 6l12 12M18 6L6 18"/></svg>,
   warnT:  <svg viewBox="0 0 24 24" className="gz-ic"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18v.5"/></svg>,
+  dl:     <svg viewBox="0 0 24 24" className="gz-ic"><path d="M12 4v12M6 11l6 6 6-6M4 20h16"/></svg>,
+  spark:  <svg viewBox="0 0 24 24" className="gz-ic"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/></svg>,
 };
 
 // ───────── Phone shell — minimal, no notch (acts as "app container") ─────────
@@ -196,7 +198,128 @@ function Collapse({ title, open, onToggle, right, children }) {
   );
 }
 
+// Avatar circle tile — colored circle with icon or letters (Walle-inspired design)
+// Sizes: 'sm' (32px), 'md' (34px default), 'lg' (40px), 'xl' (56px)
+// Colors: Walle-inspired soft, muted palette with subtle backgrounds
+const AVATAR_COLORS = [
+  { bg: '#EAD5C8', fg: '#5C4A40' }, // soft peachy beige
+  { bg: '#D4E4D8', fg: '#3D5A45' }, // soft sage green
+  { bg: '#DFD4E8', fg: '#534968' }, // soft lavender
+  { bg: '#E8D4D4', fg: '#685454' }, // soft rose
+  { bg: '#D4E0E8', fg: '#40536B' }, // soft slate blue
+  { bg: '#E8E4D4', fg: '#6B6340' }, // soft wheat
+  { bg: '#E4D8D4', fg: '#6B5954' }, // soft terracotta
+];
+
+function Avatar({ icon, size = 'md', color, bg, iconColor, children, index }) {
+  const sizeMap = { sm: 32, md: 34, lg: 40, xl: 56 };
+  const iconSizeMap = { sm: 16, md: 16, lg: 20, xl: 28 };
+  const px = sizeMap[size] || 34;
+  const iconPx = iconSizeMap[size] || 16;
+  
+  // If explicit bg/iconColor provided, use those
+  // Otherwise use Walle palette (indexed or based on children text)
+  let bgColor = bg;
+  let fgColor = iconColor;
+  
+  if (!bg && !iconColor) {
+    let paletteIndex = index !== undefined ? index % AVATAR_COLORS.length : 0;
+    
+    // If children is a string (letter), hash it to pick consistent color
+    if (children && typeof children === 'string') {
+      const hash = children.charCodeAt(0) || 0;
+      paletteIndex = hash % AVATAR_COLORS.length;
+    }
+    
+    const palette = AVATAR_COLORS[paletteIndex];
+    bgColor = palette.bg;
+    fgColor = palette.fg;
+  }
+  
+  const finalBg = bgColor || color || AVATAR_COLORS[0].bg;
+  const finalFg = fgColor || '#fff';
+  
+  return (
+    <div style={{
+      width: px,
+      height: px,
+      borderRadius: '50%',
+      background: finalBg,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: finalFg,
+      flexShrink: 0,
+      fontSize: children ? (size === 'xl' ? 24 : size === 'lg' ? 16 : 14) : undefined,
+      fontWeight: children ? 700 : undefined,
+    }}>
+      {icon ? React.cloneElement(icon, { 
+        style: { 
+          width: iconPx, 
+          height: iconPx, 
+          color: finalFg,
+          ...(icon.props?.style || {})
+        } 
+      }) : children}
+    </div>
+  );
+}
+
+// ───────── Button component ─────────
+// Shared button component with variants: primary (default), ghost, danger-outline
+function Button({ children, variant = 'primary', onClick, disabled, style, className = '' }) {
+  const baseStyle = {
+    width: '100%',
+    padding: '14px 16px',
+    fontSize: 15,
+    fontWeight: 600,
+    border: 0,
+    borderRadius: 12,
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    transition: 'background 0.2s, opacity 0.2s',
+    fontFamily: 'inherit',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    ...style,
+  };
+
+  let variantStyle = {};
+  
+  if (variant === 'primary') {
+    variantStyle = {
+      background: disabled ? 'var(--gz-fg-4)' : 'var(--gz-btn)',
+      color: disabled ? 'var(--gz-fg-3)' : '#fff',
+    };
+  } else if (variant === 'ghost') {
+    variantStyle = {
+      background: disabled ? 'transparent' : 'var(--gz-pill)',
+      color: disabled ? 'var(--gz-fg-3)' : 'var(--gz-fg)',
+      border: '1.5px solid var(--gz-rule)',
+    };
+  } else if (variant === 'danger-outline') {
+    variantStyle = {
+      background: 'transparent',
+      color: 'var(--gz-err)',
+      border: '1.5px solid var(--gz-err)',
+    };
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`gz-btn ${className}`}
+      style={{ ...baseStyle, ...variantStyle }}
+    >
+      {children}
+    </button>
+  );
+}
+
 Object.assign(window, {
   I, Phone, StatusBar, TopBar, BottomNav, Scroll,
-  Tag, Chip, LiveDot, IconBtn, MetaRow, Collapse,
+  Tag, Chip, LiveDot, IconBtn, MetaRow, Collapse, Avatar, AVATAR_COLORS,
+  Button,
 });

@@ -184,7 +184,7 @@ class BookingSummaryMobileLayout extends ConsumerWidget {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text('Total', style: AppTypography.h2),
-                      Text('₹$total', style: AppTypography.heroMd.copyWith(fontSize: 32)),
+                      Text('₹$total', style: AppTypography.heroMd),
                     ]),
               ])),
               const SizedBox(height: AppSpacing.sm + AppSpacing.xs),

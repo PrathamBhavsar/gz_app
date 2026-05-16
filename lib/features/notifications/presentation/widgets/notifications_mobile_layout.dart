@@ -110,7 +110,7 @@ class NotificationsMobileLayout extends ConsumerWidget {
                         // Unread dot
                         Container(
                           width: 8, height: 8,
-                          margin: const EdgeInsets.only(top: 14, right: -4),
+                          margin: const EdgeInsets.only(top: 14),
                           decoration: BoxDecoration(
                             color: notif.read ? Colors.transparent : AppColors.info,
                             shape: BoxShape.circle,

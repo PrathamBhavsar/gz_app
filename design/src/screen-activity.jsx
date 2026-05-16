@@ -67,11 +67,9 @@ function ActivityHubScreen() {
               style={{ width: '100%', padding: 16, border: 0, textAlign: 'left',
                 display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14,
                 cursor: 'pointer' }}>
-              <div style={{ flexShrink: 0, width: 38, height: 38, borderRadius: 999,
-                background: 'var(--gz-fg)', color: '#fff',
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Avatar size="lg" bg="var(--gz-fg)">
                 <span className="gz-dot-pulse" style={{ background: 'var(--gz-card-tint-strong)' }} />
-              </div>
+              </Avatar>
               <div style={{ flex: 1 }}>
                 <div className="gz-body" style={{ fontWeight: 700 }}>Session live now</div>
                 <div className="gz-small" style={{ marginTop: 2 }}>
@@ -111,13 +109,15 @@ function ActivityHubScreen() {
 
             {/* empty state */}
             <div style={{ textAlign: 'center', padding: '32px 20px 8px' }}>
-              <div style={{
-                width: 56, height: 56, margin: '0 auto 14px',
-                borderRadius: 14, background: 'var(--gz-pill-bg)',
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--gz-fg-3)',
-              }}>
-                {React.cloneElement(I.cal, { style: { width: 26, height: 26 } })}
+              <div style={{ display: 'inline-flex', margin: '0 auto 14px' }}>
+                <div style={{
+                  width: 56, height: 56,
+                  borderRadius: 14, background: 'var(--gz-pill-bg)',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'var(--gz-fg-3)',
+                }}>
+                  {React.cloneElement(I.cal, { style: { width: 26, height: 26 } })}
+                </div>
               </div>
               <div className="gz-h3" style={{ marginBottom: 4 }}>No more upcoming bookings</div>
               <div className="gz-small" style={{ marginBottom: 14 }}>Find a slot for the weekend</div>
@@ -140,7 +140,7 @@ function ActivityHubScreen() {
 
               <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
                 <div className="gz-meta" style={{ marginBottom: 8, color: 'var(--gz-fg-2)' }}>REMAINING</div>
-                <div className="gz-hero" style={{ fontSize: 56 }}>{`${Math.floor(remain / 3600)}:${String(Math.floor((remain % 3600) / 60)).padStart(2, '0')}:${String(remain % 60).padStart(2, '0')}`}</div>
+                <div className="gz-hero">{`${Math.floor(remain / 3600)}:${String(Math.floor((remain % 3600) / 60)).padStart(2, '0')}:${String(remain % 60).padStart(2, '0')}`}</div>
               </div>
 
               <div className="gz-progress" style={{ background: 'rgba(10,10,10,0.1)', height: 6, marginTop: 18 }}>
@@ -188,7 +188,7 @@ function ActivityHubScreen() {
               <hr className="gz-hr" style={{ margin: '6px 0' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                 <span className="gz-h3">Total</span>
-                <span className="gz-hero-md" style={{ fontSize: 32 }}>₹92</span>
+                <span className="gz-hero-md">₹92</span>
               </div>
             </div>
 
@@ -216,9 +216,7 @@ function BookingCard({ icon, system, store, when, duration, status, countdown, a
     <div className="gz-card" style={{ marginBottom: 12 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <div className="gz-tile gz-tile--sq" style={{ width: 40, height: 40 }}>
-            {React.cloneElement(icon, { style: { width: 20, height: 20 } })}
-          </div>
+          <Avatar size="lg" bg="var(--gz-pill-bg)" iconColor="var(--gz-fg)" icon={icon} />
           <div>
             <div className="gz-body" style={{ fontWeight: 700 }}>{system}</div>
             <div className="gz-small" style={{ marginTop: 2 }}>{store}</div>

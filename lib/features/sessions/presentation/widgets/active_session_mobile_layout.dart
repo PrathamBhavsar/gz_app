@@ -87,7 +87,7 @@ class _ActiveSessionMobileLayoutState
                   child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
                     Text('TIME REMAINING', style: AppTypography.meta.copyWith(color: AppColors.textSecondary)),
                     const SizedBox(height: 14),
-                    Text(remainStr, style: AppTypography.hero.copyWith(fontSize: 56)),
+                    Text(remainStr, style: AppTypography.hero.copyWith(fontSize: 64)),
                     const SizedBox(height: 6),
                     Text('$elapsedStr elapsed of 2:00:00',
                         style: AppTypography.body.copyWith(color: AppColors.textSecondary)),

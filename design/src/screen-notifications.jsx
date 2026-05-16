@@ -11,7 +11,7 @@ const INITIAL_NOTIFS = [
   { id: 'n3', icon: 'star',  kind: 'ok',    read: false, title: '850 credits earned this month',
     body: 'You hit our top tier. Use them at GameZone Koramangala for up to ₹85 off your next session.',
     when: '5 hrs ago', action: 'Open wallet →' },
-  { id: 'n4', icon: 'bell',  kind: 'warn',  read: true,  title: 'Happy Hour ends tomorrow',
+  { id: 'n4', icon: 'gift',  kind: 'warn',  read: true,  title: 'Happy Hour ends tomorrow',
     body: '30% off all weekday sessions between 10am and 2pm — last day to claim is tomorrow.',
     when: 'Yesterday', action: 'View campaign →' },
   { id: 'n5', icon: 'info',  kind: 'info',  read: true,  title: 'Dispute #DIS-0042 resolved',
@@ -25,7 +25,7 @@ const INITIAL_NOTIFS = [
     when: '4 days ago', action: 'View session →' },
 ];
 
-const ICON_FOR = { clock: 'clock', check: 'check', star: 'star', bell: 'bell', info: 'info', pin: 'pin', pad: 'pad' };
+const ICON_FOR = { clock: 'clock', check: 'check', star: 'star', gift: 'gift', info: 'info', pin: 'pin', pad: 'pad' };
 
 function NotificationsScreen() {
   const [notifs, setNotifs] = useState(INITIAL_NOTIFS);

@@ -321,9 +321,8 @@ class _BookingCard extends StatelessWidget {
         statusTag,
       ]),
       const SizedBox(height: 14),
-      Row(children: [
+      Wrap(spacing: 6, runSpacing: 6, children: [
         GzChip(keyLabel: 'WHEN', value: when),
-        const SizedBox(width: 6),
         GzChip(keyLabel: 'FOR', value: duration),
       ]),
       const SizedBox(height: 14),
