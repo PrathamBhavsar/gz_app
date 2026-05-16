@@ -5,6 +5,8 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../widgets/booking_slot_selection_mobile_layout.dart';
 import '../../widgets/booking_slot_selection_tablet_layout.dart';
 
+/// S-14 — Systems Browser `/book`
+/// Root tab screen; no EmTopBar (lives inside the player shell).
 class BookingSlotSelectionScreen extends StatelessWidget {
   const BookingSlotSelectionScreen({super.key});
 
@@ -12,11 +14,6 @@ class BookingSlotSelectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Book a Slot'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
       body: ResponsiveBuilderWidget(
         builder: (context, deviceType) => switch (deviceType) {
           DeviceType.mobile => const BookingSlotSelectionMobileLayout(),

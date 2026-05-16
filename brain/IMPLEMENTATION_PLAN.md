@@ -23,7 +23,7 @@ feature touched, and commit.
 | 1 | Foundation — AppTheme + em_ widget library | DONE |
 | 2 | Splash + Onboarding | DONE |
 | 3 | Home feature (S-11, S-12, S-13) | DONE |
-| 4 | Booking flow (S-14 → S-18) | TODO |
+| 4 | Booking flow (S-14 → S-18) | DONE |
 | 5 | Sessions + Player WebSocket (S-19 → S-25) | TODO |
 | 6 | Wallet (S-26 → S-30) | TODO |
 | 7 | Profile + Settings (S-31 → S-37) | TODO |
@@ -306,7 +306,12 @@ Create `brain/features/.registry/home.md`.
 
 ---
 
-## Phase 4 — Booking Flow
+## Phase 4 — Booking Flow ✓ DONE (2026-05-16)
+
+> **Completed**: `SystemsService` + `SystemsRepository` created. `SystemsNotifier` with 30s auto-refresh + platform filter. `AvailabilityNotifier` with `AvailabilityData` (slots + selected slot state). `BookingFormNotifier` (sealed: Initial/Loading/Success/Error) wired to `BookingRepository.placeBooking()`. `BookingNotifier` extended with `selectedSlotStart/End`, `selectedSystem`, `selectedTypeFilter`. S-14 Systems Browser rewrites the old date/time picker at `/book` — shows live systems list, platform filter chips, EmStoreSelectorPill, "Check Availability" CTA. S-15 Availability Calendar at `/book/availability` — 7-day date strip, slot list from `AvailabilityNotifier`. S-16 System Picker at `/book/systems` — real systems from `SystemsNotifier`, "Select" → stores in `BookingNotifier`. S-17 Booking Summary wired to `BookingFormNotifier.submit()` via `ref.listen`; navigates to `/book/success` on `BookingFormSuccess`. S-18 Booking Confirmation redesigned with animate() checkmark, booking ref chip, EmCard summary, payment status tag, CTAs. `/book/availability` route added to `AppRoutes` + `app_router.dart`. Registry at `brain/features/.registry/booking.md`.
+> **Deferred**: Real campaign/credit data in S-17 (hardcoded prototype UI — deferred to Phase 6 wallet integration).
+
+
 
 ### Deliverables
 

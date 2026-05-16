@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/em_tag.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
-import '../../../../shared/widgets/em_meta_row.dart';
+import '../../../../../core/auth/token_storage.dart';
+import '../../../../../core/navigation/routes.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_typography.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../shared/widgets/em_tag.dart';
+import '../../../../../shared/widgets/em_top_bar.dart';
+import '../../../../../shared/widgets/em_meta_row.dart';
+import '../providers/booking_form_notifier.dart';
+import '../providers/booking_notifier.dart';
 import '../providers/booking_summary_ui_notifier.dart';
 
 class BookingSummaryMobileLayout extends ConsumerWidget {
@@ -26,15 +31,32 @@ class BookingSummaryMobileLayout extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s  = ref.watch(bookingSummaryUiProvider);
     final n  = ref.read(bookingSummaryUiProvider.notifier);
+    final formState = ref.watch(bookingFormNotifierProvider);
+    final booking = ref.watch(bookingNotifierProvider);
     final campAmt  = s.selectedCampaign != null ? (_campMap[s.selectedCampaign]?.amt ?? 0) : 0;
     final credAmt  = s.credits ~/ 10;
     final total    = (_subtotal - campAmt - credAmt).clamp(0, _subtotal);
+    final isLoading = formState is BookingFormLoading;
+
+    // Navigate on success; show error on failure
+    ref.listen(bookingFormNotifierProvider, (_, next) {
+      if (next is BookingFormSuccess) {
+        context.go(AppRoutes.bookSuccess);
+      } else if (next is BookingFormError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.message),
+            backgroundColor: AppColors.err,
+          ),
+        );
+      }
+    });
 
     return Column(
       children: [
         EmTopBar(
           title: 'Confirm booking',
-          subtitle: 'GameZone · Koramangala',
+          subtitle: booking.selectedSystem?.name ?? 'GameZone',
           trailing: const HugeIcon(
             icon: HugeIcons.strokeRoundedInformationCircle,
             color: AppColors.textPrimary,
@@ -51,9 +73,14 @@ class BookingSummaryMobileLayout extends ConsumerWidget {
                   _IconTile(filled: true, child: HugeIcon(icon: HugeIcons.strokeRoundedComputerDesk01, color: AppColors.buttonFg, size: 22)),
                   const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('RTX 4090 Gaming PC', style: AppTypography.h2),
+                    Text(booking.selectedSystem?.name ?? 'RTX 4090 Gaming PC', style: AppTypography.h2),
                     const SizedBox(height: 2),
-                    Text('Seat 3 · PC station', style: AppTypography.small),
+                    Text(
+                      booking.selectedSystem?.stationNumber != null
+                          ? 'Seat ${booking.selectedSystem!.stationNumber}'
+                          : 'PC station',
+                      style: AppTypography.small,
+                    ),
                   ])),
                   Text('SLOT', style: AppTypography.meta),
                 ]),
@@ -61,13 +88,32 @@ class BookingSummaryMobileLayout extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
                   decoration: BoxDecoration(color: AppColors.pillBg, borderRadius: BorderRadius.circular(14)),
-                  child: const IntrinsicHeight(
+                  child: IntrinsicHeight(
                     child: Row(children: [
-                      Expanded(child: _SlotCell(label: 'DATE',     value: 'Sat, 18 Apr')),
-                      VerticalDivider(width: 1, color: AppColors.rule),
-                      Expanded(flex: 2, child: _SlotCell(label: 'TIME',     value: '4:00 – 6:00 PM', padLeft: true)),
-                      VerticalDivider(width: 1, color: AppColors.rule),
-                      Expanded(child: _SlotCell(label: 'DURATION', value: '2h', mono: true, alignRight: true, padLeft: true)),
+                      Expanded(child: _SlotCell(
+                        label: 'DATE',
+                        value: booking.selectedSlotStart != null
+                            ? '${booking.selectedSlotStart!.day} ${_monthAbbr[booking.selectedSlotStart!.month - 1]}'
+                            : 'Sat, 18 Apr',
+                      )),
+                      const VerticalDivider(width: 1, color: AppColors.rule),
+                      Expanded(flex: 2, child: _SlotCell(
+                        label: 'TIME',
+                        value: booking.hasSlot
+                            ? '${_fmt12h(booking.selectedSlotStart!)} – ${_fmt12h(booking.selectedSlotEnd!)}'
+                            : '4:00 – 6:00 PM',
+                        padLeft: true,
+                      )),
+                      const VerticalDivider(width: 1, color: AppColors.rule),
+                      Expanded(child: _SlotCell(
+                        label: 'DURATION',
+                        value: booking.hasSlot
+                            ? _durationLabel(booking.selectedSlotStart!, booking.selectedSlotEnd!)
+                            : '2h',
+                        mono: true,
+                        alignRight: true,
+                        padLeft: true,
+                      )),
                     ]),
                   ),
                 ),
@@ -224,17 +270,20 @@ class BookingSummaryMobileLayout extends ConsumerWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 decoration: BoxDecoration(
-                  color: s.confirmed ? AppColors.ok : AppColors.buttonBg,
+                  color: isLoading ? AppColors.ok : AppColors.buttonBg,
                   borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
                 ),
                 child: TextButton(
-                  onPressed: n.confirm,
-                  child: s.confirmed
-                      ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                          const HugeIcon(icon: HugeIcons.strokeRoundedCheckmarkCircle01, color: AppColors.buttonFg, size: 18),
-                          const SizedBox(width: AppSpacing.sm),
-                          Text('Booking confirmed', style: AppTypography.button),
-                        ])
+                  onPressed: isLoading ? null : () => _submit(ref, context, s, total),
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.buttonFg,
+                          ),
+                        )
                       : Text('Confirm booking · ₹$total', style: AppTypography.button),
                 ),
               ),
@@ -249,6 +298,50 @@ class BookingSummaryMobileLayout extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  void _submit(WidgetRef ref, BuildContext context, BookingSummaryUiState s, int total) {
+    final storeId = ref.read(activeStoreIdProvider);
+    final booking = ref.read(bookingNotifierProvider);
+
+    if (storeId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No store selected')),
+      );
+      return;
+    }
+
+    ref.read(bookingFormNotifierProvider.notifier).submit(
+      storeId: storeId,
+      systemId: booking.selectedSystem?.id ?? 'placeholder',
+      startTime: booking.selectedSlotStart?.toUtc().toIso8601String() ?? '',
+      endTime: booking.selectedSlotEnd?.toUtc().toIso8601String() ?? '',
+      systemTypeId: booking.selectedSystem?.systemTypeId ?? 'placeholder',
+      paymentMethod: s.payMethod,
+      campaignId: s.selectedCampaign,
+      creditsToRedeem: s.credits > 0 ? s.credits : null,
+    );
+  }
+
+  static const _monthAbbr = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  static String _fmt12h(DateTime dt) {
+    final h = dt.hour;
+    final m = dt.minute.toString().padLeft(2, '0');
+    final period = h >= 12 ? 'PM' : 'AM';
+    final h12 = h > 12 ? h - 12 : (h == 0 ? 12 : h);
+    return '$h12:$m $period';
+  }
+
+  static String _durationLabel(DateTime start, DateTime end) {
+    final mins = end.difference(start).inMinutes;
+    if (mins < 60) return '${mins}m';
+    final h = mins ~/ 60;
+    final m = mins % 60;
+    return m == 0 ? '${h}h' : '${h}h ${m}m';
   }
 }
 

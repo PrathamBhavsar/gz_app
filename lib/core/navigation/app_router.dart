@@ -20,6 +20,7 @@ import '../../features/home/presentation/screens/store_search/store_search_scree
 import '../../features/home/presentation/screens/store_detail/store_detail_screen.dart';
 import '../../features/main_shell/presentation/screens/main_page.dart';
 import '../../features/booking/presentation/screens/slot_selection/booking_slot_selection_screen.dart';
+import '../../features/booking/presentation/screens/availability/booking_availability_screen.dart';
 import '../../features/booking/presentation/screens/system_selection/booking_system_selection_screen.dart';
 import '../../features/booking/presentation/screens/summary/booking_summary_screen.dart';
 import '../../features/booking/presentation/screens/success/booking_success_screen.dart';
@@ -258,6 +259,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           final slug = state.pathParameters['slug'] ?? '';
           return StoreDetailScreen(slug: slug);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.bookAvailability,
+        builder: (context, state) => const BookingAvailabilityScreen(),
       ),
       GoRoute(
         path: AppRoutes.bookSystems,

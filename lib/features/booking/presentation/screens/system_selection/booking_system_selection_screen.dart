@@ -5,6 +5,8 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../widgets/booking_system_selection_mobile_layout.dart';
 import '../../widgets/booking_system_selection_tablet_layout.dart';
 
+/// S-16 — System Picker `/book/systems`
+/// Pushed from Availability Calendar (S-15). Not inside the player shell.
 class BookingSystemSelectionScreen extends StatelessWidget {
   const BookingSystemSelectionScreen({super.key});
 
@@ -12,11 +14,6 @@ class BookingSystemSelectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Available Systems'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
       body: ResponsiveBuilderWidget(
         builder: (context, deviceType) => switch (deviceType) {
           DeviceType.mobile => const BookingSystemSelectionMobileLayout(),

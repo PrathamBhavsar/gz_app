@@ -9,12 +9,22 @@ class BookingState {
   final bool isLoading;
   final String? error;
 
+  // Phase 4: slot + specific system selection (accumulated across the booking flow)
+  final DateTime? selectedSlotStart;
+  final DateTime? selectedSlotEnd;
+  final SystemModel? selectedSystem;
+  final String selectedTypeFilter; // 'all' | 'pc' | 'ps5' | 'xbox' | 'vr' | 'other'
+
   const BookingState({
     this.selectedDate,
     this.selectedDurationMinutes = 60,
     this.selectedSystemType,
     this.isLoading = false,
     this.error,
+    this.selectedSlotStart,
+    this.selectedSlotEnd,
+    this.selectedSystem,
+    this.selectedTypeFilter = 'all',
   });
 
   BookingState copyWith({
@@ -23,6 +33,10 @@ class BookingState {
     SystemTypeModel? selectedSystemType,
     bool? isLoading,
     String? error,
+    DateTime? selectedSlotStart,
+    DateTime? selectedSlotEnd,
+    SystemModel? selectedSystem,
+    String? selectedTypeFilter,
   }) {
     return BookingState(
       selectedDate: selectedDate ?? this.selectedDate,
@@ -31,8 +45,14 @@ class BookingState {
       selectedSystemType: selectedSystemType ?? this.selectedSystemType,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
+      selectedSlotStart: selectedSlotStart ?? this.selectedSlotStart,
+      selectedSlotEnd: selectedSlotEnd ?? this.selectedSlotEnd,
+      selectedSystem: selectedSystem ?? this.selectedSystem,
+      selectedTypeFilter: selectedTypeFilter ?? this.selectedTypeFilter,
     );
   }
+
+  bool get hasSlot => selectedSlotStart != null && selectedSlotEnd != null;
 }
 
 class BookingNotifier extends Notifier<BookingState> {
@@ -53,9 +73,22 @@ class BookingNotifier extends Notifier<BookingState> {
     state = state.copyWith(selectedSystemType: system);
   }
 
-  /// Confirm a booking for the given store.
-  /// Requires storeId + systemId + systemTypeId from the UI layer
-  /// (derived from the store detail / system picker screens).
+  void setTypeFilter(String filter) {
+    state = state.copyWith(selectedTypeFilter: filter);
+  }
+
+  void selectSlot(DateTime start, DateTime end) {
+    state = state.copyWith(selectedSlotStart: start, selectedSlotEnd: end);
+  }
+
+  void selectSystem(SystemModel system) {
+    state = state.copyWith(selectedSystem: system);
+  }
+
+  void resetFlow() {
+    state = BookingState(selectedDate: DateTime.now());
+  }
+
   Future<bool> confirmBooking(
     String storeId, {
     required String systemId,
@@ -89,7 +122,5 @@ class BookingNotifier extends Notifier<BookingState> {
 }
 
 final bookingNotifierProvider = NotifierProvider<BookingNotifier, BookingState>(
-  () {
-    return BookingNotifier();
-  },
+  () => BookingNotifier(),
 );
