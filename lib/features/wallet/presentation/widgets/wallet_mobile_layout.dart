@@ -5,6 +5,8 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/auth/token_storage.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/navigation/routes.dart';
+import 'package:gz_app/features/notifications/presentation/widgets/notification_center_sheet.dart';
+import 'package:gz_app/shared/widgets/store_selector_sheet.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -43,7 +45,7 @@ class WalletMobileLayout extends ConsumerWidget {
               children: [
                 const Text('Wallet', style: AppTypography.title),
                 EmIconBtn(
-                  onTap: () => context.push(AppRoutes.notifications),
+                  onTap: () => showNotificationCenter(context),
                   child: const HugeIcon(
                     icon: HugeIcons.strokeRoundedNotification01,
                     color: AppColors.textPrimary,
@@ -60,7 +62,7 @@ class WalletMobileLayout extends ConsumerWidget {
                 AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
             child: EmStoreSelectorPill(
               storeName: storeId ?? 'Select Store',
-              onTap: () {},
+              onTap: () => showStoreSelectorSheet(context),
             ),
           ),
 

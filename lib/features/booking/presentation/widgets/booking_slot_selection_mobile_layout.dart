@@ -13,6 +13,7 @@ import '../../../../../shared/widgets/em_button.dart';
 import '../../../../../shared/widgets/em_store_selector_pill.dart';
 import '../../../../../shared/widgets/em_tag.dart';
 import '../../../../../shared/widgets/page_error_display.dart';
+import 'package:gz_app/shared/widgets/store_selector_sheet.dart';
 import '../providers/systems_notifier.dart';
 import '../providers/booking_notifier.dart';
 
@@ -54,7 +55,7 @@ class BookingSlotSelectionMobileLayout extends ConsumerWidget {
                 ),
                 EmStoreSelectorPill(
                   storeName: storeId != null ? 'Current Store' : 'Select Store',
-                  onTap: () {},
+                  onTap: () => showStoreSelectorSheet(context),
                 ),
               ],
             ),
@@ -107,7 +108,7 @@ class BookingSlotSelectionMobileLayout extends ConsumerWidget {
         // ── Systems list ──
         Expanded(
           child: storeId == null
-              ? _NoStoreMessage(onTap: () {})
+              ? _NoStoreMessage(onTap: () => showStoreSelectorSheet(context))
               : systemsAsync.when(
                   loading: () => const Center(
                     child: CircularProgressIndicator(strokeWidth: 2),

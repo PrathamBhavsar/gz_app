@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
+import 'package:gz_app/features/notifications/presentation/widgets/notification_center_sheet.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/em_avatar.dart';
@@ -41,7 +42,7 @@ class HomeMobileLayout extends ConsumerWidget {
                 ),
                 EmIconBtn(
                   tooltip: 'Notifications',
-                  onTap: () => context.push(AppRoutes.notifications),
+                  onTap: () => showNotificationCenter(context),
                   child: const HugeIcon(
                     icon: HugeIcons.strokeRoundedNotification01,
                     color: AppColors.textPrimary,

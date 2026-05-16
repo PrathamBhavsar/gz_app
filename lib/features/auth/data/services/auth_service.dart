@@ -117,6 +117,14 @@ class AuthService {
       body: {'newPhone': newPhone},
     );
   }
+
+  // ─── Verify OTP for phone change ─────────────────────────────────
+  Future<void> verifyPhoneChange(String newPhone, String otp) async {
+    await _apiClient.post(
+      ApiConstants.authPhoneChangeVerify,
+      body: {'newPhone': newPhone, 'otp': otp},
+    );
+  }
 }
 
 final authServiceProvider = Provider<AuthService>((ref) {

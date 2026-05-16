@@ -32,6 +32,12 @@ class ChangePhoneNotifier extends Notifier<ChangePhoneState> {
     }
   }
 
+  Future<void> verifyOtp(String otp) async {
+    final current = state;
+    if (current is! ChangePhoneOtpSent) return;
+    await ref.read(authRepositoryProvider).verifyPhoneChange(current.phone, otp);
+  }
+
   void markSuccess() => state = const ChangePhoneSuccess();
   void reset() => state = const ChangePhoneInitial();
 }

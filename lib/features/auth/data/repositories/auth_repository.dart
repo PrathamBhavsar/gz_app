@@ -140,6 +140,12 @@ class AuthRepository {
     await _networkChecker.assertConnection();
     await _authService.requestPhoneChange(newPhone);
   }
+
+  // ─── Verify OTP for phone change ────────────────────────────────
+  Future<void> verifyPhoneChange(String newPhone, String otp) async {
+    await _networkChecker.assertConnection();
+    await _authService.verifyPhoneChange(newPhone, otp);
+  }
 }
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {

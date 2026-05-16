@@ -26,6 +26,7 @@ class ApiConstants {
   static const String authRefresh = '/auth/refresh';
   static const String authMeDevice = '/auth/me/device';
   static const String authPhoneChange = '/auth/phone/change';
+  static const String authPhoneChangeVerify = '/auth/phone/change/verify';
 
   // ─── Admin Auth Endpoints ──────────────────────────────────────────
   static const String authAdminLogin = '/auth/admin/login';

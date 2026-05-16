@@ -27,7 +27,7 @@ feature touched, and commit.
 | 5 | Sessions + Player WebSocket (S-19 → S-25) | DONE |
 | 6 | Wallet (S-26 → S-30) | DONE |
 | 7 | Profile + Settings (S-31 → S-37) | DONE |
-| 8 | Global Overlays (O-38, O-39, O-40, OTP sheet) | TODO |
+| 8 | Global Overlays (O-38, O-39, O-40, OTP sheet) | DONE |
 | 9 | Routes — complete AppRoutes + auth guard | TODO |
 | 10 | Polish — empty states, deep links, error surfaces | TODO |
 
@@ -761,7 +761,10 @@ Create `brain/features/.registry/profile.md` and `disputes.md`.
 
 ---
 
-## Phase 8 — Global Overlays
+## Phase 8 — Global Overlays ✓ DONE (2026-05-16)
+
+> **Completed**: `NotificationsNotifier` rewritten with `AsyncValue<NotificationsData>` backed by real API (replaces mock `NotifItem` data). `showNotificationCenter(context)` full-screen modal sheet (O-38) with `NotificationCenterContent` ConsumerWidget — lists notifications with unread dot, mark-all-read, inline empty state. `showNotificationDetail(context, ref, notification)` sheet (O-39) with auto-mark-as-read on open and action CTA. `StoreSelectorNotifier` (`AsyncValue<List<StoreModel>>`, debounced search) + `showStoreSelectorSheet(context)` (O-40) — updates `activeStoreIdProvider` + persists via `TokenStorage`. `showOtpInputSheet(context, phone, onVerify, onResend)` — 6-box auto-advance OTP, 45s countdown, attempt counter warning. Bell icon in Home/Sessions/Wallet layouts now calls `showNotificationCenter` (not route push). Store selector in Wallet + Booking layouts now calls `showStoreSelectorSheet`. `ChangePhoneMobileLayout` wired to show OTP sheet via `ref.listen` on `ChangePhoneOtpSent`; `ChangePhoneNotifier.verifyOtp` + `AuthService/Repository.verifyPhoneChange` added. Registry at `brain/features/.registry/overlays.md`.
+> **Deferred**: Bell badge (unread count dot) — Phase 10 polish. Notification detail deep-link navigation — Phase 9. WS `prependNew()` dispatch — Phase 9 app wiring.
 
 ### Deliverables
 

@@ -5,6 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/navigation/routes.dart';
+import 'package:gz_app/features/notifications/presentation/widgets/notification_center_sheet.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -37,7 +38,7 @@ class SessionsMobileLayout extends ConsumerWidget {
                 _IconBtn(icon: HugeIcons.strokeRoundedFilter, onTap: () {}),
                 _IconBtn(
                   icon: HugeIcons.strokeRoundedNotification01,
-                  onTap: () => context.push(AppRoutes.notifications),
+                  onTap: () => showNotificationCenter(context),
                 ),
               ]),
             ]),
