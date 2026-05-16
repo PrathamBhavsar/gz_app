@@ -158,3 +158,50 @@ GoRoute(
 | Model objects in route params | Pass ID only |
 | `context.go()` for drill-downs | Clears back stack |
 | `context.push()` for tab switches | Adds duplicate shell entries |
+
+---
+
+## PHASE 9 ADDITIONS (2026-05-16)
+
+### New Route Constants
+```dart
+// Sessions
+AppRoutes.paymentSheet         = '/sessions/booking/:id/pay'   // modal sheet — no GoRoute
+AppRoutes.bookingDetail        = '/sessions/booking/:id'
+AppRoutes.checkIn              = '/sessions/booking/:id/check-in'
+AppRoutes.activeSessionDetail  = '/sessions/active/:id'
+AppRoutes.sessionHistoryDetail = '/sessions/history/:id'
+AppRoutes.billingHistory       = '/sessions/billing'
+
+// Wallet
+AppRoutes.creditHistory  = '/wallet/transactions'
+AppRoutes.campaigns      = '/wallet/campaigns'
+AppRoutes.campaignDetail = '/wallet/campaigns/:id'
+
+// Profile
+AppRoutes.editProfile   = '/profile/edit'
+AppRoutes.changePhone   = '/profile/change-phone'
+AppRoutes.notifPrefs    = '/profile/notifications'
+AppRoutes.disputesList  = '/profile/disputes'
+AppRoutes.disputeCreate = '/profile/disputes/create'
+AppRoutes.disputeDetail = '/profile/disputes/:id'
+```
+
+### Auth Guard — WIRED (Phase 9)
+`routerProvider` now uses `refreshListenable` + `redirect`. Guard logic:
+- Skips redirect while `AuthInitial` / `AuthLoading` (splash owns initial routing)
+- Skips `/` (splash) and `/onboarding` — `SplashNotifier` handles those
+- Unauthenticated + non-auth + non-admin route → `AppRoutes.authLanding`
+- Authenticated + `/auth*` route → `AppRoutes.home`
+- Admin route + not admin authenticated → `AppRoutes.adminLogin`
+
+### Deep Links — WIRED (Phase 9)
+Android: `gzapp://` intent-filter in `AndroidManifest.xml`
+iOS: `CFBundleURLTypes` in `ios/Runner/Info.plist`
+
+| Deep Link | Route |
+|-----------|-------|
+| `gzapp://reset-password?token=` | `AppRoutes.resetPassword` |
+| `gzapp://stores/:slug` | `AppRoutes.storeDetail` |
+| `gzapp://bookings/:id` | `AppRoutes.bookingDetail` |
+| `gzapp://notifications` | Open `NotificationCenter` overlay |

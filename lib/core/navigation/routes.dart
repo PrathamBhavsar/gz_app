@@ -29,6 +29,7 @@ class AppRoutes {
 
   // Session sub-routes (Phase 5)
   static const bookingDetail        = '/sessions/booking/:id';
+  static const paymentSheet         = '/sessions/booking/:id/pay'; // implemented as modal sheet
   static const checkIn              = '/sessions/booking/:id/check-in';
   static const activeSessionDetail  = '/sessions/active/:id';
   static const sessionHistoryDetail = '/sessions/history/:id';

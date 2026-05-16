@@ -28,7 +28,7 @@ feature touched, and commit.
 | 6 | Wallet (S-26 → S-30) | DONE |
 | 7 | Profile + Settings (S-31 → S-37) | DONE |
 | 8 | Global Overlays (O-38, O-39, O-40, OTP sheet) | DONE |
-| 9 | Routes — complete AppRoutes + auth guard | TODO |
+| 9 | Routes — complete AppRoutes + auth guard | DONE |
 | 10 | Polish — empty states, deep links, error surfaces | TODO |
 
 ---
@@ -838,7 +838,10 @@ Create `brain/features/.registry/overlays.md`.
 
 ---
 
-## Phase 9 — Routes + Auth Guard
+## Phase 9 — Routes + Auth Guard ✓ DONE (2026-05-16)
+
+> **Completed**: `paymentSheet` route constant added to `AppRoutes`. All GoRoutes were already wired from prior phases. Auth guard wired in `routerProvider` with `ValueNotifier` `refreshListenable` + `redirect` callback. Deep link `gzapp://` scheme registered in `AndroidManifest.xml` and `ios/Runner/Info.plist`. `brain/rules/navigation.md` updated with Phase 9 additions section. Registry at `brain/features/.registry/navigation.md`.
+> **Deferred**: Deep link path parameter routing (e.g. `gzapp://bookings/:id` → open notification overlay) — the URI scheme is registered but actual go_router `initialLocation` parsing from deep-link URIs is Phase 10 polish territory. WS event dispatch (`session.ended` navigation, `session.extended` timer) from Phase 5 deferral still pending Phase 10.
 
 ### Deliverables
 

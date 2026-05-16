@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'routes.dart';
 import '../../models/domain_loyalty.dart';
+import '../../features/auth/presentation/providers/auth_notifier.dart';
+import '../../features/auth/presentation/providers/auth_state.dart';
+import '../../features/admin/presentation/providers/admin_auth_provider.dart';
+import '../../features/admin/presentation/providers/admin_auth_state.dart';
 
 import '../../features/auth/presentation/screens/splash/splash_screen.dart';
 import '../../features/auth/presentation/screens/onboarding/onboarding_screen.dart';
@@ -68,8 +72,39 @@ import '../../features/admin/presentation/screens/management/dispute_resolution_
 import '../../features/admin/presentation/screens/store/admin_store_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
+  // Listenable that fires go_router redirect whenever auth state changes
+  final listenable = ValueNotifier<int>(0);
+  ref.listen<AuthState>(authNotifierProvider, (_, _) => listenable.value++);
+  ref.listen<AdminAuthState>(adminAuthNotifierProvider, (_, _) => listenable.value++);
+  ref.onDispose(listenable.dispose);
+
   return GoRouter(
     initialLocation: AppRoutes.splash,
+    refreshListenable: listenable,
+    redirect: (context, state) {
+      final authState = ref.read(authNotifierProvider);
+      // Let splash screen own the initial routing while auth is resolving
+      if (authState is AuthInitial || authState is AuthLoading) return null;
+
+      final isAuthenticated = authState is AuthAuthenticated;
+      final isAdminAuthenticated =
+          ref.read(adminAuthNotifierProvider) is AdminAuthAuthenticated;
+
+      final loc = state.matchedLocation;
+
+      // Splash and onboarding are managed by SplashNotifier — never interrupt
+      if (loc == AppRoutes.splash || loc == AppRoutes.onboarding) return null;
+
+      final isAuthRoute = loc.startsWith('/auth');
+      final isAdminRoute = loc.startsWith('/admin');
+
+      if (!isAuthenticated && !isAuthRoute && !isAdminRoute) {
+        return AppRoutes.authLanding;
+      }
+      if (isAuthenticated && isAuthRoute) return AppRoutes.home;
+      if (isAdminRoute && !isAdminAuthenticated) return AppRoutes.adminLogin;
+      return null;
+    },
     routes: [
       GoRoute(
         path: AppRoutes.splash,
@@ -355,8 +390,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
 
-    // The redirect logic will be injected here during Auth Notifier creation
-    // redirect: (context, state) { ... }
   );
 });
 
