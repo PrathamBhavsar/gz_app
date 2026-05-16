@@ -126,4 +126,11 @@ class ApiConstants {
 
   // ─── System Types Endpoints ───────────────────────────────────────
   static const String systemTypes = '/stores/{storeId}/system-types';
+
+  // ─── Player Endpoints ──────────────────────────────────────────────
+  static const String sessionsMy    = '/stores/{storeId}/sessions/my';
+  static const String bookingsMyList = '/stores/{storeId}/bookings/my';
+  static const String billingMy     = '/stores/{storeId}/billing/my';
+  static const String bookingPayment = '/stores/{storeId}/bookings/{id}/payment';
+  static const String wsPlayerNotify = '/ws/users/{userId}/notify';
 }

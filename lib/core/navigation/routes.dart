@@ -25,7 +25,14 @@ class AppRoutes {
   static const bookSuccess      = '/book/success';
 
   static const sessions       = '/sessions';
-  static const activeSession  = '/sessions/active';  // live session detail
+  static const activeSession  = '/sessions/active';  // live session detail (legacy, kept for existing references)
+
+  // Session sub-routes (Phase 5)
+  static const bookingDetail        = '/sessions/booking/:id';
+  static const checkIn              = '/sessions/booking/:id/check-in';
+  static const activeSessionDetail  = '/sessions/active/:id';
+  static const sessionHistoryDetail = '/sessions/history/:id';
+  static const billingHistory       = '/sessions/billing';
 
   static const wallet  = '/wallet';
   static const profile = '/profile';

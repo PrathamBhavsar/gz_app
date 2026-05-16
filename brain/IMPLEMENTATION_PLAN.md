@@ -24,7 +24,7 @@ feature touched, and commit.
 | 2 | Splash + Onboarding | DONE |
 | 3 | Home feature (S-11, S-12, S-13) | DONE |
 | 4 | Booking flow (S-14 → S-18) | DONE |
-| 5 | Sessions + Player WebSocket (S-19 → S-25) | TODO |
+| 5 | Sessions + Player WebSocket (S-19 → S-25) | DONE |
 | 6 | Wallet (S-26 → S-30) | TODO |
 | 7 | Profile + Settings (S-31 → S-37) | TODO |
 | 8 | Global Overlays (O-38, O-39, O-40, OTP sheet) | TODO |
@@ -397,7 +397,10 @@ Create `brain/features/.registry/booking.md`.
 
 ---
 
-## Phase 5 — Sessions + Player WebSocket
+## Phase 5 — Sessions + Player WebSocket ✓ DONE (2026-05-16)
+
+> **Completed**: PlayerWsService created with exponential backoff reconnect. ActivityHubNotifier rewritten from UI-only state to real data (AsyncValue<ActivityHubData>) with parallel booking + session fetches. Provider name kept as `activityHubProvider`. BookingDetailNotifier, PaymentNotifier (sealed), ActiveSessionNotifier (30s poll), SessionDetailNotifier, BillingNotifier all created. BillingService + BillingRepository added. BillingRow + PaginatedBillingResponse added to api_responses.dart. New routes: bookingDetail, checkIn, activeSessionDetail, sessionHistoryDetail, billingHistory. Screens S-20 → S-25 built: BookingDetailScreen (status-contextual CTAs), PaymentSheet (showPaymentSheet function), CheckInScreen (QR placeholder + tap), ActiveSessionDetailScreen (Timer countdown from real session data), SessionHistoryDetailScreen, BillingHistoryScreen (grouped by month). sessions_mobile_layout.dart updated to real data with loading/error/empty states. Router updated with 5 new GoRoute entries. Registry at brain/features/.registry/sessions.md.
+> **Deferred**: WS event handlers (session.ended navigation, session.extended timer update) — the WS service is built and connected but event dispatch to providers requires Phase 9 app wiring. Check-in window logic uses real DateTime.now() comparison. Billing detail expand functionality not yet wired to billing endpoint.
 
 ### Deliverables
 

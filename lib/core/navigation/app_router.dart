@@ -26,6 +26,11 @@ import '../../features/booking/presentation/screens/summary/booking_summary_scre
 import '../../features/booking/presentation/screens/success/booking_success_screen.dart';
 import '../../features/sessions/presentation/screens/sessions_screen.dart';
 import '../../features/sessions/presentation/screens/active_session_screen.dart';
+import '../../features/sessions/presentation/screens/booking_detail_screen.dart';
+import '../../features/sessions/presentation/screens/check_in_screen.dart';
+import '../../features/sessions/presentation/screens/active_session_detail_screen.dart';
+import '../../features/sessions/presentation/screens/session_history_detail_screen.dart';
+import '../../features/sessions/presentation/screens/billing_history_screen.dart';
 import '../../features/wallet/presentation/screens/wallet_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
@@ -144,6 +149,38 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.activeSession,
         builder: (context, state) => const ActiveSessionScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.bookingDetail,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return BookingDetailScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.checkIn,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return CheckInScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.activeSessionDetail,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return ActiveSessionDetailScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.sessionHistoryDetail,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return SessionHistoryDetailScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.billingHistory,
+        builder: (context, state) => const BillingHistoryScreen(),
       ),
       GoRoute(
         path: AppRoutes.notifications,

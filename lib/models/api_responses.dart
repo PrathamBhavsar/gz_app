@@ -473,3 +473,60 @@ class DisputeListResponse extends SuccessResponse<List<BillingDisputeModel>> {
     );
   }
 }
+
+// --- BILLING ROW (player billing history) ---
+class BillingRow {
+  final String id;
+  final String storeId;
+  final String? sessionId;
+  final String? storeName;
+  final String? systemName;
+  final DateTime? date;
+  final int? durationMinutes;
+  final double amount;
+  final String? method;
+  final String? status;
+
+  const BillingRow({
+    required this.id,
+    required this.storeId,
+    this.sessionId,
+    this.storeName,
+    this.systemName,
+    this.date,
+    this.durationMinutes,
+    required this.amount,
+    this.method,
+    this.status,
+  });
+
+  factory BillingRow.fromJson(Map<String, dynamic> json) => BillingRow(
+    id: json['id']?.toString() ?? '',
+    storeId: json['store_id']?.toString() ?? '',
+    sessionId: json['session_id']?.toString(),
+    storeName: json['store_name']?.toString(),
+    systemName: json['system_name']?.toString(),
+    date: json['date'] != null
+        ? DateTime.tryParse(json['date'].toString())
+        : null,
+    durationMinutes: json['duration_minutes'] as int?,
+    amount: double.tryParse(json['amount']?.toString() ?? '') ?? 0.0,
+    method: json['method']?.toString(),
+    status: json['status']?.toString(),
+  );
+}
+
+class PaginatedBillingResponse extends PaginatedSuccessResponse<BillingRow> {
+  const PaginatedBillingResponse({super.message, super.data, super.pagination});
+
+  factory PaginatedBillingResponse.fromJson(Map<String, dynamic> json) =>
+      PaginatedBillingResponse(
+        message: json['message'] as String?,
+        data: (json['data'] as List<dynamic>?)
+            ?.map((e) => BillingRow.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        pagination: json['pagination'] != null
+            ? PaginationMeta.fromJson(json['pagination'])
+            : null,
+      );
+}
