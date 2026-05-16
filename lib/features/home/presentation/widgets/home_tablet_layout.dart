@@ -5,8 +5,10 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../providers/home_notifier.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
+import 'package:gz_app/core/errors/app_exception.dart';
 import '../../../../models/domain_global.dart';
+import '../providers/home_notifier.dart';
 
 class HomeTabletLayout extends ConsumerWidget {
   const HomeTabletLayout({super.key});
@@ -34,23 +36,19 @@ class HomeTabletLayout extends ConsumerWidget {
         ],
       ),
       body: homeState.when(
-        data: (stores) => ListView(
+        data: (data) => ListView(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
           children: [
-            _buildSectionTitle('Active Offers🔥'),
-            _buildOffersGrid(),
             _buildSectionTitle('Nearby Gaming Centers'),
-            _buildStoresGrid(context, stores),
+            _buildStoresGrid(context, data.stores),
             const SizedBox(height: AppSpacing.xxl),
           ],
         ),
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.rose),
-        ),
-        error: (err, st) => Center(
-          child: Text(
-            'Error: \$err',
-            style: AppTypography.bodyLarge.copyWith(color: AppColors.error),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(
+          child: PageErrorDisplay(
+            error: AppPageError.from(e),
+            onRetry: () => ref.read(homeNotifierProvider.notifier).refresh(),
           ),
         ),
       ),
@@ -64,35 +62,15 @@ class HomeTabletLayout extends ConsumerWidget {
     );
   }
 
-  Widget _buildOffersGrid() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: AppSpacing.lg,
-        mainAxisSpacing: AppSpacing.lg,
-        childAspectRatio: 2.5,
-      ),
-      itemCount: 4,
-      itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-          ),
-          child: Center(
-            child: Text(
-              'Offer ${index + 1}',
-              style: AppTypography.headingMedium,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildStoresGrid(BuildContext context, List<StoreModel> stores) {
+    if (stores.isEmpty) {
+      return Center(
+        child: Text(
+          'No stores nearby.',
+          style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+        ),
+      );
+    }
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -120,15 +98,14 @@ class HomeTabletLayout extends ConsumerWidget {
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: AppColors.background.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.borderRadiusSm,
-                      ),
+                      color: AppColors.pillBg,
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.borderRadiusSm),
                     ),
                     child: const Center(
                       child: HugeIcon(
                         icon: HugeIcons.strokeRoundedGameboy,
-                        color: AppColors.primary,
+                        color: AppColors.textTertiary,
                         size: 60,
                       ),
                     ),
@@ -141,10 +118,9 @@ class HomeTabletLayout extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '${store.address}, ${store.city}',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                  '${store.address ?? ''}, ${store.city ?? ''}',
+                  style: AppTypography.bodyMedium
+                      .copyWith(color: AppColors.textSecondary),
                 ),
               ],
             ),

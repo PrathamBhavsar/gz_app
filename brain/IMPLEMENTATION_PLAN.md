@@ -22,7 +22,7 @@ feature touched, and commit.
 |-------|------|--------|
 | 1 | Foundation — AppTheme + em_ widget library | DONE |
 | 2 | Splash + Onboarding | DONE |
-| 3 | Home feature (S-11, S-12, S-13) | TODO |
+| 3 | Home feature (S-11, S-12, S-13) | DONE |
 | 4 | Booking flow (S-14 → S-18) | TODO |
 | 5 | Sessions + Player WebSocket (S-19 → S-25) | TODO |
 | 6 | Wallet (S-26 → S-30) | TODO |
@@ -233,7 +233,10 @@ Create `brain/features/.registry/splash.md` and `onboarding.md`.
 
 ---
 
-## Phase 3 — Home Feature
+## Phase 3 — Home Feature ✓ DONE (2026-05-16)
+
+> **Completed**: `HomeData` struct added to `HomeNotifier` (stores list; active session + upcoming booking deferred to Phase 5). `StoreDetailNotifier` (FamilyNotifier by slug) created with `StoreDetailData` (store + campaigns). `StoreDetailScreen` simplified to thin `StatelessWidget` passing slug to layouts. `HomeMobileLayout` rewritten with EmGzLogo header, search tap-target, nearby stores horizontal scroll (`_StoreCardLg`), new-in-city list (`_NewStoreRow`). `HomeTabletLayout` updated for `HomeData`. `StoreDetailMobileLayout` wired to real notifier — hero carousel, store info, campaign cards (real data). `StoreDetailTabletLayout` wired to real notifier. `StoreSearchMobileLayout` rewritten with filter chips (All/PC/PS5/VR/Xbox/Open Now), debounced search, open badge. `StoreSearchNotifier` updated with `selectedFilter` state and `setFilter` method. Registry at `brain/features/.registry/home.md`.
+> **Deferred**: Active session banner (S-11) — Phase 5. Upcoming booking card (S-11) — Phase 5. System type chips with live counts on S-13 — Phase 4 (systems data). Distance from user — not in API.
 
 ### Deliverables
 

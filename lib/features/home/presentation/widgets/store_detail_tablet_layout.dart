@@ -2,25 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../providers/active_store_notifier.dart';
+import '../../../../../core/theme/app_typography.dart';
+import '../../../../../shared/widgets/em_button.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
+import 'package:gz_app/core/errors/app_exception.dart';
+import '../../../../core/auth/token_storage.dart';
+import '../providers/store_detail_notifier.dart';
 
 class StoreDetailTabletLayout extends ConsumerWidget {
-  const StoreDetailTabletLayout({super.key});
+  final String slug;
+
+  const StoreDetailTabletLayout({super.key, required this.slug});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activeStoreState = ref.watch(activeStoreProvider);
+    final detailState = ref.watch(storeDetailNotifierProvider(slug));
 
-    return activeStoreState.when(
-      data: (store) {
-        if (store == null) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.rose),
-          );
-        }
+    return detailState.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(
+        child: PageErrorDisplay(
+          error: AppPageError.from(e),
+          onRetry: () =>
+              ref.read(storeDetailNotifierProvider(slug).notifier).refresh(slug),
+        ),
+      ),
+      data: (data) {
+        final store = data.store;
         return Scaffold(
           backgroundColor: AppColors.background,
           extendBodyBehindAppBar: true,
@@ -28,7 +39,11 @@ class StoreDetailTabletLayout extends ConsumerWidget {
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: AppColors.background),
+              icon: const HugeIcon(
+                icon: HugeIcons.strokeRoundedArrowLeft01,
+                color: AppColors.textPrimary,
+                size: 24,
+              ),
               onPressed: () => context.pop(),
             ),
           ),
@@ -37,11 +52,11 @@ class StoreDetailTabletLayout extends ConsumerWidget {
               Expanded(
                 flex: 4,
                 child: Container(
-                  color: AppColors.surface,
+                  color: AppColors.pillBg,
                   child: const Center(
                     child: HugeIcon(
                       icon: HugeIcons.strokeRoundedGameboy,
-                      color: AppColors.primary,
+                      color: AppColors.textTertiary,
                       size: 120,
                     ),
                   ),
@@ -56,7 +71,7 @@ class StoreDetailTabletLayout extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        store.name ?? 'Unknown Store',
+                        store.name ?? 'Store',
                         style: AppTypography.headingLarge,
                       ),
                       const SizedBox(height: AppSpacing.md),
@@ -64,50 +79,34 @@ class StoreDetailTabletLayout extends ConsumerWidget {
                         children: [
                           const HugeIcon(
                             icon: HugeIcons.strokeRoundedLocation01,
-                            color: AppColors.rose,
-                            size: 28,
+                            color: AppColors.textTertiary,
+                            size: 20,
                           ),
                           const SizedBox(width: AppSpacing.sm),
-                          Text(
-                            '${store.address}, ${store.city}',
-                            style: AppTypography.headingSmall.copyWith(
-                              color: AppColors.textSecondary,
+                          Expanded(
+                            child: Text(
+                              [store.address, store.city]
+                                  .where((s) => s != null && s.isNotEmpty)
+                                  .join(', '),
+                              style: AppTypography.headingSmall
+                                  .copyWith(color: AppColors.textSecondary),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: AppSpacing.xxl),
-                      Text('About', style: AppTypography.headingMedium),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        'Welcome to ${store.name}. The ultimate gaming experience with ${store.settings?['systemCount'] ?? 'many'} modern PC and console setups waiting for you.',
-                        style: AppTypography.bodyLarge,
-                      ),
                       const Spacer(),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            context.push('/book');
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: AppSpacing.lg,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.borderRadius,
-                              ),
-                            ),
-                          ),
-                          child: Text(
-                            'Book a Session',
-                            style: AppTypography.headingSmall.copyWith(
-                              color: AppColors.background,
-                            ),
-                          ),
-                        ),
+                      EmButtonFull(
+                        label: 'Book a Session',
+                        onPressed: () async {
+                          if (store.id != null) {
+                            ref.read(activeStoreIdProvider.notifier).state =
+                                store.id;
+                            await ref
+                                .read(tokenStorageProvider)
+                                .saveActiveStoreId(store.id!);
+                          }
+                          if (context.mounted) context.go(AppRoutes.book);
+                        },
                       ),
                     ],
                   ),
@@ -117,14 +116,6 @@ class StoreDetailTabletLayout extends ConsumerWidget {
           ),
         );
       },
-      loading: () =>
-          const Center(child: CircularProgressIndicator(color: AppColors.rose)),
-      error: (err, st) => Center(
-        child: Text(
-          'Error: \$err',
-          style: AppTypography.bodyLarge.copyWith(color: AppColors.error),
-        ),
-      ),
     );
   }
 }
