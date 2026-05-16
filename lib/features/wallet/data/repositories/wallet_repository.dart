@@ -2,37 +2,37 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/network_checker.dart';
 import '../services/wallet_service.dart';
 import '../../../../models/api_responses.dart';
+import '../../../../models/domain_loyalty.dart';
 
 class WalletRepository {
-  final WalletService _walletService;
+  final WalletService _service;
   final NetworkChecker _networkChecker;
 
-  WalletRepository(this._walletService, this._networkChecker);
+  WalletRepository(this._service, this._networkChecker);
 
   Future<CreditBalanceResponse> fetchBalance(String storeId) async {
     await _networkChecker.assertConnection();
-    return await _walletService.getBalance(storeId);
+    return _service.getBalance(storeId);
   }
 
   Future<PaginatedCreditLedgerResponse> fetchTransactions(
     String storeId, {
-    int? page,
-    int? limit,
+    int page = 1,
+    int limit = 20,
   }) async {
     await _networkChecker.assertConnection();
-    return await _walletService.getTransactions(
-      storeId,
-      page: page ?? 1,
-      limit: limit ?? 20,
-    );
+    return _service.getTransactions(storeId, page: page, limit: limit);
   }
 
-  Future<Map<String, dynamic>> redeemCredits(
-    String storeId, {
-    required double amount,
-  }) async {
+  Future<void> redeemCredits(String storeId, {required double amount}) async {
     await _networkChecker.assertConnection();
-    return await _walletService.redeemCredits(storeId, amount: amount);
+    await _service.redeemCredits(storeId, amount: amount);
+  }
+
+  Future<List<CampaignModel>> fetchCampaigns(String storeId) async {
+    await _networkChecker.assertConnection();
+    final res = await _service.getCampaigns(storeId);
+    return res.data ?? [];
   }
 
   Future<CampaignRedemptionResponse> redeemCampaign(
@@ -40,12 +40,13 @@ class WalletRepository {
     String campaignId,
   ) async {
     await _networkChecker.assertConnection();
-    return await _walletService.redeemCampaign(storeId, campaignId);
+    return _service.redeemCampaign(storeId, campaignId);
   }
 }
 
 final walletRepositoryProvider = Provider<WalletRepository>((ref) {
-  final service = ref.watch(walletServiceProvider);
-  final network = ref.watch(networkCheckerProvider);
-  return WalletRepository(service, network);
+  return WalletRepository(
+    ref.watch(walletServiceProvider),
+    ref.watch(networkCheckerProvider),
+  );
 });

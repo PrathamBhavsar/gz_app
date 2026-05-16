@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'routes.dart';
+import '../../models/domain_loyalty.dart';
 
 import '../../features/auth/presentation/screens/splash/splash_screen.dart';
 import '../../features/auth/presentation/screens/onboarding/onboarding_screen.dart';
@@ -32,6 +33,9 @@ import '../../features/sessions/presentation/screens/active_session_detail_scree
 import '../../features/sessions/presentation/screens/session_history_detail_screen.dart';
 import '../../features/sessions/presentation/screens/billing_history_screen.dart';
 import '../../features/wallet/presentation/screens/wallet_screen.dart';
+import '../../features/wallet/presentation/screens/credit_history_screen.dart';
+import '../../features/wallet/presentation/screens/campaigns_screen.dart';
+import '../../features/wallet/presentation/screens/campaign_detail_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/disputes/presentation/screens/create_dispute_screen.dart';
@@ -181,6 +185,22 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.billingHistory,
         builder: (context, state) => const BillingHistoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.creditHistory,
+        builder: (context, state) => const CreditHistoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.campaigns,
+        builder: (context, state) => const CampaignsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.campaignDetail,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          final campaign = state.extra as CampaignModel?;
+          return CampaignDetailScreen(id: id, campaign: campaign);
+        },
       ),
       GoRoute(
         path: AppRoutes.notifications,

@@ -25,7 +25,7 @@ feature touched, and commit.
 | 3 | Home feature (S-11, S-12, S-13) | DONE |
 | 4 | Booking flow (S-14 → S-18) | DONE |
 | 5 | Sessions + Player WebSocket (S-19 → S-25) | DONE |
-| 6 | Wallet (S-26 → S-30) | TODO |
+| 6 | Wallet (S-26 → S-30) | DONE |
 | 7 | Profile + Settings (S-31 → S-37) | TODO |
 | 8 | Global Overlays (O-38, O-39, O-40, OTP sheet) | TODO |
 | 9 | Routes — complete AppRoutes + auth guard | TODO |
@@ -558,7 +558,10 @@ Update `brain/IMPLEMENTATION_PLAN.md` Phase 5 status → DONE.
 
 ---
 
-## Phase 6 — Wallet
+## Phase 6 — Wallet ✓ DONE (2026-05-16)
+
+> **Completed**: `WalletService` rewritten to use `ApiConstants.*` endpoints + added `getCampaigns()`. `WalletRepository` fixed `redeemCredits` to return `void`. `WalletData` class introduced with `balance + recentTransactions + campaigns`. `WalletNotifier` now `AsyncValue<WalletData>`, parallel-fetches all three in `_fetch()`. `CreditHistoryNotifier` with paginated append pattern. `RedeemCreditsNotifier` sealed state with two-step confirmation. `CampaignsNotifier` with `CampaignType?` filter + computed `filtered` getter. `CampaignDetailNotifier` as `FamilyNotifier<CampaignDetailState, String>`. Routes added: `creditHistory=/wallet/transactions`, `campaigns=/wallet/campaigns`, `campaignDetail=/wallet/campaigns/:id`. Screens: `CreditHistoryScreen`, `CampaignsScreen`, `CampaignDetailScreen`. Layouts: credit_history_mobile_layout (paginated, grouped by month), campaigns_mobile_layout (filter chips, campaign cards), campaign_detail_mobile_layout (full campaign detail + redeem CTA), redeem_credits_sheet (modal bottom sheet). `WalletMobileLayout` rewritten with real data — no more mock state. Registry at `brain/features/.registry/wallet.md`.
+> **Deferred**: Wallet tablet layout still delegates to mobile (single-pane appropriate for now). `wallet_ui_notifier.dart` (old mock notifier) not deleted — still in codebase but no longer imported.
 
 ### Deliverables
 

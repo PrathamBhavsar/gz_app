@@ -133,4 +133,25 @@ class ApiConstants {
   static const String billingMy     = '/stores/{storeId}/billing/my';
   static const String bookingPayment = '/stores/{storeId}/bookings/{id}/payment';
   static const String wsPlayerNotify = '/ws/users/{userId}/notify';
+
+  // ─── Player Credits Endpoints ──────────────────────────────────────────────
+  static const String playerCreditsBalance      = '/stores/{storeId}/credits/balance';
+  static const String playerCreditsTransactions = '/stores/{storeId}/credits/transactions';
+  static const String playerCreditsRedeem       = '/stores/{storeId}/credits/redeem';
+
+  // ─── Player Campaigns Endpoints ────────────────────────────────────────────
+  static const String playerCampaignsActive = '/stores/{storeId}/campaigns/active';
+  static const String playerCampaignRedeem  = '/stores/{storeId}/campaigns/{id}/redeem';
+
+  // ─── Player Disputes Endpoints ─────────────────────────────────────────────
+  static const String playerDisputesMy      = '/stores/{storeId}/disputes/my';
+  static const String playerDisputeDetail   = '/stores/{storeId}/disputes/{id}';
+  static const String playerDisputeCreate   = '/stores/{storeId}/disputes';
+  static const String playerDisputeWithdraw = '/stores/{storeId}/disputes/{id}/withdraw';
+
+  // ─── Player Notifications Endpoints ────────────────────────────────────────
+  static const String playerNotifications        = '/notifications';
+  static const String playerNotificationRead     = '/notifications/{id}/read';
+  static const String playerNotificationsReadAll = '/notifications/read-all';
+  static const String playerNotifPrefs           = '/notifications/preferences';
 }

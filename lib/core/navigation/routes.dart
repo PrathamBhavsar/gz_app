@@ -34,7 +34,11 @@ class AppRoutes {
   static const sessionHistoryDetail = '/sessions/history/:id';
   static const billingHistory       = '/sessions/billing';
 
-  static const wallet  = '/wallet';
+  static const wallet         = '/wallet';
+  static const creditHistory  = '/wallet/transactions';
+  static const campaigns      = '/wallet/campaigns';
+  static const campaignDetail = '/wallet/campaigns/:id';
+
   static const profile = '/profile';
 
   // Notifications (full-screen push)
