@@ -26,7 +26,7 @@ feature touched, and commit.
 | 4 | Booking flow (S-14 → S-18) | DONE |
 | 5 | Sessions + Player WebSocket (S-19 → S-25) | DONE |
 | 6 | Wallet (S-26 → S-30) | DONE |
-| 7 | Profile + Settings (S-31 → S-37) | TODO |
+| 7 | Profile + Settings (S-31 → S-37) | DONE |
 | 8 | Global Overlays (O-38, O-39, O-40, OTP sheet) | TODO |
 | 9 | Routes — complete AppRoutes + auth guard | TODO |
 | 10 | Polish — empty states, deep links, error surfaces | TODO |
@@ -649,7 +649,10 @@ Create `brain/features/.registry/wallet.md`.
 
 ---
 
-## Phase 7 — Profile + Settings
+## Phase 7 — Profile + Settings ✓ DONE (2026-05-16)
+
+> **Completed**: `ProfileNotifier` (delegates to `AuthRepository.getUserProfile()`), `EditProfileNotifier` (sealed: Initial/Loading/Success/Error), `ChangePhoneNotifier` (sealed: Initial/Loading/OtpSent/Success/Error), `NotifPrefsNotifier` with `NotifPrefsData` (9 bool fields, debounced 1s PATCH), `DisputesListNotifier` (`AsyncValue<List<BillingDisputeModel>>`), `DisputeDetailNotifier` (FamilyNotifier by id, sealed: Loading/Data/Error), `CreateDisputeNotifier` (sealed: Initial/Loading/Success/Error). Screens: S-31 profile home, S-32 edit profile, S-33 change phone, S-34 notification prefs, S-35 disputes list. Dispute screens S-36 (detail) and S-37 (create) rewritten with real API + new sealed state. Routes moved from `/disputes/*` → `/profile/disputes/*`. `app_router.dart` updated with 4 new GoRoute entries. Registries: `brain/features/.registry/profile.md` + `disputes.md`.
+> **Deferred**: OTP entry widget for change-phone step 2 — stub button shown pending Phase 8 OTP sheet. Stats row (sessions/hours/stores) shows `—` pending a dedicated stats API endpoint. Billing history route (`/sessions/billing`) navigation from profile reuses Phase 5 BillingHistoryScreen.
 
 ### Deliverables
 

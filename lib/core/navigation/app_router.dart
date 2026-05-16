@@ -37,6 +37,10 @@ import '../../features/wallet/presentation/screens/credit_history_screen.dart';
 import '../../features/wallet/presentation/screens/campaigns_screen.dart';
 import '../../features/wallet/presentation/screens/campaign_detail_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/edit_profile_screen.dart';
+import '../../features/profile/presentation/screens/change_phone_screen.dart';
+import '../../features/profile/presentation/screens/notif_prefs_screen.dart';
+import '../../features/profile/presentation/screens/disputes_list_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/disputes/presentation/screens/create_dispute_screen.dart';
 import '../../features/disputes/presentation/screens/dispute_detail_screen.dart';
@@ -205,6 +209,22 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.notifications,
         builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.changePhone,
+        builder: (context, state) => const ChangePhoneScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notifPrefs,
+        builder: (context, state) => const NotifPrefsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.disputesList,
+        builder: (context, state) => const DisputesListScreen(),
       ),
       GoRoute(
         path: AppRoutes.disputeCreate,

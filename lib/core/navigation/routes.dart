@@ -41,12 +41,16 @@ class AppRoutes {
 
   static const profile = '/profile';
 
+  // Profile sub-routes (Phase 7)
+  static const editProfile    = '/profile/edit';
+  static const changePhone    = '/profile/change-phone';
+  static const notifPrefs     = '/profile/notifications';
+  static const disputesList   = '/profile/disputes';
+  static const disputeCreate  = '/profile/disputes/create';
+  static const disputeDetail  = '/profile/disputes/:id';
+
   // Notifications (full-screen push)
   static const notifications = '/notifications';
-
-  // Disputes (player-side)
-  static const disputeCreate = '/disputes/create';
-  static const disputeDetail = '/disputes/:id';
 
   // Admin Auth Stack
   static const adminLogin         = '/auth/admin-login';
