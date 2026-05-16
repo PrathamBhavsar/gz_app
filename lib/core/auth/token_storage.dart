@@ -8,6 +8,7 @@ const _kUserTypeKey = 'gz_user_type'; // 'player' | 'admin'
 const _kAdminRoleKey = 'gz_admin_role'; // 'super_admin' | 'admin' | 'staff'
 const _kAdminStoreIdKey =
     'gz_admin_store_id'; // Admin's store ID (separate from player activeStoreId)
+const _kHasSeenOnboardingKey = 'gz_has_seen_onboarding';
 
 // ─── In-memory access token ────────────────────────────────────────────────
 // Kept in Riverpod state — never persisted (cleared on app restart = safe)
@@ -73,6 +74,14 @@ class TokenStorage {
 
   Future<String?> getAdminStoreId() async {
     return await _storage.read(key: _kAdminStoreIdKey);
+  }
+
+  Future<void> setHasSeenOnboarding() async {
+    await _storage.write(key: _kHasSeenOnboardingKey, value: 'true');
+  }
+
+  Future<bool> getHasSeenOnboarding() async {
+    return await _storage.read(key: _kHasSeenOnboardingKey) == 'true';
   }
 
   Future<void> clearAll() async {

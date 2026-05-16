@@ -21,7 +21,7 @@ feature touched, and commit.
 | Phase | Name | Status |
 |-------|------|--------|
 | 1 | Foundation — AppTheme + em_ widget library | DONE |
-| 2 | Splash + Onboarding | TODO |
+| 2 | Splash + Onboarding | DONE |
 | 3 | Home feature (S-11, S-12, S-13) | TODO |
 | 4 | Booking flow (S-14 → S-18) | TODO |
 | 5 | Sessions + Player WebSocket (S-19 → S-25) | TODO |
@@ -204,7 +204,10 @@ Update `brain/features/.registry/` — create `shared_widgets.md`:
 
 ---
 
-## Phase 2 — Splash + Onboarding
+## Phase 2 — Splash + Onboarding ✓ DONE (2026-05-16)
+
+> **Completed**: SplashScreen rewritten as thin StatelessWidget. SplashNotifier (sealed: Checking/ToHome/ToAdmin/ToAuth/ToOnboarding) + SplashRepository created. hasSeenOnboarding flag added to TokenStorage. SplashMobileLayout/SplashTabletLayout now show EmGzLogo + EmLiveDot and navigate via ref.listen(splashNotifierProvider). OnboardingMobileLayout/OnboardingTabletLayout rewritten as ConsumerStatefulWidget with 3-card PageView using EmCard(tint), animated dot indicator, Skip/Next/Get Started CTAs, writes hasSeenOnboarding on completion. Registries: brain/features/.registry/splash.md + onboarding.md.
+> **Deferred**: Nothing — all Phase 2 deliverables complete.
 
 ### Deliverables
 
