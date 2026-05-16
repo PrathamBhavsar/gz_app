@@ -9,7 +9,6 @@ import '../../../../../core/navigation/routes.dart';
 import '../../providers/admin_operations_provider.dart';
 import '../../../data/services/admin_operations_service.dart';
 import '../../providers/admin_auth_provider.dart';
-import '../../../../../../models/domain_admin.dart';
 
 /// Walk-in Booking — Screen 44.
 /// Rapidly create a session for a customer at the counter.
@@ -27,7 +26,6 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
   // Step 1: User
   final _searchController = TextEditingController();
   String? _selectedUserId;
-  String? _selectedUserName;
   final _newNameController = TextEditingController();
   final _newPhoneController = TextEditingController();
   bool _showNewUserForm = false;

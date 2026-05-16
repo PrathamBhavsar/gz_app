@@ -73,8 +73,9 @@ class AppRoutes {
   static const adminCampaigns    = '/admin/campaigns';
   static const adminCredits      = '/admin/credits';
   static const adminDisputes     = '/admin/disputes';
-  static const adminSystemsMgmt  = '/admin/systems';
-  static const adminStaff        = '/admin/staff';
-  static const adminConfig       = '/admin/config';
+  static const adminSystemsMgmt   = '/admin/systems';
+  static const adminManagement    = '/admin/management';
+  static const adminStaff         = '/admin/staff';
+  static const adminConfig        = '/admin/config';
   static const adminNotifications = '/admin/notifications';
 }

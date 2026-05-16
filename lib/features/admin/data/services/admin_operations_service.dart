@@ -1,35 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_constants.dart';
-import '../../../../core/auth/token_storage.dart';
 import '../../../../models/api_responses_admin.dart';
 
 /// Thin wrapper around ApiClient for all admin operations endpoints.
 /// Every endpoint path comes from [ApiConstants] — no hardcoded strings.
 class AdminOperationsService {
   final ApiClient _apiClient;
-  final TokenStorage _tokenStorage;
 
-  AdminOperationsService(this._apiClient, this._tokenStorage);
-
-  // ─── Helper: inject storeId into endpoint templates ───────────────────
-
-  String _resolveStoreId() {
-    // storeId is read synchronously from the in-memory provider state;
-    // the caller (provider) guarantees it's set before invoking service.
-    throw UnimplementedError(
-      'Use the storeId parameter overload or pass via provider.',
-    );
-  }
+  AdminOperationsService(this._apiClient);
 
   String _withStoreId(String template, String storeId) {
     return template.replaceAll('{storeId}', storeId);
-  }
-
-  String _withStoreAndId(String template, String storeId, String id) {
-    return template
-        .replaceAll('{storeId}', storeId)
-        .replaceAll('{id}', id);
   }
 
   // ─── Live Systems (Floor Map) ────────────────────────────────────────
@@ -57,12 +39,6 @@ class AdminOperationsService {
 
   /// GET /stores/:storeId/sessions/:id
   Future<dynamic> getSessionDetail(String storeId, String sessionId) async {
-    final endpoint = _withStoreAndId(
-      ApiConstants.sessionDetail.replaceAll('{id}', sessionId),
-      storeId,
-      sessionId,
-    );
-    // sessionDetail already has {id} — handle both replacements
     final resolved = ApiConstants.sessionDetail
         .replaceAll('{storeId}', storeId)
         .replaceAll('{id}', sessionId);
@@ -204,7 +180,5 @@ class AdminOperationsService {
 
 final adminOperationsServiceProvider =
     Provider<AdminOperationsService>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  final tokenStorage = ref.watch(tokenStorageProvider);
-  return AdminOperationsService(apiClient, tokenStorage);
+  return AdminOperationsService(ref.watch(apiClientProvider));
 });

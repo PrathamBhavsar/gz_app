@@ -30,6 +30,7 @@ feature touched, and commit.
 | 8 | Global Overlays (O-38, O-39, O-40, OTP sheet) | DONE |
 | 9 | Routes — complete AppRoutes + auth guard | DONE |
 | 10 | Polish — empty states, deep links, error surfaces | DONE |
+| 11 | Admin App — wire placeholder routes + cleanup + sessions registry | DONE |
 
 ---
 
@@ -969,6 +970,51 @@ Screen transitions: default go_router (no custom transitions needed).
 ### Brain Sync After Phase 10
 Final sync: review all `.registry/` files, update any gaps.
 Update `IMPLEMENTATION_PLAN.md` — all phases DONE.
+
+---
+
+## Phase 11 — Admin App: Route Wiring + Cleanup ✓ DONE (2026-05-16)
+
+> **Completed**: Added `AppRoutes.adminManagement` constant and wired `AdminManagementScreen` as Management tab root. Replaced three `_PlaceholderScreen` routes with their real implementations: `StaffManagementScreen` (`/admin/staff`), `StoreConfigScreen` (`/admin/config`), `AdminNotificationsScreen` (`/admin/notifications`). Removed `_PlaceholderScreen` class. Fixed all analyzer warnings: removed unused `_tokenStorage` fields from all 4 admin services (and simplified provider factories), removed unused `_resolveStoreId` and `_withStoreAndId` from `admin_operations_service.dart`, removed `_dateFrom`/`_dateTo` fields from `DashboardNotifier`, fixed dead code in `admin_live_service.dart` (unnecessary null check, always-true type check), cleaned unused imports in 6 screen files, fixed unnecessary casts in dispute/wallet sheets, removed unused `tint` parameter from `_GzCard`. Created missing `brain/features/.registry/sessions.md` (Phase 5 had written it to wrong parent brain).
+> **Deferred**: Nothing — all Phase 11 deliverables complete.
+
+### Goal
+Wire the 3 `_PlaceholderScreen` admin routes to their existing implementations, promote
+`AdminManagementScreen` as the Management tab root, fix all analyzer warnings, and create
+the missing sessions feature registry.
+
+### Deliverables
+
+#### 11a. Wire management tab root
+- Add `static const adminManagement = '/admin/management'` to `AppRoutes`
+- Add GoRoute for `adminManagement → AdminManagementScreen` in the admin ShellRoute
+- Update `admin_shell.dart` tab-2 tap → `AppRoutes.adminManagement`
+- Update `_calculateSelectedIndex` to match `/admin/management`
+
+#### 11b. Wire placeholder routes
+| Route constant | Was | Now |
+|---|---|---|
+| `adminStaff` | `_PlaceholderScreen` | `StaffManagementScreen` |
+| `adminConfig` | `_PlaceholderScreen` | `StoreConfigScreen` |
+| `adminNotifications` | `_PlaceholderScreen` | `AdminNotificationsScreen` |
+
+Add imports; remove `_PlaceholderScreen` class.
+
+#### 11c. Fix analyzer warnings
+- Remove unused `_tokenStorage` fields from all 4 admin services
+- Remove unused `_resolveStoreId` from `admin_operations_service.dart`
+- Remove unused `endpoint` local variables in services
+- Fix dead code / unnecessary null check in `admin_live_service.dart`
+- Remove unused import in `app_router.dart` (AdminManagementScreen now used)
+- Remove unused imports in `admin_password_reset_screen.dart`, `booking_management_screen.dart`, `session_management_screen.dart`, `walk_in_booking_screen.dart`
+- Fix unused local variables in `booking_management_screen.dart`
+
+#### 11d. Create sessions registry
+Create `brain/features/.registry/sessions.md` inside gz_app brain (was missing — Phase 5 created it in wrong parent brain).
+
+### Brain Sync After Phase 11
+- `brain/features/.registry/sessions.md` — created
+- `brain/IMPLEMENTATION_PLAN.md` — Phase 11 marked DONE
 
 ---
 

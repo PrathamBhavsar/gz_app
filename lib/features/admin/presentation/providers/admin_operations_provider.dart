@@ -40,7 +40,6 @@ class FloorMapNotifier extends Notifier<FloorMapState> {
 
   @override
   FloorMapState build() {
-    final service = ref.watch(adminOperationsServiceProvider);
     final storeId = ref.watch(adminStoreIdProvider);
 
     _connectivitySub = ref

@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_constants.dart';
-import '../../../../core/auth/token_storage.dart';
 import '../../../../models/api_responses_admin.dart';
 
 /// Thin wrapper around ApiClient for all admin management endpoints
@@ -9,9 +8,8 @@ import '../../../../models/api_responses_admin.dart';
 /// Every endpoint path comes from [ApiConstants] — no hardcoded strings.
 class AdminManagementService {
   final ApiClient _apiClient;
-  final TokenStorage _tokenStorage;
 
-  AdminManagementService(this._apiClient, this._tokenStorage);
+  AdminManagementService(this._apiClient);
 
   String _withStoreId(String template, String storeId) {
     return template.replaceAll('{storeId}', storeId);
@@ -52,9 +50,6 @@ class AdminManagementService {
     required String ruleId,
     required Map<String, dynamic> body,
   }) async {
-    final endpoint =
-        _resolve(ApiConstants.pricingRules, storeId, ruleId);
-    // pricingRules is a collection endpoint — append /:id for individual
     final resolved = '${_withStoreId(ApiConstants.pricingRules, storeId)}/$ruleId';
     return await _apiClient.patch(resolved, body: body);
   }
@@ -268,7 +263,5 @@ class AdminManagementService {
 
 final adminManagementServiceProvider =
     Provider<AdminManagementService>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  final tokenStorage = ref.watch(tokenStorageProvider);
-  return AdminManagementService(apiClient, tokenStorage);
+  return AdminManagementService(ref.watch(apiClientProvider));
 });

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../api/api_constants.dart';
-import '../auth/token_storage.dart';
 
 /// WebSocket event types from the Store Live Feed.
 enum WsEventType {
@@ -46,14 +45,11 @@ class WsEvent {
 /// - Emits typed [WsEvent]s through a broadcast stream.
 /// - Graceful connect / disconnect lifecycle tied to admin session.
 class AdminLiveService {
-  final TokenStorage _tokenStorage;
   final String Function() _getAccessToken;
 
   AdminLiveService({
-    required TokenStorage tokenStorage,
     required String Function() getAccessToken,
-  })  : _tokenStorage = tokenStorage,
-        _getAccessToken = getAccessToken;
+  }) : _getAccessToken = getAccessToken;
 
   WebSocketChannel? _channel;
   StreamSubscription? _subscription;
@@ -86,7 +82,7 @@ class AdminLiveService {
 
     _activeStoreId = storeId;
     final token = _getAccessToken();
-    if (token == null || token.isEmpty) return;
+    if (token.isEmpty) return;
 
     // Build WS URL from base URL (swap http → ws)
     final baseUrl = ApiConstants.baseUrl;
@@ -146,9 +142,7 @@ class AdminLiveService {
 
       final event = WsEvent(
         type: WsEventType.fromString(typeStr),
-        payload: payload is Map<String, dynamic>
-            ? payload
-            : Map<String, dynamic>.from(payload),
+        payload: payload,
         receivedAt: DateTime.now(),
       );
 

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/admin_live_service.dart';
 import '../../../../core/auth/token_storage.dart';
-import '../../../../core/api/api_client.dart';
 import 'admin_auth_provider.dart';
 import 'admin_auth_state.dart';
 
@@ -10,11 +9,7 @@ import 'admin_auth_state.dart';
 /// Lifecycle is tied to the admin session — connects when authenticated,
 /// disconnects on logout.
 final adminLiveServiceProvider = Provider<AdminLiveService>((ref) {
-  final tokenStorage = ref.watch(tokenStorageProvider);
-  final apiClient = ref.watch(apiClientProvider);
-
   final service = AdminLiveService(
-    tokenStorage: tokenStorage,
     getAccessToken: () => ref.read(accessTokenProvider) ?? '',
   );
 

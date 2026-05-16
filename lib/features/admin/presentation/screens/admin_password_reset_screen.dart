@@ -6,7 +6,6 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../data/services/admin_auth_service.dart';
-import '../providers/admin_auth_provider.dart';
 
 class AdminPasswordResetScreen extends ConsumerStatefulWidget {
   const AdminPasswordResetScreen({super.key});

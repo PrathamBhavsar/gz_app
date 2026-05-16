@@ -1,16 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_constants.dart';
-import '../../../../core/auth/token_storage.dart';
 import '../../../../models/api_responses_admin.dart';
 
 /// Thin wrapper around ApiClient for all admin analytics endpoints.
 /// Every endpoint path comes from [ApiConstants] — no hardcoded strings.
 class AdminAnalyticsService {
   final ApiClient _apiClient;
-  final TokenStorage _tokenStorage;
 
-  AdminAnalyticsService(this._apiClient, this._tokenStorage);
+  AdminAnalyticsService(this._apiClient);
 
   String _withStoreId(String template, String storeId) {
     return template.replaceAll('{storeId}', storeId);
@@ -131,7 +129,5 @@ class AdminAnalyticsService {
 
 final adminAnalyticsServiceProvider =
     Provider<AdminAnalyticsService>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  final tokenStorage = ref.watch(tokenStorageProvider);
-  return AdminAnalyticsService(apiClient, tokenStorage);
+  return AdminAnalyticsService(ref.watch(apiClientProvider));
 });

@@ -1,16 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_constants.dart';
-import '../../../../core/auth/token_storage.dart';
 import '../../../../models/api_responses_admin.dart';
 
 /// Thin wrapper around ApiClient for all admin store endpoints
 /// (Systems, System Types, Staff, Store Config, Notifications).
 class AdminStoreService {
   final ApiClient _apiClient;
-  final TokenStorage _tokenStorage;
 
-  AdminStoreService(this._apiClient, this._tokenStorage);
+  AdminStoreService(this._apiClient);
 
   String _withStoreId(String template, String storeId) =>
       template.replaceAll('{storeId}', storeId);
@@ -124,7 +122,5 @@ class AdminStoreService {
 }
 
 final adminStoreServiceProvider = Provider<AdminStoreService>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  final tokenStorage = ref.watch(tokenStorageProvider);
-  return AdminStoreService(apiClient, tokenStorage);
+  return AdminStoreService(ref.watch(apiClientProvider));
 });

@@ -58,7 +58,7 @@ class _CreateDisputeMobileLayoutState
           amountCtrl:  _amountCtrl,
           isLoading:   state is CreateDisputeLoading,
           errorMsg:    state is CreateDisputeError
-              ? (state as CreateDisputeError).message
+              ? state.message
               : null,
           canSubmit: _canSubmit,
           onSubmit:  _submit,

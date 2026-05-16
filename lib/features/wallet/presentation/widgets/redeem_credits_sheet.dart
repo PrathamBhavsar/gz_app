@@ -67,7 +67,7 @@ class _RedeemCreditsSheetState extends ConsumerState<_RedeemCreditsSheet> {
     final notifier = ref.read(redeemCreditsNotifierProvider.notifier);
     final isConfirming = state is RedeemCreditsConfirming;
     final isLoading = state is RedeemCreditsLoading;
-    final isError = state is RedeemCreditsError;
+    final errorState = state is RedeemCreditsError ? state : null;
     final rupees = (_amount / 10).toStringAsFixed(2);
 
     return Padding(
@@ -174,12 +174,9 @@ class _RedeemCreditsSheetState extends ConsumerState<_RedeemCreditsSheet> {
             style: AppTypography.small.copyWith(color: AppColors.textTertiary),
           ),
 
-          if (isError) ...[
+          if (errorState != null) ...[
             const SizedBox(height: AppSpacing.sm),
-            EmTag(
-              kind: EmTagKind.err,
-              label: (state as RedeemCreditsError).message,
-            ),
+            EmTag(kind: EmTagKind.err, label: errorState.message),
           ],
           const SizedBox(height: AppSpacing.lg),
 

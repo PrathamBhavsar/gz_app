@@ -65,6 +65,9 @@ import '../../features/admin/presentation/screens/analytics/player_analytics_scr
 import '../../features/admin/presentation/screens/analytics/system_performance_screen.dart';
 import '../../features/admin/presentation/screens/management/admin_management_screen.dart';
 import '../../features/admin/presentation/screens/management/pricing_rules_screen.dart';
+import '../../features/admin/presentation/screens/store/staff_management_screen.dart';
+import '../../features/admin/presentation/screens/store/store_config_screen.dart';
+import '../../features/admin/presentation/screens/store/admin_notifications_screen.dart';
 import '../../features/admin/presentation/screens/management/billing_payments_screen.dart';
 import '../../features/admin/presentation/screens/management/campaign_management_screen.dart';
 import '../../features/admin/presentation/screens/management/credits_management_screen.dart';
@@ -324,6 +327,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           // Tab 3: Management
           GoRoute(
+            path: AppRoutes.adminManagement,
+            builder: (context, state) => const AdminManagementScreen(),
+          ),
+          GoRoute(
             path: AppRoutes.adminPricing,
             builder: (context, state) => const PricingRulesScreen(),
           ),
@@ -350,18 +357,15 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.adminStaff,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Staff Management'),
+            builder: (context, state) => const StaffManagementScreen(),
           ),
           GoRoute(
             path: AppRoutes.adminConfig,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Store Config'),
+            builder: (context, state) => const StoreConfigScreen(),
           ),
           GoRoute(
             path: AppRoutes.adminNotifications,
-            builder: (context, state) =>
-                const _PlaceholderScreen(title: 'Notifications'),
+            builder: (context, state) => const AdminNotificationsScreen(),
           ),
         ],
       ),
@@ -393,41 +397,6 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// Placeholder screen for admin routes not yet fully implemented.
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-  const _PlaceholderScreen({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0A0A0A),
-        elevation: 0,
-        title: Text(title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.construction, color: Color(0xFF888888), size: 48),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: const TextStyle(color: Color(0xFF888888), fontSize: 18),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Coming soon',
-              style: TextStyle(color: Color(0xFF888888), fontSize: 14),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 /// Admin shell wrapper — wraps the AdminMobileLayout around the child route.
 class AdminShell extends StatelessWidget {

@@ -37,8 +37,6 @@ class AnalyticsError<T> extends AnalyticsState<T> {
 
 class DashboardNotifier extends Notifier<AnalyticsState<AnalyticsDashboardModel>> {
   StreamSubscription<bool>? _connectivitySub;
-  String? _dateFrom;
-  String? _dateTo;
 
   @override
   AnalyticsState<AnalyticsDashboardModel> build() {
@@ -54,8 +52,6 @@ class DashboardNotifier extends Notifier<AnalyticsState<AnalyticsDashboardModel>
   }
 
   Future<void> load({String? dateFrom, String? dateTo}) async {
-    _dateFrom = dateFrom;
-    _dateTo = dateTo;
     final storeId = ref.read(adminStoreIdProvider);
     if (storeId == null) return;
 

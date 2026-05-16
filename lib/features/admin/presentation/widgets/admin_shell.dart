@@ -11,7 +11,8 @@ class AdminMobileLayout extends StatelessWidget {
   int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).matchedLocation;
     if (location.startsWith('/admin/analytics')) return 1;
-    if (location.startsWith('/admin/pricing') ||
+    if (location.startsWith('/admin/management') ||
+        location.startsWith('/admin/pricing') ||
         location.startsWith('/admin/billing') ||
         location.startsWith('/admin/campaigns') ||
         location.startsWith('/admin/credits') ||
@@ -35,7 +36,7 @@ class AdminMobileLayout extends StatelessWidget {
       case 1:
         context.go(AppRoutes.adminAnalytics);
       case 2:
-        context.go(AppRoutes.adminPricing);
+        context.go(AppRoutes.adminManagement);
       case 3:
         context.go(AppRoutes.adminSystemsMgmt);
     }

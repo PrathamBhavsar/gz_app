@@ -14,7 +14,6 @@ import '../../../../../shared/widgets/em_button.dart';
 import '../../../../../shared/widgets/em_card.dart';
 import '../../../../../shared/widgets/em_gz_logo.dart';
 import '../../../../../shared/widgets/em_icon_btn.dart';
-import '../../../../../shared/widgets/em_scroll_content.dart';
 import '../../../../../shared/widgets/em_section_head.dart';
 import '../../../../../shared/widgets/em_tag.dart';
 import '../../../../../shared/widgets/page_error_display.dart';

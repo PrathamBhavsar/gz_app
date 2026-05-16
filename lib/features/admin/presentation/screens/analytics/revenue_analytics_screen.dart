@@ -177,13 +177,11 @@ class _RevenueAnalyticsScreenState
     // Summary totals
     String totalRevenue = '0';
     String totalNet = '0';
-    int totalSessions = 0;
     for (final row in rows) {
       final rev = double.tryParse(row.revenue ?? '0') ?? 0;
       final net = double.tryParse(row.netRevenue ?? '0') ?? 0;
       totalRevenue = (double.parse(totalRevenue) + rev).toStringAsFixed(2);
       totalNet = (double.parse(totalNet) + net).toStringAsFixed(2);
-      totalSessions += row.sessions ?? 0;
     }
 
     return Column(

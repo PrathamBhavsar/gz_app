@@ -348,14 +348,13 @@ class BookingSummaryMobileLayout extends ConsumerWidget {
 // ── Private sub-widgets ────────────────────────────────────────────────────────
 
 class _GzCard extends StatelessWidget {
-  const _GzCard({required this.child, this.tint = false});
+  const _GzCard({required this.child});
   final Widget child;
-  final bool tint;
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(AppSpacing.md),
     decoration: BoxDecoration(
-      color: tint ? AppColors.surfaceTint : AppColors.surface,
+      color: AppColors.surface,
       borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCard),
     ),
     child: child,

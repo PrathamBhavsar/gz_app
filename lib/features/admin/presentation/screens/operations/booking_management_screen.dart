@@ -6,7 +6,6 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
-import '../../providers/admin_auth_provider.dart';
 import '../../providers/admin_operations_provider.dart';
 import '../../providers/admin_permissions.dart';
 

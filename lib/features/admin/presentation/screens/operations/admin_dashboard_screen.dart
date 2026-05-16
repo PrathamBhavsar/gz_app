@@ -76,9 +76,6 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final adminState = ref.watch(adminAuthNotifierProvider);
-    final adminName = adminState is AdminAuthAuthenticated
-        ? adminState.admin.name ?? 'Admin'
-        : 'Admin';
     final role = adminState is AdminAuthAuthenticated
         ? adminState.admin.role ?? ''
         : '';

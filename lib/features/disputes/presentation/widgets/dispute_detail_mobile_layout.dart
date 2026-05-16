@@ -5,7 +5,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/em_top_bar.dart';
-import '../../../../shared/widgets/em_meta_row.dart';
 import '../../../../shared/widgets/em_chip.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../../../../core/errors/app_exception.dart';
@@ -26,7 +25,7 @@ class DisputeDetailMobileLayout extends ConsumerWidget {
           const EmTopBar(title: 'Dispute'),
           const Expanded(child: Center(child: CircularProgressIndicator())),
         ]),
-      DisputeDetailError(:final error, :final stackTrace) => Column(children: [
+      DisputeDetailError(:final error) => Column(children: [
           const EmTopBar(title: 'Dispute'),
           Expanded(
             child: PageErrorDisplay(

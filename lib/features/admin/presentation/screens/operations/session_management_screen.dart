@@ -8,7 +8,6 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/network/admin_live_service.dart';
-import '../../providers/admin_auth_provider.dart';
 import '../../providers/admin_operations_provider.dart';
 import '../../providers/admin_permissions.dart';
 import '../../providers/admin_live_provider.dart';
@@ -97,10 +96,9 @@ class _SessionManagementScreenState
     // Ensure WS is connected
     ref.watch(wsAutoConnectProvider);
 
-    // Watch session detail if sessionId is set
-    SessionDetailState? sessionState;
+    // Watch session detail if sessionId is set (triggers rebuild on state change)
     if (_sessionId != null) {
-      sessionState = ref.watch(sessionDetailProvider(_sessionId!));
+      ref.watch(sessionDetailProvider(_sessionId!));
     }
 
     // Get system info from floor map
