@@ -70,20 +70,20 @@ class _SessionHistoryBody extends StatelessWidget {
   }
 
   EmTagKind _statusKind(SessionStatus? status) => switch (status) {
-        SessionStatus.completed => EmTagKind.ok,
-        SessionStatus.inProgress => EmTagKind.info,
-        SessionStatus.cancelled => EmTagKind.err,
-        SessionStatus.disputed => EmTagKind.warn,
-        null => EmTagKind.mute,
-      };
+    SessionStatus.completed => EmTagKind.ok,
+    SessionStatus.inProgress => EmTagKind.info,
+    SessionStatus.cancelled => EmTagKind.err,
+    SessionStatus.disputed => EmTagKind.warn,
+    null => EmTagKind.mute,
+  };
 
   String _statusLabel(SessionStatus? status) => switch (status) {
-        SessionStatus.completed => 'Completed',
-        SessionStatus.inProgress => 'In progress',
-        SessionStatus.cancelled => 'Cancelled',
-        SessionStatus.disputed => 'Disputed',
-        null => 'Unknown',
-      };
+    SessionStatus.completed => 'Completed',
+    SessionStatus.inProgress => 'In progress',
+    SessionStatus.cancelled => 'Cancelled',
+    SessionStatus.disputed => 'Disputed',
+    null => 'Unknown',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -93,113 +93,117 @@ class _SessionHistoryBody extends StatelessWidget {
       child: Column(
         children: [
           const EmTopBar(title: 'Session'),
-          EmScrollContent(
-            padded: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ── System/store card ──
-                EmCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: AppColors.pillBg,
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.borderRadiusChip,
+          Expanded(
+            child: EmScrollContent(
+              padded: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // ── System/store card ──
+                  EmCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: AppColors.pillBg,
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.borderRadiusChip,
+                                ),
+                              ),
+                              child: const Center(
+                                child: HugeIcon(
+                                  icon: HugeIcons.strokeRoundedComputerDesk01,
+                                  color: AppColors.textPrimary,
+                                  size: 20,
+                                ),
                               ),
                             ),
-                            child: const Center(
-                              child: HugeIcon(
-                                icon: HugeIcons.strokeRoundedComputerDesk01,
-                                color: AppColors.textPrimary,
-                                size: 20,
-                              ),
+                            const SizedBox(
+                              width: AppSpacing.sm + AppSpacing.xs,
                             ),
-                          ),
-                          const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  session.storeId ?? '—',
-                                  style: AppTypography.small.copyWith(
-                                    color: AppColors.textTertiary,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    session.storeId ?? '—',
+                                    style: AppTypography.small.copyWith(
+                                      color: AppColors.textTertiary,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  session.systemId ?? '—',
-                                  style: AppTypography.h3,
-                                ),
-                              ],
+                                  Text(
+                                    session.systemId ?? '—',
+                                    style: AppTypography.h3,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          EmTag(
-                            kind: _statusKind(session.status),
-                            label: _statusLabel(session.status),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Wrap(
-                        spacing: 6,
-                        children: [
-                          EmChip(
-                            keyLabel: 'DATE',
-                            value: _formatDate(session.startedAt),
-                          ),
-                          if (session.id != null)
+                            EmTag(
+                              kind: _statusKind(session.status),
+                              label: _statusLabel(session.status),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Wrap(
+                          spacing: 6,
+                          children: [
                             EmChip(
-                              keyLabel: 'ID',
-                              value: session.id!.length > 8
-                                  ? session.id!.substring(0, 8)
-                                  : session.id!,
+                              keyLabel: 'DATE',
+                              value: _formatDate(session.startedAt),
                             ),
-                        ],
-                      ),
-                    ],
+                            if (session.id != null)
+                              EmChip(
+                                keyLabel: 'ID',
+                                value: session.id!.length > 8
+                                    ? session.id!.substring(0, 8)
+                                    : session.id!,
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: AppSpacing.sm),
 
-                // ── Time details ──
-                EmCard(
-                  child: Column(
-                    children: [
-                      EmMetaRow(
-                        label: 'Started',
-                        value: _formatTime(session.startedAt),
-                      ),
-                      EmMetaRow(
-                        label: 'Ended',
-                        value: _formatTime(session.endedAt),
-                      ),
-                      EmMetaRow(
-                        label: 'Duration',
-                        value: dur != null ? '${dur}m' : '—',
-                      ),
-                    ],
+                  // ── Time details ──
+                  EmCard(
+                    child: Column(
+                      children: [
+                        EmMetaRow(
+                          label: 'Started',
+                          value: _formatTime(session.startedAt),
+                        ),
+                        EmMetaRow(
+                          label: 'Ended',
+                          value: _formatTime(session.endedAt),
+                        ),
+                        EmMetaRow(
+                          label: 'Duration',
+                          value: dur != null ? '${dur}m' : '—',
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: AppSpacing.sm),
 
-                // ── Billing ──
-                EmCard(
-                  child: Column(
-                    children: const [
-                      EmMetaRow(label: 'Billing', value: '—'),
-                      EmMetaRow(label: 'Status', value: '—'),
-                    ],
+                  // ── Billing ──
+                  EmCard(
+                    child: Column(
+                      children: const [
+                        EmMetaRow(label: 'Billing', value: '—'),
+                        EmMetaRow(label: 'Status', value: '—'),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-              ],
+                  const SizedBox(height: AppSpacing.xl),
+                ],
+              ),
             ),
           ),
 

@@ -4,12 +4,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 
 class EmSectionHead extends StatelessWidget {
-  const EmSectionHead(
-    this.title, {
-    super.key,
-    this.subtitle,
-    this.trailing,
-  });
+  const EmSectionHead(this.title, {super.key, this.subtitle, this.trailing});
 
   final String title;
   final String? subtitle;
@@ -21,16 +16,37 @@ class EmSectionHead extends StatelessWidget {
       padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: 12),
       child: Row(
         children: [
-          Text(title, style: AppTypography.h2),
-          if (subtitle != null) ...[
-            const SizedBox(width: AppSpacing.xs),
-            Text(
-              subtitle!,
-              style: AppTypography.small.copyWith(color: AppColors.textTertiary),
+          Expanded(
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    title,
+                    style: AppTypography.h2,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(width: AppSpacing.xs),
+                  Flexible(
+                    child: Text(
+                      subtitle!,
+                      style: AppTypography.small.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ],
             ),
+          ),
+          if (trailing != null) ...[
+            const SizedBox(width: AppSpacing.sm),
+            trailing!,
           ],
-          const Spacer(),
-          ?trailing,
         ],
       ),
     );

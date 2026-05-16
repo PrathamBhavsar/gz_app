@@ -7,9 +7,9 @@ import '../../../../models/domain_systems.dart';
 /// Aggregated data for the Activity Hub (My Games screen).
 class ActivityHubData {
   final List<BookingModel> upcomingBookings; // status: confirmed, pending
-  final BookingModel? activeBooking;          // status: checked_in
-  final SessionModel? activeSession;          // in_progress
-  final List<SessionModel> history;           // completed, cancelled
+  final BookingModel? activeBooking; // status: checked_in
+  final SessionModel? activeSession; // in_progress
+  final List<SessionModel> history; // completed, cancelled
 
   const ActivityHubData({
     this.upcomingBookings = const [],
@@ -38,8 +38,9 @@ class ActivityHubUiState {
   }) {
     return ActivityHubUiState(
       tab: tab ?? this.tab,
-      expandedHistId:
-          expandedHistId == _sentinel ? this.expandedHistId : expandedHistId as String?,
+      expandedHistId: expandedHistId == _sentinel
+          ? this.expandedHistId
+          : expandedHistId as String?,
       showPaySheet: showPaySheet ?? this.showPaySheet,
     );
   }
@@ -61,10 +62,7 @@ class ActivityHubState {
     AsyncValue<ActivityHubData>? data,
     ActivityHubUiState? ui,
   }) {
-    return ActivityHubState(
-      data: data ?? this.data,
-      ui: ui ?? this.ui,
-    );
+    return ActivityHubState(data: data ?? this.data, ui: ui ?? this.ui);
   }
 
   // ── Convenience passthrough getters ──
@@ -76,12 +74,13 @@ class ActivityHubState {
 class ActivityHubNotifier extends Notifier<ActivityHubState> {
   @override
   ActivityHubState build() {
-    _fetch();
-    return const ActivityHubState();
+    const initialState = ActivityHubState();
+    _fetch(initialState);
+    return initialState;
   }
 
-  Future<void> _fetch() async {
-    state = state.copyWith(data: const AsyncLoading());
+  Future<void> _fetch([ActivityHubState? currentState]) async {
+    state = (currentState ?? state).copyWith(data: const AsyncLoading());
     try {
       final storeId = ref.read(activeStoreIdProvider) ?? '';
       final bookingRepo = ref.read(bookingRepositoryProvider);
@@ -109,10 +108,12 @@ class ActivityHubNotifier extends Notifier<ActivityHubState> {
       final cancelledSessions = sessionResults[2].data ?? [];
 
       final upcoming = [...confirmedBookings, ...pendingBookings];
-      final activeBooking =
-          checkedInBookings.isNotEmpty ? checkedInBookings.first as BookingModel? : null;
-      final activeSession =
-          inProgressSessions.isNotEmpty ? inProgressSessions.first as SessionModel? : null;
+      final activeBooking = checkedInBookings.isNotEmpty
+          ? checkedInBookings.first as BookingModel?
+          : null;
+      final activeSession = inProgressSessions.isNotEmpty
+          ? inProgressSessions.first as SessionModel?
+          : null;
       final history = [...completedSessions, ...cancelledSessions];
 
       state = state.copyWith(
@@ -133,8 +134,9 @@ class ActivityHubNotifier extends Notifier<ActivityHubState> {
   Future<void> refresh() => _fetch();
 
   // ── UI mutations ──
-  void setTab(String t) =>
-      state = state.copyWith(ui: state.ui.copyWith(tab: t, showPaySheet: false));
+  void setTab(String t) => state = state.copyWith(
+    ui: state.ui.copyWith(tab: t, showPaySheet: false),
+  );
 
   void toggleHist(String id) {
     final next = state.expandedHistId == id ? null : id;
@@ -149,5 +151,5 @@ class ActivityHubNotifier extends Notifier<ActivityHubState> {
 
 final activityHubProvider =
     NotifierProvider<ActivityHubNotifier, ActivityHubState>(
-  () => ActivityHubNotifier(),
-);
+      () => ActivityHubNotifier(),
+    );

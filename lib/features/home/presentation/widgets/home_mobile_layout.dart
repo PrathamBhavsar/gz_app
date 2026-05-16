@@ -21,6 +21,10 @@ import 'package:gz_app/core/errors/app_exception.dart';
 import '../../../../models/domain_global.dart';
 import '../providers/home_notifier.dart';
 
+const double _storeCardWidth = 190;
+const double _storeCardHeight = 188;
+const double _storeCardMediaHeight = 96;
+
 class HomeMobileLayout extends ConsumerWidget {
   const HomeMobileLayout({super.key});
 
@@ -34,14 +38,16 @@ class HomeMobileLayout extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md, 12, AppSpacing.md, 0),
+              AppSpacing.md,
+              12,
+              AppSpacing.md,
+              0,
+            ),
             child: Row(
               children: [
                 const EmGzLogo(),
                 const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text('Hey, gamer', style: AppTypography.h3),
-                ),
+                Expanded(child: Text('Hey, gamer', style: AppTypography.h3)),
                 EmIconBtn(
                   tooltip: 'Notifications',
                   onTap: () => showNotificationCenter(context),
@@ -73,9 +79,13 @@ class HomeMobileLayout extends ConsumerWidget {
                         size: 18,
                       ),
                       const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        'Search gaming stores...',
-                        style: AppTypography.bodyR,
+                      Expanded(
+                        child: Text(
+                          'Search gaming stores...',
+                          style: AppTypography.bodyR,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
@@ -109,7 +119,8 @@ class HomeMobileLayout extends ConsumerWidget {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md),
+                          horizontal: AppSpacing.md,
+                        ),
                         child: EmSectionHead(
                           'Nearby stores',
                           subtitle: '${data.stores.length} within 10km',
@@ -118,7 +129,8 @@ class HomeMobileLayout extends ConsumerWidget {
                       if (data.stores.isEmpty)
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md),
+                            horizontal: AppSpacing.md,
+                          ),
                           child: EmCard(
                             variant: CardVariant.inset,
                             child: Column(
@@ -156,17 +168,19 @@ class HomeMobileLayout extends ConsumerWidget {
                         )
                       else
                         SizedBox(
-                          height: 188,
+                          height: _storeCardHeight,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.md),
+                              horizontal: AppSpacing.md,
+                            ),
                             itemCount: data.stores.length,
                             itemBuilder: (_, i) => _StoreCardLg(
                               store: data.stores[i],
                               index: i,
-                              onTap: () => context
-                                  .push('/home/store/${data.stores[i].slug}'),
+                              onTap: () => context.push(
+                                '/home/store/${data.stores[i].slug}',
+                              ),
                             ),
                           ),
                         ),
@@ -174,7 +188,8 @@ class HomeMobileLayout extends ConsumerWidget {
                       if (data.stores.isNotEmpty) ...[
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md),
+                            horizontal: AppSpacing.md,
+                          ),
                           child: EmSectionHead(
                             'New in your city',
                             subtitle: '${data.stores.length} stores',
@@ -185,8 +200,9 @@ class HomeMobileLayout extends ConsumerWidget {
                           (i) => _NewStoreRow(
                             store: data.stores[i],
                             index: i,
-                            onTap: () => context
-                                .push('/home/store/${data.stores[i].slug}'),
+                            onTap: () => context.push(
+                              '/home/store/${data.stores[i].slug}',
+                            ),
                           ),
                         ),
                       ],
@@ -217,63 +233,68 @@ class _StoreCardLg extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 190,
-        margin: const EdgeInsets.only(right: AppSpacing.sm),
-        child: EmCard(
-          variant: CardVariant.base,
-          padding: 0,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 108,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: AppColors.pillBg,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(AppSpacing.borderRadiusCard),
-                  ),
-                ),
-                child: const Center(
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedGameboy,
-                    color: AppColors.textTertiary,
-                    size: 32,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      store.name ?? 'Store',
-                      style: AppTypography.h3,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+          onTap: onTap,
+          child: Container(
+            width: _storeCardWidth,
+            margin: const EdgeInsets.only(right: AppSpacing.sm),
+            child: EmCard(
+              variant: CardVariant.base,
+              padding: 0,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: _storeCardMediaHeight,
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: AppColors.pillBg,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(AppSpacing.borderRadiusCard),
+                      ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      store.city ?? '',
-                      style: AppTypography.small,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    child: const Center(
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedGameboy,
+                        color: AppColors.textTertiary,
+                        size: 32,
+                      ),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    store.isActive == true
-                        ? const EmTag(kind: EmTagKind.ok, label: 'Open')
-                        : const EmTag(kind: EmTagKind.mute, label: 'Closed'),
-                  ],
-                ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(
+                      AppSpacing.sm + AppSpacing.xs,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          store.name ?? 'Store',
+                          style: AppTypography.h3,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          store.city ?? '',
+                          style: AppTypography.small,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        store.isActive == true
+                            ? const EmTag(kind: EmTagKind.ok, label: 'Open')
+                            : const EmTag(
+                                kind: EmTagKind.mute,
+                                label: 'Closed',
+                              ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-    )
+        )
         .animate(delay: (index * 60).ms)
         .fadeIn(duration: 220.ms)
         .slideX(begin: 0.04, end: 0, duration: 220.ms);
@@ -293,50 +314,54 @@ class _NewStoreRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initial =
-        store.name?.isNotEmpty == true ? store.name![0] : 'S';
+    final initial = store.name?.isNotEmpty == true ? store.name![0] : 'S';
     return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-            AppSpacing.md, 0, AppSpacing.md, AppSpacing.sm),
-        child: EmCard(
-          variant: CardVariant.base,
-          padding: AppSpacing.sm + AppSpacing.xs,
-          child: Row(
-            children: [
-              EmAvatar(children: initial, index: index),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      store.name ?? 'Store',
-                      style: AppTypography.body,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              0,
+              AppSpacing.md,
+              AppSpacing.sm,
+            ),
+            child: EmCard(
+              variant: CardVariant.base,
+              padding: AppSpacing.sm + AppSpacing.xs,
+              child: Row(
+                children: [
+                  EmAvatar(children: initial, index: index),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          store.name ?? 'Store',
+                          style: AppTypography.body,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          [
+                            store.address,
+                            store.city,
+                          ].where((s) => s != null && s.isNotEmpty).join(', '),
+                          style: AppTypography.small,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
-                    Text(
-                      [store.address, store.city]
-                          .where((s) => s != null && s.isNotEmpty)
-                          .join(', '),
-                      style: AppTypography.small,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  store.isActive == true
+                      ? const EmTag(kind: EmTagKind.ok, label: 'Open')
+                      : const EmTag(kind: EmTagKind.mute, label: 'Closed'),
+                ],
               ),
-              const SizedBox(width: AppSpacing.sm),
-              store.isActive == true
-                  ? const EmTag(kind: EmTagKind.ok, label: 'Open')
-                  : const EmTag(kind: EmTagKind.mute, label: 'Closed'),
-            ],
+            ),
           ),
-        ),
-      ),
-    )
+        )
         .animate(delay: (index * 60).ms)
         .fadeIn(duration: 220.ms)
         .slideY(begin: 0.05, end: 0, duration: 220.ms);

@@ -40,8 +40,9 @@ class BookingDetailMobileLayout extends ConsumerWidget {
             Expanded(
               child: PageErrorDisplay(
                 error: AppPageError.from(e),
-                onRetry: () =>
-                    ref.read(bookingDetailNotifierProvider(id).notifier).refresh(id),
+                onRetry: () => ref
+                    .read(bookingDetailNotifierProvider(id).notifier)
+                    .refresh(id),
               ),
             ),
           ],
@@ -59,22 +60,22 @@ class _BookingDetailBody extends ConsumerWidget {
   const _BookingDetailBody({required this.booking, required this.bookingId});
 
   EmTagKind _tagKind(BookingStatus? status) => switch (status) {
-        BookingStatus.confirmed => EmTagKind.ok,
-        BookingStatus.pending => EmTagKind.warn,
-        BookingStatus.checkedIn => EmTagKind.info,
-        BookingStatus.cancelled => EmTagKind.err,
-        BookingStatus.noShow => EmTagKind.err,
-        null => EmTagKind.mute,
-      };
+    BookingStatus.confirmed => EmTagKind.ok,
+    BookingStatus.pending => EmTagKind.warn,
+    BookingStatus.checkedIn => EmTagKind.info,
+    BookingStatus.cancelled => EmTagKind.err,
+    BookingStatus.noShow => EmTagKind.err,
+    null => EmTagKind.mute,
+  };
 
   String _tagLabel(BookingStatus? status) => switch (status) {
-        BookingStatus.confirmed => 'Confirmed',
-        BookingStatus.pending => 'Payment pending',
-        BookingStatus.checkedIn => 'Checked in',
-        BookingStatus.cancelled => 'Cancelled',
-        BookingStatus.noShow => 'No show',
-        null => 'Unknown',
-      };
+    BookingStatus.confirmed => 'Confirmed',
+    BookingStatus.pending => 'Payment pending',
+    BookingStatus.checkedIn => 'Checked in',
+    BookingStatus.cancelled => 'Cancelled',
+    BookingStatus.noShow => 'No show',
+    null => 'Unknown',
+  };
 
   String _formatDate(DateTime? dt) {
     if (dt == null) return '—';
@@ -102,107 +103,108 @@ class _BookingDetailBody extends ConsumerWidget {
       child: Column(
         children: [
           EmTopBar(title: 'Booking'),
-          EmScrollContent(
-            padded: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ── Status tag ──
-                Center(
-                  child: EmTag(
-                    kind: _tagKind(status),
-                    label: _tagLabel(status),
+          Expanded(
+            child: EmScrollContent(
+              padded: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // ── Status tag ──
+                  Center(
+                    child: EmTag(
+                      kind: _tagKind(status),
+                      label: _tagLabel(status),
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.md),
 
-                // ── System card ──
-                EmCard(
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: AppColors.pillBg,
-                          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusChip),
-                        ),
-                        child: const Center(
-                          child: HugeIcon(
-                            icon: HugeIcons.strokeRoundedComputerDesk01,
-                            color: AppColors.textPrimary,
-                            size: 22,
+                  // ── System card ──
+                  EmCard(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: AppColors.pillBg,
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.borderRadiusChip,
+                            ),
+                          ),
+                          child: const Center(
+                            child: HugeIcon(
+                              icon: HugeIcons.strokeRoundedComputerDesk01,
+                              color: AppColors.textPrimary,
+                              size: 22,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              booking.storeId ?? '—',
-                              style: AppTypography.small.copyWith(
-                                color: AppColors.textTertiary,
+                        const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                booking.storeId ?? '—',
+                                style: AppTypography.small.copyWith(
+                                  color: AppColors.textTertiary,
+                                ),
                               ),
-                            ),
-                            Text(
-                              booking.systemId ?? '—',
-                              style: AppTypography.h3,
-                            ),
-                          ],
+                              Text(
+                                booking.systemId ?? '—',
+                                style: AppTypography.h3,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: AppSpacing.sm),
 
-                // ── Booking time fields ──
-                EmCard(
-                  child: Column(
-                    children: [
-                      EmMetaRow(
-                        label: 'Date',
-                        value: _formatDate(booking.scheduledStart),
-                      ),
-                      EmMetaRow(
-                        label: 'Start',
-                        value: _formatTime(booking.scheduledStart),
-                      ),
-                      EmMetaRow(
-                        label: 'End',
-                        value: _formatTime(booking.scheduledEnd),
-                      ),
-                      EmMetaRow(
-                        label: 'Duration',
-                        value: '${dur}m',
-                      ),
-                    ],
+                  // ── Booking time fields ──
+                  EmCard(
+                    child: Column(
+                      children: [
+                        EmMetaRow(
+                          label: 'Date',
+                          value: _formatDate(booking.scheduledStart),
+                        ),
+                        EmMetaRow(
+                          label: 'Start',
+                          value: _formatTime(booking.scheduledStart),
+                        ),
+                        EmMetaRow(
+                          label: 'End',
+                          value: _formatTime(booking.scheduledEnd),
+                        ),
+                        EmMetaRow(label: 'Duration', value: '${dur}m'),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: AppSpacing.sm),
 
-                // ── Pricing ──
-                EmCard(
-                  child: Column(
-                    children: [
-                      EmMetaRow(
-                        label: 'Amount',
-                        value: booking.amount != null
-                            ? '₹${booking.amount!.toStringAsFixed(2)}'
-                            : '—',
-                      ),
-                      EmMetaRow(
-                        label: 'Payment',
-                        value: booking.isPaid == true ? 'Paid' : 'Unpaid',
-                      ),
-                    ],
+                  // ── Pricing ──
+                  EmCard(
+                    child: Column(
+                      children: [
+                        EmMetaRow(
+                          label: 'Amount',
+                          value: booking.amount != null
+                              ? '₹${booking.amount!.toStringAsFixed(2)}'
+                              : '—',
+                        ),
+                        EmMetaRow(
+                          label: 'Payment',
+                          value: booking.isPaid == true ? 'Paid' : 'Unpaid',
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: AppSpacing.xl),
-              ],
+                  const SizedBox(height: AppSpacing.xl),
+                ],
+              ),
             ),
           ),
 
@@ -242,59 +244,58 @@ class _BottomCta extends ConsumerWidget {
       ),
       child: switch (status) {
         BookingStatus.pending => Row(
-            children: [
-              Expanded(
-                child: EmButton(
-                  label: 'Pay Now',
-                  onPressed: () => showPaymentSheet(context, ref, bookingId),
-                ),
+          children: [
+            Expanded(
+              child: EmButton(
+                label: 'Pay Now',
+                onPressed: () => showPaymentSheet(context, ref, bookingId),
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: EmButton(
-                  label: 'Cancel',
-                  variant: EmButtonVariant.ghost,
-                  onPressed: () => context.pop(),
-                ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: EmButton(
+                label: 'Cancel',
+                variant: EmButtonVariant.ghost,
+                onPressed: () => context.pop(),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
         BookingStatus.confirmed when !inWindow => EmButtonFull(
-            label: 'Cancel Booking',
-            variant: EmButtonVariant.ghost,
-            onPressed: () => context.pop(),
-          ),
+          label: 'Cancel Booking',
+          variant: EmButtonVariant.ghost,
+          onPressed: () => context.pop(),
+        ),
         BookingStatus.confirmed when inWindow => Row(
-            children: [
-              Expanded(
-                child: EmButton(
-                  label: 'Check In',
-                  onPressed: () {
-                    final path = AppRoutes.checkIn
-                        .replaceAll(':id', bookingId);
-                    context.push(path);
-                  },
-                ),
+          children: [
+            Expanded(
+              child: EmButton(
+                label: 'Check In',
+                onPressed: () {
+                  final path = AppRoutes.checkIn.replaceAll(':id', bookingId);
+                  context.push(path);
+                },
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: EmButton(
-                  label: 'Cancel',
-                  variant: EmButtonVariant.ghost,
-                  onPressed: () => context.pop(),
-                ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: EmButton(
+                label: 'Cancel',
+                variant: EmButtonVariant.ghost,
+                onPressed: () => context.pop(),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
         BookingStatus.checkedIn => EmButtonFull(
-            label: 'View Active Session',
-            onPressed: () => context.push(AppRoutes.sessions),
-          ),
+          label: 'View Active Session',
+          onPressed: () => context.push(AppRoutes.sessions),
+        ),
         BookingStatus.cancelled || BookingStatus.noShow => EmButtonFull(
-            label: 'File Dispute',
-            variant: EmButtonVariant.ghost,
-            onPressed: () => context.push(AppRoutes.disputeCreate),
-          ),
+          label: 'File Dispute',
+          variant: EmButtonVariant.ghost,
+          onPressed: () => context.push(AppRoutes.disputeCreate),
+        ),
         _ => const SizedBox.shrink(),
       },
     );

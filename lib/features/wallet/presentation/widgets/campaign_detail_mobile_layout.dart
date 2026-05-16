@@ -31,20 +31,19 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
     final notifier = ref.read(campaignDetailNotifierProvider(id).notifier);
 
     // Resolve campaign: prefer passed-in, fall back to provider lookup
-    final c = campaign ??
+    final c =
+        campaign ??
         campaignsState.data.asData?.value.cast<CampaignModel?>().firstWhere(
-              (x) => x?.id == id,
-              orElse: () => null,
-            );
+          (x) => x?.id == id,
+          orElse: () => null,
+        );
 
     if (c == null) {
       return SafeArea(
         child: Column(
           children: [
             const EmTopBar(title: 'Campaign'),
-            const Expanded(
-              child: Center(child: CircularProgressIndicator()),
-            ),
+            const Expanded(child: Center(child: CircularProgressIndicator())),
           ],
         ),
       );
@@ -52,9 +51,9 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
 
     ref.listen(campaignDetailNotifierProvider(id), (_, next) {
       if (next is CampaignDetailSuccess) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Campaign redeemed!')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Campaign redeemed!')));
       } else if (next is CampaignDetailError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -72,142 +71,162 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
       child: Column(
         children: [
           EmTopBar(title: c.name ?? 'Campaign'),
-          EmScrollContent(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.md, 0, AppSpacing.md, AppSpacing.xl),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Banner placeholder
-                  Container(
-                    height: 160,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceTint,
-                      borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCard),
-                    ),
-                    alignment: Alignment.center,
-                    child: EmTag(
-                      kind: _tagKindFor(c.campaignType),
-                      label: _typeLabel(c.campaignType),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-
-                  // Name + type
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(c.name ?? 'Campaign', style: AppTypography.h1),
+          Expanded(
+            child: EmScrollContent(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  0,
+                  AppSpacing.md,
+                  AppSpacing.xl,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Banner placeholder
+                    Container(
+                      height: 160,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceTint,
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.borderRadiusCard,
+                        ),
                       ),
-                      const SizedBox(width: AppSpacing.sm),
-                      EmTag(
+                      alignment: Alignment.center,
+                      child: EmTag(
                         kind: _tagKindFor(c.campaignType),
                         label: _typeLabel(c.campaignType),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.md),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
 
-                  // Description + terms
-                  if (c.description != null || c.terms != null)
+                    // Name + type
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            c.name ?? 'Campaign',
+                            style: AppTypography.h1,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        EmTag(
+                          kind: _tagKindFor(c.campaignType),
+                          label: _typeLabel(c.campaignType),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+
+                    // Description + terms
+                    if (c.description != null || c.terms != null)
+                      EmCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (c.description != null)
+                              Text(c.description!, style: AppTypography.bodyR),
+                            if (c.description != null && c.terms != null)
+                              const SizedBox(height: AppSpacing.sm),
+                            if (c.terms != null) ...[
+                              Text(
+                                'TERMS',
+                                style: AppTypography.meta.copyWith(
+                                  color: AppColors.textTertiary,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(c.terms!, style: AppTypography.bodyR),
+                            ],
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: AppSpacing.sm),
+
+                    // Validity + time restrictions
                     EmCard(
+                      variant: CardVariant.inset,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (c.description != null)
-                            Text(c.description!, style: AppTypography.bodyR),
-                          if (c.description != null && c.terms != null)
-                            const SizedBox(height: AppSpacing.sm),
-                          if (c.terms != null) ...[
-                            Text('TERMS',
-                                style: AppTypography.meta.copyWith(
-                                    color: AppColors.textTertiary)),
+                          if (c.validFrom != null)
+                            _InfoRow(
+                              label: 'Start',
+                              value: _dateLabel(c.validFrom!),
+                            ),
+                          if (c.validUntil != null)
+                            _InfoRow(
+                              label: 'Expires',
+                              value: _dateLabel(c.validUntil!),
+                            ),
+                          if (c.applicableSystemTypes != null &&
+                              c.applicableSystemTypes!.isNotEmpty) ...[
                             const SizedBox(height: AppSpacing.xs),
-                            Text(c.terms!, style: AppTypography.bodyR),
+                            Wrap(
+                              spacing: AppSpacing.xs,
+                              children: c.applicableSystemTypes!
+                                  .map((s) => EmChip(value: s))
+                                  .toList(),
+                            ),
                           ],
                         ],
                       ),
                     ),
-                  const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.sm),
 
-                  // Validity + time restrictions
-                  EmCard(
-                    variant: CardVariant.inset,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (c.validFrom != null)
-                          _InfoRow(
-                              label: 'Start',
-                              value: _dateLabel(c.validFrom!)),
-                        if (c.validUntil != null)
-                          _InfoRow(
-                              label: 'Expires',
-                              value: _dateLabel(c.validUntil!)),
-                        if (c.applicableSystemTypes != null &&
-                            c.applicableSystemTypes!.isNotEmpty) ...[
-                          const SizedBox(height: AppSpacing.xs),
-                          Wrap(
-                            spacing: AppSpacing.xs,
-                            children: c.applicableSystemTypes!
-                                .map((s) => EmChip(value: s))
-                                .toList(),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-
-                  // Eligibility
-                  EmCard(
-                    variant: CardVariant.inset,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (c.minTier != null)
-                          _InfoRow(
-                              label: 'Min tier', value: 'Tier ${c.minTier}'),
-                        if (c.maxPerUser != null)
-                          _InfoRow(
+                    // Eligibility
+                    EmCard(
+                      variant: CardVariant.inset,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (c.minTier != null)
+                            _InfoRow(
+                              label: 'Min tier',
+                              value: 'Tier ${c.minTier}',
+                            ),
+                          if (c.maxPerUser != null)
+                            _InfoRow(
                               label: 'Per user',
-                              value: 'Max ${c.maxPerUser} use(s)'),
-                        if (c.maxRedemptions != null) ...[
-                          _InfoRow(
+                              value: 'Max ${c.maxPerUser} use(s)',
+                            ),
+                          if (c.maxRedemptions != null) ...[
+                            _InfoRow(
                               label: 'Total',
                               value:
-                                  '${c.currentRedemptions ?? 0} / ${c.maxRedemptions} redeemed'),
+                                  '${c.currentRedemptions ?? 0} / ${c.maxRedemptions} redeemed',
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-
-                  // Benefit summary
-                  EmCard(
-                    variant: CardVariant.tint,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('BENEFIT',
-                            style: AppTypography.meta
-                                .copyWith(color: AppColors.textSecondary)),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          _benefitSummary(c),
-                          style: AppTypography.h1,
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (alreadyRedeemed) ...[
                     const SizedBox(height: AppSpacing.sm),
-                    const EmTag(kind: EmTagKind.mute, label: 'Redeemed'),
+
+                    // Benefit summary
+                    EmCard(
+                      variant: CardVariant.tint,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'BENEFIT',
+                            style: AppTypography.meta.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(_benefitSummary(c), style: AppTypography.h1),
+                        ],
+                      ),
+                    ),
+                    if (alreadyRedeemed) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      const EmTag(kind: EmTagKind.mute, label: 'Redeemed'),
+                    ],
+                    const SizedBox(height: AppSpacing.xl),
                   ],
-                  const SizedBox(height: AppSpacing.xl),
-                ],
+                ),
               ),
             ),
           ),
@@ -215,11 +234,17 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
           // Sticky CTA
           Padding(
             padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.md),
+              AppSpacing.md,
+              AppSpacing.sm,
+              AppSpacing.md,
+              AppSpacing.md,
+            ),
             child: EmButtonFull(
               label: alreadyRedeemed ? 'Redeemed' : 'Redeem Now',
               loading: isLoading,
-              onPressed: (isLoading || alreadyRedeemed) ? null : notifier.redeem,
+              onPressed: (isLoading || alreadyRedeemed)
+                  ? null
+                  : notifier.redeem,
             ),
           ),
         ],
@@ -228,22 +253,22 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
   }
 
   static EmTagKind _tagKindFor(CampaignType? type) => switch (type) {
-        CampaignType.percentageOff || CampaignType.fixedOff => EmTagKind.ok,
-        CampaignType.bonusCredits || CampaignType.bonusMinutes => EmTagKind.purple,
-        CampaignType.happyHour => EmTagKind.warn,
-        CampaignType.firstVisit => EmTagKind.info,
-        null => EmTagKind.mute,
-      };
+    CampaignType.percentageOff || CampaignType.fixedOff => EmTagKind.ok,
+    CampaignType.bonusCredits || CampaignType.bonusMinutes => EmTagKind.purple,
+    CampaignType.happyHour => EmTagKind.warn,
+    CampaignType.firstVisit => EmTagKind.info,
+    null => EmTagKind.mute,
+  };
 
   static String _typeLabel(CampaignType? type) => switch (type) {
-        CampaignType.percentageOff => 'Discount',
-        CampaignType.fixedOff => 'Fixed Off',
-        CampaignType.bonusCredits => 'Bonus Credits',
-        CampaignType.bonusMinutes => 'Bonus Time',
-        CampaignType.happyHour => 'Happy Hour',
-        CampaignType.firstVisit => 'First Visit',
-        null => 'Campaign',
-      };
+    CampaignType.percentageOff => 'Discount',
+    CampaignType.fixedOff => 'Fixed Off',
+    CampaignType.bonusCredits => 'Bonus Credits',
+    CampaignType.bonusMinutes => 'Bonus Time',
+    CampaignType.happyHour => 'Happy Hour',
+    CampaignType.firstVisit => 'First Visit',
+    null => 'Campaign',
+  };
 
   static String _benefitSummary(CampaignModel c) {
     final val = c.value;
@@ -260,8 +285,20 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
   }
 
   static String _dateLabel(DateTime dt) {
-    const m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const m = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return '${dt.day} ${m[dt.month - 1]} ${dt.year}';
   }
 }
@@ -279,9 +316,13 @@ class _InfoRow extends StatelessWidget {
         children: [
           Text(label, style: AppTypography.small),
           const SizedBox(width: AppSpacing.sm),
-          Text(value,
-              style: AppTypography.small.copyWith(
-                  color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+          Text(
+            value,
+            style: AppTypography.small.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
