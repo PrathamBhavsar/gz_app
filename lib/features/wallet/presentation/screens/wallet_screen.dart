@@ -1,24 +1,329 @@
 import 'package:flutter/material.dart';
-import '../../../../core/responsive/breakpoints.dart';
-import '../../../../core/responsive/responsive_builder.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
+
+import '../../../../core/navigation/routes.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../widgets/wallet_mobile_layout.dart';
-import '../widgets/wallet_tablet_layout.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_tag.dart';
+import 'redeem_credits_sheet.dart';
 
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
+
+  static const _transactions = [
+    _WalletTransaction(
+      title: 'Booking credit',
+      amount: '+200',
+      date: 'Jun 02',
+      color: AppColors.ok,
+    ),
+    _WalletTransaction(
+      title: 'Session deduct',
+      amount: '−150',
+      date: 'Jun 01',
+      color: AppColors.err,
+    ),
+    _WalletTransaction(
+      title: 'Welcome bonus',
+      amount: '+500',
+      date: 'May 28',
+      color: AppColors.ok,
+    ),
+  ];
+
+  static const _campaigns = [
+    _WalletCampaign(
+      id: 'welcome-bonus',
+      title: 'Welcome Bonus',
+      description: 'Earn 2× credits on your first booking',
+      status: GzTagKind.ok,
+      statusLabel: 'Active',
+      expiry: 'Expires Dec 31, 2025',
+    ),
+    _WalletCampaign(
+      id: 'happy-hours',
+      title: 'Happy Hours',
+      description: '50% off all systems 2 PM – 5 PM Mon–Thu',
+      status: GzTagKind.ok,
+      statusLabel: 'Active',
+      expiry: 'Ongoing',
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: ResponsiveBuilderWidget(
-        builder: (context, deviceType) => switch (deviceType) {
-          DeviceType.mobile  => const WalletMobileLayout(),
-          DeviceType.tablet  => const WalletTabletLayout(),
-          DeviceType.desktop => const WalletTabletLayout(),
-        },
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          children: [
+            Text('Wallet', style: AppTypography.h1),
+            const SizedBox(height: 18),
+            const GzCard(
+              variant: CardVariant.tint,
+              child: _BalanceHero(),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: GzButton(
+                    label: 'Add credits',
+                    variant: GzButtonVariant.ghost,
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Credits can be added during checkout.'),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GzButton(
+                    label: 'Redeem',
+                    onPressed: () => showRedeemCreditsSheet(context),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 26),
+            _SectionHeader(
+              title: 'Transactions',
+              actionLabel: 'See all →',
+              onTap: () => context.push(AppRoutes.creditHistory),
+            ),
+            const SizedBox(height: 12),
+            GzCard(
+              child: Column(
+                children: [
+                  _TransactionRow(transaction: _transactions[0]),
+                  const _Divider(),
+                  _TransactionRow(transaction: _transactions[1]),
+                  const _Divider(),
+                  _TransactionRow(transaction: _transactions[2]),
+                ],
+              ),
+            ),
+            const SizedBox(height: 26),
+            _SectionHeader(
+              title: 'Active campaigns',
+              actionLabel: 'See all →',
+              onTap: () => context.push(AppRoutes.campaigns),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 176,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _campaigns.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final campaign = _campaigns[index];
+                  return _CampaignPreviewCard(campaign: campaign);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+class _BalanceHero extends StatelessWidget {
+  const _BalanceHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('CREDIT BALANCE', style: AppTypography.meta),
+        const SizedBox(height: 12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text('850', style: AppTypography.hero),
+            const SizedBox(width: 8),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text('credits', style: AppTypography.small),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text('≈ ₹85.00 today', style: AppTypography.bodyR),
+      ],
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    required this.actionLabel,
+    required this.onTap,
+  });
+
+  final String title;
+  final String actionLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: Text(title, style: AppTypography.h2)),
+        GestureDetector(
+          onTap: onTap,
+          child: Text(
+            actionLabel,
+            style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TransactionRow extends StatelessWidget {
+  const _TransactionRow({required this.transaction});
+
+  final _WalletTransaction transaction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(transaction.title, style: AppTypography.h3),
+                const SizedBox(height: 4),
+                Text(transaction.date, style: AppTypography.small),
+              ],
+            ),
+          ),
+          Text(
+            transaction.amount,
+            style: AppTypography.num.copyWith(
+              color: transaction.color,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CampaignPreviewCard extends StatelessWidget {
+  const _CampaignPreviewCard({required this.campaign});
+
+  final _WalletCampaign campaign;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 246,
+      child: GestureDetector(
+        onTap: () => context.push(AppRoutes.campaignDetailPath(campaign.id)),
+        child: GzCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceTint,
+                  borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+                ),
+                child: const HugeIcon(
+                  icon: HugeIcons.strokeRoundedGift,
+                  color: AppColors.textPrimary,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(campaign.title, style: AppTypography.h3),
+              const SizedBox(height: 6),
+              Text(
+                campaign.description,
+                style: AppTypography.bodyR,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const Spacer(),
+              Row(
+                children: [
+                  GzTag(kind: campaign.status, label: campaign.statusLabel),
+                  const Spacer(),
+                  const HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowRight01,
+                    color: AppColors.textTertiary,
+                    size: 18,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(campaign.expiry, style: AppTypography.small),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  const _Divider();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Divider(height: 1, color: AppColors.divider);
+  }
+}
+
+class _WalletTransaction {
+  const _WalletTransaction({
+    required this.title,
+    required this.amount,
+    required this.date,
+    required this.color,
+  });
+
+  final String title;
+  final String amount;
+  final String date;
+  final Color color;
+}
+
+class _WalletCampaign {
+  const _WalletCampaign({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.status,
+    required this.statusLabel,
+    required this.expiry,
+  });
+
+  final String id;
+  final String title;
+  final String description;
+  final GzTagKind status;
+  final String statusLabel;
+  final String expiry;
 }

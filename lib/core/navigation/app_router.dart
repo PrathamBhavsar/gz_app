@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'routes.dart';
-import '../../models/domain_loyalty.dart';
 import '../../features/auth/presentation/providers/auth_notifier.dart';
 import '../../features/auth/presentation/providers/auth_state.dart';
 import '../../features/admin/presentation/providers/admin_auth_provider.dart';
@@ -259,8 +258,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.campaignDetail,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          final campaign = state.extra as CampaignModel?;
-          return CampaignDetailScreen(id: id, campaign: campaign);
+          return CampaignDetailScreen(id: id);
         },
       ),
       GoRoute(
