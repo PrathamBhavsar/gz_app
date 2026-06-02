@@ -1,344 +1,222 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+
 import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/navigation/routes.dart';
-import '../../providers/admin_management_provider.dart';
-import '../../providers/admin_permissions.dart';
+import '../../../../../core/theme/app_typography.dart';
+import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_avatar.dart';
+import '../../../../../shared/widgets/gz_button.dart';
+import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_scroll_content.dart';
 
-final _creditsUserIdProvider = StateProvider.autoDispose<String?>((ref) => null);
-
-/// Credits Management — Screen 55.
-/// Player search, balance card, transaction history, manual adjustment.
-class CreditsManagementScreen extends ConsumerStatefulWidget {
+class CreditsManagementScreen extends StatelessWidget {
   const CreditsManagementScreen({super.key});
 
-  @override
-  ConsumerState<CreditsManagementScreen> createState() =>
-      _CreditsManagementScreenState();
-}
-
-class _CreditsManagementScreenState
-    extends ConsumerState<CreditsManagementScreen> {
-  final _searchCtrl = TextEditingController();
-
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
+  static const _transactions = [
+    _CreditTransactionData(
+      label: 'Booking credit',
+      amount: '+200',
+      date: 'Jun 02',
+      isPositive: true,
+    ),
+    _CreditTransactionData(
+      label: 'Session deduct',
+      amount: '-150',
+      date: 'Jun 01',
+      isPositive: false,
+    ),
+    _CreditTransactionData(
+      label: 'Welcome bonus',
+      amount: '+500',
+      date: 'May 28',
+      isPositive: true,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final selectedUserId = ref.watch(_creditsUserIdProvider);
-    final state = ref.watch(creditsProvider);
-    final perms = ref.watch(adminPermissionsProvider);
-    final canAdjust = perms.canAdjustCreditBalance;
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: AppColors.textPrimary, size: 20),
-          onPressed: () => context.go(AppRoutes.adminPricing),
-        ),
-        title: Text('Credits', style: AppTypography.headingSmall),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: AppSpacing.md),
-            // Search bar
-            TextField(
-              controller: _searchCtrl,
-              style: AppTypography.bodyMedium,
-              decoration: InputDecoration(
-                hintText: 'Search by phone, email, or name',
-                hintStyle: AppTypography.caption,
-                prefixIcon: const HugeIcon(
-                  icon: HugeIcons.strokeRoundedSearch01,
-                  color: AppColors.textSecondary,
-                  size: 20,
-                ),
-                filled: true,
-                fillColor: AppColors.surface,
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadius),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              onSubmitted: (value) {
-                final userId = value.trim().isEmpty ? null : value.trim();
-                ref.read(_creditsUserIdProvider.notifier).state = userId;
-                if (userId != null) {
-                  ref.read(creditsProvider.notifier).load(userId: userId);
-                }
-              },
+      appBar: const GzAdminTopBar(title: 'Credits'),
+      body: SafeArea(
+        top: false,
+        child: GzScrollContent(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _SearchBar(),
+                const SizedBox(height: 14),
+                const _CreditsPlayerCard(transactions: _transactions),
+              ],
             ),
-            const SizedBox(height: AppSpacing.lg),
-            if (selectedUserId != null) _buildContent(state, canAdjust),
-            if (selectedUserId == null)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xxl),
-                  child: Text('Search for a player to view credits',
-                      style: AppTypography.bodyMedium
-                          .copyWith(color: AppColors.textSecondary)),
-                ),
-              ),
-            const SizedBox(height: AppSpacing.xxl),
-          ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildContent(ManagementState<Map<String, dynamic>> state, bool canAdjust) {
-    if (state is ManagementLoading<Map<String, dynamic>>) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.xxl),
-          child: CircularProgressIndicator(color: AppColors.rose),
-        ),
-      );
-    }
+class _SearchBar extends StatelessWidget {
+  const _SearchBar();
 
-    if (state is ManagementError<Map<String, dynamic>>) {
-      return _buildError(state.error);
-    }
-
-    if (state is ManagementLoaded<Map<String, dynamic>>) {
-      final balance = state.data['balance'] as Map<String, dynamic>?;
-      final transactions = state.data['transactions'] as List<dynamic>?;
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Balance card
-          _buildBalanceCard(balance, canAdjust),
-          const SizedBox(height: AppSpacing.lg),
-          // Transaction history
-          Text('Transaction History', style: AppTypography.headingSmall),
-          const SizedBox(height: AppSpacing.md),
-          if (transactions == null || transactions.isEmpty)
-            Text('No transactions',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary))
-          else
-            ...transactions
-                .map((t) => _buildTransactionRow(t as Map<String, dynamic>)),
-        ],
-      );
-    }
-
-    return const SizedBox.shrink();
-  }
-
-  Widget _buildError(Object error) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        child: Column(
-          children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedAlert01,
-              color: AppColors.error,
-              size: 48,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text('Player not found or failed to load',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBalanceCard(Map<String, dynamic>? balance, bool canAdjust) {
-    final current = balance?['current_balance']?.toString() ?? '0';
-    final available = balance?['available_balance']?.toString() ?? '0';
-
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.pillBg,
         borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
       ),
+      child: const Row(
+        children: [
+          HugeIcon(
+            icon: HugeIcons.strokeRoundedSearch01,
+            color: AppColors.textTertiary,
+            size: 18,
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Search by phone, email, or name…',
+              style: AppTypography.bodyR,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CreditsPlayerCard extends StatelessWidget {
+  const _CreditsPlayerCard({required this.transactions});
+
+  final List<_CreditTransactionData> transactions;
+
+  @override
+  Widget build(BuildContext context) {
+    return GzCard(
+      padding: 16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Current Balance', style: AppTypography.caption),
-          const SizedBox(height: AppSpacing.xs),
-          Text('₹$current', style: AppTypography.headingLarge),
-          const SizedBox(height: AppSpacing.sm),
-          Text('Available: ₹$available',
-              style: AppTypography.bodySmall
-                  .copyWith(color: AppColors.textSecondary)),
-          if (canAdjust) ...[
-            const SizedBox(height: AppSpacing.md),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () => _showAdjustSheet(context),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.rose,
-                  side: const BorderSide(color: AppColors.rose),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.borderRadius),
-                  ),
+          const Row(
+            children: [
+              GzAvatar(letter: 'R', size: GzAvatarSize.lg),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Rahul Mehra', style: AppTypography.h3),
+                    SizedBox(height: 2),
+                    Text('+91 98765 43210', style: AppTypography.small),
+                  ],
                 ),
-                child: Text('Adjust Balance', style: AppTypography.button),
               ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          const GzCard(
+            variant: CardVariant.tint,
+            padding: 14,
+            child: Column(
+              children: [
+                Text('CREDIT BALANCE', style: AppTypography.meta),
+                SizedBox(height: 4),
+                Text('850', style: AppTypography.heroMd),
+                SizedBox(height: 2),
+                Text('credits', style: AppTypography.small),
+              ],
             ),
-          ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Text('Recent transactions', style: AppTypography.h3),
+              const Spacer(),
+              Text(
+                'See all →',
+                style: AppTypography.small.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ...transactions.map((tx) => _TransactionRow(transaction: tx)),
+          const SizedBox(height: 14),
+          const Row(
+            children: [
+              Expanded(
+                child: GzButton(
+                  label: 'Deduct credits',
+                  variant: GzButtonVariant.ghost,
+                  small: true,
+                ),
+              ),
+              SizedBox(width: 10),
+              Expanded(child: GzButton(label: 'Add credits', small: true)),
+            ],
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildTransactionRow(Map<String, dynamic> tx) {
-    final type = tx['transaction_type']?.toString() ?? '--';
-    final amount = tx['amount']?.toString() ?? '0';
-    final desc = tx['description']?.toString() ?? type;
-    final isPositive = (double.tryParse(amount) ?? 0) > 0;
+class _TransactionRow extends StatelessWidget {
+  const _TransactionRow({required this.transaction});
 
+  final _CreditTransactionData transaction;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: AppColors.rule)),
       ),
       child: Row(
         children: [
           Expanded(
-            child: Text(desc, style: AppTypography.bodySmall),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction.label,
+                  style: AppTypography.body.copyWith(fontSize: 13),
+                ),
+                const SizedBox(height: 2),
+                Text(transaction.date, style: AppTypography.small),
+              ],
+            ),
           ),
           Text(
-            '${isPositive ? '+' : ''}₹$amount',
-            style: AppTypography.bodySmall.copyWith(
-              color: isPositive ? AppColors.ok : AppColors.rose,
+            transaction.amount,
+            style: AppTypography.num.copyWith(
               fontWeight: FontWeight.w600,
+              color: transaction.isPositive ? AppColors.ok : AppColors.err,
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  void _showAdjustSheet(BuildContext context) {
-    final amountCtrl = TextEditingController();
-    final reasonCtrl = TextEditingController();
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.borderRadiusLg),
-        ),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Adjust Credits', style: AppTypography.headingSmall),
-            const SizedBox(height: AppSpacing.sm),
-            Text('Use negative values to deduct. This action is logged.',
-                style: AppTypography.caption),
-            const SizedBox(height: AppSpacing.lg),
-            TextField(
-              controller: amountCtrl,
-              style: AppTypography.bodyMedium,
-              keyboardType: const TextInputType.numberWithOptions(
-                  signed: true, decimal: true),
-              decoration: InputDecoration(
-                labelText: 'Amount (±)',
-                labelStyle: AppTypography.caption,
-                filled: true,
-                fillColor: AppColors.background,
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: reasonCtrl,
-              style: AppTypography.bodyMedium,
-              maxLines: 2,
-              decoration: InputDecoration(
-                labelText: 'Reason',
-                labelStyle: AppTypography.caption,
-                filled: true,
-                fillColor: AppColors.background,
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  final amount = double.tryParse(amountCtrl.text);
-                  final selectedUserId = ref.read(_creditsUserIdProvider);
-                  if (amount == null || selectedUserId == null) return;
-                  context.pop();
-                  await ref.read(creditsProvider.notifier).adjustCredits(
-                        userId: selectedUserId,
-                        amount: amount,
-                        reason: reasonCtrl.text.trim().isEmpty
-                            ? null
-                            : reasonCtrl.text.trim(),
-                      );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.rose,
-                  foregroundColor: AppColors.background,
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.borderRadius),
-                  ),
-                ),
-                child: Text('Apply', style: AppTypography.button),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-          ],
-        ),
-      ),
-    );
-  }
+class _CreditTransactionData {
+  const _CreditTransactionData({
+    required this.label,
+    required this.amount,
+    required this.date,
+    required this.isPositive,
+  });
+
+  final String label;
+  final String amount;
+  final String date;
+  final bool isPositive;
 }

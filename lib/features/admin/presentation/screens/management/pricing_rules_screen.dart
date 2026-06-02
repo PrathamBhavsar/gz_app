@@ -1,376 +1,175 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/navigation/routes.dart';
-import '../../providers/admin_management_provider.dart';
-import '../../providers/admin_permissions.dart';
 
-/// Pricing Rules — Screen 52.
-/// CRUD for dynamic pricing rules with active toggle.
-class PricingRulesScreen extends ConsumerStatefulWidget {
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
+import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_scroll_content.dart';
+import '../../../../../shared/widgets/gz_tag.dart';
+
+class PricingRulesScreen extends StatelessWidget {
   const PricingRulesScreen({super.key});
 
-  @override
-  ConsumerState<PricingRulesScreen> createState() =>
-      _PricingRulesScreenState();
-}
-
-class _PricingRulesScreenState extends ConsumerState<PricingRulesScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() => ref.read(pricingRulesProvider.notifier).load());
-  }
+  static const _rules = [
+    _PricingRuleData(
+      name: 'Standard Rate',
+      rate: '₹80/hour · All day',
+      isActive: true,
+      tags: ['PC', 'All hours'],
+    ),
+    _PricingRuleData(
+      name: 'Peak Hour',
+      rate: '₹120/hour · 6 PM–10 PM',
+      isActive: true,
+      tags: ['All', 'Evening'],
+    ),
+    _PricingRuleData(
+      name: 'Weekend Rate',
+      rate: '₹100/hour · Sat–Sun',
+      isActive: true,
+      tags: ['All', 'Weekend'],
+    ),
+    _PricingRuleData(
+      name: 'VR Premium',
+      rate: '₹150/hour',
+      isActive: false,
+      tags: ['VR', 'All hours'],
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(pricingRulesProvider);
-    final perms = ref.watch(adminPermissionsProvider);
-    final canEdit = perms.canManagePricingRules;
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: AppColors.textPrimary, size: 20),
-          onPressed: () => context.go(AppRoutes.adminPricing),
-        ),
-        title: Text('Pricing Rules', style: AppTypography.headingSmall),
-        actions: [
-          if (canEdit)
-            IconButton(
-              icon: const HugeIcon(
-                icon: HugeIcons.strokeRoundedAdd01,
-                color: AppColors.textPrimary,
-              ),
-              onPressed: () => _showAddRuleSheet(context),
-            ),
-        ],
+      appBar: GzAdminTopBar(
+        title: 'Pricing Rules',
+        trailing: const _TopBarAction(icon: HugeIcons.strokeRoundedAdd01),
       ),
-      body: RefreshIndicator(
-        color: AppColors.rose,
-        backgroundColor: AppColors.surface,
-        onRefresh: () =>
-            ref.read(pricingRulesProvider.notifier).load(),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: AppSpacing.md),
-              _buildContent(state, canEdit),
-              const SizedBox(height: AppSpacing.xxl),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContent(ManagementState<List<dynamic>> state, bool canEdit) {
-    if (state is ManagementLoading<List<dynamic>>) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.xxl),
-          child: CircularProgressIndicator(color: AppColors.rose),
-        ),
-      );
-    }
-
-    if (state is ManagementError<List<dynamic>>) {
-      return _buildError(state.error);
-    }
-
-    if (state is ManagementLoaded<List<dynamic>>) {
-      final rules = state.data;
-      if (rules.isEmpty) {
-        return Center(
+      body: SafeArea(
+        top: false,
+        child: GzScrollContent(
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xxl),
-            child: Text('No pricing rules configured',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary)),
-          ),
-        );
-      }
-      return Column(
-        children: rules
-            .map((r) => _buildRuleCard(r as Map<String, dynamic>, canEdit))
-            .toList(),
-      );
-    }
-
-    return const SizedBox.shrink();
-  }
-
-  Widget _buildError(Object error) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        child: Column(
-          children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedAlert01,
-              color: AppColors.error,
-              size: 48,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text('Failed to load pricing rules',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary)),
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: () =>
-                  ref.read(pricingRulesProvider.notifier).load(),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(color: AppColors.border),
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadius),
-                ),
-              ),
-              child: Text('Retry', style: AppTypography.button),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRuleCard(Map<String, dynamic> rule, bool canEdit) {
-    final isActive = rule['is_active'] as bool? ?? false;
-    final name = rule['name'] ?? 'Unnamed Rule';
-    final ruleType = rule['rule_type'] ?? '--';
-    final multiplier = rule['multiplier']?.toString() ?? '--';
-    final startTime = rule['start_time'] ?? '';
-    final endTime = rule['end_time'] ?? '';
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-      ),
-      child: Row(
-        children: [
-          Expanded(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: AppTypography.bodyMedium),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  '$ruleType · ${multiplier}x${startTime.isNotEmpty ? ' · $startTime–$endTime' : ''}',
-                  style: AppTypography.caption,
-                ),
-              ],
+              children: _rules
+                  .map(
+                    (rule) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _PricingRuleCard(rule: rule),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color: isActive
-                  ? AppColors.ok.withValues(alpha: 0.15)
-                  : AppColors.surface2,
-              borderRadius:
-                  BorderRadius.circular(AppSpacing.borderRadiusSm),
-            ),
-            child: Text(
-              isActive ? 'Active' : 'Inactive',
-              style: AppTypography.bodySmall.copyWith(
-                color: isActive ? AppColors.ok : AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAddRuleSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.borderRadiusLg),
         ),
       ),
-      builder: (context) => const _AddRuleSheet(),
     );
   }
 }
 
-final _addRuleTypeProvider = StateProvider.autoDispose<String>((ref) => 'peak');
-final _addRuleSavingProvider = StateProvider.autoDispose<bool>((ref) => false);
+class _PricingRuleCard extends StatelessWidget {
+  const _PricingRuleCard({required this.rule});
 
-class _AddRuleSheet extends ConsumerStatefulWidget {
-  const _AddRuleSheet();
-
-  @override
-  ConsumerState<_AddRuleSheet> createState() => _AddRuleSheetState();
-}
-
-class _AddRuleSheetState extends ConsumerState<_AddRuleSheet> {
-  final _nameCtrl = TextEditingController();
-  final _multiplierCtrl = TextEditingController(text: '1.0');
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _multiplierCtrl.dispose();
-    super.dispose();
-  }
+  final _PricingRuleData rule;
 
   @override
   Widget build(BuildContext context) {
-    final ruleType = ref.watch(_addRuleTypeProvider);
-    final saving = ref.watch(_addRuleSavingProvider);
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
+    return GzCard(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Add Pricing Rule', style: AppTypography.headingSmall),
-          const SizedBox(height: AppSpacing.lg),
-          TextField(
-            controller: _nameCtrl,
-            style: AppTypography.bodyMedium,
-            decoration: InputDecoration(
-              labelText: 'Rule Name',
-              labelStyle: AppTypography.caption,
-              filled: true,
-              fillColor: AppColors.background,
-              border: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.borderRadiusSm),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.borderRadiusSm),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTypeChip('Peak', 'peak', ruleType),
-              const SizedBox(width: AppSpacing.sm),
-              _buildTypeChip('Off-Peak', 'off_peak', ruleType),
-              const SizedBox(width: AppSpacing.sm),
-              _buildTypeChip('Custom', 'custom', ruleType),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          TextField(
-            controller: _multiplierCtrl,
-            style: AppTypography.bodyMedium,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(
-              labelText: 'Multiplier',
-              labelStyle: AppTypography.caption,
-              filled: true,
-              fillColor: AppColors.background,
-              border: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.borderRadiusSm),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.borderRadiusSm),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: saving ? null : _save,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.rose,
-                foregroundColor: AppColors.background,
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadius),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(rule.name, style: AppTypography.h3),
+                    const SizedBox(height: 2),
+                    Text(rule.rate, style: AppTypography.small),
+                  ],
                 ),
               ),
-              child: saving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: AppColors.background,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : Text('Create Rule', style: AppTypography.button),
-            ),
+              _StaticToggle(isActive: rule.isActive),
+            ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: rule.tags
+                .map((tag) => GzTag(kind: GzTagKind.mute, label: tag))
+                .toList(),
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildTypeChip(String label, String value, String ruleType) {
-    final isActive = ruleType == value;
-    return GestureDetector(
-      onTap: () => ref.read(_addRuleTypeProvider.notifier).state = value,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
-        ),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.rose : AppColors.background,
-          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
-          border: Border.all(color: isActive ? AppColors.rose : AppColors.border),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.bodySmall.copyWith(
-            color: isActive ? AppColors.background : AppColors.textSecondary,
+class _StaticToggle extends StatelessWidget {
+  const _StaticToggle({required this.isActive});
+
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 26,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: isActive ? AppColors.buttonBg : AppColors.pillBg,
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusPill),
+      ),
+      child: Align(
+        alignment: isActive ? Alignment.centerRight : Alignment.centerLeft,
+        child: Container(
+          width: 20,
+          height: 20,
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            shape: BoxShape.circle,
           ),
         ),
       ),
     );
   }
+}
 
-  Future<void> _save() async {
-    if (_nameCtrl.text.trim().isEmpty) return;
-    ref.read(_addRuleSavingProvider.notifier).state = true;
+class _TopBarAction extends StatelessWidget {
+  const _TopBarAction({required this.icon});
 
-    final success = await ref.read(pricingRulesProvider.notifier).createRule({
-      'name': _nameCtrl.text.trim(),
-      'rule_type': ref.read(_addRuleTypeProvider),
-      'multiplier': double.tryParse(_multiplierCtrl.text) ?? 1.0,
-      'is_active': true,
-    });
+  final dynamic icon;
 
-    if (mounted) {
-      ref.read(_addRuleSavingProvider.notifier).state = false;
-      if (success) {
-        context.pop();
-      }
-    }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+      ),
+      alignment: Alignment.center,
+      child: HugeIcon(icon: icon, color: AppColors.textTertiary, size: 18),
+    );
   }
+}
+
+class _PricingRuleData {
+  const _PricingRuleData({
+    required this.name,
+    required this.rate,
+    required this.isActive,
+    required this.tags,
+  });
+
+  final String name;
+  final String rate;
+  final bool isActive;
+  final List<String> tags;
 }

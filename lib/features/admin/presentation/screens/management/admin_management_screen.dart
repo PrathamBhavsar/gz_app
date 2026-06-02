@@ -1,57 +1,107 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/navigation/routes.dart';
 
-/// Management Hub — Tab 3 root.
+import '../../../../../core/navigation/routes.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
+import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_scroll_content.dart';
+
 class AdminManagementScreen extends StatelessWidget {
   const AdminManagementScreen({super.key});
+
+  static const _tiles = [
+    _ManagementTileData(
+      label: 'Pricing Rules',
+      route: AppRoutes.adminPricing,
+      icon: HugeIcons.strokeRoundedBalanceScale,
+      iconColor: AppColors.err,
+    ),
+    _ManagementTileData(
+      label: 'Billing & Payments',
+      route: AppRoutes.adminBilling,
+      icon: HugeIcons.strokeRoundedCoinsDollar,
+      iconColor: AppColors.info,
+    ),
+    _ManagementTileData(
+      label: 'Campaigns',
+      route: AppRoutes.adminCampaigns,
+      icon: HugeIcons.strokeRoundedGift,
+      iconColor: AppColors.ok,
+    ),
+    _ManagementTileData(
+      label: 'Credits',
+      route: AppRoutes.adminCredits,
+      icon: HugeIcons.strokeRoundedStar,
+      iconColor: AppColors.warn,
+    ),
+    _ManagementTileData(
+      label: 'Disputes',
+      route: AppRoutes.adminDisputes,
+      icon: HugeIcons.strokeRoundedJusticeScale01,
+      iconColor: AppColors.err,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        title: Text('Management', style: AppTypography.headingSmall),
+      appBar: const GzAdminTopBar(title: 'Management', disableBack: true),
+      body: SafeArea(
+        top: false,
+        child: GzScrollContent(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            child: Column(
+              children: _tiles
+                  .map(
+                    (tile) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _ManagementTile(data: tile),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        child: Column(
-          children: const [
-            SizedBox(height: AppSpacing.md),
-            _ManagementTile(
-              title: 'Pricing Rules',
-              icon: HugeIcons.strokeRoundedTags,
-              route: AppRoutes.adminPricing,
+    );
+  }
+}
+
+class _ManagementTile extends StatelessWidget {
+  const _ManagementTile({required this.data});
+
+  final _ManagementTileData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCard),
+      onTap: () => context.go(data.route),
+      child: GzCard(
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: data.iconColor.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+              ),
+              alignment: Alignment.center,
+              child: HugeIcon(icon: data.icon, color: data.iconColor, size: 20),
             ),
-            SizedBox(height: AppSpacing.sm),
-            _ManagementTile(
-              title: 'Billing & Payments',
-              icon: HugeIcons.strokeRoundedInvoice01,
-              route: AppRoutes.adminBilling,
-            ),
-            SizedBox(height: AppSpacing.sm),
-            _ManagementTile(
-              title: 'Campaigns',
-              icon: HugeIcons.strokeRoundedMegaphone01,
-              route: AppRoutes.adminCampaigns,
-            ),
-            SizedBox(height: AppSpacing.sm),
-            _ManagementTile(
-              title: 'Credits',
-              icon: HugeIcons.strokeRoundedStar,
-              route: AppRoutes.adminCredits,
-            ),
-            SizedBox(height: AppSpacing.sm),
-            _ManagementTile(
-              title: 'Disputes',
-              icon: HugeIcons.strokeRoundedJusticeScale01,
-              route: AppRoutes.adminDisputes,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(child: Text(data.label, style: AppTypography.h3)),
+            const HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowRight01,
+              color: AppColors.textTertiary,
+              size: 18,
             ),
           ],
         ),
@@ -60,32 +110,16 @@ class AdminManagementScreen extends StatelessWidget {
   }
 }
 
-class _ManagementTile extends StatelessWidget {
-  const _ManagementTile({
-    required this.title,
-    required this.icon,
+class _ManagementTileData {
+  const _ManagementTileData({
+    required this.label,
     required this.route,
+    required this.icon,
+    required this.iconColor,
   });
 
-  final String title;
-  final dynamic icon;
+  final String label;
   final String route;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      tileColor: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-      ),
-      leading: HugeIcon(icon: icon, color: AppColors.textPrimary, size: 22),
-      title: Text(title, style: AppTypography.bodyLarge),
-      trailing: const HugeIcon(
-        icon: HugeIcons.strokeRoundedArrowRight01,
-        color: AppColors.textSecondary,
-        size: 20,
-      ),
-      onTap: () => context.go(route),
-    );
-  }
+  final dynamic icon;
+  final Color iconColor;
 }

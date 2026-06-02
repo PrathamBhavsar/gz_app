@@ -1,370 +1,169 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hugeicons/hugeicons.dart';
+
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/navigation/routes.dart';
-import '../../providers/admin_management_provider.dart';
-import '../../providers/admin_permissions.dart';
+import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_button.dart';
+import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_chip.dart';
+import '../../../../../shared/widgets/gz_scroll_content.dart';
+import '../../../../../shared/widgets/gz_tag.dart';
 
-final _billingStatusProvider = StateProvider.autoDispose<String?>((ref) => null);
-
-/// Billing & Payments — Screen 53.
-/// Ledger view with status filters, override panel (super_admin), refund.
-class BillingPaymentsScreen extends ConsumerStatefulWidget {
+class BillingPaymentsScreen extends StatelessWidget {
   const BillingPaymentsScreen({super.key});
 
-  @override
-  ConsumerState<BillingPaymentsScreen> createState() =>
-      _BillingPaymentsScreenState();
-}
-
-class _BillingPaymentsScreenState
-    extends ConsumerState<BillingPaymentsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() => ref.read(billingProvider.notifier).load());
-  }
+  static const _filters = ['All', 'Unpaid', 'Paid', 'Overridden'];
+  static const _records = [
+    _BillingRecordData(
+      name: 'Rahul Mehra',
+      detail: 'PC Station 01 · 2h 10m',
+      amount: '₹1,740',
+      tag: GzTagKind.ok,
+      tagLabel: 'Paid',
+    ),
+    _BillingRecordData(
+      name: 'Priya Singh',
+      detail: 'PS5 Console · 1h 30m',
+      amount: '₹1,200',
+      tag: GzTagKind.warn,
+      tagLabel: 'Unpaid',
+      showOverride: true,
+    ),
+    _BillingRecordData(
+      name: 'Amit Kumar',
+      detail: 'Xbox Series X · 45m',
+      amount: '₹600',
+      tag: GzTagKind.mute,
+      tagLabel: 'Overridden',
+    ),
+    _BillingRecordData(
+      name: 'Neha Reddy',
+      detail: 'VR Pod 01 · 2h 00m',
+      amount: '₹3,000',
+      tag: GzTagKind.ok,
+      tagLabel: 'Paid',
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final statusFilter = ref.watch(_billingStatusProvider);
-    final state = ref.watch(billingProvider);
-    final perms = ref.watch(adminPermissionsProvider);
-    final isSuperAdmin = perms.canBillingOverride;
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: AppColors.textPrimary, size: 20),
-          onPressed: () => context.go(AppRoutes.adminPricing),
-        ),
-        title: Text('Billing', style: AppTypography.headingSmall),
-      ),
-      body: RefreshIndicator(
-        color: AppColors.rose,
-        backgroundColor: AppColors.surface,
-        onRefresh: () =>
-            ref.read(billingProvider.notifier).load(status: statusFilter),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: AppSpacing.md),
-              _buildStatusChips(statusFilter),
-              const SizedBox(height: AppSpacing.lg),
-              _buildContent(state, isSuperAdmin),
-              const SizedBox(height: AppSpacing.xxl),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusChips(String? statusFilter) {
-    final options = [null, 'unpaid', 'paid', 'overridden'];
-    final labels = ['All', 'Unpaid', 'Paid', 'Overridden'];
-    return Row(
-      children: List.generate(options.length, (i) {
-        final isActive = statusFilter == options[i];
-        return Padding(
-          padding: const EdgeInsets.only(right: AppSpacing.sm),
-          child: GestureDetector(
-            onTap: () {
-              ref.read(_billingStatusProvider.notifier).state = options[i];
-              ref.read(billingProvider.notifier).load(status: options[i]);
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: isActive ? AppColors.rose : AppColors.surface,
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.borderRadiusSm),
-              ),
-              child: Text(
-                labels[i],
-                style: AppTypography.bodySmall.copyWith(
-                  color:
-                      isActive ? AppColors.background : AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ),
-        );
-      }),
-    );
-  }
-
-  Widget _buildContent(
-      ManagementState<List<dynamic>> state, bool isSuperAdmin) {
-    if (state is ManagementLoading<List<dynamic>>) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.xxl),
-          child: CircularProgressIndicator(color: AppColors.rose),
-        ),
-      );
-    }
-
-    if (state is ManagementError<List<dynamic>>) {
-      return _buildError(state.error);
-    }
-
-    if (state is ManagementLoaded<List<dynamic>>) {
-      final entries = state.data;
-      if (entries.isEmpty) {
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xxl),
-            child: Text('No billing records',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary)),
-          ),
-        );
-      }
-      return Column(
-        children: entries
-            .map((e) => _buildLedgerCard(e as Map<String, dynamic>, isSuperAdmin))
-            .toList(),
-      );
-    }
-
-    return const SizedBox.shrink();
-  }
-
-  Widget _buildError(Object error) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
+      appBar: const GzAdminTopBar(title: 'Billing'),
+      body: SafeArea(
+        top: false,
         child: Column(
           children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedAlert01,
-              color: AppColors.error,
-              size: 48,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text('Failed to load billing records',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary)),
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: () => ref
-                  .read(billingProvider.notifier)
-                  .load(status: ref.read(_billingStatusProvider)),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(color: AppColors.border),
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadius),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+              child: Row(
+                children: List.generate(
+                  _filters.length,
+                  (index) => Padding(
+                    padding: EdgeInsets.only(
+                      right: index == _filters.length - 1 ? 0 : 8,
+                    ),
+                    child: GzChip(label: _filters[index], active: index == 0),
+                  ),
                 ),
               ),
-              child: Text('Retry', style: AppTypography.button),
             ),
+            const Expanded(child: _BillingList(records: _records)),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildLedgerCard(Map<String, dynamic> entry, bool isSuperAdmin) {
-    final id = entry['id']?.toString() ?? '--';
-    final netAmount = entry['net_amount']?.toString() ?? '0';
-    final status = entry['status'] ?? entry['billing_reason'] ?? '--';
-    final createdAt = entry['created_at']?.toString() ?? '';
-    final userId = entry['user_id']?.toString() ?? '';
+class _BillingList extends StatelessWidget {
+  const _BillingList({required this.records});
 
-    final statusColor = switch (status.toString().toLowerCase()) {
-      'paid' => AppColors.ok,
-      'unpaid' => AppColors.rose,
-      'overridden' => AppColors.gold,
-      _ => AppColors.textSecondary,
-    };
+  final List<_BillingRecordData> records;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+  @override
+  Widget build(BuildContext context) {
+    return GzScrollContent(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        child: Column(
+          children: records
+              .map(
+                (record) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: _BillingCard(record: record),
+                ),
+              )
+              .toList(),
+        ),
       ),
+    );
+  }
+}
+
+class _BillingCard extends StatelessWidget {
+  const _BillingCard({required this.record});
+
+  final _BillingRecordData record;
+
+  @override
+  Widget build(BuildContext context) {
+    return GzCard(
+      padding: 14,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Bill #${id.substring(0, id.length > 8 ? 8 : id.length)}',
-                        style: AppTypography.bodyMedium),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      '₹$netAmount · $userId',
-                      style: AppTypography.caption,
-                    ),
-                    if (createdAt.isNotEmpty)
-                      Text(_formatDate(createdAt), style: AppTypography.caption),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.15),
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                ),
-                child: Text(
-                  status.toString().toUpperCase(),
-                  style: AppTypography.bodySmall.copyWith(
-                    color: statusColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+              Expanded(child: Text(record.name, style: AppTypography.h3)),
+              GzTag(kind: record.tag, label: record.tagLabel),
             ],
           ),
-          if (isSuperAdmin)
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.sm),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => _showOverrideSheet(context, id),
-                    child: Text('Override',
-                        style:
-                            AppTypography.bodySmall.copyWith(color: AppColors.rose)),
-                  ),
-                ],
+          const SizedBox(height: 4),
+          Text(record.detail, style: AppTypography.small),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text(
+                record.amount,
+                style: AppTypography.num.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
+              const Spacer(),
+              if (record.showOverride)
+                const SizedBox(
+                  width: 104,
+                  child: GzButton(
+                    label: 'Override',
+                    variant: GzButtonVariant.ghost,
+                    small: true,
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );
   }
+}
 
-  void _showOverrideSheet(BuildContext context, String billingId) {
-    final reasonCtrl = TextEditingController();
-    final amountCtrl = TextEditingController();
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.borderRadiusLg),
-        ),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Manual Override', style: AppTypography.headingSmall),
-            const SizedBox(height: AppSpacing.sm),
-            Text('This action is being logged under your name.',
-                style: AppTypography.caption),
-            const SizedBox(height: AppSpacing.lg),
-            TextField(
-              controller: amountCtrl,
-              style: AppTypography.bodyMedium,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                labelText: 'New Amount',
-                labelStyle: AppTypography.caption,
-                filled: true,
-                fillColor: AppColors.background,
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: reasonCtrl,
-              style: AppTypography.bodyMedium,
-              maxLines: 2,
-              decoration: InputDecoration(
-                labelText: 'Reason for Override (required)',
-                labelStyle: AppTypography.caption,
-                filled: true,
-                fillColor: AppColors.background,
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  final amount = double.tryParse(amountCtrl.text);
-                  if (amount == null || reasonCtrl.text.trim().isEmpty) return;
-                  context.pop();
-                  await ref.read(billingProvider.notifier).overrideBilling(
-                    billingId: billingId,
-                    reason: reasonCtrl.text.trim(),
-                    amount: amount,
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.rose,
-                  foregroundColor: AppColors.background,
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.borderRadius),
-                  ),
-                ),
-                child: Text('Apply Override', style: AppTypography.button),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-          ],
-        ),
-      ),
-    );
-  }
+class _BillingRecordData {
+  const _BillingRecordData({
+    required this.name,
+    required this.detail,
+    required this.amount,
+    required this.tag,
+    required this.tagLabel,
+    this.showOverride = false,
+  });
 
-  String _formatDate(String iso) {
-    try {
-      final dt = DateTime.parse(iso);
-      return '${dt.day}/${dt.month}/${dt.year}';
-    } catch (_) {
-      return iso;
-    }
-  }
+  final String name;
+  final String detail;
+  final String amount;
+  final GzTagKind tag;
+  final String tagLabel;
+  final bool showOverride;
 }

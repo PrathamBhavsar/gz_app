@@ -1,253 +1,134 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hugeicons/hugeicons.dart';
+
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/navigation/routes.dart';
-import '../../providers/admin_management_provider.dart';
-import '../../providers/admin_permissions.dart';
+import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_button.dart';
+import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_meta_row.dart';
+import '../../../../../shared/widgets/gz_scroll_content.dart';
+import '../../../../../shared/widgets/gz_tag.dart';
 
-/// Campaign Management — Screen 54.
-/// Campaign list with status badges, pause/resume actions, redemption stats.
-class CampaignManagementScreen extends ConsumerStatefulWidget {
+class CampaignManagementScreen extends StatelessWidget {
   const CampaignManagementScreen({super.key});
 
-  @override
-  ConsumerState<CampaignManagementScreen> createState() =>
-      _CampaignManagementScreenState();
-}
-
-class _CampaignManagementScreenState
-    extends ConsumerState<CampaignManagementScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() => ref.read(campaignsProvider.notifier).load());
-  }
+  static const _campaigns = [
+    _CampaignData(
+      name: 'Welcome Bonus',
+      description: 'Earn 2× credits on first booking',
+      redemptions: '142',
+      expires: 'Dec 31, 2025',
+      tag: GzTagKind.ok,
+      tagLabel: 'Active',
+    ),
+    _CampaignData(
+      name: 'Happy Hours',
+      description: '50% off 2–5 PM Mon–Thu',
+      redemptions: '89',
+      expires: 'Dec 31, 2025',
+      tag: GzTagKind.ok,
+      tagLabel: 'Active',
+    ),
+    _CampaignData(
+      name: 'Summer Blast',
+      description: 'Free hour with 2-hour booking',
+      redemptions: '234',
+      expires: 'Sep 30, 2025',
+      tag: GzTagKind.mute,
+      tagLabel: 'Paused',
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(campaignsProvider);
-    final perms = ref.watch(adminPermissionsProvider);
-    final canEdit = perms.canManagePricingRules; // Campaign edit follows pricing permission level
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: AppColors.textPrimary, size: 20),
-          onPressed: () => context.go(AppRoutes.adminPricing),
-        ),
-        title: Text('Campaigns', style: AppTypography.headingSmall),
-      ),
-      body: RefreshIndicator(
-        color: AppColors.rose,
-        backgroundColor: AppColors.surface,
-        onRefresh: () => ref.read(campaignsProvider.notifier).load(),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: AppSpacing.md),
-              _buildContent(state, canEdit),
-              const SizedBox(height: AppSpacing.xxl),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContent(ManagementState<List<dynamic>> state, bool canEdit) {
-    if (state is ManagementLoading<List<dynamic>>) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.xxl),
-          child: CircularProgressIndicator(color: AppColors.rose),
-        ),
-      );
-    }
-
-    if (state is ManagementError<List<dynamic>>) {
-      return _buildError(state.error);
-    }
-
-    if (state is ManagementLoaded<List<dynamic>>) {
-      final campaigns = state.data;
-      if (campaigns.isEmpty) {
-        return Center(
+      appBar: const GzAdminTopBar(title: 'Campaigns'),
+      body: SafeArea(
+        top: false,
+        child: GzScrollContent(
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xxl),
-            child: Text('No campaigns created',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary)),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            child: Column(
+              children: _campaigns
+                  .map(
+                    (campaign) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _CampaignCard(campaign: campaign),
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
-        );
-      }
-      return Column(
-        children: campaigns
-            .map((c) =>
-                _buildCampaignCard(c as Map<String, dynamic>, canEdit))
-            .toList(),
-      );
-    }
-
-    return const SizedBox.shrink();
-  }
-
-  Widget _buildError(Object error) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        child: Column(
-          children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedAlert01,
-              color: AppColors.error,
-              size: 48,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text('Failed to load campaigns',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary)),
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: () =>
-                  ref.read(campaignsProvider.notifier).load(),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(color: AppColors.border),
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadius),
-                ),
-              ),
-              child: Text('Retry', style: AppTypography.button),
-            ),
-          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildCampaignCard(Map<String, dynamic> campaign, bool canEdit) {
-    final id = campaign['id']?.toString() ?? '';
-    final name = campaign['name']?.toString() ?? 'Unnamed';
-    final status = campaign['status']?.toString() ?? 'draft';
-    final type = campaign['campaign_type']?.toString() ?? '--';
-    final value = campaign['value']?.toString() ?? '0';
-    final maxRedemptions = campaign['max_redemptions'] as int?;
-    final currentRedemptions = campaign['current_redemptions'] as int? ?? 0;
+class _CampaignCard extends StatelessWidget {
+  const _CampaignCard({required this.campaign});
 
-    final statusColor = switch (status.toLowerCase()) {
-      'active' => AppColors.ok,
-      'paused' => AppColors.gold,
-      'expired' => AppColors.textSecondary,
-      'scheduled' => AppColors.info,
-      'draft' => AppColors.textSecondary,
-      _ => AppColors.textSecondary,
-    };
+  final _CampaignData campaign;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-      ),
+  @override
+  Widget build(BuildContext context) {
+    return GzCard(
+      padding: 16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              Expanded(child: Text(campaign.name, style: AppTypography.h3)),
+              GzTag(kind: campaign.tag, label: campaign.tagLabel),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(campaign.description, style: AppTypography.small),
+          const SizedBox(height: 10),
+          GzMetaRow(label: 'Redemptions', value: campaign.redemptions),
+          GzMetaRow(label: 'Expires', value: campaign.expires),
+          const SizedBox(height: 12),
+          const Row(
+            children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(name, style: AppTypography.bodyMedium),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text('$type · ₹$value',
-                        style: AppTypography.caption),
-                  ],
+                child: GzButton(
+                  label: 'Pause',
+                  variant: GzButtonVariant.ghost,
+                  small: true,
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.15),
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                ),
-                child: Text(
-                  status.toUpperCase(),
-                  style: AppTypography.bodySmall.copyWith(
-                    color: statusColor,
-                    fontWeight: FontWeight.w600,
-                  ),
+              SizedBox(width: 8),
+              Expanded(
+                child: GzButton(
+                  label: 'Edit',
+                  variant: GzButtonVariant.ghost,
+                  small: true,
                 ),
               ),
             ],
           ),
-          if (maxRedemptions != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: maxRedemptions > 0
-                          ? currentRedemptions / maxRedemptions
-                          : 0,
-                      backgroundColor: AppColors.surface2,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                          AppColors.rose),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text('$currentRedemptions/$maxRedemptions',
-                    style: AppTypography.caption),
-              ],
-            ),
-          ],
-          if (canEdit && (status.toLowerCase() == 'active' || status.toLowerCase() == 'paused'))
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.sm),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (status.toLowerCase() == 'active')
-                    TextButton(
-                      onPressed: () =>
-                          ref.read(campaignsProvider.notifier).pauseCampaign(id),
-                      child: Text('Pause',
-                          style: AppTypography.bodySmall
-                              .copyWith(color: AppColors.gold)),
-                    ),
-                  if (status.toLowerCase() == 'paused')
-                    TextButton(
-                      onPressed: () => ref
-                          .read(campaignsProvider.notifier)
-                          .resumeCampaign(id),
-                      child: Text('Resume',
-                          style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.ok)),
-                    ),
-                ],
-              ),
-            ),
         ],
       ),
     );
   }
+}
+
+class _CampaignData {
+  const _CampaignData({
+    required this.name,
+    required this.description,
+    required this.redemptions,
+    required this.expires,
+    required this.tag,
+    required this.tagLabel,
+  });
+
+  final String name;
+  final String description;
+  final String redemptions;
+  final String expires;
+  final GzTagKind tag;
+  final String tagLabel;
 }
