@@ -3,9 +3,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/navigation/routes.dart';
 import '../../../../shared/widgets/gz_admin_bottom_nav.dart';
 
-class AdminMobileLayout extends StatelessWidget {
+class AdminShell extends StatelessWidget {
   final Widget child;
-  const AdminMobileLayout({super.key, required this.child});
+  const AdminShell({super.key, required this.child});
 
   GzAdminTab _selectedTab(BuildContext context) {
     final String location = GoRouterState.of(context).matchedLocation;

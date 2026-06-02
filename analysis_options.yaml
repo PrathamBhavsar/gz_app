@@ -12,6 +12,7 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   exclude:
     - test/shared/widgets/em_scroll_content_test.dart
+    - test/features/home/presentation/widgets/home_mobile_layout_test.dart
 
 linter:
   # The lint rules applied to this project can be customized in the

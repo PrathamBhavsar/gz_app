@@ -82,7 +82,10 @@ final routerProvider = Provider<GoRouter>((ref) {
   // only operation. This is explicitly permitted as core navigation infra.
   final listenable = ValueNotifier<int>(0);
   ref.listen<AuthState>(authNotifierProvider, (_, _) => listenable.value++);
-  ref.listen<AdminAuthState>(adminAuthNotifierProvider, (_, _) => listenable.value++);
+  ref.listen<AdminAuthState>(
+    adminAuthNotifierProvider,
+    (_, _) => listenable.value++,
+  );
   ref.onDispose(listenable.dispose);
 
   return GoRouter(
@@ -401,18 +404,5 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const BookingSuccessScreen(),
       ),
     ],
-
   );
 });
-
-
-/// Admin shell wrapper — wraps the AdminMobileLayout around the child route.
-class AdminShell extends StatelessWidget {
-  final Widget child;
-  const AdminShell({super.key, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return AdminMobileLayout(child: child);
-  }
-}
