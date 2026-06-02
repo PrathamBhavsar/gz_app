@@ -1,39 +1,18 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/app_spacing.dart';
+
 import '../../../../../core/navigation/routes.dart';
-import '../../../../../core/network/admin_live_service.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
+import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_chip.dart';
+import '../../../../../shared/widgets/gz_live_dot.dart';
+import '../../../../../shared/widgets/gz_tag.dart';
 import '../../providers/admin_auth_provider.dart';
-import '../../providers/admin_auth_state.dart';
-import '../../providers/admin_operations_provider.dart';
-import '../../providers/admin_live_provider.dart';
-import '../../../../../../models/domain_admin.dart';
 
-final _dashboardFilterProvider =
-    StateProvider.autoDispose<String>((ref) => 'All');
-
-Color _systemStatusColor(String? status) => switch (status) {
-      'available' => AppColors.ok,
-      'in_use' => AppColors.info,
-      'maintenance' => AppColors.warn,
-      'offline' => AppColors.error,
-      _ => AppColors.textSecondary,
-    };
-
-String _formatSessionDuration(Duration d) {
-  final hours = d.inHours;
-  final minutes = d.inMinutes.remainder(60);
-  if (hours > 0) return '${hours}h ${minutes}m';
-  return '${minutes}m';
-}
-
-/// Admin Dashboard / Floor Map — Screen 42.
-/// Real-time visualization of the gaming floor with system availability.
 class AdminDashboardScreen extends ConsumerStatefulWidget {
   const AdminDashboardScreen({super.key});
 
@@ -43,589 +22,427 @@ class AdminDashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
-  StreamSubscription<WsEvent>? _wsSubscription;
+  static const _filters = ['All', 'PC', 'Console', 'VR', 'Maintenance'];
 
-  static const _filterOptions = ['All', 'PC', 'Console', 'VR', 'Maintenance'];
+  static const _systems = [
+    _SystemTileData(
+      name: 'PC Station 01',
+      type: 'PC',
+      status: _SystemStatus.available,
+    ),
+    _SystemTileData(
+      name: 'PC Station 02',
+      type: 'PC',
+      status: _SystemStatus.inUse,
+      user: 'Rahul M.',
+      time: '1h 22m',
+      endingSoon: true,
+    ),
+    _SystemTileData(
+      name: 'PC Station 03',
+      type: 'PC',
+      status: _SystemStatus.inUse,
+      user: 'Priya S.',
+      time: '0h 45m',
+    ),
+    _SystemTileData(
+      name: 'PC Station 04',
+      type: 'PC',
+      status: _SystemStatus.inUse,
+      user: 'Amit K.',
+      time: '2h 10m',
+    ),
+    _SystemTileData(
+      name: 'PS5 Console 01',
+      type: 'Console',
+      status: _SystemStatus.available,
+    ),
+    _SystemTileData(
+      name: 'PS5 Console 02',
+      type: 'Console',
+      status: _SystemStatus.inUse,
+      user: 'Neha R.',
+      time: '1h 05m',
+    ),
+    _SystemTileData(
+      name: 'Xbox 01',
+      type: 'Xbox',
+      status: _SystemStatus.offline,
+    ),
+    _SystemTileData(
+      name: 'Xbox Station 02',
+      type: 'Console',
+      status: _SystemStatus.maintenance,
+    ),
+    _SystemTileData(
+      name: 'VR Pod 01',
+      type: 'VR',
+      status: _SystemStatus.available,
+    ),
+    _SystemTileData(
+      name: 'VR Pod 02',
+      type: 'VR',
+      status: _SystemStatus.maintenance,
+    ),
+    _SystemTileData(
+      name: 'PC Station 05',
+      type: 'PC',
+      status: _SystemStatus.available,
+    ),
+    _SystemTileData(
+      name: 'PC Station 06',
+      type: 'PC',
+      status: _SystemStatus.inUse,
+      user: 'Kiran P.',
+      time: '1h 50m',
+    ),
+  ];
 
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(
-      () => ref.read(floorMapProvider.notifier).loadSystems(),
-    );
+  String _activeFilter = 'All';
+
+  List<_SystemTileData> get _visibleSystems {
+    switch (_activeFilter) {
+      case 'PC':
+        return _systems.where((tile) => tile.type == 'PC').toList();
+      case 'Console':
+        return _systems
+            .where((tile) => tile.type == 'Console' || tile.type == 'Xbox')
+            .toList();
+      case 'VR':
+        return _systems.where((tile) => tile.type == 'VR').toList();
+      case 'Maintenance':
+        return _systems
+            .where((tile) => tile.status == _SystemStatus.maintenance)
+            .toList();
+      default:
+        return _systems;
+    }
   }
 
-  @override
-  void dispose() {
-    _wsSubscription?.cancel();
-    super.dispose();
-  }
-
-  void _listenToWsEvents() {
-    _wsSubscription?.cancel();
-    _wsSubscription =
-        ref.read(adminLiveServiceProvider).events.listen((event) {
-      if (!mounted) return;
-      switch (event.type) {
-        case WsEventType.systemStatusChange:
-        case WsEventType.sessionStarted:
-        case WsEventType.sessionEnded:
-        case WsEventType.agentHeartbeat:
-          ref.read(floorMapProvider.notifier).loadSystems();
-        case WsEventType.bookingNew:
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('New booking received'),
-              backgroundColor: AppColors.surface,
-              duration: Duration(seconds: 2),
-            ),
-          );
-        case WsEventType.unknown:
-          break;
-      }
-    });
+  Future<void> _logout() async {
+    await ref.read(adminAuthNotifierProvider.notifier).logout();
+    if (mounted) context.go(AppRoutes.adminLogin);
   }
 
   @override
   Widget build(BuildContext context) {
-    final adminState = ref.watch(adminAuthNotifierProvider);
-    final role = adminState is AdminAuthAuthenticated
-        ? adminState.admin.role ?? ''
-        : '';
-    final floorState = ref.watch(floorMapProvider);
-    final selectedFilter = ref.watch(_dashboardFilterProvider);
-
-    final wsConnection = ref.watch(liveConnectionProvider);
-    final isWsConnected = wsConnection.valueOrNull ?? false;
-
-    _listenToWsEvents();
-    ref.watch(wsAutoConnectProvider);
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      appBar: GzAdminTopBar(
+        title: 'Gaming Zone',
+        subtitle: 'Operations · Admin',
+        disableBack: true,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Gaming Zone', style: AppTypography.headingSmall),
-            Row(
-              children: [
-                Text(
-                  'Operations · ${_formatRole(role)}',
-                  style: AppTypography.caption,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _LivePill(isConnected: isWsConnected),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedLogout01,
-              color: AppColors.textSecondary,
-            ),
-            onPressed: () async {
-              await ref.read(adminAuthNotifierProvider.notifier).logout();
-              if (context.mounted) context.go(AppRoutes.authLanding);
-            },
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        color: AppColors.rose,
-        backgroundColor: AppColors.surface,
-        onRefresh: () => ref.read(floorMapProvider.notifier).loadSystems(),
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: _KpiRibbon(floorState: floorState),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
-            SliverToBoxAdapter(
-              child: _FilterChips(
-                filterOptions: _filterOptions,
-                selectedFilter: selectedFilter,
+            const _LivePill(),
+            const SizedBox(width: AppSpacing.sm),
+            IconButton(
+              onPressed: _logout,
+              icon: const HugeIcon(
+                icon: HugeIcons.strokeRoundedLogout01,
+                color: AppColors.textTertiary,
+                size: 20,
               ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
-            _FloorGrid(
-              floorState: floorState,
-              selectedFilter: selectedFilter,
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go(AppRoutes.adminWalkIn),
         backgroundColor: AppColors.rose,
+        shape: const CircleBorder(),
         child: const HugeIcon(
           icon: HugeIcons.strokeRoundedAdd01,
-          color: AppColors.background,
+          color: AppColors.surface,
           size: 24,
         ),
       ),
-    );
-  }
-
-  String _formatRole(String role) => switch (role) {
-        'super_admin' => 'Super Admin',
-        'admin' => 'Admin',
-        'staff' => 'Staff',
-        _ => role,
-      };
-}
-
-// ─── Live Pill ────────────────────────────────────────────────────────────────
-
-class _LivePill extends StatelessWidget {
-  const _LivePill({required this.isConnected});
-  final bool isConnected;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isConnected ? AppColors.success : AppColors.error;
-    final label = isConnected ? 'Live' : 'Offline';
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: AppTypography.caption.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── KPI Ribbon ───────────────────────────────────────────────────────────────
-
-class _KpiRibbon extends StatelessWidget {
-  const _KpiRibbon({required this.floorState});
-  final FloorMapState floorState;
-
-  @override
-  Widget build(BuildContext context) {
-    int totalSystems = 0;
-    int inUseSystems = 0;
-    int activeSessions = 0;
-
-    if (floorState is FloorMapLoaded) {
-      final loaded = floorState as FloorMapLoaded;
-      totalSystems = loaded.systems.length;
-      inUseSystems =
-          loaded.systems.where((s) => s.status == 'in_use').length;
-      activeSessions =
-          loaded.systems.where((s) => s.currentSession != null).length;
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      child: Row(
-        children: [
-          _DashKpiCard(
-            label: 'Occupancy',
-            value: totalSystems > 0 ? '$inUseSystems/$totalSystems' : '--',
-            icon: HugeIcons.strokeRoundedDashboardSpeed01,
-            iconColor: AppColors.rose,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          _DashKpiCard(
-            label: 'Sessions',
-            value: '$activeSessions',
-            icon: HugeIcons.strokeRoundedTimer01,
-            iconColor: AppColors.success,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          _DashKpiCard(
-            label: 'Available',
-            value: '${totalSystems - inUseSystems}',
-            icon: HugeIcons.strokeRoundedGameboy,
-            iconColor: AppColors.ok,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DashKpiCard extends StatelessWidget {
-  const _DashKpiCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.iconColor,
-  });
-  final String label;
-  final String value;
-  final List<List<dynamic>> icon;
-  final Color iconColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            HugeIcon(icon: icon, color: iconColor, size: 18),
-            const SizedBox(height: AppSpacing.xs),
-            Text(value, style: AppTypography.headingSmall),
-            Text(label, style: AppTypography.caption),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Filter Chips ─────────────────────────────────────────────────────────────
-
-class _FilterChips extends ConsumerWidget {
-  const _FilterChips({
-    required this.filterOptions,
-    required this.selectedFilter,
-  });
-  final List<String> filterOptions;
-  final String selectedFilter;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SizedBox(
-      height: 36,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding:
-            const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        itemCount: filterOptions.length,
-        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-        itemBuilder: (context, index) {
-          final filter = filterOptions[index];
-          final isSelected = filter == selectedFilter;
-          return GestureDetector(
-            onTap: () => ref
-                .read(_dashboardFilterProvider.notifier)
-                .state = filter,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.rose : AppColors.surface,
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.borderRadiusSm),
-                border: Border.all(
-                  color: isSelected ? AppColors.rose : AppColors.border,
-                ),
-              ),
-              child: Text(
-                filter,
-                style: AppTypography.bodySmall.copyWith(
-                  color: isSelected
-                      ? AppColors.background
-                      : AppColors.textSecondary,
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.w400,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// ─── Floor Grid ───────────────────────────────────────────────────────────────
-
-class _FloorGrid extends ConsumerWidget {
-  const _FloorGrid({
-    required this.floorState,
-    required this.selectedFilter,
-  });
-  final FloorMapState floorState;
-  final String selectedFilter;
-
-  List<LiveSystemStatusModel> _filterSystems(
-    List<LiveSystemStatusModel> systems,
-    String filter,
-  ) {
-    if (filter == 'All') return systems;
-    if (filter == 'Maintenance') {
-      return systems.where((s) => s.status == 'maintenance').toList();
-    }
-    return systems
-        .where(
-            (s) => s.platform?.toLowerCase() == filter.toLowerCase())
-        .toList();
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (floorState is FloorMapLoading) {
-      return const SliverFillRemaining(
-        child: Center(child: CircularProgressIndicator(color: AppColors.rose)),
-      );
-    }
-
-    if (floorState is FloorMapError) {
-      return SliverFillRemaining(
-        child: Center(
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 104),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const HugeIcon(
-                icon: HugeIcons.strokeRoundedAlert01,
-                color: AppColors.error,
-                size: 48,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                'Failed to load floor data',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              OutlinedButton(
-                onPressed: () =>
-                    ref.read(floorMapProvider.notifier).loadSystems(),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.textPrimary,
-                  side: const BorderSide(color: AppColors.border),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.borderRadius),
-                  ),
-                ),
-                child: Text('Retry', style: AppTypography.button),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (floorState is FloorMapLoaded) {
-      final filtered = _filterSystems(
-        (floorState as FloorMapLoaded).systems,
-        selectedFilter,
-      );
-
-      if (filtered.isEmpty) {
-        return SliverFillRemaining(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const HugeIcon(
-                  icon: HugeIcons.strokeRoundedGameboy,
-                  color: AppColors.textSecondary,
-                  size: 64,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  'No systems found',
-                  style: AppTypography.bodyMedium
-                      .copyWith(color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-
-      return SliverPadding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        sliver: SliverGrid(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: AppSpacing.sm,
-            mainAxisSpacing: AppSpacing.sm,
-            childAspectRatio: 0.75,
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) => _SystemTile(system: filtered[index]),
-            childCount: filtered.length,
-          ),
-        ),
-      );
-    }
-
-    return const SliverFillRemaining(
-      child: Center(child: CircularProgressIndicator(color: AppColors.rose)),
-    );
-  }
-}
-
-// ─── System Tile ──────────────────────────────────────────────────────────────
-
-class _SystemTile extends StatelessWidget {
-  const _SystemTile({required this.system});
-  final LiveSystemStatusModel system;
-
-  @override
-  Widget build(BuildContext context) {
-    final statusColor = _systemStatusColor(system.status);
-    final isAvailable = system.status == 'available';
-    final isInUse = system.status == 'in_use';
-    final isMaintenance = system.status == 'maintenance';
-    final isOffline = system.status == 'offline';
-
-    String? elapsed;
-    bool endingSoon = false;
-    if (isInUse &&
-        system.currentSession?.startedAt != null &&
-        system.currentSession?.durationMinutes != null) {
-      final elapsedDuration =
-          DateTime.now().difference(system.currentSession!.startedAt!);
-      elapsed = _formatSessionDuration(elapsedDuration);
-      final remaining = (system.currentSession!.durationMinutes! * 60) -
-          elapsedDuration.inSeconds;
-      endingSoon = remaining < 600 && remaining > 0;
-    }
-
-    return GestureDetector(
-      onTap: () => context.go(
-        '${AppRoutes.adminSessions}?systemId=${system.systemId}',
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-          border: Border.all(
-            color: statusColor.withValues(alpha: 0.6),
-            width: 2,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    system.name ?? 'Unknown',
-                    style: AppTypography.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: isMaintenance || isOffline
-                          ? AppColors.textSecondary
-                          : AppColors.textPrimary,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              system.systemTypeName ?? system.platform ?? '',
-              style:
-                  AppTypography.caption.copyWith(color: AppColors.textSecondary),
-            ),
-            const Spacer(),
-            if (isAvailable)
-              Text(
-                'Available',
-                style: AppTypography.bodySmall.copyWith(color: AppColors.ok),
-              ),
-            if (isInUse && system.currentSession != null) ...[
-              Text(
-                system.currentSession?.userName ?? 'Player',
-                style:
-                    AppTypography.bodySmall.copyWith(color: AppColors.textPrimary),
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (elapsed != null)
-                Text(
-                  elapsed,
-                  style: AppTypography.caption
-                      .copyWith(color: AppColors.textSecondary),
-                ),
-              if (endingSoon)
-                Container(
-                  margin: const EdgeInsets.only(top: AppSpacing.xs),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xs,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.rose.withValues(alpha: 0.15),
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.borderRadiusSm),
-                  ),
-                  child: Text(
-                    'Ending soon',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.rose,
-                      fontSize: 10,
-                    ),
-                  ),
-                ),
-            ],
-            if (isMaintenance)
-              Row(
+              const Row(
                 children: [
-                  const HugeIcon(
-                    icon: HugeIcons.strokeRoundedWrench01,
-                    color: AppColors.textSecondary,
-                    size: 14,
+                  Expanded(
+                    child: _KpiCard(
+                      icon: HugeIcons.strokeRoundedDashboardSpeed01,
+                      accent: AppColors.rose,
+                      value: '8/12',
+                      label: 'Occupancy',
+                    ),
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Maintenance',
-                    style: AppTypography.caption
-                        .copyWith(color: AppColors.textSecondary),
+                  SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: _KpiCard(
+                      icon: HugeIcons.strokeRoundedTimer01,
+                      accent: AppColors.ok,
+                      value: '8',
+                      label: 'Sessions',
+                    ),
+                  ),
+                  SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: _KpiCard(
+                      icon: HugeIcons.strokeRoundedGameboy,
+                      accent: AppColors.textTertiary,
+                      value: '4',
+                      label: 'Available',
+                    ),
                   ),
                 ],
               ),
-            if (isOffline)
-              Text(
-                'Offline',
-                style:
-                    AppTypography.caption.copyWith(color: AppColors.error),
+              const SizedBox(height: 14),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: _filters
+                      .map(
+                        (filter) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: GzChip(
+                            label: filter,
+                            active: _activeFilter == filter,
+                            onTap: () => setState(() => _activeFilter = filter),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
               ),
-          ],
+              const SizedBox(height: 12),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _visibleSystems.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  mainAxisExtent: 122,
+                ),
+                itemBuilder: (context, index) {
+                  final system = _visibleSystems[index];
+                  return _SystemTile(
+                    data: system,
+                    onTap: () => context.go(
+                      '${AppRoutes.adminSessions}?systemId=${Uri.encodeComponent(system.name)}',
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+class _LivePill extends StatelessWidget {
+  const _LivePill();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.okBg,
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusPill),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GzLiveDot(size: 6),
+          SizedBox(width: 4),
+          Text(
+            'Live',
+            style: TextStyle(
+              fontFamily: 'Geist',
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.ok,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _KpiCard extends StatelessWidget {
+  const _KpiCard({
+    required this.icon,
+    required this.accent,
+    required this.value,
+    required this.label,
+  });
+
+  final dynamic icon;
+  final Color accent;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          HugeIcon(icon: icon, color: accent, size: 20),
+          const SizedBox(height: 14),
+          Text(
+            value,
+            style: AppTypography.h2.copyWith(
+              fontFamily: 'GeistMono',
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(label, style: AppTypography.small),
+        ],
+      ),
+    );
+  }
+}
+
+class _SystemTile extends StatelessWidget {
+  const _SystemTile({required this.data, required this.onTap});
+
+  final _SystemTileData data;
+  final VoidCallback onTap;
+
+  Color get _borderColor => switch (data.status) {
+    _SystemStatus.available => AppColors.ok,
+    _SystemStatus.inUse => AppColors.info,
+    _SystemStatus.maintenance => AppColors.warn,
+    _SystemStatus.offline => AppColors.err,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: _borderColor, width: 2),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      data.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.body.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.only(top: 4),
+                    decoration: BoxDecoration(
+                      color: _borderColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(data.type, style: AppTypography.small),
+              const Spacer(),
+              switch (data.status) {
+                _SystemStatus.available => Text(
+                  'Available',
+                  style: AppTypography.small.copyWith(color: AppColors.ok),
+                ),
+                _SystemStatus.inUse => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      data.user!,
+                      style: AppTypography.small.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    Text(data.time!, style: AppTypography.small),
+                    if (data.endingSoon) ...[
+                      const SizedBox(height: 4),
+                      const GzTag(kind: GzTagKind.err, label: 'Ending soon'),
+                    ],
+                  ],
+                ),
+                _SystemStatus.maintenance => Row(
+                  children: [
+                    const HugeIcon(
+                      icon: HugeIcons.strokeRoundedWrench01,
+                      color: AppColors.warn,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Maintenance',
+                      style: AppTypography.small.copyWith(
+                        color: AppColors.warn,
+                      ),
+                    ),
+                  ],
+                ),
+                _SystemStatus.offline => Text(
+                  'Offline',
+                  style: AppTypography.small.copyWith(color: AppColors.err),
+                ),
+              },
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum _SystemStatus { available, inUse, maintenance, offline }
+
+class _SystemTileData {
+  const _SystemTileData({
+    required this.name,
+    required this.type,
+    required this.status,
+    this.user,
+    this.time,
+    this.endingSoon = false,
+  });
+
+  final String name;
+  final String type;
+  final _SystemStatus status;
+  final String? user;
+  final String? time;
+  final bool endingSoon;
 }
