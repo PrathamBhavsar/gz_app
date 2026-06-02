@@ -26,13 +26,13 @@ class _RedeemCreditsSheetState extends State<RedeemCreditsSheet> {
   static const double _maxCredits = 850;
 
   double _selectedCredits = 300;
-  bool _confirmed = false;
+  bool _showConfirmation = false;
 
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
-    final rupeeValue = _selectedCredits / 10;
-    final remaining = _maxCredits - _selectedCredits;
+    final redeemValue = _selectedCredits / 10;
+    final remainingCredits = _maxCredits - _selectedCredits;
 
     return SafeArea(
       top: false,
@@ -62,16 +62,10 @@ class _RedeemCreditsSheetState extends State<RedeemCreditsSheet> {
                 const SizedBox(height: 18),
                 Text('Redeem credits', style: AppTypography.h1),
                 const SizedBox(height: 4),
-                Text(
-                  '10 credits = ₹1',
-                  style: AppTypography.bodyR,
-                ),
+                Text('10 credits = ₹1', style: AppTypography.bodyR),
                 const SizedBox(height: 16),
-                const GzCard(
-                  variant: CardVariant.tint,
-                  child: _BalanceCard(),
-                ),
-                if (_confirmed) ...[
+                const GzCard(variant: CardVariant.tint, child: _BalanceCard()),
+                if (_showConfirmation) ...[
                   const SizedBox(height: 12),
                   Container(
                     width: double.infinity,
@@ -83,7 +77,7 @@ class _RedeemCreditsSheetState extends State<RedeemCreditsSheet> {
                       ),
                     ),
                     child: Text(
-                      'Success! ₹${rupeeValue.toStringAsFixed(2)} has been applied to your wallet.',
+                      'Success! ₹${redeemValue.toStringAsFixed(2)} has been applied.',
                       style: AppTypography.body.copyWith(color: AppColors.ok),
                     ),
                   ),
@@ -105,25 +99,25 @@ class _RedeemCreditsSheetState extends State<RedeemCreditsSheet> {
                     onChanged: (value) {
                       setState(() {
                         _selectedCredits = value.roundToDouble();
-                        _confirmed = false;
+                        _showConfirmation = false;
                       });
                     },
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Redeem: ${_selectedCredits.toInt()} credits = ₹${rupeeValue.toStringAsFixed(2)}',
+                  'Redeem: ${_selectedCredits.toInt()} credits = ₹${redeemValue.toStringAsFixed(2)}',
                   style: AppTypography.h3,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Remaining: ${remaining.toInt()} credits',
+                  'Remaining: ${remainingCredits.toInt()} credits',
                   style: AppTypography.bodyR,
                 ),
                 const SizedBox(height: 18),
                 GzButton(
                   label: 'Redeem ${_selectedCredits.toInt()} credits',
-                  onPressed: () => setState(() => _confirmed = true),
+                  onPressed: () => setState(() => _showConfirmation = true),
                 ),
               ],
             ),

@@ -15,47 +15,47 @@ class CampaignDetailScreen extends StatelessWidget {
 
   final String id;
 
-  static const _campaigns = {
-    'welcome-bonus': _CampaignDetailData(
+  static const Map<String, _CampaignDetail> _campaigns = {
+    'welcome-bonus': _CampaignDetail(
       title: 'Welcome Bonus',
       description: 'Earn 2× credits on your first booking',
       statusKind: GzTagKind.ok,
       statusLabel: 'Active',
-      validUntil: 'Until Dec 31, 2025',
+      valid: 'Until Dec 31, 2025',
       redeemed: '142 times',
-      minimumBooking: '1 hour',
+      minBooking: '1 hour',
       steps: [
-        'Book your first session through the app.',
-        'The 2× credit bonus is applied automatically after checkout.',
-        'Use the extra credits on your next booking or redemption.',
+        'Complete your first booking in the app.',
+        'The wallet bonus is added automatically after checkout.',
+        'Use the earned credits on your next booking or redemption.',
       ],
     ),
-    'happy-hours': _CampaignDetailData(
+    'happy-hours': _CampaignDetail(
       title: 'Happy Hours',
       description: '50% off all systems 2 PM – 5 PM Mon–Thu',
       statusKind: GzTagKind.ok,
       statusLabel: 'Active',
-      validUntil: 'Ongoing',
+      valid: 'Ongoing',
       redeemed: '318 times',
-      minimumBooking: '1 hour',
+      minBooking: '1 hour',
       steps: [
-        'Choose any system during the Happy Hours window.',
-        'The offer is applied before payment confirmation.',
-        'Discounted sessions still earn standard wallet credits.',
+        'Choose a participating slot during the campaign window.',
+        'The discount is applied before final payment.',
+        'Credits continue to accrue from eligible spend.',
       ],
     ),
-    'summer-blast': _CampaignDetailData(
+    'summer-blast': _CampaignDetail(
       title: 'Summer Blast',
       description: 'Free hour with any 2-hour booking',
       statusKind: GzTagKind.mute,
       statusLabel: 'Expired',
-      validUntil: 'Ended May 1',
+      valid: 'Ended May 1',
       redeemed: '89 times',
-      minimumBooking: '2 hours',
+      minBooking: '2 hours',
       steps: [
-        'Book a two-hour session at any participating store.',
-        'The bonus hour is added during booking review.',
-        'Expired campaigns remain visible for past reference only.',
+        'Book any qualifying two-hour session.',
+        'The extra hour is added in the booking flow.',
+        'This campaign is no longer redeemable.',
       ],
     ),
   };
@@ -95,10 +95,7 @@ class CampaignDetailScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(campaign.title, style: AppTypography.h1),
                   const SizedBox(height: 8),
-                  GzTag(
-                    kind: campaign.statusKind,
-                    label: campaign.statusLabel,
-                  ),
+                  GzTag(kind: campaign.statusKind, label: campaign.statusLabel),
                   const SizedBox(height: 10),
                   Text(campaign.description, style: AppTypography.bodyR),
                 ],
@@ -108,14 +105,11 @@ class CampaignDetailScreen extends StatelessWidget {
             GzCard(
               child: Column(
                 children: [
-                  GzMetaRow(label: 'Valid', value: campaign.validUntil),
+                  GzMetaRow(label: 'Valid', value: campaign.valid),
                   const Divider(height: 1, color: AppColors.divider),
                   GzMetaRow(label: 'Redeemed', value: campaign.redeemed),
                   const Divider(height: 1, color: AppColors.divider),
-                  GzMetaRow(
-                    label: 'Min. booking',
-                    value: campaign.minimumBooking,
-                  ),
+                  GzMetaRow(label: 'Min. booking', value: campaign.minBooking),
                 ],
               ),
             ),
@@ -135,11 +129,11 @@ class CampaignDetailScreen extends StatelessWidget {
                         Container(
                           width: 26,
                           height: 26,
+                          alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: AppColors.pillBg,
                             borderRadius: BorderRadius.circular(999),
                           ),
-                          alignment: Alignment.center,
                           child: Text(
                             '${index + 1}',
                             style: AppTypography.num.copyWith(
@@ -168,7 +162,11 @@ class CampaignDetailScreen extends StatelessWidget {
               label: 'Apply to next booking',
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${campaign.title} ready for checkout.')),
+                  SnackBar(
+                    content: Text(
+                      '${campaign.title} applied for the next flow.',
+                    ),
+                  ),
                 );
               },
             ),
@@ -179,15 +177,15 @@ class CampaignDetailScreen extends StatelessWidget {
   }
 }
 
-class _CampaignDetailData {
-  const _CampaignDetailData({
+class _CampaignDetail {
+  const _CampaignDetail({
     required this.title,
     required this.description,
     required this.statusKind,
     required this.statusLabel,
-    required this.validUntil,
+    required this.valid,
     required this.redeemed,
-    required this.minimumBooking,
+    required this.minBooking,
     required this.steps,
   });
 
@@ -195,8 +193,8 @@ class _CampaignDetailData {
   final String description;
   final GzTagKind statusKind;
   final String statusLabel;
-  final String validUntil;
+  final String valid;
   final String redeemed;
-  final String minimumBooking;
+  final String minBooking;
   final List<String> steps;
 }

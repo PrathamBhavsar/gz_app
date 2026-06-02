@@ -13,31 +13,28 @@ class CreditHistoryScreen extends StatefulWidget {
 }
 
 class _CreditHistoryScreenState extends State<CreditHistoryScreen> {
-  int _selectedFilter = 0;
-
-  static const _filters = ['All', 'Earned', 'Spent'];
-
-  static const _transactions = [
-    _CreditTransaction(amount: '+200', label: 'Booking credit', date: 'Jun 02', earned: true),
-    _CreditTransaction(amount: '−150', label: 'Session deduct', date: 'Jun 01', earned: false),
-    _CreditTransaction(amount: '+500', label: 'Welcome bonus', date: 'May 28', earned: true),
-    _CreditTransaction(amount: '−80', label: 'Redemption', date: 'May 20', earned: false),
-    _CreditTransaction(amount: '+300', label: 'Referral bonus', date: 'May 15', earned: true),
-    _CreditTransaction(amount: '−200', label: 'Session deduct', date: 'May 10', earned: false),
+  static const List<String> _filters = ['All', 'Earned', 'Spent'];
+  static const List<_CreditEntry> _entries = [
+    _CreditEntry(amount: '+200', label: 'Booking credit', date: 'Jun 02'),
+    _CreditEntry(amount: '−150', label: 'Session deduct', date: 'Jun 01'),
+    _CreditEntry(amount: '+500', label: 'Welcome bonus', date: 'May 28'),
+    _CreditEntry(amount: '−80', label: 'Redemption', date: 'May 20'),
+    _CreditEntry(amount: '+300', label: 'Referral bonus', date: 'May 15'),
+    _CreditEntry(amount: '−200', label: 'Session deduct', date: 'May 10'),
   ];
 
-  List<_CreditTransaction> get _visibleTransactions {
+  int _selectedFilter = 0;
+
+  List<_CreditEntry> get _visibleEntries {
     return switch (_selectedFilter) {
-      1 => _transactions.where((item) => item.earned).toList(),
-      2 => _transactions.where((item) => !item.earned).toList(),
-      _ => _transactions,
+      1 => _entries.where((entry) => entry.isCredit).toList(),
+      2 => _entries.where((entry) => !entry.isCredit).toList(),
+      _ => _entries,
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    final transactions = _visibleTransactions;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const GzTopBar(title: 'Credit history'),
@@ -67,14 +64,11 @@ class _CreditHistoryScreenState extends State<CreditHistoryScreen> {
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                itemCount: transactions.length,
-                separatorBuilder: (_, _) => const Divider(
-                  height: 1,
-                  color: AppColors.divider,
-                ),
+                itemCount: _visibleEntries.length,
+                separatorBuilder: (_, _) =>
+                    const Divider(height: 1, color: AppColors.divider),
                 itemBuilder: (context, index) {
-                  final transaction = transactions[index];
-                  return _CreditHistoryRow(transaction: transaction);
+                  return _CreditRow(entry: _visibleEntries[index]);
                 },
               ),
             ),
@@ -85,56 +79,47 @@ class _CreditHistoryScreenState extends State<CreditHistoryScreen> {
   }
 }
 
-class _CreditHistoryRow extends StatelessWidget {
-  const _CreditHistoryRow({required this.transaction});
+class _CreditRow extends StatelessWidget {
+  const _CreditRow({required this.entry});
 
-  final _CreditTransaction transaction;
+  final _CreditEntry entry;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: AppTypography.body.copyWith(color: AppColors.textPrimary),
-                children: [
-                  TextSpan(
-                    text: transaction.amount,
-                    style: AppTypography.num.copyWith(
-                      color: transaction.earned ? AppColors.ok : AppColors.err,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const TextSpan(text: ' · '),
-                  TextSpan(text: transaction.label),
-                  const TextSpan(text: ' · '),
-                  TextSpan(
-                    text: transaction.date,
-                    style: AppTypography.bodyR,
-                  ),
-                ],
+      child: RichText(
+        text: TextSpan(
+          style: AppTypography.body.copyWith(color: AppColors.textPrimary),
+          children: [
+            TextSpan(
+              text: entry.amount,
+              style: AppTypography.num.copyWith(
+                color: entry.isCredit ? AppColors.ok : AppColors.err,
+                fontWeight: FontWeight.w700,
               ),
             ),
-          ),
-        ],
+            const TextSpan(text: ' · '),
+            TextSpan(text: entry.label),
+            const TextSpan(text: ' · '),
+            TextSpan(text: entry.date, style: AppTypography.bodyR),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _CreditTransaction {
-  const _CreditTransaction({
+class _CreditEntry {
+  const _CreditEntry({
     required this.amount,
     required this.label,
     required this.date,
-    required this.earned,
   });
 
   final String amount;
   final String label;
   final String date;
-  final bool earned;
+
+  bool get isCredit => amount.startsWith('+');
 }

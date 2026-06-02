@@ -19,52 +19,49 @@ class CampaignsScreen extends StatefulWidget {
 }
 
 class _CampaignsScreenState extends State<CampaignsScreen> {
-  int _selectedFilter = 0;
-
-  static const _filters = ['All', 'Active', 'Expired'];
-
-  static const _campaigns = [
-    _CampaignCardData(
+  static const List<String> _filters = ['All', 'Active', 'Expired'];
+  static const List<_CampaignSummary> _campaigns = [
+    _CampaignSummary(
       id: 'welcome-bonus',
       title: 'Welcome Bonus',
       description: 'Earn 2× credits on your first booking',
       statusKind: GzTagKind.ok,
       statusLabel: 'Active',
-      expiryLabel: 'Expires Dec 31, 2025',
+      expiry: 'Expires Dec 31, 2025',
       active: true,
     ),
-    _CampaignCardData(
+    _CampaignSummary(
       id: 'happy-hours',
       title: 'Happy Hours',
       description: '50% off all systems 2 PM – 5 PM Mon–Thu',
       statusKind: GzTagKind.ok,
       statusLabel: 'Active',
-      expiryLabel: 'Ongoing',
+      expiry: 'Ongoing',
       active: true,
     ),
-    _CampaignCardData(
+    _CampaignSummary(
       id: 'summer-blast',
       title: 'Summer Blast',
       description: 'Free hour with any 2-hour booking',
       statusKind: GzTagKind.mute,
       statusLabel: 'Expired',
-      expiryLabel: 'Ended May 1',
+      expiry: 'Ended May 1',
       active: false,
     ),
   ];
 
-  List<_CampaignCardData> get _visibleCampaigns {
+  int _selectedFilter = 0;
+
+  List<_CampaignSummary> get _visibleCampaigns {
     return switch (_selectedFilter) {
-      1 => _campaigns.where((item) => item.active).toList(),
-      2 => _campaigns.where((item) => !item.active).toList(),
+      1 => _campaigns.where((campaign) => campaign.active).toList(),
+      2 => _campaigns.where((campaign) => !campaign.active).toList(),
       _ => _campaigns,
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    final campaigns = _visibleCampaigns;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const GzTopBar(title: 'Campaigns'),
@@ -94,11 +91,10 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                itemCount: campaigns.length,
+                itemCount: _visibleCampaigns.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
-                  final campaign = campaigns[index];
-                  return _CampaignListCard(campaign: campaign);
+                  return _CampaignListCard(campaign: _visibleCampaigns[index]);
                 },
               ),
             ),
@@ -112,7 +108,7 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
 class _CampaignListCard extends StatelessWidget {
   const _CampaignListCard({required this.campaign});
 
-  final _CampaignCardData campaign;
+  final _CampaignSummary campaign;
 
   @override
   Widget build(BuildContext context) {
@@ -144,12 +140,9 @@ class _CampaignListCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(campaign.description, style: AppTypography.bodyR),
                   const SizedBox(height: 10),
-                  GzTag(
-                    kind: campaign.statusKind,
-                    label: campaign.statusLabel,
-                  ),
+                  GzTag(kind: campaign.statusKind, label: campaign.statusLabel),
                   const SizedBox(height: 10),
-                  Text(campaign.expiryLabel, style: AppTypography.small),
+                  Text(campaign.expiry, style: AppTypography.small),
                 ],
               ),
             ),
@@ -169,14 +162,14 @@ class _CampaignListCard extends StatelessWidget {
   }
 }
 
-class _CampaignCardData {
-  const _CampaignCardData({
+class _CampaignSummary {
+  const _CampaignSummary({
     required this.id,
     required this.title,
     required this.description,
     required this.statusKind,
     required this.statusLabel,
-    required this.expiryLabel,
+    required this.expiry,
     required this.active,
   });
 
@@ -185,6 +178,6 @@ class _CampaignCardData {
   final String description;
   final GzTagKind statusKind;
   final String statusLabel;
-  final String expiryLabel;
+  final String expiry;
   final bool active;
 }

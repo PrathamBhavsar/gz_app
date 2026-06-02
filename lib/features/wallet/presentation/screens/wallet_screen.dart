@@ -14,7 +14,7 @@ import 'redeem_credits_sheet.dart';
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
 
-  static const _transactions = [
+  static const List<_WalletTransaction> _transactions = [
     _WalletTransaction(
       title: 'Booking credit',
       amount: '+200',
@@ -35,12 +35,12 @@ class WalletScreen extends StatelessWidget {
     ),
   ];
 
-  static const _campaigns = [
+  static const List<_WalletCampaign> _campaigns = [
     _WalletCampaign(
       id: 'welcome-bonus',
       title: 'Welcome Bonus',
       description: 'Earn 2× credits on your first booking',
-      status: GzTagKind.ok,
+      statusKind: GzTagKind.ok,
       statusLabel: 'Active',
       expiry: 'Expires Dec 31, 2025',
     ),
@@ -48,7 +48,7 @@ class WalletScreen extends StatelessWidget {
       id: 'happy-hours',
       title: 'Happy Hours',
       description: '50% off all systems 2 PM – 5 PM Mon–Thu',
-      status: GzTagKind.ok,
+      statusKind: GzTagKind.ok,
       statusLabel: 'Active',
       expiry: 'Ongoing',
     ),
@@ -64,10 +64,7 @@ class WalletScreen extends StatelessWidget {
           children: [
             Text('Wallet', style: AppTypography.h1),
             const SizedBox(height: 18),
-            const GzCard(
-              variant: CardVariant.tint,
-              child: _BalanceHero(),
-            ),
+            const GzCard(variant: CardVariant.tint, child: _BalanceHeroCard()),
             const SizedBox(height: 14),
             Row(
               children: [
@@ -78,7 +75,9 @@ class WalletScreen extends StatelessWidget {
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Credits can be added during checkout.'),
+                          content: Text(
+                            'Credits are added automatically from eligible bookings.',
+                          ),
                         ),
                       );
                     },
@@ -102,13 +101,15 @@ class WalletScreen extends StatelessWidget {
             const SizedBox(height: 12),
             GzCard(
               child: Column(
-                children: [
-                  _TransactionRow(transaction: _transactions[0]),
-                  const _Divider(),
-                  _TransactionRow(transaction: _transactions[1]),
-                  const _Divider(),
-                  _TransactionRow(transaction: _transactions[2]),
-                ],
+                children: List.generate(_transactions.length * 2 - 1, (index) {
+                  if (index.isOdd) {
+                    return const Divider(height: 1, color: AppColors.divider);
+                  }
+
+                  return _TransactionRow(
+                    transaction: _transactions[index ~/ 2],
+                  );
+                }),
               ),
             ),
             const SizedBox(height: 26),
@@ -119,14 +120,13 @@ class WalletScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             SizedBox(
-              height: 176,
+              height: 188,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: _campaigns.length,
                 separatorBuilder: (_, _) => const SizedBox(width: 12),
                 itemBuilder: (context, index) {
-                  final campaign = _campaigns[index];
-                  return _CampaignPreviewCard(campaign: campaign);
+                  return _CampaignCard(campaign: _campaigns[index]);
                 },
               ),
             ),
@@ -137,8 +137,8 @@ class WalletScreen extends StatelessWidget {
   }
 }
 
-class _BalanceHero extends StatelessWidget {
-  const _BalanceHero();
+class _BalanceHeroCard extends StatelessWidget {
+  const _BalanceHeroCard();
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +208,10 @@ class _TransactionRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(transaction.title, style: AppTypography.h3),
+                Text(
+                  '${transaction.title} ${transaction.amount}',
+                  style: AppTypography.h3,
+                ),
                 const SizedBox(height: 4),
                 Text(transaction.date, style: AppTypography.small),
               ],
@@ -228,8 +231,8 @@ class _TransactionRow extends StatelessWidget {
   }
 }
 
-class _CampaignPreviewCard extends StatelessWidget {
-  const _CampaignPreviewCard({required this.campaign});
+class _CampaignCard extends StatelessWidget {
+  const _CampaignCard({required this.campaign});
 
   final _WalletCampaign campaign;
 
@@ -244,11 +247,13 @@ class _CampaignPreviewCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
                   color: AppColors.surfaceTint,
-                  borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+                  borderRadius: BorderRadius.circular(
+                    AppSpacing.borderRadiusLg,
+                  ),
                 ),
                 child: const HugeIcon(
                   icon: HugeIcons.strokeRoundedGift,
@@ -268,7 +273,7 @@ class _CampaignPreviewCard extends StatelessWidget {
               const Spacer(),
               Row(
                 children: [
-                  GzTag(kind: campaign.status, label: campaign.statusLabel),
+                  GzTag(kind: campaign.statusKind, label: campaign.statusLabel),
                   const Spacer(),
                   const HugeIcon(
                     icon: HugeIcons.strokeRoundedArrowRight01,
@@ -284,15 +289,6 @@ class _CampaignPreviewCard extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _Divider extends StatelessWidget {
-  const _Divider();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Divider(height: 1, color: AppColors.divider);
   }
 }
 
@@ -315,7 +311,7 @@ class _WalletCampaign {
     required this.id,
     required this.title,
     required this.description,
-    required this.status,
+    required this.statusKind,
     required this.statusLabel,
     required this.expiry,
   });
@@ -323,7 +319,7 @@ class _WalletCampaign {
   final String id;
   final String title;
   final String description;
-  final GzTagKind status;
+  final GzTagKind statusKind;
   final String statusLabel;
   final String expiry;
 }
