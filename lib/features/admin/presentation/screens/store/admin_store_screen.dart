@@ -1,51 +1,115 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/navigation/routes.dart';
 
-/// Store Hub — Tab 4 root.
+import '../../../../../core/navigation/routes.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
+import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_scroll_content.dart';
+
 class AdminStoreScreen extends StatelessWidget {
   const AdminStoreScreen({super.key});
+
+  static const _tiles = [
+    _StoreTileData(
+      title: 'System Management',
+      subtitle: 'Layouts, availability, hardware',
+      route: AppRoutes.adminSystemsMgmt,
+      icon: HugeIcons.strokeRoundedInformationCircle,
+      iconColor: AppColors.info,
+    ),
+    _StoreTileData(
+      title: 'Staff Management',
+      subtitle: 'Roles, access and team roster',
+      route: AppRoutes.adminStaff,
+      icon: HugeIcons.strokeRoundedUserGroup,
+      iconColor: AppColors.purple,
+    ),
+    _StoreTileData(
+      title: 'Store Config',
+      subtitle: 'Hours, booking windows and ops',
+      route: AppRoutes.adminConfig,
+      icon: HugeIcons.strokeRoundedSettings02,
+      iconColor: AppColors.textSecondary,
+    ),
+    _StoreTileData(
+      title: 'Notifications',
+      subtitle: 'Compose player-wide announcements',
+      route: AppRoutes.adminNotifications,
+      icon: HugeIcons.strokeRoundedNotification03,
+      iconColor: AppColors.warn,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        title: Text('Store', style: AppTypography.headingSmall),
+      appBar: const GzAdminTopBar(title: 'Store', disableBack: true),
+      body: SafeArea(
+        top: false,
+        child: GzScrollContent(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            child: Column(
+              children: _tiles
+                  .map(
+                    (tile) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _StoreTile(tile: tile),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        child: Column(
-          children: const [
-            SizedBox(height: AppSpacing.md),
-            _StoreTile(
-              title: 'System Management',
-              icon: HugeIcons.strokeRoundedComputer,
-              route: AppRoutes.adminSystemsMgmt,
+    );
+  }
+}
+
+class _StoreTile extends StatelessWidget {
+  const _StoreTile({required this.tile});
+
+  final _StoreTileData tile;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCard),
+      onTap: () => context.go(tile.route),
+      child: GzCard(
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: tile.iconColor.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+              ),
+              alignment: Alignment.center,
+              child: HugeIcon(icon: tile.icon, color: tile.iconColor, size: 22),
             ),
-            SizedBox(height: AppSpacing.sm),
-            _StoreTile(
-              title: 'Staff Management',
-              icon: HugeIcons.strokeRoundedUserGroup,
-              route: AppRoutes.adminStaff,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(tile.title, style: AppTypography.h3),
+                  const SizedBox(height: 2),
+                  Text(tile.subtitle, style: AppTypography.small),
+                ],
+              ),
             ),
-            SizedBox(height: AppSpacing.sm),
-            _StoreTile(
-              title: 'Store Config',
-              icon: HugeIcons.strokeRoundedSettings01,
-              route: AppRoutes.adminConfig,
-            ),
-            SizedBox(height: AppSpacing.sm),
-            _StoreTile(
-              title: 'Notifications',
-              icon: HugeIcons.strokeRoundedNotification01,
-              route: AppRoutes.adminNotifications,
+            const SizedBox(width: AppSpacing.sm),
+            const HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowRight01,
+              color: AppColors.textTertiary,
+              size: 18,
             ),
           ],
         ),
@@ -54,32 +118,18 @@ class AdminStoreScreen extends StatelessWidget {
   }
 }
 
-class _StoreTile extends StatelessWidget {
-  const _StoreTile({
+class _StoreTileData {
+  const _StoreTileData({
     required this.title,
-    required this.icon,
+    required this.subtitle,
     required this.route,
+    required this.icon,
+    required this.iconColor,
   });
 
   final String title;
-  final dynamic icon;
+  final String subtitle;
   final String route;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      tileColor: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-      ),
-      leading: HugeIcon(icon: icon, color: AppColors.textPrimary, size: 22),
-      title: Text(title, style: AppTypography.bodyLarge),
-      trailing: const HugeIcon(
-        icon: HugeIcons.strokeRoundedArrowRight01,
-        color: AppColors.textSecondary,
-        size: 20,
-      ),
-      onTap: () => context.go(route),
-    );
-  }
+  final dynamic icon;
+  final Color iconColor;
 }

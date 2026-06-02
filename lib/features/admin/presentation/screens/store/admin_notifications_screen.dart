@@ -1,31 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/navigation/routes.dart';
-import '../../providers/admin_auth_provider.dart';
-import '../../../data/services/admin_store_service.dart';
-final _notifChannelProvider = StateProvider.autoDispose<String>((ref) => 'push');
-final _notifTargetProvider = StateProvider.autoDispose<String>((ref) => 'all');
-final _notifSendingProvider = StateProvider.autoDispose<bool>((ref) => false);
 
-/// Admin Notifications — Screen 60.
-/// Broadcast console with channel/target selector.
-class AdminNotificationsScreen extends ConsumerStatefulWidget {
+import '../../../../../core/navigation/routes.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
+import '../../../../../shared/widgets/gz_admin_chip.dart';
+import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_button.dart';
+import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_scroll_content.dart';
+import '../../../../../shared/widgets/gz_section_head.dart';
+
+class AdminNotificationsScreen extends StatefulWidget {
   const AdminNotificationsScreen({super.key});
 
   @override
-  ConsumerState<AdminNotificationsScreen> createState() =>
+  State<AdminNotificationsScreen> createState() =>
       _AdminNotificationsScreenState();
 }
 
-class _AdminNotificationsScreenState
-    extends ConsumerState<AdminNotificationsScreen> {
-  final _titleCtrl = TextEditingController();
-  final _bodyCtrl = TextEditingController();
+class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
+  final _titleCtrl = TextEditingController(text: 'Tonight at GZ Arena');
+  final _bodyCtrl = TextEditingController(
+    text:
+        'Walk-in lanes open after 8 PM. Claim double credits on every 2-hour session.',
+  );
+  String _channel = 'push';
+  String _audience = 'all';
 
   @override
   void dispose() {
@@ -36,264 +39,189 @@ class _AdminNotificationsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final role = ref.watch(adminRoleProvider);
-    final canSend = role == 'super_admin' || role == 'admin';
-    final channel = ref.watch(_notifChannelProvider);
-    final target = ref.watch(_notifTargetProvider);
-    final sending = ref.watch(_notifSendingProvider);
+    final previewTitle = _titleCtrl.text.trim().isEmpty
+        ? 'Notification title'
+        : _titleCtrl.text.trim();
+    final previewBody = _bodyCtrl.text.trim().isEmpty
+        ? 'Notification body preview'
+        : _bodyCtrl.text.trim();
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: AppColors.textPrimary, size: 20),
-          onPressed: () => context.go(AppRoutes.adminSystemsMgmt),
-        ),
-        title: Text('Notifications', style: AppTypography.headingSmall),
+      appBar: GzAdminTopBar(
+        title: 'Notifications',
+        onBack: () => context.go(AppRoutes.adminSystemsMgmt),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: AppSpacing.md),
-
-            if (!canSend) ...[
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xxl),
-                  child: Column(
+      body: SafeArea(
+        top: false,
+        child: GzScrollContent(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const GzSectionHead('Channel'),
+                GzCard(
+                  child: Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
                     children: [
-                      const HugeIcon(
-                        icon: HugeIcons.strokeRoundedLock,
-                        color: AppColors.textSecondary,
-                        size: 48,
+                      GzAdminChip(
+                        label: 'Push',
+                        active: _channel == 'push',
+                        onTap: () => setState(() => _channel = 'push'),
                       ),
-                      const SizedBox(height: AppSpacing.md),
-                      Text('View only',
-                          style: AppTypography.bodyMedium.copyWith(
-                              color: AppColors.textSecondary)),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text('Only admins can send broadcasts.',
-                          style: AppTypography.caption),
+                      GzAdminChip(
+                        label: 'Email',
+                        active: _channel == 'email',
+                        onTap: () => setState(() => _channel = 'email'),
+                      ),
+                      GzAdminChip(
+                        label: 'SMS',
+                        active: _channel == 'sms',
+                        onTap: () => setState(() => _channel = 'sms'),
+                      ),
                     ],
                   ),
                 ),
-              ),
-            ],
-
-            // Broadcast Composer
-            Text('Broadcast', style: AppTypography.headingSmall),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: _titleCtrl,
-              enabled: canSend,
-              style: AppTypography.bodyMedium,
-              decoration: InputDecoration(
-                labelText: 'Title',
-                labelStyle: AppTypography.caption,
-                filled: true,
-                fillColor: canSend ? AppColors.surface : AppColors.surface2,
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: _bodyCtrl,
-              enabled: canSend,
-              style: AppTypography.bodyMedium,
-              maxLines: 4,
-              decoration: InputDecoration(
-                labelText: 'Message',
-                labelStyle: AppTypography.caption,
-                filled: true,
-                fillColor: canSend ? AppColors.surface : AppColors.surface2,
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // Channel selector
-            Text('Channel', style: AppTypography.caption),
-            const SizedBox(height: AppSpacing.xs),
-            Wrap(
-              spacing: AppSpacing.sm,
-              children: [
-                _buildChip('Push', 'push', canSend, channel),
-                _buildChip('Email', 'email', canSend, channel),
-                _buildChip('In-App', 'in_app', canSend, channel),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // Target selector
-            Text('Target', style: AppTypography.caption),
-            const SizedBox(height: AppSpacing.xs),
-            Wrap(
-              spacing: AppSpacing.sm,
-              children: [
-                _buildTargetChip('All Users', 'all', canSend, target),
-                _buildTargetChip('On-Floor Players', 'on_floor', canSend, target),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xl),
-
-            // Send button
-            if (canSend)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: sending ? null : _send,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.rose,
-                    foregroundColor: AppColors.background,
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.borderRadius),
-                    ),
+                const SizedBox(height: AppSpacing.md),
+                const GzSectionHead('Audience'),
+                GzCard(
+                  child: Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      GzAdminChip(
+                        label: 'All Players',
+                        active: _audience == 'all',
+                        onTap: () => setState(() => _audience = 'all'),
+                      ),
+                      GzAdminChip(
+                        label: 'Active Now',
+                        active: _audience == 'active',
+                        onTap: () => setState(() => _audience = 'active'),
+                      ),
+                    ],
                   ),
-                  child: sending
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            color: AppColors.background,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Text('Send Broadcast', style: AppTypography.button),
                 ),
-              ),
-            const SizedBox(height: AppSpacing.xxl),
-          ],
+                const SizedBox(height: AppSpacing.md),
+                const GzSectionHead('Compose'),
+                GzCard(
+                  child: Column(
+                    children: [
+                      _ComposeField(
+                        label: 'Title',
+                        controller: _titleCtrl,
+                        onChanged: () => setState(() {}),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      _ComposeField(
+                        label: 'Body',
+                        controller: _bodyCtrl,
+                        maxLines: 5,
+                        onChanged: () => setState(() {}),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                const GzSectionHead('Preview'),
+                GzCard(
+                  variant: CardVariant.inset,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: AppColors.infoBg,
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.borderRadiusLg,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedNotification03,
+                          color: AppColors.info,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(previewTitle, style: AppTypography.h3),
+                            const SizedBox(height: 4),
+                            Text(
+                              previewBody,
+                              style: AppTypography.bodyR.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                GzButton(
+                  label: 'Send notification',
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildChip(String label, String value, bool enabled, String channel) {
-    final isActive = channel == value;
-    return GestureDetector(
-      onTap: enabled ? () => ref.read(_notifChannelProvider.notifier).state = value : null,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
-        ),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.rose : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
-          border: Border.all(
-            color: isActive ? AppColors.rose : AppColors.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.bodySmall.copyWith(
-            color:
-                isActive ? AppColors.background : AppColors.textSecondary,
-          ),
-        ),
-      ),
-    );
-  }
+class _ComposeField extends StatelessWidget {
+  const _ComposeField({
+    required this.label,
+    required this.controller,
+    required this.onChanged,
+    this.maxLines = 1,
+  });
 
-  Widget _buildTargetChip(String label, String value, bool enabled, String target) {
-    final isActive = target == value;
-    return GestureDetector(
-      onTap: enabled ? () => ref.read(_notifTargetProvider.notifier).state = value : null,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
+  final String label;
+  final TextEditingController controller;
+  final VoidCallback onChanged;
+  final int maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      onChanged: (_) => onChanged(),
+      style: AppTypography.body,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: AppTypography.small,
+        filled: true,
+        fillColor: AppColors.pillBg,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
         ),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.rose : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
-          border: Border.all(
-            color: isActive ? AppColors.rose : AppColors.border,
-          ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+          borderSide: BorderSide.none,
         ),
-        child: Text(
-          label,
-          style: AppTypography.bodySmall.copyWith(
-            color:
-                isActive ? AppColors.background : AppColors.textSecondary,
-          ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+          borderSide: const BorderSide(color: AppColors.rule),
         ),
       ),
     );
-  }
-
-  Future<void> _send() async {
-    if (_titleCtrl.text.trim().isEmpty || _bodyCtrl.text.trim().isEmpty) {
-      return;
-    }
-
-    ref.read(_notifSendingProvider.notifier).state = true;
-    final channel = ref.read(_notifChannelProvider);
-    final target = ref.read(_notifTargetProvider);
-
-    try {
-      final service = ref.read(adminStoreServiceProvider);
-      if (target == 'on_floor') {
-        await service.sendNotification({
-          'title': _titleCtrl.text.trim(),
-          'body': _bodyCtrl.text.trim(),
-          'channel': channel,
-          'target': target,
-        });
-      } else {
-        await service.sendTopicNotification({
-          'title': _titleCtrl.text.trim(),
-          'body': _bodyCtrl.text.trim(),
-          'channel': channel,
-          'topic': 'all_users',
-        });
-      }
-
-      if (mounted) {
-        _titleCtrl.clear();
-        _bodyCtrl.clear();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Broadcast sent'),
-            backgroundColor: AppColors.ok,
-          ),
-        );
-      }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to send'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) ref.read(_notifSendingProvider.notifier).state = false;
-    }
   }
 }
