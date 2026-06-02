@@ -318,8 +318,137 @@ function Button({ children, variant = 'primary', onClick, disabled, style, class
   );
 }
 
+// ───────── Admin shared components ─────────
+
+// Admin bottom nav — 4 tabs: Dashboard, Sessions, Management, Store
+function AdminBottomNav({ active = 'dashboard' }) {
+  const tabs = [
+    { id: 'dashboard',  icon: I.home,   label: 'Floor' },
+    { id: 'sessions',   icon: I.clock,  label: 'Sessions' },
+    { id: 'management', icon: I.scale,  label: 'Manage' },
+    { id: 'store',      icon: I.pc,     label: 'Store' },
+  ];
+  return (
+    <div className="gz-bottomnav" style={{ flexShrink: 0 }}>
+      {tabs.map(t => (
+        <button key={t.id} data-active={active === t.id}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+            color: active === t.id ? 'var(--gz-rose)' : 'var(--gz-fg-4)',
+            background: 'transparent', border: 0, padding: 8, cursor: 'pointer', fontFamily: 'inherit' }}>
+          {React.cloneElement(t.icon, { style: { width: 20, height: 20 } })}
+          <span style={{ fontSize: 10, fontWeight: 600 }}>{t.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// Admin TopBar — title on the left (not centered), optional back button
+function AdminTopBar({ title, subtitle, onBack, trailing }) {
+  return (
+    <div style={{ padding: '10px 16px 10px', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+      {onBack && (
+        <button onClick={onBack} style={{ width: 36, height: 36, border: 0, background: 'transparent',
+          color: 'var(--gz-fg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, cursor: 'pointer' }}>
+          {I.back}
+        </button>
+      )}
+      <div style={{ flex: 1 }}>
+        <div className="gz-h2">{title}</div>
+        {subtitle && <div className="gz-small" style={{ marginTop: 1 }}>{subtitle}</div>}
+      </div>
+      {trailing && <div style={{ display: 'flex', alignItems: 'center' }}>{trailing}</div>}
+    </div>
+  );
+}
+
+// KPI card used across admin analytics screens
+function AdminKpiCard({ label, value, icon, accentColor = 'var(--gz-fg-3)' }) {
+  return (
+    <div className="gz-card" style={{ flex: 1, padding: 14, borderRadius: 16 }}>
+      <div style={{ color: accentColor, marginBottom: 6 }}>
+        {React.cloneElement(icon, { style: { width: 18, height: 18 } })}
+      </div>
+      <div className="gz-h2" style={{ fontFamily: 'var(--gz-mono)' }}>{value}</div>
+      <div className="gz-small">{label}</div>
+    </div>
+  );
+}
+
+// Rose filter chip — used in admin filter rows
+function AdminChip({ label, active, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      height: 30, padding: '0 12px', border: 0, borderRadius: 'var(--gz-r-chip)',
+      background: active ? 'var(--gz-rose)' : 'var(--gz-card)',
+      color: active ? '#fff' : 'var(--gz-fg-2)',
+      fontSize: 13, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer',
+      boxShadow: active ? 'none' : 'inset 0 0 0 1px var(--gz-rule)',
+    }}>{label}</button>
+  );
+}
+
+// Toggle switch for admin screens
+function AdminToggle({ active = true }) {
+  return (
+    <div style={{
+      width: 44, height: 24, borderRadius: 999, flexShrink: 0,
+      background: active ? 'var(--gz-ok)' : 'var(--gz-rule)',
+      position: 'relative', transition: 'background 0.2s',
+    }}>
+      <div style={{
+        width: 18, height: 18, borderRadius: 999,
+        background: active ? '#fff' : 'var(--gz-fg-4)',
+        position: 'absolute', top: 3,
+        left: active ? 23 : 3,
+        transition: 'left 0.2s',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+      }} />
+    </div>
+  );
+}
+
+// Admin nav tile — used in Management hub and Store hub
+function AdminNavTile({ icon, iconColor, label, onClick }) {
+  return (
+    <div className="gz-card" style={{ padding: 16, borderRadius: 14, cursor: 'pointer' }} onClick={onClick}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{
+          width: 36, height: 36, borderRadius: 10,
+          background: iconColor + '1A',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: iconColor, flexShrink: 0,
+        }}>
+          {React.cloneElement(icon, { style: { width: 22, height: 22 } })}
+        </div>
+        <div style={{ flex: 1 }}>
+          <div className="gz-h3">{label}</div>
+        </div>
+        <div style={{ color: 'var(--gz-fg-3)' }}>
+          {React.cloneElement(I.chev, { style: { width: 16, height: 16 } })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Admin input field — reusable input style
+function AdminInput({ label, value, placeholder, type = 'text', style: extraStyle }) {
+  return (
+    <div style={{ marginBottom: 12, ...extraStyle }}>
+      {label && <div className="gz-meta" style={{ marginBottom: 4 }}>{label}</div>}
+      <div style={{
+        background: 'var(--gz-pill-bg)', borderRadius: 10,
+        padding: '10px 12px', fontSize: 14, fontFamily: 'var(--gz-font)',
+        fontWeight: 500, color: 'var(--gz-fg)',
+      }}>{value || placeholder}</div>
+    </div>
+  );
+}
+
 Object.assign(window, {
   I, Phone, StatusBar, TopBar, BottomNav, Scroll,
   Tag, Chip, LiveDot, IconBtn, MetaRow, Collapse, Avatar, AVATAR_COLORS,
   Button,
+  AdminBottomNav, AdminTopBar, AdminKpiCard, AdminChip, AdminToggle, AdminNavTile, AdminInput,
 });

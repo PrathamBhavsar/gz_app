@@ -75,6 +75,31 @@
   <script type="text/babel" src="src/screen-email-verify-success.jsx"></script>
   <script type="text/babel" src="src/screen-app-flow-demo.jsx"></script>
   <script type="text/babel" src="src/screen-notification-prefs.jsx"></script>
+  <script type="text/babel" src="src/screen-register.jsx"></script>
+  <script type="text/babel" src="src/screen-book-systems.jsx"></script>
+  <script type="text/babel" src="src/screen-active-session-detail.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-login.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-password-reset.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-dashboard.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-session-mgmt.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-walk-in.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-bookings.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-analytics.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-revenue.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-utilization.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-session-stats.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-players.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-system-perf.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-management.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-pricing.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-billing.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-campaigns.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-credits.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-disputes.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-store.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-staff.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-config.jsx"></script>
+  <script type="text/babel" src="src/screen-admin-notifications.jsx"></script>
 </head>
 <body>
   <div id="root"></div>
@@ -158,7 +183,7 @@
             <DCArtboard id="session"  label="Active session"   width={PHONE_W} height={PHONE_H}>
               <ActiveSessionScreen />
             </DCArtboard>
-            <DCArtboard id="activity" label="Activity hub"     width={PHONE_W} height={PHONE_H}>
+            <DCArtboard id="activity" label="Sessions"     width={PHONE_W} height={PHONE_H}>
               <ActivityHubScreen />
             </DCArtboard>
             <DCArtboard id="wallet"   label="Wallet home"      width={PHONE_W} height={PHONE_H}>
@@ -184,7 +209,7 @@
             <DCArtboard id="home"     label="Home feed"             width={PHONE_W} height={PHONE_H}>
               <HomeFeedScreen />
             </DCArtboard>
-            <DCArtboard id="systems"  label="Systems → calendar"     width={PHONE_W} height={PHONE_H}>
+            <DCArtboard id="systems"  label="Systems browser / availability"     width={PHONE_W} height={PHONE_H}>
               <SystemsBrowserScreen />
             </DCArtboard>
             <DCArtboard id="history"  label="Session receipt"        width={PHONE_W} height={PHONE_H}>
@@ -229,7 +254,7 @@
             <DCArtboard id="forgot"       label="Forgot password"       width={PHONE_W} height={PHONE_H}>
               <ForgotPasswordScreen />
             </DCArtboard>
-            <DCArtboard id="confirmation" label="Booking confirmation"   width={PHONE_W} height={PHONE_H}>
+            <DCArtboard id="confirmation" label="Booking success"   width={PHONE_W} height={PHONE_H}>
               <BookingConfirmationScreen />
             </DCArtboard>
             <DCArtboard id="billing"      label="Billing history"       width={PHONE_W} height={PHONE_H}>
@@ -250,7 +275,7 @@
             <DCArtboard id="campaigns"     label="Campaigns list"       width={PHONE_W} height={PHONE_H}>
               <CampaignsListScreen />
             </DCArtboard>
-            <DCArtboard id="system-picker" label="System picker"        width={PHONE_W} height={PHONE_H}>
+            <DCArtboard id="system-picker" label="Booking — System type"        width={PHONE_W} height={PHONE_H}>
               <SystemPickerScreen />
             </DCArtboard>
           </DCSection>
@@ -294,6 +319,105 @@
             </DCArtboard>
             <DCArtboard id="notif-prefs-pushoff" label="Push OFF variant" width={PHONE_W} height={PHONE_H}>
               <NotificationPrefsScreen initialPushOff={true} />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens-player-extra" title="13 · Player — missing screens"
+            subtitle="Register, book-tab systems browser, active session detail">
+            <DCArtboard id="register" label="Register" width={PHONE_W} height={PHONE_H}>
+              <RegisterScreen />
+            </DCArtboard>
+            <DCArtboard id="book-systems" label="Book — Systems browser" width={PHONE_W} height={PHONE_H}>
+              <BookSystemsScreen />
+            </DCArtboard>
+            <DCArtboard id="active-session-detail" label="Active session detail" width={PHONE_W} height={PHONE_H}>
+              <ActiveSessionDetailScreen />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens-admin-auth" title="14 · Admin — Auth"
+            subtitle="Admin login and password reset">
+            <DCArtboard id="admin-login" label="Admin login" width={PHONE_W} height={PHONE_H}>
+              <AdminLoginScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-pw-reset" label="Admin password reset" width={PHONE_W} height={PHONE_H}>
+              <AdminPasswordResetScreen />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens-admin-ops" title="15 · Admin — Operations"
+            subtitle="Real-time floor map, session control, walk-in, bookings">
+            <DCArtboard id="admin-dashboard" label="Admin dashboard (floor map)" width={PHONE_W} height={PHONE_H}>
+              <AdminDashboardScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-session-mgmt" label="Session management" width={PHONE_W} height={PHONE_H}>
+              <AdminSessionMgmtScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-walk-in" label="Walk-in booking" width={PHONE_W} height={PHONE_H}>
+              <AdminWalkInScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-bookings" label="Booking management" width={PHONE_W} height={PHONE_H}>
+              <AdminBookingsScreen />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens-admin-analytics" title="16 · Admin — Analytics"
+            subtitle="Dashboard KPIs, revenue, utilization heatmap, session stats, players, system perf">
+            <DCArtboard id="admin-analytics" label="Analytics hub" width={PHONE_W} height={PHONE_H}>
+              <AdminAnalyticsScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-revenue" label="Revenue breakdown" width={PHONE_W} height={PHONE_H}>
+              <AdminRevenueScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-utilization" label="Utilization heatmap" width={PHONE_W} height={PHONE_H}>
+              <AdminUtilizationScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-session-stats" label="Session statistics" width={PHONE_W} height={PHONE_H}>
+              <AdminSessionStatsScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-players" label="Player analytics" width={PHONE_W} height={PHONE_H}>
+              <AdminPlayersScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-system-perf" label="System performance" width={PHONE_W} height={PHONE_H}>
+              <AdminSystemPerfScreen />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens-admin-management" title="17 · Admin — Management"
+            subtitle="Hub, pricing rules, billing, campaigns, credits, dispute resolution">
+            <DCArtboard id="admin-management" label="Management hub" width={PHONE_W} height={PHONE_H}>
+              <AdminManagementScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-pricing" label="Pricing rules" width={PHONE_W} height={PHONE_H}>
+              <AdminPricingScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-billing" label="Billing & payments" width={PHONE_W} height={PHONE_H}>
+              <AdminBillingScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-campaigns" label="Campaign management" width={PHONE_W} height={PHONE_H}>
+              <AdminCampaignsScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-credits" label="Credits management" width={PHONE_W} height={PHONE_H}>
+              <AdminCreditsScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-disputes" label="Dispute resolution" width={PHONE_W} height={PHONE_H}>
+              <AdminDisputesScreen />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="screens-admin-store" title="18 · Admin — Store"
+            subtitle="Store hub, staff, config, notifications broadcast">
+            <DCArtboard id="admin-store" label="Store hub" width={PHONE_W} height={PHONE_H}>
+              <AdminStoreScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-staff" label="Staff management" width={PHONE_W} height={PHONE_H}>
+              <AdminStaffScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-config" label="Store config" width={PHONE_W} height={PHONE_H}>
+              <AdminConfigScreen />
+            </DCArtboard>
+            <DCArtboard id="admin-notifications" label="Notification broadcast" width={PHONE_W} height={PHONE_H}>
+              <AdminNotificationsScreen />
             </DCArtboard>
           </DCSection>
 

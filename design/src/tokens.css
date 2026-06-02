@@ -39,6 +39,10 @@
   --gz-purple:    #5A3A82;
   --gz-purple-bg: #E5DCEE;
 
+  /* admin accent — maps to AppColors.rose = AppColors.err */
+  --gz-rose:    #9A2A1F;
+  --gz-rose-bg: #F2DAD5;
+
   /* radii */
   --gz-r-card:  26px;
   --gz-r-inner: 16px;
