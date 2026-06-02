@@ -9,12 +9,12 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../models/domain_systems.dart';
 import '../../../../models/enums.dart';
-import '../../../../shared/widgets/em_button.dart';
-import '../../../../shared/widgets/em_card.dart';
-import '../../../../shared/widgets/em_meta_row.dart';
-import '../../../../shared/widgets/em_scroll_content.dart';
-import '../../../../shared/widgets/em_tag.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_meta_row.dart';
+import '../../../../shared/widgets/gz_scroll_content.dart';
+import '../../../../shared/widgets/gz_tag.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../providers/booking_detail_notifier.dart';
 import 'payment_sheet.dart';
@@ -36,7 +36,7 @@ class BookingDetailMobileLayout extends ConsumerWidget {
         backgroundColor: AppColors.background,
         body: Column(
           children: [
-            EmTopBar(title: 'Booking'),
+            GzTopBar(title: 'Booking'),
             Expanded(
               child: PageErrorDisplay(
                 error: AppPageError.from(e),
@@ -59,13 +59,13 @@ class _BookingDetailBody extends ConsumerWidget {
 
   const _BookingDetailBody({required this.booking, required this.bookingId});
 
-  EmTagKind _tagKind(BookingStatus? status) => switch (status) {
-    BookingStatus.confirmed => EmTagKind.ok,
-    BookingStatus.pending => EmTagKind.warn,
-    BookingStatus.checkedIn => EmTagKind.info,
-    BookingStatus.cancelled => EmTagKind.err,
-    BookingStatus.noShow => EmTagKind.err,
-    null => EmTagKind.mute,
+  GzTagKind _tagKind(BookingStatus? status) => switch (status) {
+    BookingStatus.confirmed => GzTagKind.ok,
+    BookingStatus.pending => GzTagKind.warn,
+    BookingStatus.checkedIn => GzTagKind.info,
+    BookingStatus.cancelled => GzTagKind.err,
+    BookingStatus.noShow => GzTagKind.err,
+    null => GzTagKind.mute,
   };
 
   String _tagLabel(BookingStatus? status) => switch (status) {
@@ -102,16 +102,16 @@ class _BookingDetailBody extends ConsumerWidget {
     return SafeArea(
       child: Column(
         children: [
-          EmTopBar(title: 'Booking'),
+          GzTopBar(title: 'Booking'),
           Expanded(
-            child: EmScrollContent(
+            child: GzScrollContent(
               padded: true,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // ── Status tag ──
                   Center(
-                    child: EmTag(
+                    child: GzTag(
                       kind: _tagKind(status),
                       label: _tagLabel(status),
                     ),
@@ -119,7 +119,7 @@ class _BookingDetailBody extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.md),
 
                   // ── System card ──
-                  EmCard(
+                  GzCard(
                     child: Row(
                       children: [
                         Container(
@@ -163,38 +163,38 @@ class _BookingDetailBody extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.sm),
 
                   // ── Booking time fields ──
-                  EmCard(
+                  GzCard(
                     child: Column(
                       children: [
-                        EmMetaRow(
+                        GzMetaRow(
                           label: 'Date',
                           value: _formatDate(booking.scheduledStart),
                         ),
-                        EmMetaRow(
+                        GzMetaRow(
                           label: 'Start',
                           value: _formatTime(booking.scheduledStart),
                         ),
-                        EmMetaRow(
+                        GzMetaRow(
                           label: 'End',
                           value: _formatTime(booking.scheduledEnd),
                         ),
-                        EmMetaRow(label: 'Duration', value: '${dur}m'),
+                        GzMetaRow(label: 'Duration', value: '${dur}m'),
                       ],
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
 
                   // ── Pricing ──
-                  EmCard(
+                  GzCard(
                     child: Column(
                       children: [
-                        EmMetaRow(
+                        GzMetaRow(
                           label: 'Amount',
                           value: booking.amount != null
                               ? '₹${booking.amount!.toStringAsFixed(2)}'
                               : '—',
                         ),
-                        EmMetaRow(
+                        GzMetaRow(
                           label: 'Payment',
                           value: booking.isPaid == true ? 'Paid' : 'Unpaid',
                         ),
@@ -246,30 +246,30 @@ class _BottomCta extends ConsumerWidget {
         BookingStatus.pending => Row(
           children: [
             Expanded(
-              child: EmButton(
+              child: GzButton(
                 label: 'Pay Now',
                 onPressed: () => showPaymentSheet(context, ref, bookingId),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: EmButton(
+              child: GzButton(
                 label: 'Cancel',
-                variant: EmButtonVariant.ghost,
+                variant: GzButtonVariant.ghost,
                 onPressed: () => context.pop(),
               ),
             ),
           ],
         ),
-        BookingStatus.confirmed when !inWindow => EmButtonFull(
+        BookingStatus.confirmed when !inWindow => GzButton(
           label: 'Cancel Booking',
-          variant: EmButtonVariant.ghost,
+          variant: GzButtonVariant.ghost,
           onPressed: () => context.pop(),
         ),
         BookingStatus.confirmed when inWindow => Row(
           children: [
             Expanded(
-              child: EmButton(
+              child: GzButton(
                 label: 'Check In',
                 onPressed: () {
                   context.push(AppRoutes.checkInPath(bookingId));
@@ -278,21 +278,21 @@ class _BottomCta extends ConsumerWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: EmButton(
+              child: GzButton(
                 label: 'Cancel',
-                variant: EmButtonVariant.ghost,
+                variant: GzButtonVariant.ghost,
                 onPressed: () => context.pop(),
               ),
             ),
           ],
         ),
-        BookingStatus.checkedIn => EmButtonFull(
+        BookingStatus.checkedIn => GzButton(
           label: 'View Active Session',
           onPressed: () => context.push(AppRoutes.sessions),
         ),
-        BookingStatus.cancelled || BookingStatus.noShow => EmButtonFull(
+        BookingStatus.cancelled || BookingStatus.noShow => GzButton(
           label: 'File Dispute',
-          variant: EmButtonVariant.ghost,
+          variant: GzButtonVariant.ghost,
           onPressed: () => context.push(AppRoutes.disputeCreate),
         ),
         _ => const SizedBox.shrink(),

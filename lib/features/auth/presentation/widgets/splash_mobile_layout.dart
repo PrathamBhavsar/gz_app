@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../shared/widgets/em_gz_logo.dart';
-import '../../../../../shared/widgets/em_live_dot.dart';
+import '../../../../../shared/widgets/gz_logo.dart';
+import '../../../../../shared/widgets/gz_live_dot.dart';
 import '../providers/splash_notifier.dart';
 
 class SplashMobileLayout extends ConsumerWidget {
@@ -31,9 +31,9 @@ class SplashMobileLayout extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          EmGzLogo(),
+          GzLogo(),
           SizedBox(height: AppSpacing.sm),
-          EmLiveDot(),
+          GzLiveDot(),
         ],
       ),
     );

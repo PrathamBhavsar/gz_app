@@ -12,6 +12,7 @@ class AppRoutes {
   static const forgotPassword           = '/auth/forgot-password';
   static const resetPassword            = '/auth/reset-password';
   static const emailVerificationPending = '/auth/email-verification-pending';
+  static const emailVerified            = '/auth/email-verified';
 
   // Main App (Authenticated)
   static const home        = '/home';

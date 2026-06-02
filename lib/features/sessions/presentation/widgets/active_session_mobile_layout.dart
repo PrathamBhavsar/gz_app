@@ -5,11 +5,11 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/em_tag.dart';
-import '../../../../shared/widgets/em_chip.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
-import '../../../../shared/widgets/em_live_dot.dart';
-import '../../../../shared/widgets/em_progress_bar.dart';
+import '../../../../shared/widgets/gz_tag.dart';
+import '../../../../shared/widgets/gz_chip.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../shared/widgets/gz_live_dot.dart';
+import '../../../../shared/widgets/gz_progress_bar.dart';
 
 final _activeSessionElapsedProvider =
     StateProvider.autoDispose<int>((ref) => 23 * 60 + 56);
@@ -70,7 +70,7 @@ class _ActiveSessionMobileLayoutState
     return SafeArea(
       child: Column(
         children: [
-          EmTopBar(
+          GzTopBar(
             title: 'Live session',
             subtitle: 'GameZone · Koramangala',
             disableBack: true,
@@ -99,7 +99,7 @@ class _ActiveSessionMobileLayoutState
                     Text('$elapsedStr elapsed of 2:00:00',
                         style: AppTypography.body.copyWith(color: AppColors.textSecondary)),
                     const SizedBox(height: 18),
-                    EmProgressBar(
+                    GzProgressBar(
                       value: pct,
                       trackColor: Colors.black12,
                       fillColor: AppColors.buttonBg,
@@ -129,13 +129,13 @@ class _ActiveSessionMobileLayoutState
                       const SizedBox(height: 3),
                       Text('GameZone Koramangala', style: AppTypography.small),
                     ])),
-                    const EmTag(kind: EmTagKind.ok, label: 'Active'),
+                    const GzTag(kind: GzTagKind.ok, label: 'Active'),
                   ]),
                   const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
                   Wrap(spacing: 6, children: const [
-                    EmChip(keyLabel: 'SEAT', value: '3'),
-                    EmChip(keyLabel: 'PLAT', value: 'PC'),
-                    EmChip(keyLabel: 'ID',   value: 'SES-20948'),
+                    GzChip(keyLabel: 'SEAT', value: '3'),
+                    GzChip(keyLabel: 'PLAT', value: 'PC'),
+                    GzChip(keyLabel: 'ID',   value: 'SES-20948'),
                   ]),
                 ])),
                 const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
@@ -145,7 +145,7 @@ class _ActiveSessionMobileLayoutState
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                     Text('RUNNING TOTAL', style: AppTypography.meta),
                     Row(children: [
-                      const EmLiveDot(size: 6),
+                      const GzLiveDot(size: 6),
                       const SizedBox(width: 6),
                       Text('live', style: AppTypography.small.copyWith(color: AppColors.ok, fontWeight: FontWeight.w600)),
                     ]),

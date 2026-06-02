@@ -11,9 +11,9 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../models/domain_systems.dart';
 import '../../../../../models/enums.dart';
 import '../../../../../shared/widgets/connectivity_banner.dart';
-import '../../../../../shared/widgets/em_button.dart';
-import '../../../../../shared/widgets/em_store_selector_pill.dart';
-import '../../../../../shared/widgets/em_tag.dart';
+import '../../../../../shared/widgets/gz_button.dart';
+import '../../../../../shared/widgets/gz_store_selector_pill.dart';
+import '../../../../../shared/widgets/gz_tag.dart';
 import '../../../../../shared/widgets/page_error_display.dart';
 import 'package:gz_app/shared/widgets/store_selector_sheet.dart';
 import '../providers/systems_notifier.dart';
@@ -55,7 +55,7 @@ class BookingSlotSelectionMobileLayout extends ConsumerWidget {
                 Expanded(
                   child: Text('Book a System', style: AppTypography.h1),
                 ),
-                EmStoreSelectorPill(
+                GzStoreSelectorPill(
                   storeName: storeId != null ? 'Current Store' : 'Select Store',
                   onTap: () => showStoreSelectorSheet(context),
                 ),
@@ -164,7 +164,7 @@ class BookingSlotSelectionMobileLayout extends ConsumerWidget {
           color: AppColors.background,
           child: SafeArea(
             top: false,
-            child: EmButtonFull(
+            child: GzButton(
               label: 'Check Availability',
               onPressed: storeId == null
                   ? null
@@ -226,8 +226,8 @@ class _SystemCard extends StatelessWidget {
               ],
             ),
           ),
-          EmTag(
-            kind: isAvailable ? EmTagKind.ok : EmTagKind.mute,
+          GzTag(
+            kind: isAvailable ? GzTagKind.ok : GzTagKind.mute,
             label: isAvailable ? 'Available' : 'Booked',
           ),
         ],
@@ -289,7 +289,7 @@ class _NoStoreMessage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.lg),
-              EmButton(label: 'Select a store', onPressed: onTap),
+              GzButton(label: 'Select a store', onPressed: onTap),
             ],
           ),
         ),

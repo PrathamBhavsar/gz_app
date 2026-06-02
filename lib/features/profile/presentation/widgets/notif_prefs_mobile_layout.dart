@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
-import '../../../../shared/widgets/em_card.dart';
-import '../../../../shared/widgets/em_section_head.dart';
-import '../../../../shared/widgets/em_scroll_content.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_section_head.dart';
+import '../../../../shared/widgets/gz_scroll_content.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../providers/notif_prefs_notifier.dart';
@@ -20,7 +20,7 @@ class NotifPrefsMobileLayout extends ConsumerWidget {
 
     return Column(
       children: [
-        const EmTopBar(title: 'Notifications'),
+        const GzTopBar(title: 'Notifications'),
         Expanded(
           child: state.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -46,13 +46,13 @@ class _PrefsContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return EmScrollContent(
+    return GzScrollContent(
       padded: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const EmSectionHead('Channels'),
-          EmCard(
+          const GzSectionHead('Channels'),
+          GzCard(
             padding: 0,
             child: Column(
               children: [
@@ -89,8 +89,8 @@ class _PrefsContent extends ConsumerWidget {
 
           const SizedBox(height: AppSpacing.md),
 
-          const EmSectionHead('When to notify me'),
-          EmCard(
+          const GzSectionHead('When to notify me'),
+          GzCard(
             padding: 0,
             child: Column(
               children: [

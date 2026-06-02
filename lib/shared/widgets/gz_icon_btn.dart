@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class EmIconBtn extends StatelessWidget {
-  const EmIconBtn({
+class GzIconBtn extends StatelessWidget {
+  const GzIconBtn({
     super.key,
     required this.child,
     this.onTap,

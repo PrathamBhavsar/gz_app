@@ -6,7 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../models/domain_misc.dart';
-import '../../../../shared/widgets/em_card.dart';
+import '../../../../shared/widgets/gz_card.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import 'package:gz_app/core/errors/app_exception.dart';
 import '../providers/notifications_notifier.dart';
@@ -70,7 +70,7 @@ class NotificationCenterContent extends ConsumerWidget {
             ? const Center(
                 child: Padding(
                   padding: EdgeInsets.all(AppSpacing.xl),
-                  child: EmCard(
+                  child: GzCard(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [

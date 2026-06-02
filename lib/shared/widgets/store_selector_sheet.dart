@@ -8,7 +8,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../features/home/presentation/providers/store_selector_notifier.dart';
 import '../../models/domain_global.dart';
-import 'em_card.dart';
+import 'gz_card.dart';
 import 'page_error_display.dart';
 import 'package:gz_app/core/errors/app_exception.dart';
 
@@ -132,7 +132,7 @@ class _StoreSelectorSheetState extends ConsumerState<StoreSelectorSheet> {
                 return const Center(
                   child: Padding(
                     padding: EdgeInsets.all(AppSpacing.xl),
-                    child: EmCard(
+                    child: GzCard(
                       child: Text(
                         'No stores found',
                         style: AppTypography.bodyR,

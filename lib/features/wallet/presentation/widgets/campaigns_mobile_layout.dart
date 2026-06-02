@@ -10,11 +10,11 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../models/domain_loyalty.dart';
 import '../../../../models/enums.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
-import '../../../../shared/widgets/em_tag.dart';
-import '../../../../shared/widgets/em_progress_bar.dart';
-import '../../../../shared/widgets/em_button.dart';
-import '../../../../shared/widgets/em_card.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../shared/widgets/gz_tag.dart';
+import '../../../../shared/widgets/gz_progress_bar.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_card.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../providers/campaigns_notifier.dart';
 
@@ -37,7 +37,7 @@ class CampaignsMobileLayout extends ConsumerWidget {
     return SafeArea(
       child: Column(
         children: [
-          const EmTopBar(title: 'Campaigns'),
+          const GzTopBar(title: 'Campaigns'),
           SizedBox(
             height: 44,
             child: ListView.separated(
@@ -132,7 +132,7 @@ class _CampaignCard extends StatelessWidget {
         ? ((campaign.currentRedemptions ?? 0) / campaign.maxRedemptions!).clamp(0.0, 1.0)
         : 0.0;
 
-    return EmCard(
+    return GzCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -164,17 +164,17 @@ class _CampaignCard extends StatelessWidget {
                       style: AppTypography.h3,
                     ),
                     const SizedBox(height: AppSpacing.xs),
-                    EmTag(
+                    GzTag(
                       kind: _tagKindFor(campaign.campaignType),
                       label: _typeLabel(campaign.campaignType),
                     ),
                   ],
                 ),
               ),
-              EmButton(
+              GzButton(
                 label: 'View',
                 small: true,
-                variant: EmButtonVariant.ghost,
+                variant: GzButtonVariant.ghost,
                 onPressed: onTap,
               ),
             ],
@@ -192,7 +192,7 @@ class _CampaignCard extends StatelessWidget {
           ],
           if (hasProgress) ...[
             const SizedBox(height: AppSpacing.sm),
-            EmProgressBar(
+            GzProgressBar(
               value: progress,
               height: 4,
               fillColor: AppColors.warn,
@@ -208,12 +208,12 @@ class _CampaignCard extends StatelessWidget {
     );
   }
 
-  static EmTagKind _tagKindFor(CampaignType? type) => switch (type) {
-        CampaignType.percentageOff || CampaignType.fixedOff => EmTagKind.ok,
-        CampaignType.bonusCredits || CampaignType.bonusMinutes => EmTagKind.purple,
-        CampaignType.happyHour => EmTagKind.warn,
-        CampaignType.firstVisit => EmTagKind.info,
-        null => EmTagKind.mute,
+  static GzTagKind _tagKindFor(CampaignType? type) => switch (type) {
+        CampaignType.percentageOff || CampaignType.fixedOff => GzTagKind.ok,
+        CampaignType.bonusCredits || CampaignType.bonusMinutes => GzTagKind.purple,
+        CampaignType.happyHour => GzTagKind.warn,
+        CampaignType.firstVisit => GzTagKind.info,
+        null => GzTagKind.mute,
       };
 
   static String _typeLabel(CampaignType? type) => switch (type) {
@@ -242,7 +242,7 @@ class _EmptyState extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Center(
-        child: EmCard(
+        child: GzCard(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
-import '../../../../shared/widgets/em_button.dart';
-import '../../../../shared/widgets/em_scroll_content.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_scroll_content.dart';
 import '../../../../shared/widgets/otp_input_sheet.dart';
 import '../providers/change_phone_notifier.dart';
 
@@ -68,9 +68,9 @@ class _ChangePhoneMobileLayoutState
 
     return Column(
       children: [
-        const EmTopBar(title: 'Change Phone'),
+        const GzTopBar(title: 'Change Phone'),
         Expanded(
-          child: EmScrollContent(
+          child: GzScrollContent(
             padded: true,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,7 +126,7 @@ class _ChangePhoneMobileLayoutState
                           AppTypography.small.copyWith(color: AppColors.err)),
                 ],
                 const SizedBox(height: AppSpacing.xl),
-                EmButtonFull(
+                GzButton(
                   label: 'Send OTP',
                   loading: isLoading,
                   onPressed: isLoading

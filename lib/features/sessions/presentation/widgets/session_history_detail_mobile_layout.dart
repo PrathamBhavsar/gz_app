@@ -9,13 +9,13 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../models/domain_systems.dart';
 import '../../../../models/enums.dart';
-import '../../../../shared/widgets/em_button.dart';
-import '../../../../shared/widgets/em_card.dart';
-import '../../../../shared/widgets/em_chip.dart';
-import '../../../../shared/widgets/em_meta_row.dart';
-import '../../../../shared/widgets/em_scroll_content.dart';
-import '../../../../shared/widgets/em_tag.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_chip.dart';
+import '../../../../shared/widgets/gz_meta_row.dart';
+import '../../../../shared/widgets/gz_scroll_content.dart';
+import '../../../../shared/widgets/gz_tag.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../providers/session_detail_notifier.dart';
 
@@ -36,7 +36,7 @@ class SessionHistoryDetailMobileLayout extends ConsumerWidget {
         backgroundColor: AppColors.background,
         body: Column(
           children: [
-            const EmTopBar(title: 'Session'),
+            const GzTopBar(title: 'Session'),
             Expanded(
               child: PageErrorDisplay(
                 error: AppPageError.from(e),
@@ -69,12 +69,12 @@ class _SessionHistoryBody extends StatelessWidget {
     return '$h:$m';
   }
 
-  EmTagKind _statusKind(SessionStatus? status) => switch (status) {
-    SessionStatus.completed => EmTagKind.ok,
-    SessionStatus.inProgress => EmTagKind.info,
-    SessionStatus.cancelled => EmTagKind.err,
-    SessionStatus.disputed => EmTagKind.warn,
-    null => EmTagKind.mute,
+  GzTagKind _statusKind(SessionStatus? status) => switch (status) {
+    SessionStatus.completed => GzTagKind.ok,
+    SessionStatus.inProgress => GzTagKind.info,
+    SessionStatus.cancelled => GzTagKind.err,
+    SessionStatus.disputed => GzTagKind.warn,
+    null => GzTagKind.mute,
   };
 
   String _statusLabel(SessionStatus? status) => switch (status) {
@@ -92,15 +92,15 @@ class _SessionHistoryBody extends StatelessWidget {
     return SafeArea(
       child: Column(
         children: [
-          const EmTopBar(title: 'Session'),
+          const GzTopBar(title: 'Session'),
           Expanded(
-            child: EmScrollContent(
+            child: GzScrollContent(
               padded: true,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // ── System/store card ──
-                  EmCard(
+                  GzCard(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -143,7 +143,7 @@ class _SessionHistoryBody extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            EmTag(
+                            GzTag(
                               kind: _statusKind(session.status),
                               label: _statusLabel(session.status),
                             ),
@@ -153,12 +153,12 @@ class _SessionHistoryBody extends StatelessWidget {
                         Wrap(
                           spacing: 6,
                           children: [
-                            EmChip(
+                            GzChip(
                               keyLabel: 'DATE',
                               value: _formatDate(session.startedAt),
                             ),
                             if (session.id != null)
-                              EmChip(
+                              GzChip(
                                 keyLabel: 'ID',
                                 value: session.id!.length > 8
                                     ? session.id!.substring(0, 8)
@@ -172,18 +172,18 @@ class _SessionHistoryBody extends StatelessWidget {
                   const SizedBox(height: AppSpacing.sm),
 
                   // ── Time details ──
-                  EmCard(
+                  GzCard(
                     child: Column(
                       children: [
-                        EmMetaRow(
+                        GzMetaRow(
                           label: 'Started',
                           value: _formatTime(session.startedAt),
                         ),
-                        EmMetaRow(
+                        GzMetaRow(
                           label: 'Ended',
                           value: _formatTime(session.endedAt),
                         ),
-                        EmMetaRow(
+                        GzMetaRow(
                           label: 'Duration',
                           value: dur != null ? '${dur}m' : '—',
                         ),
@@ -193,11 +193,11 @@ class _SessionHistoryBody extends StatelessWidget {
                   const SizedBox(height: AppSpacing.sm),
 
                   // ── Billing ──
-                  EmCard(
+                  GzCard(
                     child: Column(
                       children: const [
-                        EmMetaRow(label: 'Billing', value: '—'),
-                        EmMetaRow(label: 'Status', value: '—'),
+                        GzMetaRow(label: 'Billing', value: '—'),
+                        GzMetaRow(label: 'Status', value: '—'),
                       ],
                     ),
                   ),
@@ -215,9 +215,9 @@ class _SessionHistoryBody extends StatelessWidget {
               AppSpacing.md,
               AppSpacing.lg,
             ),
-            child: EmButtonFull(
+            child: GzButton(
               label: 'File a Dispute',
-              variant: EmButtonVariant.ghost,
+              variant: GzButtonVariant.ghost,
               onPressed: () => context.push(AppRoutes.disputeCreate),
             ),
           ),

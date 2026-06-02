@@ -6,13 +6,13 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/navigation/routes.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
-import '../../../../shared/widgets/em_card.dart';
-import '../../../../shared/widgets/em_button.dart';
-import '../../../../shared/widgets/em_avatar.dart';
-import '../../../../shared/widgets/em_chip.dart';
-import '../../../../shared/widgets/em_section_head.dart';
-import '../../../../shared/widgets/em_scroll_content.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_avatar.dart';
+import '../../../../shared/widgets/gz_chip.dart';
+import '../../../../shared/widgets/gz_section_head.dart';
+import '../../../../shared/widgets/gz_scroll_content.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../features/auth/presentation/providers/auth_notifier.dart';
@@ -27,7 +27,7 @@ class ProfileMobileLayout extends ConsumerWidget {
 
     return Column(
       children: [
-        const EmTopBar(title: 'Profile'),
+        const GzTopBar(title: 'Profile'),
         Expanded(
           child: profileState.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -58,17 +58,17 @@ class _ProfileContent extends ConsumerWidget {
         ? 'Member since ${createdAt.year}'
         : 'Member';
 
-    return EmScrollContent(
+    return GzScrollContent(
       padded: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── User card ──
-          EmCard(
+          GzCard(
             variant: CardVariant.tint,
             child: Row(
               children: [
-                EmAvatar(size: AvatarSize.xl, children: initial),
+                GzAvatar(size: GzAvatarSize.xl, children: initial),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
@@ -101,19 +101,19 @@ class _ProfileContent extends ConsumerWidget {
           // ── Stats row ──
           Row(
             children: [
-              Expanded(child: EmChip(keyLabel: 'SESSIONS', value: '—')),
+              Expanded(child: GzChip(keyLabel: 'SESSIONS', value: '—')),
               const SizedBox(width: AppSpacing.sm),
-              Expanded(child: EmChip(keyLabel: 'HOURS', value: '—')),
+              Expanded(child: GzChip(keyLabel: 'HOURS', value: '—')),
               const SizedBox(width: AppSpacing.sm),
-              Expanded(child: EmChip(keyLabel: 'STORES', value: '—')),
+              Expanded(child: GzChip(keyLabel: 'STORES', value: '—')),
             ],
           ),
 
           const SizedBox(height: AppSpacing.lg),
 
           // ── Menu ──
-          const EmSectionHead('Account'),
-          EmCard(
+          const GzSectionHead('Account'),
+          GzCard(
             padding: 0,
             child: Column(
               children: [
@@ -140,8 +140,8 @@ class _ProfileContent extends ConsumerWidget {
 
           const SizedBox(height: AppSpacing.md),
 
-          const EmSectionHead('Activity'),
-          EmCard(
+          const GzSectionHead('Activity'),
+          GzCard(
             padding: 0,
             child: Column(
               children: [
@@ -169,9 +169,9 @@ class _ProfileContent extends ConsumerWidget {
           const SizedBox(height: AppSpacing.xl),
 
           // ── Sign out ──
-          EmButtonFull(
+          GzButton(
             label: 'Sign Out',
-            variant: EmButtonVariant.dangerOutline,
+            variant: GzButtonVariant.dangerOutline,
             onPressed: () => _confirmSignOut(context, ref),
           ),
 

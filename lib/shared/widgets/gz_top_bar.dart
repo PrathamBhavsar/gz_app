@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 
-class EmTopBar extends StatelessWidget implements PreferredSizeWidget {
-  const EmTopBar({
+class GzTopBar extends StatelessWidget implements PreferredSizeWidget {
+  const GzTopBar({
     super.key,
     required this.title,
     this.subtitle,
-    this.onBack,
     this.trailing,
     this.disableBack = false,
+    this.onBack,
   });
 
   final String title;
   final String? subtitle;
-  final VoidCallback? onBack;
   final Widget? trailing;
   final bool disableBack;
+  final VoidCallback? onBack;
 
   @override
   Size get preferredSize => const Size.fromHeight(64);
@@ -35,19 +36,23 @@ class EmTopBar extends StatelessWidget implements PreferredSizeWidget {
               width: 40,
               child: disableBack
                   ? const SizedBox.shrink()
-                  : GestureDetector(
-                      onTap: onBack ?? () {
-                        if (context.canPop()) context.pop();
-                      },
-                      child: const SizedBox(
-                        width: 38,
-                        height: 38,
-                        child: HugeIcon(
-                          icon: HugeIcons.strokeRoundedArrowLeft01,
-                          color: AppColors.textPrimary,
-                          size: 22,
-                        ),
+                  : IconButton(
+                      onPressed: onBack ??
+                          () {
+                            if (context.canPop()) context.pop();
+                          },
+                      icon: const HugeIcon(
+                        icon: HugeIcons.strokeRoundedArrowLeft01,
+                        color: AppColors.textPrimary,
+                        size: 22,
                       ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints.tightFor(
+                        width: 40,
+                        height: 40,
+                      ),
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
                     ),
             ),
             Expanded(
@@ -60,7 +65,9 @@ class EmTopBar extends StatelessWidget implements PreferredSizeWidget {
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(
                         subtitle!,
-                        style: AppTypography.small,
+                        style: AppTypography.small.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -69,9 +76,10 @@ class EmTopBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             SizedBox(
               width: 40,
-              child: trailing != null
-                  ? Align(alignment: Alignment.centerRight, child: trailing)
-                  : const SizedBox.shrink(),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: trailing ?? const SizedBox.shrink(),
+              ),
             ),
           ],
         ),

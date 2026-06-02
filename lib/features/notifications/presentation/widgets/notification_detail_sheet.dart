@@ -6,8 +6,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../models/domain_misc.dart';
-import '../../../../shared/widgets/em_button.dart';
-import '../../../../shared/widgets/em_scroll_content.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_scroll_content.dart';
 import '../providers/notifications_notifier.dart';
 
 void showNotificationDetail(
@@ -83,7 +83,7 @@ class NotificationDetailSheet extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: EmScrollContent(
+          child: GzScrollContent(
             padded: true,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,7 +104,7 @@ class NotificationDetailSheet extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xl),
                 if (notification.referenceType != null &&
                     notification.referenceId != null)
-                  EmButtonFull(
+                  GzButton(
                     label: _actionLabel(notification.referenceType),
                     onPressed: () => context.pop(),
                   ),

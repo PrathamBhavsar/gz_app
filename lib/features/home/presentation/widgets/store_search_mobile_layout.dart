@@ -8,9 +8,9 @@ import '../../../../../core/errors/app_exception.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../../shared/widgets/em_avatar.dart';
-import '../../../../../shared/widgets/em_card.dart';
-import '../../../../../shared/widgets/em_tag.dart';
+import '../../../../../shared/widgets/gz_avatar.dart';
+import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_tag.dart';
 import '../../../../../shared/widgets/page_error_display.dart';
 import '../providers/store_search_notifier.dart';
 
@@ -151,7 +151,7 @@ class StoreSearchMobileLayout extends ConsumerWidget {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
-          child: EmCard(
+          child: GzCard(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -197,12 +197,12 @@ class StoreSearchMobileLayout extends ConsumerWidget {
           onTap: () => context.push(AppRoutes.storeDetailPath(store.slug ?? '')),
           child: Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: EmCard(
+            child: GzCard(
               variant: CardVariant.base,
               padding: AppSpacing.sm + AppSpacing.xs,
               child: Row(
                 children: [
-                  EmAvatar(children: initial, index: i),
+                  GzAvatar(children: initial, index: i),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
@@ -227,8 +227,8 @@ class StoreSearchMobileLayout extends ConsumerWidget {
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   store.isActive == true
-                      ? const EmTag(kind: EmTagKind.ok, label: 'Open')
-                      : const EmTag(kind: EmTagKind.mute, label: 'Closed'),
+                      ? const GzTag(kind: GzTagKind.ok, label: 'Open')
+                      : const GzTag(kind: GzTagKind.mute, label: 'Closed'),
                 ],
               ),
             ),

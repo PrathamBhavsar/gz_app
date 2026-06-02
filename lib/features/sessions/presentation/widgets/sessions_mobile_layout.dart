@@ -12,12 +12,12 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../models/domain_systems.dart';
 import '../../../../models/enums.dart';
-import '../../../../shared/widgets/em_button.dart';
-import '../../../../shared/widgets/em_card.dart';
-import '../../../../shared/widgets/em_tag.dart';
-import '../../../../shared/widgets/em_chip.dart';
-import '../../../../shared/widgets/em_meta_row.dart';
-import '../../../../shared/widgets/em_live_dot.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_tag.dart';
+import '../../../../shared/widgets/gz_chip.dart';
+import '../../../../shared/widgets/gz_meta_row.dart';
+import '../../../../shared/widgets/gz_live_dot.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../providers/activity_hub_notifier.dart';
 
@@ -154,7 +154,7 @@ class SessionsMobileLayout extends ConsumerWidget {
                 width: 38,
                 height: 38,
                 decoration: const BoxDecoration(color: AppColors.buttonBg, shape: BoxShape.circle),
-                child: const Center(child: EmLiveDot(color: AppColors.surfaceTintStrong, size: 8)),
+                child: const Center(child: GzLiveDot(color: AppColors.surfaceTintStrong, size: 8)),
               ),
               const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
               Expanded(
@@ -178,7 +178,7 @@ class SessionsMobileLayout extends ConsumerWidget {
       items.add(
         Padding(
           padding: const EdgeInsets.only(top: AppSpacing.lg),
-          child: EmCard(
+          child: GzCard(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -204,7 +204,7 @@ class SessionsMobileLayout extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                EmButtonFull(
+                GzButton(
                   label: 'Book a slot',
                   onPressed: () => context.go(AppRoutes.book),
                 ),
@@ -242,7 +242,7 @@ class SessionsMobileLayout extends ConsumerWidget {
       return [
         Padding(
           padding: const EdgeInsets.only(top: AppSpacing.lg),
-          child: EmCard(
+          child: GzCard(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -287,7 +287,7 @@ class SessionsMobileLayout extends ConsumerWidget {
           ),
           child: Column(children: [
             Row(children: [
-              const EmLiveDot(),
+              const GzLiveDot(),
               const SizedBox(width: AppSpacing.sm),
               Text('LIVE NOW', style: AppTypography.meta.copyWith(color: AppColors.ok)),
             ]),
@@ -337,7 +337,7 @@ class SessionsMobileLayout extends ConsumerWidget {
       return [
         Padding(
           padding: const EdgeInsets.only(top: AppSpacing.lg),
-          child: EmCard(
+          child: GzCard(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -449,7 +449,7 @@ class _Tab extends StatelessWidget {
         ),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           if (dot && active) ...[
-            const EmLiveDot(size: 6),
+            const GzLiveDot(size: 6),
             const SizedBox(width: 6),
           ],
           Text(
@@ -490,11 +490,11 @@ class _BookingCard extends StatelessWidget {
   final BookingModel booking;
   final VoidCallback? onCardTap;
 
-  EmTagKind _tagKind(BookingStatus? status) => switch (status) {
-        BookingStatus.confirmed => EmTagKind.ok,
-        BookingStatus.pending => EmTagKind.warn,
-        BookingStatus.checkedIn => EmTagKind.info,
-        _ => EmTagKind.mute,
+  GzTagKind _tagKind(BookingStatus? status) => switch (status) {
+        BookingStatus.confirmed => GzTagKind.ok,
+        BookingStatus.pending => GzTagKind.warn,
+        BookingStatus.checkedIn => GzTagKind.info,
+        _ => GzTagKind.mute,
       };
 
   String _tagLabel(BookingStatus? status) => switch (status) {
@@ -565,15 +565,15 @@ class _BookingCard extends StatelessWidget {
               Text(booking.storeId ?? '—', style: AppTypography.small),
             ]),
           ),
-          EmTag(
+          GzTag(
             kind: _tagKind(booking.status),
             label: _tagLabel(booking.status),
           ),
         ]),
         const SizedBox(height: 14),
         Wrap(spacing: 6, runSpacing: 6, children: [
-          EmChip(keyLabel: 'WHEN', value: _formatWhen()),
-          EmChip(keyLabel: 'FOR', value: _formatDuration()),
+          GzChip(keyLabel: 'WHEN', value: _formatWhen()),
+          GzChip(keyLabel: 'FOR', value: _formatDuration()),
         ]),
         const SizedBox(height: 10),
         const HugeIcon(
@@ -676,7 +676,7 @@ class _HistoryRow extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.md),
           child: Column(children: [
-            EmMetaRow(label: 'Session ID', value: id.length > 8 ? '#${id.substring(0, 8)}' : '#$id'),
+            GzMetaRow(label: 'Session ID', value: id.length > 8 ? '#${id.substring(0, 8)}' : '#$id'),
             if (onDetailTap != null)
               GestureDetector(
                 onTap: onDetailTap,

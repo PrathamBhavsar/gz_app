@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 
-class EmGzLogo extends StatelessWidget {
-  const EmGzLogo({super.key});
+class GzLogo extends StatelessWidget {
+  const GzLogo({super.key});
 
   @override
   Widget build(BuildContext context) {

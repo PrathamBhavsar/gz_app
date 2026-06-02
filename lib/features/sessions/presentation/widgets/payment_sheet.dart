@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../shared/widgets/em_button.dart';
-import '../../../../shared/widgets/em_card.dart';
-import '../../../../shared/widgets/em_section_head.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_section_head.dart';
 import '../providers/payment_notifier.dart';
 
 final _paymentMethodProvider =
@@ -80,10 +80,10 @@ class _PaymentSheetState extends ConsumerState<_PaymentSheet> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const EmSectionHead('Payment'),
+                const GzSectionHead('Payment'),
 
                 // ── Booking summary card ──
-                EmCard(
+                GzCard(
                   variant: CardVariant.inset,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -104,7 +104,7 @@ class _PaymentSheetState extends ConsumerState<_PaymentSheet> {
                 const SizedBox(height: AppSpacing.sm),
 
                 // ── Payment methods ──
-                EmCard(
+                GzCard(
                   child: Column(
                     children: _methods.map((m) {
                       final selected = selectedMethod == m.id;
@@ -164,7 +164,7 @@ class _PaymentSheetState extends ConsumerState<_PaymentSheet> {
                   const SizedBox(height: AppSpacing.sm),
                 ],
 
-                EmButtonFull(
+                GzButton(
                   label: 'Confirm Payment',
                   loading: isLoading,
                   onPressed: isLoading

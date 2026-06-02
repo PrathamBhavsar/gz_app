@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 
-class EmStoreSelectorPill extends StatelessWidget {
-  const EmStoreSelectorPill({
+class GzStoreSelectorPill extends StatelessWidget {
+  const GzStoreSelectorPill({
     super.key,
     required this.storeName,
     this.onTap,

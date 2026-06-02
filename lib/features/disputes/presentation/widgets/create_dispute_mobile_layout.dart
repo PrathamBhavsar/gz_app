@@ -7,8 +7,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/navigation/routes.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
-import '../../../../shared/widgets/em_button.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../shared/widgets/gz_button.dart';
 import '../../../../models/domain_billing.dart';
 import '../providers/create_dispute_notifier.dart';
 
@@ -91,7 +91,7 @@ class _FormView extends StatelessWidget {
 
         return Column(
           children: [
-            const EmTopBar(title: 'File a Dispute', subtitle: "We've got you"),
+            const GzTopBar(title: 'File a Dispute', subtitle: "We've got you"),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(
@@ -282,7 +282,7 @@ class _FormView extends StatelessWidget {
                   AppSpacing.sm + AppSpacing.xs, AppSpacing.md, AppSpacing.lg),
               color: AppColors.background,
               child: Column(children: [
-                EmButtonFull(
+                GzButton(
                   label: 'Submit Dispute',
                   loading: isLoading,
                   onPressed: (canSubmit && !isLoading) ? onSubmit : null,
@@ -326,7 +326,7 @@ class _SuccessView extends StatelessWidget {
         '#${id.length > 8 ? id.substring(0, 8).toUpperCase() : id.toUpperCase()}';
 
     return Column(children: [
-      const EmTopBar(title: 'Submitted'),
+      const GzTopBar(title: 'Submitted'),
       Expanded(
         child: Center(
           child: Padding(
@@ -368,16 +368,16 @@ class _SuccessView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              EmButtonFull(
+              GzButton(
                 label: 'View Dispute',
                 onPressed: id.isNotEmpty
                     ? () => context.pushReplacement(AppRoutes.disputeDetailPath(id))
                     : null,
               ),
               const SizedBox(height: AppSpacing.sm),
-              EmButtonFull(
+              GzButton(
                 label: 'Back to Disputes',
-                variant: EmButtonVariant.ghost,
+                variant: GzButtonVariant.ghost,
                 onPressed: () => context.go(AppRoutes.disputesList),
               ),
             ]),

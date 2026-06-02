@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
-class EmScrollContent extends StatelessWidget {
-  const EmScrollContent({super.key, required this.child, this.padded = false});
+class GzScrollContent extends StatelessWidget {
+  const GzScrollContent({super.key, required this.child, this.padded = false});
 
   final Widget child;
-
-  /// If true, wraps content in EdgeInsets.fromLTRB(16, 4, 16, 24).
   final bool padded;
 
   @override

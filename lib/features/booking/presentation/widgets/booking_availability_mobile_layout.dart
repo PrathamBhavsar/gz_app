@@ -8,9 +8,9 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../models/api_responses.dart';
-import '../../../../../shared/widgets/em_button.dart';
-import '../../../../../shared/widgets/em_tag.dart';
-import '../../../../../shared/widgets/em_top_bar.dart';
+import '../../../../../shared/widgets/gz_button.dart';
+import '../../../../../shared/widgets/gz_tag.dart';
+import '../../../../../shared/widgets/gz_top_bar.dart';
 import '../../../../../shared/widgets/page_error_display.dart';
 import '../providers/availability_notifier.dart';
 import '../providers/booking_notifier.dart';
@@ -67,7 +67,7 @@ class _BookingAvailabilityMobileLayoutState
 
     return Column(
       children: [
-        EmTopBar(title: 'Pick a slot'),
+        GzTopBar(title: 'Pick a slot'),
 
         // ── Date strip ──
         SizedBox(
@@ -203,7 +203,7 @@ class _BookingAvailabilityMobileLayoutState
           color: AppColors.background,
           child: SafeArea(
             top: false,
-            child: EmButtonFull(
+            child: GzButton(
               label: 'Select System',
               onPressed: selectedSlot == null
                   ? null
@@ -292,8 +292,8 @@ class _SlotRow extends StatelessWidget {
                   style: AppTypography.small,
                 ),
               const SizedBox(width: AppSpacing.sm),
-              EmTag(
-                kind: _isBooked ? EmTagKind.mute : EmTagKind.ok,
+              GzTag(
+                kind: _isBooked ? GzTagKind.mute : GzTagKind.ok,
                 label: _isBooked ? 'Full' : 'Open',
               ),
             ],

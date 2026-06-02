@@ -6,7 +6,7 @@ import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../../shared/widgets/em_button.dart';
+import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/page_error_display.dart';
 import 'package:gz_app/core/errors/app_exception.dart';
 import '../../../../core/auth/token_storage.dart';
@@ -95,7 +95,7 @@ class StoreDetailTabletLayout extends ConsumerWidget {
                         ],
                       ),
                       const Spacer(),
-                      EmButtonFull(
+                      GzButton(
                         label: 'Book a Session',
                         onPressed: () async {
                           if (store.id != null) {

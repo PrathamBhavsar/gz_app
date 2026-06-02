@@ -9,9 +9,9 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../models/domain_systems.dart';
 import '../../../../../models/enums.dart';
-import '../../../../../shared/widgets/em_button.dart';
-import '../../../../../shared/widgets/em_chip.dart';
-import '../../../../../shared/widgets/em_top_bar.dart';
+import '../../../../../shared/widgets/gz_button.dart';
+import '../../../../../shared/widgets/gz_chip.dart';
+import '../../../../../shared/widgets/gz_top_bar.dart';
 import '../../../../../shared/widgets/page_error_display.dart';
 import '../providers/booking_notifier.dart';
 import '../providers/systems_notifier.dart';
@@ -47,7 +47,7 @@ class BookingSystemSelectionMobileLayout extends ConsumerWidget {
 
     return Column(
       children: [
-        EmTopBar(title: 'Choose System'),
+        GzTopBar(title: 'Choose System'),
 
         // ── Selected slot chip ──
         Padding(
@@ -65,7 +65,7 @@ class BookingSystemSelectionMobileLayout extends ConsumerWidget {
                 size: 16,
               ),
               const SizedBox(width: AppSpacing.xs),
-              EmChip(keyLabel: 'WHEN', value: slotLabel),
+              GzChip(keyLabel: 'WHEN', value: slotLabel),
             ],
           ),
         ),
@@ -198,7 +198,7 @@ class _SystemPickerRow extends StatelessWidget {
               ],
             ),
           ),
-          EmButton(
+          GzButton(
             label: 'Select',
             small: true,
             onPressed: onSelect,

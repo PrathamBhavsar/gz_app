@@ -5,12 +5,12 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../models/domain_loyalty.dart';
 import '../../../../models/enums.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
-import '../../../../shared/widgets/em_scroll_content.dart';
-import '../../../../shared/widgets/em_card.dart';
-import '../../../../shared/widgets/em_tag.dart';
-import '../../../../shared/widgets/em_button.dart';
-import '../../../../shared/widgets/em_chip.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../shared/widgets/gz_scroll_content.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_tag.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_chip.dart';
 import '../providers/campaign_detail_notifier.dart';
 import '../providers/campaigns_notifier.dart';
 
@@ -42,7 +42,7 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
       return SafeArea(
         child: Column(
           children: [
-            const EmTopBar(title: 'Campaign'),
+            const GzTopBar(title: 'Campaign'),
             const Expanded(child: Center(child: CircularProgressIndicator())),
           ],
         ),
@@ -70,9 +70,9 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
     return SafeArea(
       child: Column(
         children: [
-          EmTopBar(title: c.name ?? 'Campaign'),
+          GzTopBar(title: c.name ?? 'Campaign'),
           Expanded(
-            child: EmScrollContent(
+            child: GzScrollContent(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.md,
@@ -94,7 +94,7 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
                         ),
                       ),
                       alignment: Alignment.center,
-                      child: EmTag(
+                      child: GzTag(
                         kind: _tagKindFor(c.campaignType),
                         label: _typeLabel(c.campaignType),
                       ),
@@ -111,7 +111,7 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: AppSpacing.sm),
-                        EmTag(
+                        GzTag(
                           kind: _tagKindFor(c.campaignType),
                           label: _typeLabel(c.campaignType),
                         ),
@@ -121,7 +121,7 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
 
                     // Description + terms
                     if (c.description != null || c.terms != null)
-                      EmCard(
+                      GzCard(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -145,7 +145,7 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.sm),
 
                     // Validity + time restrictions
-                    EmCard(
+                    GzCard(
                       variant: CardVariant.inset,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,7 +166,7 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
                             Wrap(
                               spacing: AppSpacing.xs,
                               children: c.applicableSystemTypes!
-                                  .map((s) => EmChip(value: s))
+                                  .map((s) => GzChip(value: s))
                                   .toList(),
                             ),
                           ],
@@ -176,7 +176,7 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.sm),
 
                     // Eligibility
-                    EmCard(
+                    GzCard(
                       variant: CardVariant.inset,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +204,7 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.sm),
 
                     // Benefit summary
-                    EmCard(
+                    GzCard(
                       variant: CardVariant.tint,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,7 +222,7 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
                     ),
                     if (alreadyRedeemed) ...[
                       const SizedBox(height: AppSpacing.sm),
-                      const EmTag(kind: EmTagKind.mute, label: 'Redeemed'),
+                      const GzTag(kind: GzTagKind.mute, label: 'Redeemed'),
                     ],
                     const SizedBox(height: AppSpacing.xl),
                   ],
@@ -239,7 +239,7 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
               AppSpacing.md,
               AppSpacing.md,
             ),
-            child: EmButtonFull(
+            child: GzButton(
               label: alreadyRedeemed ? 'Redeemed' : 'Redeem Now',
               loading: isLoading,
               onPressed: (isLoading || alreadyRedeemed)
@@ -252,12 +252,12 @@ class CampaignDetailMobileLayout extends ConsumerWidget {
     );
   }
 
-  static EmTagKind _tagKindFor(CampaignType? type) => switch (type) {
-    CampaignType.percentageOff || CampaignType.fixedOff => EmTagKind.ok,
-    CampaignType.bonusCredits || CampaignType.bonusMinutes => EmTagKind.purple,
-    CampaignType.happyHour => EmTagKind.warn,
-    CampaignType.firstVisit => EmTagKind.info,
-    null => EmTagKind.mute,
+  static GzTagKind _tagKindFor(CampaignType? type) => switch (type) {
+    CampaignType.percentageOff || CampaignType.fixedOff => GzTagKind.ok,
+    CampaignType.bonusCredits || CampaignType.bonusMinutes => GzTagKind.purple,
+    CampaignType.happyHour => GzTagKind.warn,
+    CampaignType.firstVisit => GzTagKind.info,
+    null => GzTagKind.mute,
   };
 
   static String _typeLabel(CampaignType? type) => switch (type) {

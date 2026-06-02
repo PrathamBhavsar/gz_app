@@ -8,9 +8,9 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../models/domain_loyalty.dart';
 import '../../../../models/enums.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
-import '../../../../shared/widgets/em_card.dart';
-import '../../../../shared/widgets/em_section_head.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_section_head.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../providers/credit_history_notifier.dart';
 
@@ -52,7 +52,7 @@ class _CreditHistoryMobileLayoutState
     return SafeArea(
       child: Column(
         children: [
-          const EmTopBar(title: 'Transactions'),
+          const GzTopBar(title: 'Transactions'),
           if (state.error != null && state.items.isEmpty)
             Expanded(
               child: PageErrorDisplay(
@@ -119,8 +119,8 @@ class _GroupedList extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            EmSectionHead(month),
-            EmCard(
+            GzSectionHead(month),
+            GzCard(
               padding: 0,
               child: Column(
                 children: txList.asMap().entries.map((e) {
@@ -248,7 +248,7 @@ class _EmptyState extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Center(
-        child: EmCard(
+        child: GzCard(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

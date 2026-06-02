@@ -4,8 +4,8 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
-import '../../../../shared/widgets/em_chip.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../shared/widgets/gz_chip.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../models/domain_billing.dart';
@@ -22,11 +22,11 @@ class DisputeDetailMobileLayout extends ConsumerWidget {
 
     return switch (state) {
       DisputeDetailLoading() => Column(children: [
-          const EmTopBar(title: 'Dispute'),
+          const GzTopBar(title: 'Dispute'),
           const Expanded(child: Center(child: CircularProgressIndicator())),
         ]),
       DisputeDetailError(:final error) => Column(children: [
-          const EmTopBar(title: 'Dispute'),
+          const GzTopBar(title: 'Dispute'),
           Expanded(
             child: PageErrorDisplay(
               error: AppPageError.from(error),
@@ -39,7 +39,7 @@ class DisputeDetailMobileLayout extends ConsumerWidget {
           children: [
             Column(
               children: [
-                EmTopBar(
+                GzTopBar(
                   title: 'Dispute',
                   subtitle:
                       '#${(dispute.id ?? '').length > 8 ? dispute.id!.substring(0, 8).toUpperCase() : (dispute.id ?? '').toUpperCase()}',
@@ -66,7 +66,7 @@ class DisputeDetailMobileLayout extends ConsumerWidget {
                               runSpacing: 6,
                               children: [
                                 if (dispute.sessionId != null)
-                                  EmChip(
+                                  GzChip(
                                     keyLabel: 'SESSION',
                                     value: dispute.sessionId!.length > 8
                                         ? dispute.sessionId!
@@ -75,12 +75,12 @@ class DisputeDetailMobileLayout extends ConsumerWidget {
                                         : dispute.sessionId!.toUpperCase(),
                                   ),
                                 if (dispute.createdAt != null)
-                                  EmChip(
+                                  GzChip(
                                     keyLabel: 'FILED',
                                     value: _fmtDate(dispute.createdAt!),
                                   ),
                                 if (dispute.disputeAmount != null)
-                                  EmChip(
+                                  GzChip(
                                     keyLabel: 'DISPUTED',
                                     value:
                                         '₹${dispute.disputeAmount!.toStringAsFixed(0)}',

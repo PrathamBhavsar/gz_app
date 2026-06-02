@@ -7,10 +7,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../models/api_responses.dart';
-import '../../../../shared/widgets/em_card.dart';
-import '../../../../shared/widgets/em_section_head.dart';
-import '../../../../shared/widgets/em_tag.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_section_head.dart';
+import '../../../../shared/widgets/gz_tag.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../providers/billing_notifier.dart';
 
@@ -24,7 +24,7 @@ class BillingHistoryMobileLayout extends ConsumerWidget {
     return SafeArea(
       child: Column(
         children: [
-          const EmTopBar(title: 'Billing History'),
+          const GzTopBar(title: 'Billing History'),
           Expanded(
             child: asyncBilling.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -102,7 +102,7 @@ class _BillingList extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = items[index];
         if (item is _BillingHeaderItem) {
-          return EmSectionHead(
+          return GzSectionHead(
             item.label,
             subtitle: 'Total ₹${item.total.toStringAsFixed(2)}',
           );
@@ -147,7 +147,7 @@ class _EmptyState extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
-        child: EmCard(
+        child: GzCard(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -186,11 +186,11 @@ class _BillingRowWidget extends StatelessWidget {
   final BillingRow row;
   const _BillingRowWidget({required this.row});
 
-  EmTagKind _statusKind(String? status) => switch (status) {
-        'completed' || 'paid' => EmTagKind.ok,
-        'pending' => EmTagKind.warn,
-        'failed' => EmTagKind.err,
-        _ => EmTagKind.mute,
+  GzTagKind _statusKind(String? status) => switch (status) {
+        'completed' || 'paid' => GzTagKind.ok,
+        'pending' => GzTagKind.warn,
+        'failed' => GzTagKind.err,
+        _ => GzTagKind.mute,
       };
 
   String _statusLabel(String? status) =>
@@ -246,7 +246,7 @@ class _BillingRowWidget extends StatelessWidget {
                 style: AppTypography.num.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 4),
-              EmTag(
+              GzTag(
                 kind: _statusKind(row.status),
                 label: _statusLabel(row.status),
               ),

@@ -7,10 +7,10 @@ import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../../shared/widgets/em_button.dart';
-import '../../../../../shared/widgets/em_card.dart';
-import '../../../../../shared/widgets/em_chip.dart';
-import '../../../../../shared/widgets/em_tag.dart';
+import '../../../../../shared/widgets/gz_button.dart';
+import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_chip.dart';
+import '../../../../../shared/widgets/gz_tag.dart';
 import '../providers/booking_form_notifier.dart';
 import '../providers/booking_notifier.dart';
 
@@ -82,7 +82,7 @@ class BookingSuccessMobileLayout extends ConsumerWidget {
 
             // ── Booking ref ──
             if (booking?.id != null)
-              EmChip(
+              GzChip(
                 keyLabel: 'REF',
                 value: booking!.id!.substring(0, 8).toUpperCase(),
               ).animate(delay: 350.ms).fadeIn(),
@@ -90,7 +90,7 @@ class BookingSuccessMobileLayout extends ConsumerWidget {
             const SizedBox(height: AppSpacing.md),
 
             // ── Booking summary card ──
-            EmCard(
+            GzCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -114,24 +114,24 @@ class BookingSuccessMobileLayout extends ConsumerWidget {
             const SizedBox(height: AppSpacing.sm),
 
             // ── Payment status ──
-            EmTag(
-              kind: booking?.isPaid == true ? EmTagKind.ok : EmTagKind.warn,
+            GzTag(
+              kind: booking?.isPaid == true ? GzTagKind.ok : GzTagKind.warn,
               label: booking?.isPaid == true ? 'Payment confirmed' : 'Pay at store',
             ).animate(delay: 450.ms).fadeIn(),
 
             const Spacer(),
 
             // ── CTAs ──
-            EmButtonFull(
+            GzButton(
               label: 'View Booking',
               onPressed: () => context.go(AppRoutes.sessions),
             ).animate(delay: 500.ms).fadeIn().slideY(begin: 0.05, end: 0),
 
             const SizedBox(height: AppSpacing.sm),
 
-            EmButtonFull(
+            GzButton(
               label: 'Back to Home',
-              variant: EmButtonVariant.ghost,
+              variant: GzButtonVariant.ghost,
               onPressed: () => context.go(AppRoutes.home),
             ).animate(delay: 550.ms).fadeIn(),
 

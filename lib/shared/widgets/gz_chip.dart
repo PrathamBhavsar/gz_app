@@ -1,26 +1,37 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 
-class EmChip extends StatelessWidget {
-  const EmChip({
+class GzChip extends StatelessWidget {
+  const GzChip({
     super.key,
-    required this.value,
-    this.keyLabel,
-    this.filled = false,
+    this.label,
+    this.keyPrefix,
+    this.active = false,
     this.onTap,
+    this.value,
+    this.keyLabel,
+    this.filled,
   });
 
-  final String value;
-  final String? keyLabel;
-  final bool filled;
+  final String? label;
+  final String? keyPrefix;
+  final bool active;
   final VoidCallback? onTap;
+
+  final String? value;
+  final String? keyLabel;
+  final bool? filled;
 
   @override
   Widget build(BuildContext context) {
-    final bg = filled ? AppColors.buttonBg : AppColors.surface;
-    final fg = filled ? AppColors.buttonFg : AppColors.textPrimary;
-    final keyFg = filled
+    final displayValue = label ?? value ?? '';
+    final displayKey = keyPrefix ?? keyLabel;
+    final isFilled = filled ?? active;
+    final bg = isFilled ? AppColors.buttonBg : AppColors.surface;
+    final fg = isFilled ? AppColors.buttonFg : AppColors.textPrimary;
+    final keyFg = isFilled
         ? AppColors.buttonFg.withValues(alpha: 0.55)
         : AppColors.textTertiary;
 
@@ -30,13 +41,14 @@ class EmChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(10),
+        border: isFilled ? null : Border.all(color: AppColors.rule),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (keyLabel != null) ...[
+          if (displayKey != null) ...[
             Text(
-              keyLabel!,
+              displayKey,
               style: AppTypography.num.copyWith(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -46,7 +58,7 @@ class EmChip extends StatelessWidget {
             const SizedBox(width: 4),
           ],
           Text(
-            value,
+            displayValue,
             style: AppTypography.num.copyWith(
               fontSize: 13,
               fontWeight: FontWeight.w600,

@@ -13,14 +13,14 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../models/domain_loyalty.dart';
 import '../../../../models/enums.dart';
-import '../../../../shared/widgets/em_card.dart';
-import '../../../../shared/widgets/em_icon_btn.dart';
-import '../../../../shared/widgets/em_progress_bar.dart';
-import '../../../../shared/widgets/em_scroll_content.dart';
-import '../../../../shared/widgets/em_section_head.dart';
-import '../../../../shared/widgets/em_store_selector_pill.dart';
-import '../../../../shared/widgets/em_tag.dart';
-import '../../../../shared/widgets/em_chip.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_icon_btn.dart';
+import '../../../../shared/widgets/gz_progress_bar.dart';
+import '../../../../shared/widgets/gz_scroll_content.dart';
+import '../../../../shared/widgets/gz_section_head.dart';
+import '../../../../shared/widgets/gz_store_selector_pill.dart';
+import '../../../../shared/widgets/gz_tag.dart';
+import '../../../../shared/widgets/gz_chip.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../providers/wallet_notifier.dart';
 import 'redeem_credits_sheet.dart';
@@ -45,7 +45,7 @@ class WalletMobileLayout extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Wallet', style: AppTypography.title),
-                EmIconBtn(
+                GzIconBtn(
                   tooltip: 'Notifications',
                   onTap: () => showNotificationCenter(context),
                   child: const HugeIcon(
@@ -62,7 +62,7 @@ class WalletMobileLayout extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(
                 AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
-            child: EmStoreSelectorPill(
+            child: GzStoreSelectorPill(
               storeName: storeId ?? 'Select Store',
               onTap: () => showStoreSelectorSheet(context),
             ),
@@ -72,7 +72,7 @@ class WalletMobileLayout extends ConsumerWidget {
           if (storeId == null)
             Expanded(
               child: Center(
-                child: EmCard(
+                child: GzCard(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -129,7 +129,7 @@ class _WalletContent extends ConsumerWidget {
 
     return RefreshIndicator(
       onRefresh: () => ref.read(walletNotifierProvider.notifier).refresh(),
-      child: EmScrollContent(
+      child: GzScrollContent(
         padded: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
@@ -138,7 +138,7 @@ class _WalletContent extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Hero credit card ──
-              EmCard(
+              GzCard(
                 variant: CardVariant.tint,
                 padding: 22,
                 child: Column(
@@ -226,7 +226,7 @@ class _WalletContent extends ConsumerWidget {
               const SizedBox(height: 18),
 
               // ── Recent transactions ──
-              EmCard(
+              GzCard(
                 padding: 0,
                 child: Column(
                   children: [
@@ -272,7 +272,7 @@ class _WalletContent extends ConsumerWidget {
 
               // ── Active campaigns ──
               if (campaigns.isNotEmpty) ...[
-                EmSectionHead(
+                GzSectionHead(
                   'Active Campaigns',
                   subtitle: '${campaigns.length}',
                 ),
@@ -351,7 +351,7 @@ class _WalletContent extends ConsumerWidget {
                     ),
                     child: Row(
                       children: [
-                        EmChip(value: e.value.$1),
+                        GzChip(value: e.value.$1),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Text(e.value.$2,
@@ -537,7 +537,7 @@ class _CampCard extends StatelessWidget {
                   child: Text(campaign.name ?? 'Campaign',
                       style: AppTypography.h3),
                 ),
-                EmTag(
+                GzTag(
                   kind: _tagKindFor(campaign.campaignType),
                   label: _typeLabel(campaign.campaignType),
                 ),
@@ -548,7 +548,7 @@ class _CampCard extends StatelessWidget {
               Text(campaign.description!, style: AppTypography.small),
             if (hasProgress) ...[
               const SizedBox(height: AppSpacing.sm),
-              EmProgressBar(
+              GzProgressBar(
                   value: progress, height: 4, fillColor: AppColors.warn),
               const SizedBox(height: AppSpacing.xs),
               Text(
@@ -563,14 +563,14 @@ class _CampCard extends StatelessWidget {
     );
   }
 
-  static EmTagKind _tagKindFor(CampaignType? type) => switch (type) {
-        CampaignType.percentageOff || CampaignType.fixedOff => EmTagKind.ok,
+  static GzTagKind _tagKindFor(CampaignType? type) => switch (type) {
+        CampaignType.percentageOff || CampaignType.fixedOff => GzTagKind.ok,
         CampaignType.bonusCredits ||
         CampaignType.bonusMinutes =>
-          EmTagKind.purple,
-        CampaignType.happyHour => EmTagKind.warn,
-        CampaignType.firstVisit => EmTagKind.info,
-        null => EmTagKind.mute,
+          GzTagKind.purple,
+        CampaignType.happyHour => GzTagKind.warn,
+        CampaignType.firstVisit => GzTagKind.info,
+        null => GzTagKind.mute,
       };
 
   static String _typeLabel(CampaignType? type) => switch (type) {

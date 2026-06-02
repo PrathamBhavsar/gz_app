@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 
-class EmSectionHead extends StatelessWidget {
-  const EmSectionHead(this.title, {super.key, this.subtitle, this.trailing});
+class GzSectionHead extends StatelessWidget {
+  const GzSectionHead(
+    this.title, {
+    super.key,
+    this.subtitle,
+    this.trailing,
+  });
 
   final String title;
   final String? subtitle;

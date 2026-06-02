@@ -152,6 +152,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.emailVerificationPending,
         builder: (context, state) => const EmailVerificationPendingScreen(),
       ),
+      GoRoute(
+        path: AppRoutes.emailVerified,
+        builder: (context, state) => const Scaffold(
+          body: Center(child: Text('Email verified')),
+        ),
+      ),
 
       // Admin Auth Stack
       GoRoute(

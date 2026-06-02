@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 
 enum CardVariant { base, tint, inset }
 
-class EmCard extends StatelessWidget {
-  const EmCard({
+class GzCard extends StatelessWidget {
+  const GzCard({
     super.key,
     required this.child,
     this.variant = CardVariant.base,
@@ -14,8 +15,6 @@ class EmCard extends StatelessWidget {
 
   final Widget child;
   final CardVariant variant;
-
-  /// Uniform padding in dp. Defaults to AppSpacing.md (16).
   final double? padding;
 
   @override

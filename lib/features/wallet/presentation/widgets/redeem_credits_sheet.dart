@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/em_button.dart';
-import '../../../../shared/widgets/em_card.dart';
-import '../../../../shared/widgets/em_tag.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_tag.dart';
 import '../providers/redeem_credits_notifier.dart';
 
 final _redeemAmountProvider = StateProvider.autoDispose<double>((ref) => 0);
@@ -106,7 +106,7 @@ class _RedeemCreditsSheetState extends ConsumerState<_RedeemCreditsSheet> {
           const SizedBox(height: AppSpacing.md),
 
           // Balance display
-          EmCard(
+          GzCard(
             variant: CardVariant.inset,
             child: Row(
               children: [
@@ -163,10 +163,10 @@ class _RedeemCreditsSheetState extends ConsumerState<_RedeemCreditsSheet> {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              EmButton(
+              GzButton(
                 label: 'Max',
                 small: true,
-                variant: EmButtonVariant.ghost,
+                variant: GzButtonVariant.ghost,
                 onPressed: () => _setAmount(widget.balance),
               ),
             ],
@@ -179,13 +179,13 @@ class _RedeemCreditsSheetState extends ConsumerState<_RedeemCreditsSheet> {
 
           if (errorState != null) ...[
             const SizedBox(height: AppSpacing.sm),
-            EmTag(kind: EmTagKind.err, label: errorState.message),
+            GzTag(kind: GzTagKind.err, label: errorState.message),
           ],
           const SizedBox(height: AppSpacing.lg),
 
           // CTA
           if (!isConfirming)
-            EmButtonFull(
+            GzButton(
               label: 'Redeem',
               onPressed: amount > 0 ? () => notifier.requestConfirm(amount) : null,
             )
@@ -200,15 +200,15 @@ class _RedeemCreditsSheetState extends ConsumerState<_RedeemCreditsSheet> {
                 Row(
                   children: [
                     Expanded(
-                      child: EmButton(
+                      child: GzButton(
                         label: 'Cancel',
-                        variant: EmButtonVariant.ghost,
+                        variant: GzButtonVariant.ghost,
                         onPressed: notifier.cancelConfirm,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
-                      child: EmButton(
+                      child: GzButton(
                         label: 'Confirm',
                         loading: isLoading,
                         onPressed: isLoading ? null : notifier.confirm,

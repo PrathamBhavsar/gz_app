@@ -7,9 +7,9 @@ import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../../shared/widgets/em_button.dart';
-import '../../../../../shared/widgets/em_chip.dart';
-import '../../../../../shared/widgets/em_tag.dart';
+import '../../../../../shared/widgets/gz_button.dart';
+import '../../../../../shared/widgets/gz_chip.dart';
+import '../../../../../shared/widgets/gz_tag.dart';
 import '../../../../../shared/widgets/page_error_display.dart';
 import 'package:gz_app/core/errors/app_exception.dart';
 import '../../../../models/domain_loyalty.dart';
@@ -181,11 +181,11 @@ class StoreDetailMobileLayout extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 if (store.isActive == true)
-                                  const EmTag(
-                                      kind: EmTagKind.ok, label: 'Open now')
+                                  const GzTag(
+                                      kind: GzTagKind.ok, label: 'Open now')
                                 else
-                                  const EmTag(
-                                      kind: EmTagKind.mute, label: 'Closed'),
+                                  const GzTag(
+                                      kind: GzTagKind.mute, label: 'Closed'),
                                 const SizedBox(height: AppSpacing.sm),
                                 Text(
                                   store.name ?? 'Store',
@@ -251,10 +251,10 @@ class StoreDetailMobileLayout extends ConsumerWidget {
                             spacing: 6,
                             runSpacing: 6,
                             children: [
-                              EmChip(value: 'PC Gaming'),
-                              EmChip(value: 'PS5'),
-                              EmChip(value: 'VR'),
-                              EmChip(value: 'Xbox'),
+                              GzChip(value: 'PC Gaming'),
+                              GzChip(value: 'PS5'),
+                              GzChip(value: 'VR'),
+                              GzChip(value: 'Xbox'),
                             ],
                           ),
                           if (campaigns.isNotEmpty) ...[
@@ -300,7 +300,7 @@ class StoreDetailMobileLayout extends ConsumerWidget {
                     AppSpacing.md, AppSpacing.sm, AppSpacing.md,
                     AppSpacing.lg),
                 color: AppColors.background,
-                child: EmButtonFull(
+                child: GzButton(
                   label: 'Book a slot',
                   onPressed: () async {
                     if (store.id != null) {
@@ -462,7 +462,7 @@ class _MiniCamp extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const EmTag(kind: EmTagKind.ok, label: 'Active'),
+                const GzTag(kind: GzTagKind.ok, label: 'Active'),
               ],
             ),
             const SizedBox(height: 6),

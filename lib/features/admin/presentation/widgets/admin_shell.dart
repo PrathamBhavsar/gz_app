@@ -1,43 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hugeicons/hugeicons.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/navigation/routes.dart';
+import '../../../../shared/widgets/gz_admin_bottom_nav.dart';
 
 class AdminMobileLayout extends StatelessWidget {
   final Widget child;
   const AdminMobileLayout({super.key, required this.child});
 
-  int _calculateSelectedIndex(BuildContext context) {
+  GzAdminTab _selectedTab(BuildContext context) {
     final String location = GoRouterState.of(context).matchedLocation;
-    if (location.startsWith('/admin/analytics')) return 1;
+    if (location.startsWith('/admin/analytics')) return GzAdminTab.sessions;
     if (location.startsWith('/admin/management') ||
         location.startsWith('/admin/pricing') ||
         location.startsWith('/admin/billing') ||
         location.startsWith('/admin/campaigns') ||
         location.startsWith('/admin/credits') ||
         location.startsWith('/admin/disputes')) {
-      return 2;
+      return GzAdminTab.management;
     }
     if (location.startsWith('/admin/systems') ||
         location.startsWith('/admin/staff') ||
         location.startsWith('/admin/config') ||
         location.startsWith('/admin/notifications')) {
-      return 3;
+      return GzAdminTab.store;
     }
-    // Default: Operations tab (dashboard, sessions, walk-in, bookings)
-    return 0;
+    return GzAdminTab.dashboard;
   }
 
-  void _onTap(BuildContext context, int index) {
-    switch (index) {
-      case 0:
+  void _onTap(BuildContext context, GzAdminTab tab) {
+    switch (tab) {
+      case GzAdminTab.dashboard:
         context.go(AppRoutes.adminDashboard);
-      case 1:
+      case GzAdminTab.sessions:
         context.go(AppRoutes.adminAnalytics);
-      case 2:
+      case GzAdminTab.management:
         context.go(AppRoutes.adminManagement);
-      case 3:
+      case GzAdminTab.store:
         context.go(AppRoutes.adminSystemsMgmt);
     }
   }
@@ -46,59 +44,9 @@ class AdminMobileLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _calculateSelectedIndex(context),
-        onTap: (index) => _onTap(context, index),
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: AppColors.background,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textSecondary,
-        items: const [
-          BottomNavigationBarItem(
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedHome01,
-              color: AppColors.textSecondary,
-            ),
-            activeIcon: HugeIcon(
-              icon: HugeIcons.strokeRoundedHome01,
-              color: AppColors.primary,
-            ),
-            label: 'Operations',
-          ),
-          BottomNavigationBarItem(
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedGameboy,
-              color: AppColors.textSecondary,
-            ),
-            activeIcon: HugeIcon(
-              icon: HugeIcons.strokeRoundedGameboy,
-              color: AppColors.primary,
-            ),
-            label: 'Analytics',
-          ),
-          BottomNavigationBarItem(
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedWallet01,
-              color: AppColors.textSecondary,
-            ),
-            activeIcon: HugeIcon(
-              icon: HugeIcons.strokeRoundedWallet01,
-              color: AppColors.primary,
-            ),
-            label: 'Management',
-          ),
-          BottomNavigationBarItem(
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedUser,
-              color: AppColors.textSecondary,
-            ),
-            activeIcon: HugeIcon(
-              icon: HugeIcons.strokeRoundedUser,
-              color: AppColors.primary,
-            ),
-            label: 'Store',
-          ),
-        ],
+      bottomNavigationBar: GzAdminBottomNav(
+        currentTab: _selectedTab(context),
+        onTap: (tab) => _onTap(context, tab),
       ),
     );
   }

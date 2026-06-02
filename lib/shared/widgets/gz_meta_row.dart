@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 
-class EmMetaRow extends StatelessWidget {
-  const EmMetaRow({
+class GzMetaRow extends StatelessWidget {
+  const GzMetaRow({
     super.key,
     required this.label,
     required this.value,
+    this.valueBold = false,
     this.valueStyle,
   });
 
   final String label;
   final String value;
+  final bool valueBold;
   final TextStyle? valueStyle;
 
   @override
@@ -30,7 +33,9 @@ class EmMetaRow extends StatelessWidget {
           Text(
             value,
             style: valueStyle ??
-                AppTypography.num.copyWith(fontWeight: FontWeight.w600),
+                AppTypography.num.copyWith(
+                  fontWeight: valueBold ? FontWeight.w700 : FontWeight.w600,
+                ),
           ),
         ],
       ),

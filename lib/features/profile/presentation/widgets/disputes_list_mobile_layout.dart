@@ -6,11 +6,11 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/navigation/routes.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
-import '../../../../shared/widgets/em_card.dart';
-import '../../../../shared/widgets/em_tag.dart';
-import '../../../../shared/widgets/em_chip.dart';
-import '../../../../shared/widgets/em_button.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_tag.dart';
+import '../../../../shared/widgets/gz_chip.dart';
+import '../../../../shared/widgets/gz_button.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../models/domain_billing.dart';
@@ -26,7 +26,7 @@ class DisputesListMobileLayout extends ConsumerWidget {
 
     return Column(
       children: [
-        EmTopBar(
+        GzTopBar(
           title: 'My Disputes',
           trailing: GestureDetector(
             onTap: () => context.push(AppRoutes.disputeCreate),
@@ -65,7 +65,7 @@ class _EmptyState extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: EmCard(
+        child: GzCard(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -84,7 +84,7 @@ class _EmptyState extends StatelessWidget {
                       .copyWith(color: AppColors.textTertiary),
                   textAlign: TextAlign.center),
               const SizedBox(height: AppSpacing.md),
-              EmButton(
+              GzButton(
                 label: 'File a Dispute',
                 small: true,
                 onPressed: onFile,
@@ -120,12 +120,12 @@ class _DisputeRow extends StatelessWidget {
   const _DisputeRow({required this.dispute});
   final BillingDisputeModel dispute;
 
-  static EmTagKind _tagKind(DisputeStatus? s) => switch (s) {
-    DisputeStatus.open      => EmTagKind.warn,
-    DisputeStatus.underReview => EmTagKind.info,
-    DisputeStatus.resolved  => EmTagKind.ok,
-    DisputeStatus.withdrawn => EmTagKind.mute,
-    null                    => EmTagKind.mute,
+  static GzTagKind _tagKind(DisputeStatus? s) => switch (s) {
+    DisputeStatus.open      => GzTagKind.warn,
+    DisputeStatus.underReview => GzTagKind.info,
+    DisputeStatus.resolved  => GzTagKind.ok,
+    DisputeStatus.withdrawn => GzTagKind.mute,
+    null                    => GzTagKind.mute,
   };
 
   static String _statusLabel(DisputeStatus? s) => switch (s) {
@@ -147,7 +147,7 @@ class _DisputeRow extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => context.push(AppRoutes.disputeDetailPath(id)),
-      child: EmCard(
+      child: GzCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -160,7 +160,7 @@ class _DisputeRow extends StatelessWidget {
                         AppTypography.body.copyWith(fontWeight: FontWeight.w600),
                   ),
                 ),
-                EmTag(
+                GzTag(
                   kind: _tagKind(dispute.status),
                   label: _statusLabel(dispute.status),
                 ),
@@ -168,9 +168,9 @@ class _DisputeRow extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             Wrap(spacing: AppSpacing.xs, runSpacing: AppSpacing.xs, children: [
-              EmChip(keyLabel: 'DATE', value: dateStr),
+              GzChip(keyLabel: 'DATE', value: dateStr),
               if (amount != null)
-                EmChip(keyLabel: 'DISPUTED', value: '₹${amount.toStringAsFixed(0)}'),
+                GzChip(keyLabel: 'DISPUTED', value: '₹${amount.toStringAsFixed(0)}'),
             ]),
           ],
         ),

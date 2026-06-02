@@ -9,13 +9,13 @@ import 'package:gz_app/features/notifications/presentation/widgets/notification_
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/connectivity_banner.dart';
-import '../../../../../shared/widgets/em_avatar.dart';
-import '../../../../../shared/widgets/em_button.dart';
-import '../../../../../shared/widgets/em_card.dart';
-import '../../../../../shared/widgets/em_gz_logo.dart';
-import '../../../../../shared/widgets/em_icon_btn.dart';
-import '../../../../../shared/widgets/em_section_head.dart';
-import '../../../../../shared/widgets/em_tag.dart';
+import '../../../../../shared/widgets/gz_avatar.dart';
+import '../../../../../shared/widgets/gz_button.dart';
+import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_logo.dart';
+import '../../../../../shared/widgets/gz_icon_btn.dart';
+import '../../../../../shared/widgets/gz_section_head.dart';
+import '../../../../../shared/widgets/gz_tag.dart';
 import '../../../../../shared/widgets/page_error_display.dart';
 import 'package:gz_app/core/errors/app_exception.dart';
 import '../../../../models/domain_global.dart';
@@ -45,10 +45,10 @@ class HomeMobileLayout extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                const EmGzLogo(),
+                const GzLogo(),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(child: Text('Hey, gamer', style: AppTypography.h3)),
-                EmIconBtn(
+                GzIconBtn(
                   tooltip: 'Notifications',
                   onTap: () => showNotificationCenter(context),
                   child: const HugeIcon(
@@ -68,7 +68,7 @@ class HomeMobileLayout extends ConsumerWidget {
               onTap: () => context.push(AppRoutes.storeSearch),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                child: EmCard(
+                child: GzCard(
                   variant: CardVariant.base,
                   padding: AppSpacing.sm + AppSpacing.xs,
                   child: Row(
@@ -121,7 +121,7 @@ class HomeMobileLayout extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.md,
                         ),
-                        child: EmSectionHead(
+                        child: GzSectionHead(
                           'Nearby stores',
                           subtitle: '${data.stores.length} within 10km',
                         ),
@@ -131,17 +131,17 @@ class HomeMobileLayout extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(
                             horizontal: AppSpacing.md,
                           ),
-                          child: EmCard(
+                          child: GzCard(
                             variant: CardVariant.inset,
                             child: Column(
                               children: [
-                                EmAvatar(
+                                GzAvatar(
                                   icon: const HugeIcon(
                                     icon: HugeIcons.strokeRoundedStore01,
                                     color: AppColors.textTertiary,
                                     size: 24,
                                   ),
-                                  size: AvatarSize.xl,
+                                  size: GzAvatarSize.xl,
                                 ),
                                 const SizedBox(height: AppSpacing.md),
                                 Text(
@@ -156,7 +156,7 @@ class HomeMobileLayout extends ConsumerWidget {
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: AppSpacing.md),
-                                EmButtonFull(
+                                GzButton(
                                   label: 'Refresh',
                                   onPressed: () => ref
                                       .read(homeNotifierProvider.notifier)
@@ -190,7 +190,7 @@ class HomeMobileLayout extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(
                             horizontal: AppSpacing.md,
                           ),
-                          child: EmSectionHead(
+                          child: GzSectionHead(
                             'New in your city',
                             subtitle: '${data.stores.length} stores',
                           ),
@@ -237,7 +237,7 @@ class _StoreCardLg extends StatelessWidget {
           child: Container(
             width: _storeCardWidth,
             margin: const EdgeInsets.only(right: AppSpacing.sm),
-            child: EmCard(
+            child: GzCard(
               variant: CardVariant.base,
               padding: 0,
               child: Column(
@@ -282,9 +282,9 @@ class _StoreCardLg extends StatelessWidget {
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         store.isActive == true
-                            ? const EmTag(kind: EmTagKind.ok, label: 'Open')
-                            : const EmTag(
-                                kind: EmTagKind.mute,
+                            ? const GzTag(kind: GzTagKind.ok, label: 'Open')
+                            : const GzTag(
+                                kind: GzTagKind.mute,
                                 label: 'Closed',
                               ),
                       ],
@@ -324,12 +324,12 @@ class _NewStoreRow extends StatelessWidget {
               AppSpacing.md,
               AppSpacing.sm,
             ),
-            child: EmCard(
+            child: GzCard(
               variant: CardVariant.base,
               padding: AppSpacing.sm + AppSpacing.xs,
               child: Row(
                 children: [
-                  EmAvatar(children: initial, index: index),
+                  GzAvatar(children: initial, index: index),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
@@ -355,8 +355,8 @@ class _NewStoreRow extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   store.isActive == true
-                      ? const EmTag(kind: EmTagKind.ok, label: 'Open')
-                      : const EmTag(kind: EmTagKind.mute, label: 'Closed'),
+                      ? const GzTag(kind: GzTagKind.ok, label: 'Open')
+                      : const GzTag(kind: GzTagKind.mute, label: 'Closed'),
                 ],
               ),
             ),

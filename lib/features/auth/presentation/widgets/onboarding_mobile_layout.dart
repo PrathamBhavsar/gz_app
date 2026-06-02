@@ -7,8 +7,8 @@ import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../../shared/widgets/em_button.dart';
-import '../../../../../shared/widgets/em_card.dart';
+import '../../../../../shared/widgets/gz_button.dart';
+import '../../../../../shared/widgets/gz_card.dart';
 
 class _OnboardingPage {
   final String headline;
@@ -98,7 +98,7 @@ class _OnboardingMobileLayoutState
                     horizontal: AppSpacing.md,
                     vertical: AppSpacing.sm,
                   ),
-                  child: EmCard(
+                  child: GzCard(
                     variant: CardVariant.tint,
                     padding: AppSpacing.xl,
                     child: Column(
@@ -148,8 +148,8 @@ class _OnboardingMobileLayoutState
               AppSpacing.xxl,
             ),
             child: currentPage == _pages.length - 1
-                ? EmButtonFull(label: 'Get Started', onPressed: _finish)
-                : EmButtonFull(
+                ? GzButton(label: 'Get Started', onPressed: _finish)
+                : GzButton(
                     label: 'Next',
                     onPressed: () => _controller.nextPage(
                       duration: const Duration(milliseconds: 300),

@@ -5,11 +5,11 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
-import '../../../../shared/widgets/em_button.dart';
-import '../../../../shared/widgets/em_card.dart';
-import '../../../../shared/widgets/em_tag.dart';
-import '../../../../shared/widgets/em_scroll_content.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_tag.dart';
+import '../../../../shared/widgets/gz_scroll_content.dart';
 import '../providers/edit_profile_notifier.dart';
 import '../providers/profile_notifier.dart';
 
@@ -66,7 +66,7 @@ class _EditProfileMobileLayoutState
       loading: () =>
           const Center(child: CircularProgressIndicator()),
       error: (_, _) => Column(children: [
-        const EmTopBar(title: 'Edit Profile'),
+        const GzTopBar(title: 'Edit Profile'),
         Expanded(
           child: Center(
             child: Text('Unable to load profile',
@@ -82,7 +82,7 @@ class _EditProfileMobileLayoutState
 
         return Column(
           children: [
-            EmTopBar(
+            GzTopBar(
               title: 'Edit Profile',
               trailing: GestureDetector(
                 onTap: isLoading
@@ -105,7 +105,7 @@ class _EditProfileMobileLayoutState
               ),
             ),
             Expanded(
-              child: EmScrollContent(
+              child: GzScrollContent(
                 padded: true,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,8 +120,8 @@ class _EditProfileMobileLayoutState
                     Row(
                       children: [
                         Expanded(child: _FieldLabel('Email address')),
-                        EmTag(
-                          kind: emailVerified ? EmTagKind.ok : EmTagKind.warn,
+                        GzTag(
+                          kind: emailVerified ? GzTagKind.ok : GzTagKind.warn,
                           label: emailVerified ? 'Verified' : 'Unverified',
                         ),
                       ],
@@ -133,7 +133,7 @@ class _EditProfileMobileLayoutState
                     ),
                     if (!emailVerified && (user.email?.isNotEmpty ?? false)) ...[
                       const SizedBox(height: AppSpacing.sm),
-                      EmCard(
+                      GzCard(
                         variant: CardVariant.inset,
                         child: Row(children: [
                           const HugeIcon(
@@ -153,7 +153,7 @@ class _EditProfileMobileLayoutState
                       ),
                     ],
                     const SizedBox(height: AppSpacing.xl),
-                    EmButtonFull(
+                    GzButton(
                       label: 'Save Changes',
                       loading: isLoading,
                       onPressed: isLoading

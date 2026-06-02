@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
-import 'em_button.dart';
+import 'gz_button.dart';
 
 void showOtpInputSheet(
   BuildContext context, {
@@ -283,7 +283,7 @@ class _OtpInputSheetState extends State<OtpInputSheet> {
 
                 const SizedBox(height: AppSpacing.lg),
 
-                EmButtonFull(
+                GzButton(
                   label: 'Verify',
                   loading: _loading,
                   onPressed: _loading || _otp.length < _length

@@ -7,9 +7,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../models/domain_systems.dart';
-import '../../../../shared/widgets/em_live_dot.dart';
-import '../../../../shared/widgets/em_tag.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
+import '../../../../shared/widgets/gz_live_dot.dart';
+import '../../../../shared/widgets/gz_tag.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../providers/active_session_notifier.dart';
 
@@ -35,7 +35,7 @@ class ActiveSessionDetailMobileLayout extends ConsumerWidget {
         backgroundColor: AppColors.background,
         body: Column(
           children: [
-            const EmTopBar(title: 'Live session'),
+            const GzTopBar(title: 'Live session'),
             Expanded(
               child: PageErrorDisplay(
                 error: AppPageError.from(e),
@@ -121,7 +121,7 @@ class _ActiveSessionBodyState extends ConsumerState<_ActiveSessionBody> {
     return SafeArea(
       child: Column(
         children: [
-          EmTopBar(
+          GzTopBar(
             title: 'Live session',
             subtitle: session.storeId ?? '',
             disableBack: false,
@@ -237,7 +237,7 @@ class _ActiveSessionBodyState extends ConsumerState<_ActiveSessionBody> {
                               ],
                             ),
                           ),
-                          const EmTag(kind: EmTagKind.ok, label: 'Active'),
+                          const GzTag(kind: GzTagKind.ok, label: 'Active'),
                         ],
                       ),
                     ],
@@ -325,7 +325,7 @@ class _ActiveSessionBodyState extends ConsumerState<_ActiveSessionBody> {
                   ),
                   child: Row(
                     children: [
-                      const EmLiveDot(),
+                      const GzLiveDot(),
                       const SizedBox(width: AppSpacing.sm),
                       Text(
                         'Session is live',

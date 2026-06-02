@@ -7,8 +7,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../features/booking/data/repositories/booking_repository.dart';
-import '../../../../shared/widgets/em_button.dart';
-import '../../../../shared/widgets/em_top_bar.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
 
 final _checkInLoadingProvider = StateProvider.autoDispose<bool>((ref) => false);
 final _checkInErrorProvider = StateProvider.autoDispose<String?>((ref) => null);
@@ -48,7 +48,7 @@ class _CheckInMobileLayoutState extends ConsumerState<CheckInMobileLayout> {
     return SafeArea(
       child: Column(
         children: [
-          const EmTopBar(title: 'Check In'),
+          const GzTopBar(title: 'Check In'),
           Expanded(
             child: Center(
               child: Padding(
@@ -90,7 +90,7 @@ class _CheckInMobileLayoutState extends ConsumerState<CheckInMobileLayout> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    EmButtonFull(
+                    GzButton(
                       label: 'Tap to Check In',
                       loading: loading,
                       onPressed: loading ? null : _tapCheckIn,
