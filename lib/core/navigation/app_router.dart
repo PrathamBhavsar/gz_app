@@ -34,6 +34,7 @@ import '../../features/sessions/presentation/screens/sessions_screen.dart';
 import '../../features/sessions/presentation/screens/active_session_screen.dart';
 import '../../features/sessions/presentation/screens/booking_detail_screen.dart';
 import '../../features/sessions/presentation/screens/check_in_screen.dart';
+import '../../features/sessions/presentation/screens/payment_screen.dart';
 import '../../features/sessions/presentation/screens/active_session_detail_screen.dart';
 import '../../features/sessions/presentation/screens/session_history_detail_screen.dart';
 import '../../features/sessions/presentation/screens/billing_history_screen.dart';
@@ -219,6 +220,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
           return CheckInScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.paymentSheet,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return PaymentScreen(id: id);
         },
       ),
       GoRoute(
