@@ -60,11 +60,14 @@ class WalletScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
           children: [
             Text('Wallet', style: AppTypography.h1),
             const SizedBox(height: 18),
-            const GzCard(variant: CardVariant.tint, child: _BalanceHeroCard()),
+            const GzCard(
+              variant: CardVariant.tint,
+              child: _WalletBalanceHero(),
+            ),
             const SizedBox(height: 14),
             Row(
               children: [
@@ -92,7 +95,7 @@ class WalletScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 26),
+            const SizedBox(height: 28),
             _SectionHeader(
               title: 'Transactions',
               actionLabel: 'See all →',
@@ -105,14 +108,13 @@ class WalletScreen extends StatelessWidget {
                   if (index.isOdd) {
                     return const Divider(height: 1, color: AppColors.divider);
                   }
-
                   return _TransactionRow(
                     transaction: _transactions[index ~/ 2],
                   );
                 }),
               ),
             ),
-            const SizedBox(height: 26),
+            const SizedBox(height: 28),
             _SectionHeader(
               title: 'Active campaigns',
               actionLabel: 'See all →',
@@ -120,7 +122,7 @@ class WalletScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             SizedBox(
-              height: 188,
+              height: 196,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: _campaigns.length,
@@ -137,8 +139,8 @@ class WalletScreen extends StatelessWidget {
   }
 }
 
-class _BalanceHeroCard extends StatelessWidget {
-  const _BalanceHeroCard();
+class _WalletBalanceHero extends StatelessWidget {
+  const _WalletBalanceHero();
 
   @override
   Widget build(BuildContext context) {
@@ -239,7 +241,7 @@ class _CampaignCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 246,
+      width: 248,
       child: GestureDetector(
         onTap: () => context.push(AppRoutes.campaignDetailPath(campaign.id)),
         child: GzCard(
@@ -270,19 +272,9 @@ class _CampaignCard extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              const Spacer(),
-              Row(
-                children: [
-                  GzTag(kind: campaign.statusKind, label: campaign.statusLabel),
-                  const Spacer(),
-                  const HugeIcon(
-                    icon: HugeIcons.strokeRoundedArrowRight01,
-                    color: AppColors.textTertiary,
-                    size: 18,
-                  ),
-                ],
-              ),
               const SizedBox(height: 10),
+              GzTag(kind: campaign.statusKind, label: campaign.statusLabel),
+              const Spacer(),
               Text(campaign.expiry, style: AppTypography.small),
             ],
           ),

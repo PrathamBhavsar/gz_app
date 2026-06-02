@@ -55,7 +55,9 @@ class _RedeemCreditsSheetState extends State<RedeemCreditsSheet> {
                     height: 4,
                     decoration: BoxDecoration(
                       color: AppColors.rule,
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadiusPill,
+                      ),
                     ),
                   ),
                 ),
@@ -64,7 +66,10 @@ class _RedeemCreditsSheetState extends State<RedeemCreditsSheet> {
                 const SizedBox(height: 4),
                 Text('10 credits = ₹1', style: AppTypography.bodyR),
                 const SizedBox(height: 16),
-                const GzCard(variant: CardVariant.tint, child: _BalanceCard()),
+                const GzCard(
+                  variant: CardVariant.tint,
+                  child: _RedeemBalanceCard(),
+                ),
                 if (_showConfirmation) ...[
                   const SizedBox(height: 12),
                   Container(
@@ -128,8 +133,8 @@ class _RedeemCreditsSheetState extends State<RedeemCreditsSheet> {
   }
 }
 
-class _BalanceCard extends StatelessWidget {
-  const _BalanceCard();
+class _RedeemBalanceCard extends StatelessWidget {
+  const _RedeemBalanceCard();
 
   @override
   Widget build(BuildContext context) {

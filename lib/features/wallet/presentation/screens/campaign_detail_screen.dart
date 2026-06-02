@@ -18,7 +18,6 @@ class CampaignDetailScreen extends StatelessWidget {
   static const Map<String, _CampaignDetail> _campaigns = {
     'welcome-bonus': _CampaignDetail(
       title: 'Welcome Bonus',
-      description: 'Earn 2× credits on your first booking',
       statusKind: GzTagKind.ok,
       statusLabel: 'Active',
       valid: 'Until Dec 31, 2025',
@@ -32,7 +31,6 @@ class CampaignDetailScreen extends StatelessWidget {
     ),
     'happy-hours': _CampaignDetail(
       title: 'Happy Hours',
-      description: '50% off all systems 2 PM – 5 PM Mon–Thu',
       statusKind: GzTagKind.ok,
       statusLabel: 'Active',
       valid: 'Ongoing',
@@ -46,7 +44,6 @@ class CampaignDetailScreen extends StatelessWidget {
     ),
     'summer-blast': _CampaignDetail(
       title: 'Summer Blast',
-      description: 'Free hour with any 2-hour booking',
       statusKind: GzTagKind.mute,
       statusLabel: 'Expired',
       valid: 'Ended May 1',
@@ -96,8 +93,6 @@ class CampaignDetailScreen extends StatelessWidget {
                   Text(campaign.title, style: AppTypography.h1),
                   const SizedBox(height: 8),
                   GzTag(kind: campaign.statusKind, label: campaign.statusLabel),
-                  const SizedBox(height: 10),
-                  Text(campaign.description, style: AppTypography.bodyR),
                 ],
               ),
             ),
@@ -132,7 +127,9 @@ class CampaignDetailScreen extends StatelessWidget {
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: AppColors.pillBg,
-                            borderRadius: BorderRadius.circular(999),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.borderRadiusPill,
+                            ),
                           ),
                           child: Text(
                             '${index + 1}',
@@ -180,7 +177,6 @@ class CampaignDetailScreen extends StatelessWidget {
 class _CampaignDetail {
   const _CampaignDetail({
     required this.title,
-    required this.description,
     required this.statusKind,
     required this.statusLabel,
     required this.valid,
@@ -190,7 +186,6 @@ class _CampaignDetail {
   });
 
   final String title;
-  final String description;
   final GzTagKind statusKind;
   final String statusLabel;
   final String valid;
