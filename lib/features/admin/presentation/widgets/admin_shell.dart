@@ -12,6 +12,17 @@ class AdminShell extends StatefulWidget {
 }
 
 class _AdminShellState extends State<AdminShell> {
+  bool _showsBottomNav(BuildContext context) {
+    final location = GoRouterState.of(context).matchedLocation;
+    return location == AppRoutes.adminDashboard ||
+        location == AppRoutes.adminSessions ||
+        location == AppRoutes.adminWalkIn ||
+        location == AppRoutes.adminBookings ||
+        location == AppRoutes.adminAnalytics ||
+        location == AppRoutes.adminManagement ||
+        location == AppRoutes.adminSystemsMgmt;
+  }
+
   GzAdminTab _selectedTab(BuildContext context) {
     final String location = GoRouterState.of(context).matchedLocation;
     if (location.startsWith('/admin/analytics')) return GzAdminTab.sessions;
@@ -58,10 +69,12 @@ class _AdminShellState extends State<AdminShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: widget.child,
-      bottomNavigationBar: GzAdminBottomNav(
-        currentTab: _selectedTab(context),
-        onTap: (tab) => _onTap(context, tab),
-      ),
+      bottomNavigationBar: _showsBottomNav(context)
+          ? GzAdminBottomNav(
+              currentTab: _selectedTab(context),
+              onTap: (tab) => _onTap(context, tab),
+            )
+          : null,
     );
   }
 }

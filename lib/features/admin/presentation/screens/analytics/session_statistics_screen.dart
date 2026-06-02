@@ -1,391 +1,270 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/navigation/routes.dart';
-import '../../providers/admin_analytics_provider.dart';
-import '../../../../../../models/domain_analytics.dart';
+import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_progress_bar.dart';
+import '../../../../../shared/widgets/gz_tag.dart';
 
-/// Session Statistics — Screen 49.
-/// Average duration, completion rate, walk-in vs booking ratio.
-class SessionStatisticsScreen extends ConsumerStatefulWidget {
+class SessionStatisticsScreen extends StatelessWidget {
   const SessionStatisticsScreen({super.key});
 
-  @override
-  ConsumerState<SessionStatisticsScreen> createState() =>
-      _SessionStatisticsScreenState();
-}
-
-class _SessionStatisticsScreenState
-    extends ConsumerState<SessionStatisticsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() => _load());
-  }
+  static const _kpis = [
+    _KpiData(
+      label: 'Avg Duration',
+      value: '87 min',
+      icon: HugeIcons.strokeRoundedClock01,
+      accent: AppColors.info,
+    ),
+    _KpiData(
+      label: 'Completion',
+      value: '94%',
+      icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+      accent: AppColors.ok,
+    ),
+    _KpiData(
+      label: 'Walk-ins',
+      value: '34',
+      icon: HugeIcons.strokeRoundedGameboy,
+      accent: AppColors.rose,
+    ),
+    _KpiData(
+      label: 'Bookings',
+      value: '108',
+      icon: HugeIcons.strokeRoundedCalendar03,
+      accent: AppColors.textTertiary,
+    ),
+  ];
+  static const _sessions = [
+    _SessionRow(
+      title: 'Rahul M. · PC Station 01',
+      duration: '2h 10m',
+      tag: GzTagKind.ok,
+      tagLabel: 'Completed',
+    ),
+    _SessionRow(
+      title: 'Priya S. · PS5 Console',
+      duration: '1h 30m',
+      tag: GzTagKind.ok,
+      tagLabel: 'Completed',
+    ),
+    _SessionRow(
+      title: 'Amit K. · Xbox Series X',
+      duration: '0h 45m',
+      tag: GzTagKind.warn,
+      tagLabel: 'Early end',
+    ),
+    _SessionRow(
+      title: 'Neha R. · VR Pod 01',
+      duration: '2h 00m',
+      tag: GzTagKind.ok,
+      tagLabel: 'Completed',
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(sessionStatsProvider);
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
-            color: AppColors.textPrimary,
-            size: 20,
-          ),
-          onPressed: () => context.go(AppRoutes.adminAnalytics),
-        ),
-        title: Text('Session Stats', style: AppTypography.headingSmall),
+      appBar: GzAdminTopBar(
+        title: 'Session Stats',
+        onBack: () => Navigator.of(context).maybePop(),
       ),
-      body: RefreshIndicator(
-        color: AppColors.rose,
-        backgroundColor: AppColors.surface,
-        onRefresh: () => _load(),
+      body: SafeArea(
+        top: false,
         child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: AppSpacing.md),
-              _buildContent(state),
-              const SizedBox(height: AppSpacing.xxl),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 1.25,
+                ),
+                itemCount: _kpis.length,
+                itemBuilder: (context, index) => _KpiCard(data: _kpis[index]),
+              ),
+              const SizedBox(height: 14),
+              const _Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Session types', style: AppTypography.h3),
+                    SizedBox(height: 14),
+                    _TypeBreakdownRow(
+                      label: 'Walk-in',
+                      percent: 24,
+                      color: AppColors.rose,
+                    ),
+                    SizedBox(height: 8),
+                    _TypeBreakdownRow(
+                      label: 'Booking',
+                      percent: 76,
+                      color: AppColors.info,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              _Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Recent sessions', style: AppTypography.h3),
+                    const SizedBox(height: 12),
+                    ...List.generate(_sessions.length, (index) {
+                      final item = _sessions[index];
+                      return Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          border: index == 0
+                              ? null
+                              : const Border(
+                                  top: BorderSide(color: AppColors.rule),
+                                ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.title,
+                                    style: AppTypography.body.copyWith(fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(item.duration, style: AppTypography.small),
+                                ],
+                              ),
+                            ),
+                            GzTag(kind: item.tag, label: item.tagLabel),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
-
-  Widget _buildContent(AnalyticsState<SessionStatsModel> state) {
-    if (state is AnalyticsLoading<SessionStatsModel>) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.xxl),
-          child: CircularProgressIndicator(color: AppColors.rose),
-        ),
-      );
-    }
-    if (state is AnalyticsError<SessionStatsModel>) {
-      return _StatsError(onRetry: _load);
-    }
-    if (state is AnalyticsLoaded<SessionStatsModel>) {
-      return _SessionStatsContent(data: state.data);
-    }
-    return const SizedBox.shrink();
-  }
-
-  Future<void> _load() async {
-    final now = DateTime.now();
-    ref.read(sessionStatsProvider.notifier).load(
-          dateFrom: _formatDate(now.subtract(const Duration(days: 7))),
-          dateTo: _formatDate(now),
-        );
-  }
-
-  String _formatDate(DateTime d) =>
-      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 }
 
-// ─── Error View ───────────────────────────────────────────────────────────────
+class _TypeBreakdownRow extends StatelessWidget {
+  const _TypeBreakdownRow({
+    required this.label,
+    required this.percent,
+    required this.color,
+  });
 
-class _StatsError extends StatelessWidget {
-  const _StatsError({required this.onRetry});
-  final VoidCallback onRetry;
+  final String label;
+  final int percent;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        child: Column(
-          children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedAlert01,
-              color: AppColors.error,
-              size: 48,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Failed to load session stats',
-              style: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: onRetry,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(color: AppColors.border),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-                ),
-              ),
-              child: Text('Retry', style: AppTypography.button),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Stats Content ────────────────────────────────────────────────────────────
-
-class _SessionStatsContent extends StatelessWidget {
-  const _SessionStatsContent({required this.data});
-  final SessionStatsModel data;
-
-  @override
-  Widget build(BuildContext context) {
-    final totalSessions = data.totalSessions ?? 0;
-    final completed = data.completed ?? 0;
-    final cancelled = data.cancelled ?? 0;
-    final avgDuration = data.avgDurationMinutes ?? '0';
-    final totalMinutes = data.totalMinutes ?? 0;
-    final walkInCount = data.walkInCount ?? 0;
-    final bookingCount = data.bookingCount ?? 0;
-
-    final completionRate = totalSessions > 0
-        ? ((completed / totalSessions) * 100).toStringAsFixed(1)
-        : '0.0';
-    final cancellationRate = totalSessions > 0
-        ? ((cancelled / totalSessions) * 100).toStringAsFixed(1)
-        : '0.0';
-    final totalHours = (totalMinutes / 60).toStringAsFixed(1);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Row(
-          children: [
-            _MetricTile(
-              label: 'Avg Duration',
-              value: '$avgDuration min',
-              icon: HugeIcons.strokeRoundedTimer01,
-              iconColor: AppColors.info,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            _MetricTile(
-              label: 'Completion',
-              value: '$completionRate%',
-              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-              iconColor: AppColors.ok,
-            ),
-          ],
+        Expanded(child: Text(label, style: AppTypography.body)),
+        SizedBox(
+          width: 100,
+          child: GzProgressBar(
+            value: percent / 100,
+            height: 6,
+            fillColor: color,
+          ),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        Row(
-          children: [
-            _MetricTile(
-              label: 'Total Hours',
-              value: '${totalHours}h',
-              icon: HugeIcons.strokeRoundedClock01,
-              iconColor: AppColors.rose,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            _MetricTile(
-              label: 'Cancellation',
-              value: '$cancellationRate%',
-              icon: HugeIcons.strokeRoundedCancel01,
-              iconColor: AppColors.error,
-            ),
-          ],
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 30,
+          child: Text(
+            '$percent%',
+            textAlign: TextAlign.right,
+            style: AppTypography.small.copyWith(fontFamily: 'GeistMono'),
+          ),
         ),
-        const SizedBox(height: AppSpacing.xl),
-        Text('Session Breakdown', style: AppTypography.headingSmall),
-        const SizedBox(height: AppSpacing.md),
-        _BreakdownCard(
-          total: totalSessions,
-          completed: completed,
-          cancelled: cancelled,
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        Text('Source Ratio', style: AppTypography.headingSmall),
-        const SizedBox(height: AppSpacing.md),
-        _SourceRatio(walkIn: walkInCount, booking: bookingCount),
       ],
     );
   }
 }
 
-// ─── Metric Tile ──────────────────────────────────────────────────────────────
+class _KpiCard extends StatelessWidget {
+  const _KpiCard({required this.data});
 
-class _MetricTile extends StatelessWidget {
-  const _MetricTile({
+  final _KpiData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          HugeIcon(icon: data.icon, color: data.accent, size: 18),
+          const Spacer(),
+          Text(data.value, style: AppTypography.h1.copyWith(fontFamily: 'GeistMono')),
+          const SizedBox(height: 4),
+          Text(
+            data.label,
+            style: AppTypography.small.copyWith(color: AppColors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  const _Card({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _KpiData {
+  const _KpiData({
     required this.label,
     required this.value,
     required this.icon,
-    required this.iconColor,
+    required this.accent,
   });
+
   final String label;
   final String value;
   final List<List<dynamic>> icon;
-  final Color iconColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            HugeIcon(icon: icon, color: iconColor, size: 20),
-            const SizedBox(height: AppSpacing.sm),
-            Text(value, style: AppTypography.headingSmall),
-            const SizedBox(height: AppSpacing.xs),
-            Text(label, style: AppTypography.caption),
-          ],
-        ),
-      ),
-    );
-  }
+  final Color accent;
 }
 
-// ─── Breakdown Card ───────────────────────────────────────────────────────────
-
-class _BreakdownCard extends StatelessWidget {
-  const _BreakdownCard({
-    required this.total,
-    required this.completed,
-    required this.cancelled,
+class _SessionRow {
+  const _SessionRow({
+    required this.title,
+    required this.duration,
+    required this.tag,
+    required this.tagLabel,
   });
-  final int total;
-  final int completed;
-  final int cancelled;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-      ),
-      child: Column(
-        children: [
-          _row('Total Sessions', '$total', AppColors.textPrimary),
-          const SizedBox(height: AppSpacing.sm),
-          _row('Completed', '$completed', AppColors.ok),
-          const SizedBox(height: AppSpacing.sm),
-          _row('Cancelled', '$cancelled', AppColors.error),
-          const SizedBox(height: AppSpacing.md),
-          if (total > 0)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: completed / total,
-                backgroundColor: AppColors.surface2,
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.ok),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _row(String label, String value, Color valueColor) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: AppTypography.bodyMedium),
-        Text(
-          value,
-          style: AppTypography.bodyMedium.copyWith(color: valueColor),
-        ),
-      ],
-    );
-  }
-}
-
-// ─── Source Ratio ─────────────────────────────────────────────────────────────
-
-class _SourceRatio extends StatelessWidget {
-  const _SourceRatio({required this.walkIn, required this.booking});
-  final int walkIn;
-  final int booking;
-
-  @override
-  Widget build(BuildContext context) {
-    final total = walkIn + booking;
-    final walkInPct =
-        total > 0 ? (walkIn / total * 100).toStringAsFixed(0) : '0';
-    final bookingPct =
-        total > 0 ? (booking / total * 100).toStringAsFixed(0) : '0';
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                flex: walkIn > 0 ? walkIn : 1,
-                child: Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: AppColors.rose,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: booking > 0 ? booking : 1,
-                child: Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: AppColors.info,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _label('Walk-in', '$walkIn ($walkInPct%)', AppColors.rose),
-              _label('Booking', '$booking ($bookingPct%)', AppColors.info),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _label(String text, String value, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        Text('$text: $value', style: AppTypography.bodySmall),
-      ],
-    );
-  }
+  final String title;
+  final String duration;
+  final GzTagKind tag;
+  final String tagLabel;
 }

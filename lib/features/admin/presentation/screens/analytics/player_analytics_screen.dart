@@ -1,318 +1,199 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/navigation/routes.dart';
-import '../../providers/admin_analytics_provider.dart';
-import '../../../../../../models/domain_analytics.dart';
+import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_avatar.dart';
+import '../../../../../shared/widgets/gz_meta_row.dart';
 
-/// Player Analytics — Screen 50.
-/// Player segments (New/Returning) and top player minutes.
-class PlayerAnalyticsScreen extends ConsumerStatefulWidget {
+class PlayerAnalyticsScreen extends StatelessWidget {
   const PlayerAnalyticsScreen({super.key});
 
-  @override
-  ConsumerState<PlayerAnalyticsScreen> createState() =>
-      _PlayerAnalyticsScreenState();
-}
-
-class _PlayerAnalyticsScreenState
-    extends ConsumerState<PlayerAnalyticsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() => _load());
-  }
+  static const _players = [
+    _PlayerRow(letter: 'R', name: 'Rahul Mehra', minutes: '420 min', index: 0),
+    _PlayerRow(letter: 'P', name: 'Priya Singh', minutes: '380 min', index: 1),
+    _PlayerRow(letter: 'A', name: 'Amit Kumar', minutes: '310 min', index: 2),
+    _PlayerRow(letter: 'N', name: 'Neha Reddy', minutes: '290 min', index: 3),
+    _PlayerRow(letter: 'S', name: 'Suresh V.', minutes: '245 min', index: 4),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(playersProvider);
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
-            color: AppColors.textPrimary,
-            size: 20,
-          ),
-          onPressed: () => context.go(AppRoutes.adminAnalytics),
-        ),
-        title: Text('Players', style: AppTypography.headingSmall),
+      appBar: GzAdminTopBar(
+        title: 'Players',
+        onBack: () => Navigator.of(context).maybePop(),
       ),
-      body: RefreshIndicator(
-        color: AppColors.rose,
-        backgroundColor: AppColors.surface,
-        onRefresh: () => _load(),
+      body: SafeArea(
+        top: false,
         child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: AppSpacing.md),
-              _buildContent(state),
-              const SizedBox(height: AppSpacing.xxl),
+              const _Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Player segments', style: AppTypography.h3),
+                    SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _SegmentCell(
+                            value: '68',
+                            label: 'New',
+                          ),
+                        ),
+                        SizedBox(
+                          width: 1,
+                          height: 40,
+                          child: ColoredBox(color: AppColors.rule),
+                        ),
+                        Expanded(
+                          child: _SegmentCell(
+                            value: '74',
+                            label: 'Returning',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              _Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Top players · minutes', style: AppTypography.h3),
+                    const SizedBox(height: 12),
+                    ...List.generate(_players.length, (index) {
+                      final player = _players[index];
+                      return Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          border: index == 0
+                              ? null
+                              : const Border(
+                                  top: BorderSide(color: AppColors.rule),
+                                ),
+                        ),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              child: Text(
+                                '${index + 1}',
+                                textAlign: TextAlign.center,
+                                style: AppTypography.body.copyWith(
+                                  fontFamily: 'GeistMono',
+                                  color: AppColors.textTertiary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            GzAvatar(
+                              letter: player.letter,
+                              index: player.index,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                player.name,
+                                style: AppTypography.body.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              player.minutes,
+                              style: AppTypography.small.copyWith(
+                                fontFamily: 'GeistMono',
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const HugeIcon(
+                              icon: HugeIcons.strokeRoundedArrowRight01,
+                              color: AppColors.textTertiary,
+                              size: 14,
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              const _Card(
+                child: Column(
+                  children: [
+                    GzMetaRow(label: 'Total players', value: '142'),
+                    GzMetaRow(label: 'Active today', value: '28'),
+                    GzMetaRow(label: 'Avg sessions/player', value: '2.3'),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
-
-  Widget _buildContent(AnalyticsState<PlayerAnalyticsModel> state) {
-    if (state is AnalyticsLoading<PlayerAnalyticsModel>) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.xxl),
-          child: CircularProgressIndicator(color: AppColors.rose),
-        ),
-      );
-    }
-    if (state is AnalyticsError<PlayerAnalyticsModel>) {
-      return _PlayerError(onRetry: _load);
-    }
-    if (state is AnalyticsLoaded<PlayerAnalyticsModel>) {
-      return _PlayerStatsContent(data: state.data);
-    }
-    return const SizedBox.shrink();
-  }
-
-  Future<void> _load() async {
-    final now = DateTime.now();
-    ref.read(playersProvider.notifier).load(
-          dateFrom: _formatDate(now.subtract(const Duration(days: 30))),
-          dateTo: _formatDate(now),
-        );
-  }
-
-  String _formatDate(DateTime d) =>
-      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 }
 
-// ─── Error View ───────────────────────────────────────────────────────────────
+class _SegmentCell extends StatelessWidget {
+  const _SegmentCell({
+    required this.value,
+    required this.label,
+  });
 
-class _PlayerError extends StatelessWidget {
-  const _PlayerError({required this.onRetry});
-  final VoidCallback onRetry;
+  final String value;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        child: Column(
-          children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedAlert01,
-              color: AppColors.error,
-              size: 48,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Failed to load player analytics',
-              style: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: onRetry,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(color: AppColors.border),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-                ),
-              ),
-              child: Text('Retry', style: AppTypography.button),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Player Stats Content ─────────────────────────────────────────────────────
-
-class _PlayerStatsContent extends StatelessWidget {
-  const _PlayerStatsContent({required this.data});
-  final PlayerAnalyticsModel data;
-
-  @override
-  Widget build(BuildContext context) {
-    final unique = data.uniquePlayers ?? 0;
-    final newPlayers = data.newPlayers ?? 0;
-    final returning = data.returningPlayers ?? 0;
-    final topMinutes = data.topPlayerMinutes ?? 0;
-
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Player Segments', style: AppTypography.headingSmall),
-        const SizedBox(height: AppSpacing.md),
-        Row(
-          children: [
-            _SegmentCard(
-              label: 'Unique',
-              value: '$unique',
-              icon: HugeIcons.strokeRoundedUserGroup,
-              iconColor: AppColors.rose,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            _SegmentCard(
-              label: 'New',
-              value: '$newPlayers',
-              icon: HugeIcons.strokeRoundedUserAdd01,
-              iconColor: AppColors.ok,
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Row(
-          children: [
-            _SegmentCard(
-              label: 'Returning',
-              value: '$returning',
-              icon: HugeIcons.strokeRoundedUserCircle,
-              iconColor: AppColors.info,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            _SegmentCard(
-              label: 'Top Minutes',
-              value: '${(topMinutes / 60).toStringAsFixed(1)}h',
-              icon: HugeIcons.strokeRoundedStar,
-              iconColor: AppColors.gold,
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        Text('New vs Returning', style: AppTypography.headingSmall),
-        const SizedBox(height: AppSpacing.md),
-        _RetentionBar(newPlayers: newPlayers, returning: returning),
+        Text(value, style: AppTypography.h1.copyWith(fontFamily: 'GeistMono')),
+        const SizedBox(height: 4),
+        Text(label, style: AppTypography.small),
       ],
     );
   }
 }
 
-// ─── Segment Card ─────────────────────────────────────────────────────────────
+class _Card extends StatelessWidget {
+  const _Card({required this.child});
 
-class _SegmentCard extends StatelessWidget {
-  const _SegmentCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.iconColor,
-  });
-  final String label;
-  final String value;
-  final List<List<dynamic>> icon;
-  final Color iconColor;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            HugeIcon(icon: icon, color: iconColor, size: 20),
-            const SizedBox(height: AppSpacing.sm),
-            Text(value, style: AppTypography.headingSmall),
-            const SizedBox(height: AppSpacing.xs),
-            Text(label, style: AppTypography.caption),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Retention Bar ────────────────────────────────────────────────────────────
-
-class _RetentionBar extends StatelessWidget {
-  const _RetentionBar({required this.newPlayers, required this.returning});
-  final int newPlayers;
-  final int returning;
-
-  @override
-  Widget build(BuildContext context) {
-    final total = newPlayers + returning;
-    final newPct =
-        total > 0 ? (newPlayers / total * 100).toStringAsFixed(0) : '0';
-    final retPct =
-        total > 0 ? (returning / total * 100).toStringAsFixed(0) : '0';
-
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                flex: newPlayers > 0 ? newPlayers : 1,
-                child: Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: AppColors.ok,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: returning > 0 ? returning : 1,
-                child: Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: AppColors.info,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _label('New', '$newPlayers ($newPct%)', AppColors.ok),
-              _label('Returning', '$returning ($retPct%)', AppColors.info),
-            ],
-          ),
-        ],
-      ),
+      child: child,
     );
   }
+}
 
-  Widget _label(String text, String value, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        Text('$text: $value', style: AppTypography.bodySmall),
-      ],
-    );
-  }
+class _PlayerRow {
+  const _PlayerRow({
+    required this.letter,
+    required this.name,
+    required this.minutes,
+    required this.index,
+  });
+
+  final String letter;
+  final String name;
+  final String minutes;
+  final int index;
 }

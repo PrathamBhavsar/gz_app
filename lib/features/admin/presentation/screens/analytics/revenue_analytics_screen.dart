@@ -1,326 +1,242 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hugeicons/hugeicons.dart';
+
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/navigation/routes.dart';
-import '../../providers/admin_analytics_provider.dart';
-import '../../../../../../models/domain_analytics.dart';
+import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_meta_row.dart';
 
-final _revenueGroupByProvider = StateProvider.autoDispose<String>((ref) => 'day');
-
-/// Revenue Analytics — Screen 47.
-/// Detailed financial breakdown with revenue table and payment breakdown.
-class RevenueAnalyticsScreen extends ConsumerStatefulWidget {
+class RevenueAnalyticsScreen extends StatefulWidget {
   const RevenueAnalyticsScreen({super.key});
 
   @override
-  ConsumerState<RevenueAnalyticsScreen> createState() =>
-      _RevenueAnalyticsScreenState();
+  State<RevenueAnalyticsScreen> createState() => _RevenueAnalyticsScreenState();
 }
 
-class _RevenueAnalyticsScreenState
-    extends ConsumerState<RevenueAnalyticsScreen> {
+class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
+  static const _filters = ['Daily', 'Weekly', 'Monthly'];
+  static const _rows = [
+    _RevenueRow(date: 'Jun 01', sessions: '28', revenue: '₹8,400'),
+    _RevenueRow(date: 'Jun 02', sessions: '31', revenue: '₹9,300'),
+    _RevenueRow(date: 'Jun 03', sessions: '25', revenue: '₹7,500'),
+    _RevenueRow(date: 'Jun 04', sessions: '29', revenue: '₹8,700'),
+    _RevenueRow(date: 'Jun 05', sessions: '33', revenue: '₹9,900'),
+    _RevenueRow(date: 'Jun 06', sessions: '34', revenue: '₹10,200'),
+  ];
+
+  int _activeFilter = 0;
+
   @override
   Widget build(BuildContext context) {
-    final groupBy = ref.watch(_revenueGroupByProvider);
-    final state = ref.watch(revenueProvider);
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
-            color: AppColors.textPrimary,
-            size: 20,
-          ),
-          onPressed: () => context.go(AppRoutes.adminAnalytics),
-        ),
-        title: Text('Revenue', style: AppTypography.headingSmall),
+      appBar: GzAdminTopBar(
+        title: 'Revenue',
+        onBack: () => Navigator.of(context).maybePop(),
       ),
-      body: RefreshIndicator(
-        color: AppColors.rose,
-        backgroundColor: AppColors.surface,
-        onRefresh: () => _load(),
+      body: SafeArea(
+        top: false,
         child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: AppSpacing.md),
               Row(
-                children: [
-                  _GroupByChip(
-                    label: 'Daily',
-                    value: 'day',
-                    activeGroupBy: groupBy,
-                    onTap: () => _selectGroupBy('day'),
+                children: List.generate(
+                  _filters.length,
+                  (index) => Padding(
+                    padding: EdgeInsets.only(
+                      right: index == _filters.length - 1 ? 0 : 8,
+                    ),
+                    child: _RoseChip(
+                      label: _filters[index],
+                      active: _activeFilter == index,
+                      onTap: () => setState(() => _activeFilter = index),
+                    ),
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  _GroupByChip(
-                    label: 'Weekly',
-                    value: 'week',
-                    activeGroupBy: groupBy,
-                    onTap: () => _selectGroupBy('week'),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  _GroupByChip(
-                    label: 'Monthly',
-                    value: 'month',
-                    activeGroupBy: groupBy,
-                    onTap: () => _selectGroupBy('month'),
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: AppSpacing.lg),
-              _buildContent(state),
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: 12),
+              const _Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Total Revenue', style: AppTypography.meta),
+                    SizedBox(height: 6),
+                    Text('₹1,84,200', style: AppTypography.heroMd),
+                    SizedBox(height: 6),
+                    Text('Last 30 days', style: AppTypography.small),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              const _Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Payment breakdown', style: AppTypography.h3),
+                    SizedBox(height: 14),
+                    GzMetaRow(label: 'Cash', value: '₹72,400'),
+                    GzMetaRow(label: 'UPI', value: '₹89,200'),
+                    GzMetaRow(label: 'Credits', value: '₹22,600'),
+                    Divider(height: 16, color: AppColors.rule),
+                    GzMetaRow(
+                      label: 'Total',
+                      value: '₹1,84,200',
+                      valueStyle: TextStyle(
+                        fontFamily: 'Geist',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              _Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Daily breakdown', style: AppTypography.h3),
+                    const SizedBox(height: 12),
+                    const Row(
+                      children: [
+                        Expanded(
+                          child: Text('DATE', style: AppTypography.meta),
+                        ),
+                        SizedBox(
+                          width: 70,
+                          child: Text(
+                            'SESSIONS',
+                            textAlign: TextAlign.right,
+                            style: AppTypography.meta,
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        SizedBox(
+                          width: 80,
+                          child: Text(
+                            'REVENUE',
+                            textAlign: TextAlign.right,
+                            style: AppTypography.meta,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Divider(height: 1, color: AppColors.rule),
+                    ...List.generate(_rows.length, (index) {
+                      final row = _rows[index];
+                      return Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          border: index == _rows.length - 1
+                              ? null
+                              : const Border(
+                                  bottom: BorderSide(color: AppColors.rule),
+                                ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(row.date, style: AppTypography.num),
+                            ),
+                            SizedBox(
+                              width: 70,
+                              child: Text(
+                                row.sessions,
+                                textAlign: TextAlign.right,
+                                style: AppTypography.num,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            SizedBox(
+                              width: 80,
+                              child: Text(
+                                row.revenue,
+                                textAlign: TextAlign.right,
+                                style: AppTypography.num,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
-
-  void _selectGroupBy(String value) {
-    ref.read(_revenueGroupByProvider.notifier).state = value;
-    _load(value);
-  }
-
-  Widget _buildContent(AnalyticsState<RevenueAnalyticsModel> state) {
-    if (state is AnalyticsLoading<RevenueAnalyticsModel>) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.xxl),
-          child: CircularProgressIndicator(color: AppColors.rose),
-        ),
-      );
-    }
-    if (state is AnalyticsError<RevenueAnalyticsModel>) {
-      return _RevenueError(onRetry: _load);
-    }
-    if (state is AnalyticsLoaded<RevenueAnalyticsModel>) {
-      return _RevenueContent(data: state.data);
-    }
-    return const SizedBox.shrink();
-  }
-
-  Future<void> _load([String? overrideGroupBy]) async {
-    final now = DateTime.now();
-    ref.read(revenueProvider.notifier).load(
-          dateFrom: _formatDate(now.subtract(const Duration(days: 30))),
-          dateTo: _formatDate(now),
-          groupBy: overrideGroupBy ?? ref.read(_revenueGroupByProvider),
-        );
-  }
-
-  String _formatDate(DateTime d) =>
-      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 }
 
-// ─── Group By Chip ────────────────────────────────────────────────────────────
-
-class _GroupByChip extends StatelessWidget {
-  const _GroupByChip({
+class _RoseChip extends StatelessWidget {
+  const _RoseChip({
     required this.label,
-    required this.value,
-    required this.activeGroupBy,
+    required this.active,
     required this.onTap,
   });
+
   final String label;
-  final String value;
-  final String activeGroupBy;
+  final bool active;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final isActive = activeGroupBy == value;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
-        ),
+        height: 30,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.rose : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
+          color: active ? AppColors.rose : AppColors.surface,
+          borderRadius: BorderRadius.circular(10),
+          border: active ? null : Border.all(color: AppColors.rule),
         ),
+        alignment: Alignment.center,
         child: Text(
           label,
-          style: AppTypography.bodySmall.copyWith(
-            color: isActive ? AppColors.background : AppColors.textSecondary,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Error View ───────────────────────────────────────────────────────────────
-
-class _RevenueError extends StatelessWidget {
-  const _RevenueError({required this.onRetry});
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        child: Column(
-          children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedAlert01,
-              color: AppColors.error,
-              size: 48,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Failed to load revenue data',
-              style: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: onRetry,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(color: AppColors.border),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-                ),
-              ),
-              child: Text('Retry', style: AppTypography.button),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Revenue Content ──────────────────────────────────────────────────────────
-
-class _RevenueContent extends StatelessWidget {
-  const _RevenueContent({required this.data});
-  final RevenueAnalyticsModel data;
-
-  @override
-  Widget build(BuildContext context) {
-    final rows = data.data ?? [];
-
-    if (rows.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: Text(
-            'No revenue data available',
-            style: AppTypography.bodyMedium
-                .copyWith(color: AppColors.textSecondary),
-          ),
-        ),
-      );
-    }
-
-    String totalRevenue = '0';
-    String totalNet = '0';
-    for (final row in rows) {
-      final rev = double.tryParse(row.revenue ?? '0') ?? 0;
-      final net = double.tryParse(row.netRevenue ?? '0') ?? 0;
-      totalRevenue = (double.parse(totalRevenue) + rev).toStringAsFixed(2);
-      totalNet = (double.parse(totalNet) + net).toStringAsFixed(2);
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            _SummaryCard(label: 'Gross', value: '₹$totalRevenue'),
-            const SizedBox(width: AppSpacing.sm),
-            _SummaryCard(label: 'Net', value: '₹$totalNet'),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text('Revenue Breakdown', style: AppTypography.headingSmall),
-        const SizedBox(height: AppSpacing.md),
-        _tableRow('Date', 'Revenue', 'Net', 'Sessions', isHeader: true),
-        const Divider(color: AppColors.border, height: 1),
-        ...rows.map(
-          (row) => _tableRow(
-            row.date ?? '--',
-            '₹${row.revenue ?? '0'}',
-            '₹${row.netRevenue ?? '0'}',
-            '${row.sessions ?? 0}',
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _tableRow(
-    String col1,
-    String col2,
-    String col3,
-    String col4, {
-    bool isHeader = false,
-  }) {
-    final style = isHeader
-        ? AppTypography.caption.copyWith(
-            color: AppColors.textSecondary,
+          style: AppTypography.num.copyWith(
+            fontSize: 13,
             fontWeight: FontWeight.w600,
-          )
-        : AppTypography.bodySmall;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      child: Row(
-        children: [
-          Expanded(flex: 2, child: Text(col1, style: style)),
-          Expanded(
-              flex: 2,
-              child: Text(col2, style: style, textAlign: TextAlign.right)),
-          Expanded(
-              flex: 2,
-              child: Text(col3, style: style, textAlign: TextAlign.right)),
-          Expanded(child: Text(col4, style: style, textAlign: TextAlign.right)),
-        ],
+            color: active ? AppColors.surface : AppColors.textPrimary,
+          ),
+        ),
       ),
     );
   }
 }
 
-// ─── Summary Card ─────────────────────────────────────────────────────────────
+class _Card extends StatelessWidget {
+  const _Card({required this.child});
 
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({required this.label, required this.value});
-  final String label;
-  final String value;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(value, style: AppTypography.headingSmall),
-            const SizedBox(height: AppSpacing.xs),
-            Text(label, style: AppTypography.caption),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
       ),
+      child: child,
     );
   }
+}
+
+class _RevenueRow {
+  const _RevenueRow({
+    required this.date,
+    required this.sessions,
+    required this.revenue,
+  });
+
+  final String date;
+  final String sessions;
+  final String revenue;
 }

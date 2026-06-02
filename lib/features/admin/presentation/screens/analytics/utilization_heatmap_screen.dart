@@ -1,165 +1,249 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hugeicons/hugeicons.dart';
+
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/navigation/routes.dart';
-import '../../providers/admin_analytics_provider.dart';
-import '../../../../../../models/domain_analytics.dart';
+import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_meta_row.dart';
 
-final _utilizationViewModeProvider = StateProvider.autoDispose<int>((ref) => 0);
-
-/// Utilization Heatmap — Screen 48.
-/// Hourly grid showing occupancy density with peak hour indicator.
-class UtilizationHeatmapScreen extends ConsumerStatefulWidget {
+class UtilizationHeatmapScreen extends StatefulWidget {
   const UtilizationHeatmapScreen({super.key});
 
   @override
-  ConsumerState<UtilizationHeatmapScreen> createState() =>
+  State<UtilizationHeatmapScreen> createState() =>
       _UtilizationHeatmapScreenState();
 }
 
-class _UtilizationHeatmapScreenState
-    extends ConsumerState<UtilizationHeatmapScreen> {
+class _UtilizationHeatmapScreenState extends State<UtilizationHeatmapScreen> {
+  static const _filters = ['Day', 'Week'];
+  static const _hours = ['10', '11', '12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+  static const _rows = 12;
+  static const _cols = 14;
+
+  int _activeFilter = 0;
+
+  double _intensity(int row, int col) {
+    const base = [
+      0.10,
+      0.15,
+      0.25,
+      0.35,
+      0.40,
+      0.45,
+      0.50,
+      0.60,
+      0.75,
+      0.90,
+      0.85,
+      0.70,
+      0.50,
+      0.30,
+    ];
+    final noise = ((row * 7 + col * 13) % 11) / 30;
+    final value = (base[col] + noise - 0.15).clamp(0.0, 1.0);
+    return value;
+  }
+
+  Color _colorFor(double value) {
+    if (value < 0.15) return AppColors.surface;
+    if (value < 0.40) return AppColors.surfaceTint;
+    if (value < 0.65) return AppColors.surfaceTintStrong;
+    if (value < 0.85) return const Color(0xFF7BA87B);
+    return AppColors.buttonBg;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final viewMode = ref.watch(_utilizationViewModeProvider);
-    final state = ref.watch(utilizationProvider);
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
-            color: AppColors.textPrimary,
-            size: 20,
-          ),
-          onPressed: () => context.go(AppRoutes.adminAnalytics),
-        ),
-        title: Text('Utilization', style: AppTypography.headingSmall),
+      appBar: GzAdminTopBar(
+        title: 'Utilization',
+        onBack: () => Navigator.of(context).maybePop(),
       ),
-      body: RefreshIndicator(
-        color: AppColors.rose,
-        backgroundColor: AppColors.surface,
-        onRefresh: () => _load(),
+      body: SafeArea(
+        top: false,
         child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: AppSpacing.md),
               Row(
-                children: [
-                  _ViewModeChip(
-                    label: 'Day',
-                    index: 0,
-                    activeIndex: viewMode,
-                    onTap: () => _selectMode(0),
+                children: List.generate(
+                  _filters.length,
+                  (index) => Padding(
+                    padding: EdgeInsets.only(right: index == _filters.length - 1 ? 0 : 8),
+                    child: _RoseChip(
+                      label: _filters[index],
+                      active: _activeFilter == index,
+                      onTap: () => setState(() => _activeFilter = index),
+                    ),
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  _ViewModeChip(
-                    label: 'Week',
-                    index: 1,
-                    activeIndex: viewMode,
-                    onTap: () => _selectMode(1),
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: AppSpacing.lg),
-              _buildContent(state),
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: 12),
+              const _Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Peak hour: 7 PM – 9 PM', style: AppTypography.h3),
+                    SizedBox(height: 4),
+                    Text(
+                      '89% average occupancy',
+                      style: TextStyle(
+                        fontFamily: 'Geist',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        height: 1.35,
+                        color: AppColors.ok,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              _Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Hourly occupancy', style: AppTypography.h3),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: List.generate(
+                        _hours.length,
+                        (index) => SizedBox(
+                          width: 18,
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              right: index == _hours.length - 1 ? 0 : 2,
+                            ),
+                            child: Text(
+                              _hours[index],
+                              textAlign: TextAlign.center,
+                              style: AppTypography.meta.copyWith(
+                                fontSize: 8,
+                                letterSpacing: 0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    ...List.generate(
+                      _rows,
+                      (row) => Padding(
+                        padding: EdgeInsets.only(bottom: row == _rows - 1 ? 0 : 2),
+                        child: Row(
+                          children: List.generate(
+                            _cols,
+                            (col) {
+                              final color = _colorFor(_intensity(row, col));
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  right: col == _cols - 1 ? 0 : 2,
+                                ),
+                                child: Container(
+                                  width: 18,
+                                  height: 18,
+                                  decoration: BoxDecoration(
+                                    color: color,
+                                    borderRadius: BorderRadius.circular(3),
+                                    border: color == AppColors.surface
+                                        ? Border.all(color: AppColors.rule)
+                                        : null,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text(
+                          '0%',
+                          style: AppTypography.small.copyWith(fontSize: 10),
+                        ),
+                        const SizedBox(width: 6),
+                        ...[
+                          AppColors.surface,
+                          AppColors.surfaceTint,
+                          AppColors.surfaceTintStrong,
+                          AppColors.buttonBg,
+                        ].map(
+                          (color) => Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: Container(
+                              width: 14,
+                              height: 14,
+                              decoration: BoxDecoration(
+                                color: color,
+                                borderRadius: BorderRadius.circular(2),
+                                border: color == AppColors.surface
+                                    ? Border.all(color: AppColors.rule)
+                                    : null,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '100%',
+                          style: AppTypography.small.copyWith(fontSize: 10),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              const _Card(
+                child: Column(
+                  children: [
+                    GzMetaRow(label: 'Avg occupancy', value: '67%'),
+                    GzMetaRow(label: 'Peak time', value: '7:00 PM'),
+                    GzMetaRow(label: 'Quietest', value: '11:00 AM'),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
-
-  void _selectMode(int index) {
-    ref.read(_utilizationViewModeProvider.notifier).state = index;
-    _load(index);
-  }
-
-  Widget _buildContent(AnalyticsState<UtilizationModel> state) {
-    if (state is AnalyticsLoading<UtilizationModel>) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.xxl),
-          child: CircularProgressIndicator(color: AppColors.rose),
-        ),
-      );
-    }
-    if (state is AnalyticsError<UtilizationModel>) {
-      return _UtilizationError(onRetry: _load);
-    }
-    if (state is AnalyticsLoaded<UtilizationModel>) {
-      return _UtilizationHeatmap(data: state.data);
-    }
-    return const SizedBox.shrink();
-  }
-
-  Future<void> _load([int? overrideMode]) async {
-    final now = DateTime.now();
-    final viewMode = overrideMode ?? ref.read(_utilizationViewModeProvider);
-    final String dateFrom;
-    final String dateTo;
-
-    if (viewMode == 0) {
-      dateFrom = _formatDate(now);
-      dateTo = _formatDate(now);
-    } else {
-      dateFrom = _formatDate(now.subtract(const Duration(days: 6)));
-      dateTo = _formatDate(now);
-    }
-
-    ref.read(utilizationProvider.notifier).load(
-          dateFrom: dateFrom,
-          dateTo: dateTo,
-        );
-  }
-
-  String _formatDate(DateTime d) =>
-      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 }
 
-// ─── View Mode Chip ───────────────────────────────────────────────────────────
-
-class _ViewModeChip extends StatelessWidget {
-  const _ViewModeChip({
+class _RoseChip extends StatelessWidget {
+  const _RoseChip({
     required this.label,
-    required this.index,
-    required this.activeIndex,
+    required this.active,
     required this.onTap,
   });
+
   final String label;
-  final int index;
-  final int activeIndex;
+  final bool active;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final isActive = activeIndex == index;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
-        ),
+        height: 30,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.rose : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
+          color: active ? AppColors.rose : AppColors.surface,
+          borderRadius: BorderRadius.circular(10),
+          border: active ? null : Border.all(color: AppColors.rule),
         ),
+        alignment: Alignment.center,
         child: Text(
           label,
-          style: AppTypography.bodySmall.copyWith(
-            color: isActive ? AppColors.background : AppColors.textSecondary,
+          style: AppTypography.num.copyWith(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: active ? AppColors.surface : AppColors.textPrimary,
           ),
         ),
       ),
@@ -167,236 +251,20 @@ class _ViewModeChip extends StatelessWidget {
   }
 }
 
-// ─── Error View ───────────────────────────────────────────────────────────────
+class _Card extends StatelessWidget {
+  const _Card({required this.child});
 
-class _UtilizationError extends StatelessWidget {
-  const _UtilizationError({required this.onRetry});
-  final VoidCallback onRetry;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        child: Column(
-          children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedAlert01,
-              color: AppColors.error,
-              size: 48,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Failed to load utilization data',
-              style: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: onRetry,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(color: AppColors.border),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-                ),
-              ),
-              child: Text('Retry', style: AppTypography.button),
-            ),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
       ),
+      child: child,
     );
-  }
-}
-
-// ─── Heatmap Content ──────────────────────────────────────────────────────────
-
-class _UtilizationHeatmap extends StatelessWidget {
-  const _UtilizationHeatmap({required this.data});
-  final UtilizationModel data;
-
-  @override
-  Widget build(BuildContext context) {
-    final hours = data.data ?? [];
-
-    if (hours.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: Text(
-            'No utilization data available',
-            style: AppTypography.bodyMedium
-                .copyWith(color: AppColors.textSecondary),
-          ),
-        ),
-      );
-    }
-
-    UtilizationHourModel? peak;
-    for (final h in hours) {
-      if (peak == null ||
-          (h.activeSessionsPeak ?? 0) > (peak.activeSessionsPeak ?? 0)) {
-        peak = h;
-      }
-    }
-
-    int maxPeak = 1;
-    for (final h in hours) {
-      if ((h.activeSessionsPeak ?? 0) > maxPeak) {
-        maxPeak = h.activeSessionsPeak!;
-      }
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (peak != null && peak.hourOfDay != null)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-              border: Border.all(
-                color: AppColors.rose.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              children: [
-                const HugeIcon(
-                  icon: HugeIcons.strokeRoundedFire,
-                  color: AppColors.rose,
-                  size: 20,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    'Peak hour: ${_formatHour(peak.hourOfDay!)} — ${peak.activeSessionsPeak ?? 0} active sessions',
-                    style: AppTypography.bodyMedium,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        const SizedBox(height: AppSpacing.lg),
-        Text('Hourly Breakdown', style: AppTypography.headingSmall),
-        const SizedBox(height: AppSpacing.md),
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-          child: Row(
-            children: [
-              Expanded(
-                  flex: 2, child: Text('Hour', style: AppTypography.caption)),
-              Expanded(
-                  flex: 2,
-                  child: Text('Active',
-                      style: AppTypography.caption,
-                      textAlign: TextAlign.center)),
-              Expanded(
-                  flex: 2,
-                  child: Text('Started',
-                      style: AppTypography.caption,
-                      textAlign: TextAlign.center)),
-              Expanded(
-                  flex: 2,
-                  child: Text('Usage',
-                      style: AppTypography.caption,
-                      textAlign: TextAlign.right)),
-            ],
-          ),
-        ),
-        const Divider(color: AppColors.border, height: 1),
-        ...hours.map((h) => _HourRow(h: h, maxPeak: maxPeak)),
-      ],
-    );
-  }
-
-  static String _formatHour(int hour) {
-    if (hour == 0) return '12 AM';
-    if (hour < 12) return '$hour AM';
-    if (hour == 12) return '12 PM';
-    return '${hour - 12} PM';
-  }
-}
-
-// ─── Hour Row ─────────────────────────────────────────────────────────────────
-
-class _HourRow extends StatelessWidget {
-  const _HourRow({required this.h, required this.maxPeak});
-  final UtilizationHourModel h;
-  final int maxPeak;
-
-  @override
-  Widget build(BuildContext context) {
-    final utilizationPct =
-        maxPeak > 0 ? (h.activeSessionsPeak ?? 0) / maxPeak : 0.0;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              _formatHour(h.hourOfDay ?? 0),
-              style: AppTypography.bodySmall,
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              '${h.activeSessionsPeak ?? 0}',
-              style: AppTypography.bodySmall,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              '${h.sessionsStarted ?? 0}',
-              style: AppTypography.bodySmall,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SizedBox(
-                  width: 48,
-                  height: 6,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(3),
-                    child: LinearProgressIndicator(
-                      value: utilizationPct.clamp(0.0, 1.0),
-                      backgroundColor: AppColors.surface2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        _heatColor(utilizationPct),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static String _formatHour(int hour) {
-    if (hour == 0) return '12 AM';
-    if (hour < 12) return '$hour AM';
-    if (hour == 12) return '12 PM';
-    return '${hour - 12} PM';
-  }
-
-  static Color _heatColor(double pct) {
-    if (pct > 0.75) return AppColors.rose;
-    if (pct > 0.5) return AppColors.gold;
-    if (pct > 0.25) return AppColors.ok;
-    return AppColors.textSecondary;
   }
 }
