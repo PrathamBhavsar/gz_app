@@ -4,6 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
+import 'gz_card.dart';
 
 void showStoreSelectorSheet(BuildContext context) {
   showModalBottomSheet<void>(
@@ -31,12 +32,11 @@ class _StoreSelectorSheetState extends State<StoreSelectorSheet> {
   static const _stores = <_StoreOption>[
     _StoreOption(
       name: 'GameZone Koramangala',
-      subtitle: 'Current store',
+      subtitle: '2.4 km',
       isActive: true,
     ),
-    _StoreOption(name: 'GameZone Indiranagar', subtitle: '100ft Road'),
-    _StoreOption(name: 'GameZone Whitefield', subtitle: 'ITPL Main Road'),
-    _StoreOption(name: 'GameZone HSR', subtitle: '27th Main'),
+    _StoreOption(name: 'GameZone Indiranagar', subtitle: '3.1 km'),
+    _StoreOption(name: 'GameZone Whitefield', subtitle: '5.8 km'),
   ];
 
   final TextEditingController _searchCtrl = TextEditingController();
@@ -71,16 +71,16 @@ class _StoreSelectorSheetState extends State<StoreSelectorSheet> {
           ),
         ),
         const SizedBox(height: 12),
-        Text('Select store', style: AppTypography.h2),
+        Text('Select store', style: AppTypography.h1),
         const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Container(
+            height: 48,
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
-              border: Border.all(color: AppColors.rule),
+              color: AppColors.pillBg,
+              borderRadius: BorderRadius.circular(AppSpacing.borderRadiusPill),
             ),
             child: Row(
               children: [
@@ -94,14 +94,13 @@ class _StoreSelectorSheetState extends State<StoreSelectorSheet> {
                   child: TextField(
                     controller: _searchCtrl,
                     onChanged: (value) => setState(() => _query = value),
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       border: InputBorder.none,
                       hintText: 'Search stores...',
-                      hintStyle: AppTypography.bodyR.copyWith(
-                        color: AppColors.textMuted,
-                      ),
                     ),
-                    style: AppTypography.body,
+                    style: AppTypography.bodyR.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
               ],
@@ -119,16 +118,9 @@ class _StoreSelectorSheetState extends State<StoreSelectorSheet> {
               final store = filteredStores[index];
               return GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: store.isActive
-                        ? AppColors.surfaceTint
-                        : AppColors.surface,
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.borderRadiusLg,
-                    ),
-                  ),
+                child: GzCard(
+                  variant: store.isActive ? CardVariant.tint : CardVariant.base,
+                  padding: 14,
                   child: Row(
                     children: [
                       Container(
@@ -157,7 +149,12 @@ class _StoreSelectorSheetState extends State<StoreSelectorSheet> {
                           children: [
                             Text(store.name, style: AppTypography.body),
                             const SizedBox(height: 2),
-                            Text(store.subtitle, style: AppTypography.small),
+                            Text(
+                              store.subtitle,
+                              style: AppTypography.small.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
                           ],
                         ),
                       ),

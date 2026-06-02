@@ -11,6 +11,7 @@ class GzTopBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.subtitle,
     this.trailing,
+    this.trailingWidth = 40,
     this.disableBack = false,
     this.onBack,
   });
@@ -18,6 +19,7 @@ class GzTopBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final String? subtitle;
   final Widget? trailing;
+  final double trailingWidth;
   final bool disableBack;
   final VoidCallback? onBack;
 
@@ -75,7 +77,7 @@ class GzTopBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             SizedBox(
-              width: 40,
+              width: trailingWidth,
               child: Align(
                 alignment: Alignment.centerRight,
                 child: trailing ?? const SizedBox.shrink(),
