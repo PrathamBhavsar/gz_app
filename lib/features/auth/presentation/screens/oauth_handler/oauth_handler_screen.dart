@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/responsive/breakpoints.dart';
-import '../../../../../core/responsive/responsive_builder.dart';
+
 import '../../../../../core/theme/app_colors.dart';
-import '../../widgets/oauth_handler_mobile_layout.dart';
-import '../../widgets/oauth_handler_tablet_layout.dart';
+import '../../../../../core/theme/app_typography.dart';
+import '../../../../../shared/widgets/gz_logo.dart';
 
 class OAuthHandlerScreen extends StatelessWidget {
   const OAuthHandlerScreen({super.key});
@@ -12,12 +11,29 @@ class OAuthHandlerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: ResponsiveBuilderWidget(
-        builder: (context, deviceType) => switch (deviceType) {
-          DeviceType.mobile => const OAuthHandlerMobileLayout(),
-          DeviceType.tablet => const OAuthHandlerTabletLayout(),
-          DeviceType.desktop => const OAuthHandlerTabletLayout(),
-        },
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const GzLogo(),
+            const SizedBox(height: 24),
+            const SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'Signing you in…',
+              style: AppTypography.body.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

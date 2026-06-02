@@ -1,366 +1,89 @@
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/navigation/routes.dart';
-import '../../data/services/admin_auth_service.dart';
+import 'package:hugeicons/hugeicons.dart';
 
-final _adminPwResetObscureProvider = StateProvider.autoDispose<bool>((ref) => true);
-final _adminPwResetSubmittingProvider = StateProvider.autoDispose<bool>((ref) => false);
-final _adminPwResetSuccessProvider = StateProvider.autoDispose<String?>((ref) => null);
-final _adminPwResetErrorProvider = StateProvider.autoDispose<String?>((ref) => null);
+import '../../../../core/navigation/routes.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/gz_top_bar.dart';
 
-class AdminPasswordResetScreen extends ConsumerStatefulWidget {
+class AdminPasswordResetScreen extends StatelessWidget {
   const AdminPasswordResetScreen({super.key});
 
   @override
-  ConsumerState<AdminPasswordResetScreen> createState() =>
-      _AdminPasswordResetScreenState();
-}
-
-class _AdminPasswordResetScreenState
-    extends ConsumerState<AdminPasswordResetScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmController.dispose();
-    super.dispose();
-  }
-
-  /// If this route was reached via deep link with a reset token,
-  /// show the confirm-reset form. Otherwise, show the request form.
-  bool get _hasToken {
-    // The GoRouter state may carry a `token` query param.
-    // For now, we simply check if the route was navigated with a token.
-    // This will be wired up properly in Phase 3 when routes are configured.
-    return false; // TODO: Read from GoRouterState query params
-  }
-
-  Future<void> _handleRequestReset() async {
-    if (!_formKey.currentState!.validate()) return;
-    ref.read(_adminPwResetSubmittingProvider.notifier).state = true;
-    ref.read(_adminPwResetErrorProvider.notifier).state = null;
-
-    try {
-      await ref
-          .read(adminAuthServiceProvider)
-          .requestPasswordReset(_emailController.text.trim());
-      if (mounted) {
-        ref.read(_adminPwResetSuccessProvider.notifier).state =
-            'If an account exists with this email, a reset link has been sent.';
-      }
-    } catch (e) {
-      if (mounted) {
-        ref.read(_adminPwResetErrorProvider.notifier).state =
-            'Failed to send reset email. Try again.';
-      }
-    } finally {
-      if (mounted) {
-        ref.read(_adminPwResetSubmittingProvider.notifier).state = false;
-      }
-    }
-  }
-
-  Future<void> _handleConfirmReset() async {
-    if (!_formKey.currentState!.validate()) return;
-    ref.read(_adminPwResetSubmittingProvider.notifier).state = true;
-    ref.read(_adminPwResetErrorProvider.notifier).state = null;
-
-    try {
-      // TODO: Get actual token from deep link
-      await ref
-          .read(adminAuthServiceProvider)
-          .confirmPasswordReset('placeholder-token', _passwordController.text);
-      if (mounted) {
-        context.go(AppRoutes.adminLogin);
-      }
-    } catch (e) {
-      if (mounted) {
-        ref.read(_adminPwResetErrorProvider.notifier).state =
-            'Failed to reset password. Try again.';
-      }
-    } finally {
-      if (mounted) {
-        ref.read(_adminPwResetSubmittingProvider.notifier).state = false;
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final obscurePassword = ref.watch(_adminPwResetObscureProvider);
-    final isSubmitting = ref.watch(_adminPwResetSubmittingProvider);
-    final successMessage = ref.watch(_adminPwResetSuccessProvider);
-    final errorMessage = ref.watch(_adminPwResetErrorProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
-            color: AppColors.textPrimary,
-            size: 20,
-          ),
-          onPressed: () => context.go(AppRoutes.adminLogin),
-        ),
+      appBar: GzTopBar(
+        title: '',
+        onBack: () => context.go(AppRoutes.adminLogin),
       ),
       body: SafeArea(
+        top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  _hasToken ? 'Set New Password' : 'Reset Password',
-                  style: AppTypography.headingMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  _hasToken
-                      ? 'Enter your new password below'
-                      : 'Enter your email to receive a reset link',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.xxl),
-
-                // Success message
-                if (successMessage != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.sm),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.borderRadiusSm,
-                      ),
-                    ),
-                    child: Text(
-                      successMessage,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.success,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                ],
-
-                // Error message
-                if (errorMessage != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.sm),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.borderRadiusSm,
-                      ),
-                    ),
-                    child: Text(
-                      errorMessage,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.error,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                ],
-
-                if (!_hasToken) ...[
-                  // Email field (request mode)
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    autocorrect: false,
-                    style: AppTypography.bodyLarge,
-                    decoration: InputDecoration(
-                      labelText: 'Email address',
-                      labelStyle: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      filled: true,
-                      fillColor: AppColors.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadius,
-                        ),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadius,
-                        ),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadius,
-                        ),
-                        borderSide: const BorderSide(color: AppColors.primary),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Email is required';
-                      }
-                      if (!value.contains('@')) return 'Enter a valid email';
-                      return null;
-                    },
-                  ),
-                ] else ...[
-                  // New password field (confirm mode)
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: obscurePassword,
-                    style: AppTypography.bodyLarge,
-                    decoration: InputDecoration(
-                      labelText: 'New password',
-                      labelStyle: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      filled: true,
-                      fillColor: AppColors.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadius,
-                        ),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadius,
-                        ),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadius,
-                        ),
-                        borderSide: const BorderSide(color: AppColors.primary),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: HugeIcon(
-                          icon: obscurePassword
-                              ? HugeIcons.strokeRoundedViewOff
-                              : HugeIcons.strokeRoundedView,
-                          color: AppColors.textSecondary,
-                          size: 20,
-                        ),
-                        onPressed: () => ref
-                            .read(_adminPwResetObscureProvider.notifier)
-                            .state = !obscurePassword,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Password is required';
-                      }
-                      if (value.length < 8) return 'At least 8 characters';
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  TextFormField(
-                    controller: _confirmController,
-                    obscureText: obscurePassword,
-                    style: AppTypography.bodyLarge,
-                    decoration: InputDecoration(
-                      labelText: 'Confirm password',
-                      labelStyle: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      filled: true,
-                      fillColor: AppColors.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadius,
-                        ),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadius,
-                        ),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadius,
-                        ),
-                        borderSide: const BorderSide(color: AppColors.primary),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value != _passwordController.text) {
-                        return 'Passwords do not match';
-                      }
-                      return null;
-                    },
-                  ),
-                ],
-
-                const Spacer(),
-
-                // Submit button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: isSubmitting
-                        ? null
-                        : (_hasToken
-                              ? _handleConfirmReset
-                              : _handleRequestReset),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.background,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.md,
-                      ),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadius,
-                        ),
-                      ),
-                      disabledBackgroundColor: AppColors.textSecondary,
-                    ),
-                    child: isSubmitting
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.background,
-                            ),
-                          )
-                        : Text(
-                            _hasToken ? 'Reset Password' : 'Send Reset Link',
-                            style: AppTypography.button.copyWith(
-                              color: AppColors.background,
-                            ),
-                          ),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Reset password', style: AppTypography.h1),
+              const SizedBox(height: 4),
+              Text(
+                'Enter your admin email and we\'ll send a reset link.',
+                style: AppTypography.bodyR,
+              ),
+              const SizedBox(height: 24),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.pillBg,
+                  borderRadius: BorderRadius.circular(
+                    AppSpacing.borderRadius,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.lg),
-              ],
-            ),
+                child: TextField(
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    hintText: 'Admin email address',
+                    hintStyle: AppTypography.body.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const GzButton(label: 'Send reset link'),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.okBg,
+                  borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const HugeIcon(
+                      icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                      color: AppColors.ok,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'If an account exists with this email, a reset link has been sent.',
+                        style: AppTypography.body.copyWith(color: AppColors.ok),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

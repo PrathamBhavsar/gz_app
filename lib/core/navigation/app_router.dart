@@ -19,6 +19,7 @@ import '../../features/auth/presentation/screens/oauth_handler/oauth_handler_scr
 import '../../features/auth/presentation/screens/forgot_password/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/reset_password/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/email_verification_pending/email_verification_pending_screen.dart';
+import '../../features/auth/presentation/screens/email_verify_success/email_verify_success_screen.dart';
 
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/home/presentation/screens/store_search/store_search_screen.dart';
@@ -154,9 +155,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.emailVerified,
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Email verified')),
-        ),
+        builder: (context, state) => const EmailVerifySuccessScreen(),
       ),
 
       // Admin Auth Stack
