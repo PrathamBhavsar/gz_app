@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+te
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-import '../../../../core/auth/token_storage.dart';
+
 import '../../../../core/navigation/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -12,24 +12,19 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/gz_button.dart';
 import '../../../../shared/widgets/gz_top_bar.dart';
 
-class AdminLoginScreen extends ConsumerStatefulWidget {
+class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
 
   @override
-  ConsumerState<AdminLoginScreen> createState() => _AdminLoginScreenState();
+  State<AdminLoginScreen> createState() => _AdminLoginScreenState();
 }
 
-class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
+class _AdminLoginScreenState extends State<AdminLoginScreen> {
   bool _showPassword = false;
   DateTime? _lastBackPress;
 
-  Future<void> _signIn() async {
-    final storage = ref.read(tokenStorageProvider);
-    await storage.saveRefreshToken('demo_admin_token');
-    await storage.saveUserType('admin');
-    await storage.saveAdminRole('admin');
-    await storage.saveAdminStoreId('demo_store_001');
-    if (mounted) context.go(AppRoutes.adminDashboard);
+  void _signIn() {
+    context.go(AppRoutes.adminDashboard);
   }
 
   void _onPop(bool didPop, Object? result) {

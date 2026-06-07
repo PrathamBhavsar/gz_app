@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-import '../../../../../core/auth/token_storage.dart';
+
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -11,21 +11,18 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_top_bar.dart';
 
-class EmailLoginScreen extends ConsumerStatefulWidget {
+class EmailLoginScreen extends StatefulWidget {
   const EmailLoginScreen({super.key});
 
   @override
-  ConsumerState<EmailLoginScreen> createState() => _EmailLoginScreenState();
+  State<EmailLoginScreen> createState() => _EmailLoginScreenState();
 }
 
-class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
+class _EmailLoginScreenState extends State<EmailLoginScreen> {
   bool _showPassword = false;
 
-  Future<void> _signIn() async {
-    final storage = ref.read(tokenStorageProvider);
-    await storage.saveRefreshToken('demo_player_token');
-    await storage.saveUserType('player');
-    if (mounted) context.go(AppRoutes.home);
+  void _signIn() {
+    context.go(AppRoutes.home);
   }
 
   @override

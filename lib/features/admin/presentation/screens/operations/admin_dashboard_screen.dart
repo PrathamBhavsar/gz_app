@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-import '../../../../../core/auth/token_storage.dart';
+
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -13,14 +13,14 @@ import '../../../../../shared/widgets/gz_chip.dart';
 import '../../../../../shared/widgets/gz_live_dot.dart';
 import '../../../../../shared/widgets/gz_tag.dart';
 
-class AdminDashboardScreen extends ConsumerStatefulWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
 
   @override
-  ConsumerState<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
-class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   static const _filters = ['All', 'PC', 'Console', 'VR', 'Maintenance'];
 
   static const _systems = [
@@ -138,7 +138,6 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       ),
     );
     if (confirmed != true) return;
-    await ref.read(tokenStorageProvider).clearAll();
     if (mounted) context.go(AppRoutes.adminLogin);
   }
 

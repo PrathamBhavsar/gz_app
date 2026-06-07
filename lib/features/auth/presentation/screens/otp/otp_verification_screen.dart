@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/auth/token_storage.dart';
+
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -10,18 +10,15 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_top_bar.dart';
 
-class OtpVerificationScreen extends ConsumerWidget {
+class OtpVerificationScreen extends StatelessWidget {
   const OtpVerificationScreen({super.key});
 
-  Future<void> _verify(BuildContext context, WidgetRef ref) async {
-    final storage = ref.read(tokenStorageProvider);
-    await storage.saveRefreshToken('demo_player_token');
-    await storage.saveUserType('player');
-    if (context.mounted) context.go(AppRoutes.home);
+  void _verify(BuildContext context) {
+    context.go(AppRoutes.home);
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     const digits = ['4', '2', '1', '8', '', ''];
 
     return Scaffold(
@@ -86,7 +83,7 @@ class OtpVerificationScreen extends ConsumerWidget {
               const Spacer(),
               GzButton(
                 label: 'Verify',
-                onPressed: () => _verify(context, ref),
+                onPressed: () => _verify(context),
               ),
             ],
           ),
