@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -45,7 +43,6 @@ class _StoreConfigScreenState extends State<StoreConfigScreen> {
       backgroundColor: AppColors.background,
       appBar: GzAdminTopBar(
         title: 'Store Config',
-        onBack: () => context.go(AppRoutes.adminSystemsMgmt),
         trailing: SizedBox(
           width: 72,
           child: GzButton(

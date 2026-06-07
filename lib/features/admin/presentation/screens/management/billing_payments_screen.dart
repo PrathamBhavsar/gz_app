@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import 'billing_override_sheet.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
 import '../../../../../shared/widgets/gz_button.dart';
@@ -15,6 +16,7 @@ class BillingPaymentsScreen extends StatelessWidget {
   static const _filters = ['All', 'Unpaid', 'Paid', 'Overridden'];
   static const _records = [
     _BillingRecordData(
+      id: 'BIL-001',
       name: 'Rahul Mehra',
       detail: 'PC Station 01 · 2h 10m',
       amount: '₹1,740',
@@ -22,6 +24,7 @@ class BillingPaymentsScreen extends StatelessWidget {
       tagLabel: 'Paid',
     ),
     _BillingRecordData(
+      id: 'BIL-002',
       name: 'Priya Singh',
       detail: 'PS5 Console · 1h 30m',
       amount: '₹1,200',
@@ -30,6 +33,7 @@ class BillingPaymentsScreen extends StatelessWidget {
       showOverride: true,
     ),
     _BillingRecordData(
+      id: 'BIL-003',
       name: 'Amit Kumar',
       detail: 'Xbox Series X · 45m',
       amount: '₹600',
@@ -37,6 +41,7 @@ class BillingPaymentsScreen extends StatelessWidget {
       tagLabel: 'Overridden',
     ),
     _BillingRecordData(
+      id: 'BIL-004',
       name: 'Neha Reddy',
       detail: 'VR Pod 01 · 2h 00m',
       amount: '₹3,000',
@@ -134,12 +139,19 @@ class _BillingCard extends StatelessWidget {
               ),
               const Spacer(),
               if (record.showOverride)
-                const SizedBox(
+                SizedBox(
                   width: 104,
                   child: GzButton(
                     label: 'Override',
                     variant: GzButtonVariant.ghost,
                     small: true,
+                    onPressed: () => showBillingOverrideSheet(
+                      context,
+                      billingId: record.id,
+                      playerName: record.name,
+                      originalAmount: record.amount,
+                      description: record.detail,
+                    ),
                   ),
                 ),
             ],
@@ -152,6 +164,7 @@ class _BillingCard extends StatelessWidget {
 
 class _BillingRecordData {
   const _BillingRecordData({
+    required this.id,
     required this.name,
     required this.detail,
     required this.amount,
@@ -160,6 +173,7 @@ class _BillingRecordData {
     this.showOverride = false,
   });
 
+  final String id;
   final String name;
   final String detail;
   final String amount;

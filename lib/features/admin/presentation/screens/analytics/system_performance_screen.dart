@@ -61,10 +61,7 @@ class SystemPerformanceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(
-        title: 'System Performance',
-        onBack: () => Navigator.of(context).maybePop(),
-      ),
+      appBar: const GzAdminTopBar(title: 'System Performance'),
       body: SafeArea(
         top: false,
         child: ListView.separated(

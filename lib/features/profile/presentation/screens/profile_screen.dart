@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../core/auth/token_storage.dart';
 import '../../../../core/navigation/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -10,11 +12,35 @@ import '../../../../shared/widgets/gz_avatar.dart';
 import '../../../../shared/widgets/gz_button.dart';
 import '../../../../shared/widgets/gz_card.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
+  Future<void> _signOut(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('Sign out', style: AppTypography.h2),
+        content: Text('Are you sure you want to sign out?', style: AppTypography.bodyR),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Cancel', style: AppTypography.body.copyWith(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Sign out', style: AppTypography.body.copyWith(color: AppColors.err)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await ref.read(tokenStorageProvider).clearAll();
+    if (context.mounted) context.go(AppRoutes.authLanding);
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -83,11 +109,7 @@ class ProfileScreen extends StatelessWidget {
             GzButton(
               label: 'Sign out',
               variant: GzButtonVariant.dangerOutline,
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Sign out is not wired in this UI phase.')),
-                );
-              },
+              onPressed: () => _signOut(context, ref),
             ),
           ],
         ),
@@ -139,16 +161,16 @@ class _ProfileNavTile extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: AppSpacing.xl + AppSpacing.xs,
-              height: AppSpacing.xl + AppSpacing.xs,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
                 color: AppColors.pillBg,
-                borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: HugeIcon(
                 icon: icon,
                 color: AppColors.textSecondary,
-                size: 18,
+                size: 14,
               ),
             ),
             const SizedBox(width: AppSpacing.md),

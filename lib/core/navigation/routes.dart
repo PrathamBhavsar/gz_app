@@ -89,4 +89,30 @@ class AppRoutes {
   static const adminStaff         = '/admin/staff';
   static const adminConfig        = '/admin/config';
   static const adminNotifications = '/admin/notifications';
+
+  // Admin CRUD sub-routes
+  static const adminBookingDetail  = '/admin/bookings/:id';
+  static const adminDisputeDetail  = '/admin/disputes/:id';
+  static const adminCreateCampaign = '/admin/campaigns/create';
+  static const adminEditCampaign   = '/admin/campaigns/:id/edit';
+  static const adminCreatePricing  = '/admin/pricing/create';
+  static const adminEditPricing    = '/admin/pricing/:id/edit';
+  static const adminInviteStaff    = '/admin/staff/invite';
+  static const adminSystemsList    = '/admin/systems/list';
+  static const adminAddSystem      = '/admin/systems/add';
+  static const adminEditSystem     = '/admin/systems/edit/:id';
+  static const adminSystemDetail   = '/admin/systems/:id';
+
+  // Session logs
+  static const sessionLogs = '/sessions/logs/:id';
+
+  // ── Path builders ──
+  static String adminBookingDetailPath(String id)  => '/admin/bookings/$id';
+  static String adminDisputeDetailPath(String id)  => '/admin/disputes/$id';
+  static String adminEditCampaignPath(String id)   => '/admin/campaigns/$id/edit';
+  static String adminEditPricingPath(String id)    => '/admin/pricing/$id/edit';
+  static String adminSystemDetailPath(String id)   => '/admin/systems/$id';
+  static String adminAddSystemPath()               => '/admin/systems/add';
+  static String adminEditSystemPath(String id)     => '/admin/systems/edit/$id';
+  static String sessionLogsPath(String id)         => '/sessions/logs/$id';
 }

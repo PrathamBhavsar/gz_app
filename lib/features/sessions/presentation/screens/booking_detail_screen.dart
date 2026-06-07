@@ -9,6 +9,7 @@ import '../../../../shared/widgets/gz_button.dart';
 import '../../../../shared/widgets/gz_meta_row.dart';
 import '../../../../shared/widgets/gz_tag.dart';
 import '../../../../shared/widgets/gz_top_bar.dart';
+import 'cancel_booking_sheet.dart';
 
 class BookingDetailScreen extends StatelessWidget {
   const BookingDetailScreen({super.key, required this.id});
@@ -84,8 +85,14 @@ class BookingDetailScreen extends StatelessWidget {
             const SizedBox(height: 12),
             GzButton(
               label: 'Cancel booking',
-              variant: GzButtonVariant.ghost,
-              onPressed: () {},
+              variant: GzButtonVariant.dangerOutline,
+              onPressed: () => showCancelBookingSheet(
+                context,
+                bookingId: id,
+                systemName: 'PC Station 01',
+                bookingTime: '09:00 – 11:00',
+                hoursUntilBooking: 26.0,
+              ),
             ),
           ],
         ),

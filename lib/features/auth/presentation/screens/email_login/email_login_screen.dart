@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/auth/token_storage.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_top_bar.dart';
-import '../../providers/auth_notifier.dart';
 
 class EmailLoginScreen extends ConsumerStatefulWidget {
   const EmailLoginScreen({super.key});
@@ -22,12 +22,10 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
   bool _showPassword = false;
 
   Future<void> _signIn() async {
-    await ref.read(authNotifierProvider.notifier).loginWithEmail(
-      'rahul@example.com',
-      'demo-password',
-    );
-    if (!mounted) return;
-    context.go(AppRoutes.home);
+    final storage = ref.read(tokenStorageProvider);
+    await storage.saveRefreshToken('demo_player_token');
+    await storage.saveUserType('player');
+    if (mounted) context.go(AppRoutes.home);
   }
 
   @override
@@ -64,7 +62,7 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => context.go(AppRoutes.forgotPassword),
+                  onPressed: () => context.push(AppRoutes.forgotPassword),
                   child: Text(
                     'Forgot password?',
                     style: AppTypography.small.copyWith(
@@ -78,7 +76,7 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
               const SizedBox(height: 16),
               Center(
                 child: TextButton(
-                  onPressed: () => context.go(AppRoutes.register),
+                  onPressed: () => context.pushReplacement(AppRoutes.register),
                   child: Text(
                     'Don\'t have an account? Register →',
                     style: AppTypography.body.copyWith(

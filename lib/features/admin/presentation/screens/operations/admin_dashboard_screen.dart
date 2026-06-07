@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/auth/token_storage.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -11,14 +12,12 @@ import '../../../../../shared/widgets/gz_admin_top_bar.dart';
 import '../../../../../shared/widgets/gz_chip.dart';
 import '../../../../../shared/widgets/gz_live_dot.dart';
 import '../../../../../shared/widgets/gz_tag.dart';
-import '../../providers/admin_auth_provider.dart';
 
 class AdminDashboardScreen extends ConsumerStatefulWidget {
   const AdminDashboardScreen({super.key});
 
   @override
-  ConsumerState<AdminDashboardScreen> createState() =>
-      _AdminDashboardScreenState();
+  ConsumerState<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
 class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
@@ -120,7 +119,26 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   }
 
   Future<void> _logout() async {
-    await ref.read(adminAuthNotifierProvider.notifier).logout();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('Sign out', style: AppTypography.h2),
+        content: Text('Sign out of admin portal?', style: AppTypography.bodyR),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Cancel', style: AppTypography.body.copyWith(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Sign out', style: AppTypography.body.copyWith(color: AppColors.err)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await ref.read(tokenStorageProvider).clearAll();
     if (mounted) context.go(AppRoutes.adminLogin);
   }
 

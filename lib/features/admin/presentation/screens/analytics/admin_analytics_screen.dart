@@ -279,7 +279,7 @@ class _QuickNavCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.go(data.route),
+      onTap: () => context.push(data.route),
       child: Container(
         width: 100,
         padding: const EdgeInsets.all(12),

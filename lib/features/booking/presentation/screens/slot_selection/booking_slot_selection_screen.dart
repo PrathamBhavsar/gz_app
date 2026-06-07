@@ -141,7 +141,7 @@ class _BookingSlotSelectionScreenState
               ),
               child: GzButton(
                 label: 'Check Availability',
-                onPressed: () => context.go(AppRoutes.bookAvailability),
+                onPressed: () => context.push(AppRoutes.bookAvailability),
               ),
             ),
           ],

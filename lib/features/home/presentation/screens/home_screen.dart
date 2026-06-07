@@ -93,7 +93,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   GzIconBtn(
                     tooltip: 'Notifications',
-                    onTap: () => context.go(AppRoutes.notifications),
+                    onTap: () => context.push(AppRoutes.notifications),
                     child: const HugeIcon(
                       icon: HugeIcons.strokeRoundedNotification03,
                       color: AppColors.textPrimary,
@@ -173,7 +173,7 @@ class _StoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.go(AppRoutes.storeDetailPath(store.slug)),
+      onTap: () => context.push(AppRoutes.storeDetailPath(store.slug)),
       child: SizedBox(
         width: 200,
         child: GzCard(
@@ -182,7 +182,7 @@ class _StoreCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                height: 52,
+                height: 38,
                 decoration: BoxDecoration(
                   color: AppColors.surfaceTint,
                   borderRadius: BorderRadius.circular(
@@ -190,7 +190,7 @@ class _StoreCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 8),
               Text(store.name, style: AppTypography.h3),
               const SizedBox(height: 6),
               Text(

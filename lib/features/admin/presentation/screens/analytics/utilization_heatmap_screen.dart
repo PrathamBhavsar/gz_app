@@ -55,10 +55,7 @@ class _UtilizationHeatmapScreenState extends State<UtilizationHeatmapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(
-        title: 'Utilization',
-        onBack: () => Navigator.of(context).maybePop(),
-      ),
+      appBar: const GzAdminTopBar(title: 'Utilization'),
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(

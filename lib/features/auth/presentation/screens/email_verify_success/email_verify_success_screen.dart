@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
@@ -9,18 +8,16 @@ import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_button.dart';
-import '../../providers/auth_notifier.dart';
 
-class EmailVerifySuccessScreen extends ConsumerStatefulWidget {
+class EmailVerifySuccessScreen extends StatefulWidget {
   const EmailVerifySuccessScreen({super.key});
 
   @override
-  ConsumerState<EmailVerifySuccessScreen> createState() =>
+  State<EmailVerifySuccessScreen> createState() =>
       _EmailVerifySuccessScreenState();
 }
 
-class _EmailVerifySuccessScreenState
-    extends ConsumerState<EmailVerifySuccessScreen> {
+class _EmailVerifySuccessScreenState extends State<EmailVerifySuccessScreen> {
   int _countdown = 4;
   Timer? _timer;
 
@@ -38,11 +35,8 @@ class _EmailVerifySuccessScreenState
     });
   }
 
-  Future<void> _continueToApp() async {
-    await ref.read(authNotifierProvider.notifier).signInDemo();
-    if (mounted) {
-      context.go(AppRoutes.home);
-    }
+  void _continueToApp() {
+    if (mounted) context.go(AppRoutes.home);
   }
 
   @override

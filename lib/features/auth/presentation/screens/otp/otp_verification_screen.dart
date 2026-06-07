@@ -2,25 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../core/auth/token_storage.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_top_bar.dart';
-import '../../providers/auth_notifier.dart';
 
 class OtpVerificationScreen extends ConsumerWidget {
   const OtpVerificationScreen({super.key});
 
   Future<void> _verify(BuildContext context, WidgetRef ref) async {
-    await ref.read(authNotifierProvider.notifier).submitOtp(
-      '+91 98765 43210',
-      '4218',
-    );
-    if (context.mounted) {
-      context.go(AppRoutes.home);
-    }
+    final storage = ref.read(tokenStorageProvider);
+    await storage.saveRefreshToken('demo_player_token');
+    await storage.saveUserType('player');
+    if (context.mounted) context.go(AppRoutes.home);
   }
 
   @override

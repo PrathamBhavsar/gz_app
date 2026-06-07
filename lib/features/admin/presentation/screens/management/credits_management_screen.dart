@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import 'adjust_credits_sheet.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
@@ -148,17 +149,32 @@ class _CreditsPlayerCard extends StatelessWidget {
           const SizedBox(height: 8),
           ...transactions.map((tx) => _TransactionRow(transaction: tx)),
           const SizedBox(height: 14),
-          const Row(
+          Row(
             children: [
               Expanded(
                 child: GzButton(
                   label: 'Deduct credits',
                   variant: GzButtonVariant.ghost,
                   small: true,
+                  onPressed: () => showAdjustCreditsSheet(context,
+                      userId: 'USR-001',
+                      userName: 'Rahul Mehra',
+                      balance: 850,
+                      mode: 'deduct'),
                 ),
               ),
-              SizedBox(width: 10),
-              Expanded(child: GzButton(label: 'Add credits', small: true)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: GzButton(
+                  label: 'Add credits',
+                  small: true,
+                  onPressed: () => showAdjustCreditsSheet(context,
+                      userId: 'USR-001',
+                      userName: 'Rahul Mehra',
+                      balance: 850,
+                      mode: 'add'),
+                ),
+              ),
             ],
           ),
         ],

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/widgets/gz_card.dart';
 import '../../../../shared/widgets/gz_chip.dart';
 import '../../../../shared/widgets/gz_collapse.dart';
 import '../../../../shared/widgets/gz_live_dot.dart';
@@ -156,6 +158,31 @@ class _ActiveSessionDetailScreenState
                   _EventRow(time: '09:41', event: 'System online'),
                   _EventRow(time: '09:45', event: 'Player connected'),
                 ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: () => context.push('/sessions/logs/${widget.id}'),
+              child: GzCard(
+                padding: 12,
+                child: Row(
+                  children: [
+                    const HugeIcon(
+                      icon: HugeIcons.strokeRoundedListView,
+                      size: 18,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text('Session events', style: AppTypography.body),
+                    ),
+                    const HugeIcon(
+                      icon: HugeIcons.strokeRoundedArrowRight01,
+                      size: 16,
+                      color: AppColors.textTertiary,
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16),

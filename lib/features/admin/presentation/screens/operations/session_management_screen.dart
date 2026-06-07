@@ -4,6 +4,8 @@ import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
+import 'end_session_sheet.dart';
+import 'extend_session_sheet.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
@@ -30,53 +32,68 @@ class SessionManagementScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              _InfoCard(
+            children: [
+              const _InfoCard(
                 icon: HugeIcons.strokeRoundedGameboy,
                 iconColor: AppColors.rose,
                 title: 'PC Station 03',
                 subtitle: 'PC Gaming Rig',
               ),
-              SizedBox(height: 16),
-              _TimerCard(),
-              SizedBox(height: 16),
-              _InfoCard(
+              const SizedBox(height: 16),
+              const _TimerCard(),
+              const SizedBox(height: 16),
+              const _InfoCard(
                 icon: HugeIcons.strokeRoundedUserCircle,
                 iconColor: AppColors.textTertiary,
                 title: 'Rahul Mehra',
                 subtitle: 'Walk-in',
               ),
-              SizedBox(height: 16),
-              Text('Actions', style: AppTypography.small),
-              SizedBox(height: 12),
+              const SizedBox(height: 16),
+              const Text('Actions', style: AppTypography.small),
+              const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(
+                  const Expanded(
                     child: _ActionTile(
                       icon: HugeIcons.strokeRoundedPause,
                       label: 'Pause',
                     ),
                   ),
-                  SizedBox(width: 10),
-                  Expanded(
+                  const SizedBox(width: 10),
+                  const Expanded(
                     child: _ActionTile(
                       icon: HugeIcons.strokeRoundedPlay,
                       label: 'Resume',
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: _ActionTile(
-                      icon: HugeIcons.strokeRoundedStop,
-                      label: 'End',
-                      active: true,
+                    child: GestureDetector(
+                      onTap: () => showEndSessionSheet(
+                        context,
+                        sessionId: 'SES-20948',
+                        systemName: 'PC Station 03',
+                        elapsed: '01:22:38',
+                      ),
+                      child: const _ActionTile(
+                        icon: HugeIcons.strokeRoundedStop,
+                        label: 'End',
+                        active: true,
+                      ),
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: _ActionTile(
-                      icon: HugeIcons.strokeRoundedForward01,
-                      label: 'Extend',
+                    child: GestureDetector(
+                      onTap: () => showExtendSessionSheet(
+                        context,
+                        sessionId: 'SES-20948',
+                        systemName: 'PC Station 03',
+                      ),
+                      child: const _ActionTile(
+                        icon: HugeIcons.strokeRoundedForward01,
+                        label: 'Extend',
+                      ),
                     ),
                   ),
                 ],

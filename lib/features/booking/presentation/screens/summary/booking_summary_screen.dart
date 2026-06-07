@@ -45,7 +45,7 @@ class BookingSummaryScreen extends StatelessWidget {
             ),
             child: GzButton(
               label: 'Confirm booking',
-              onPressed: () => context.go(AppRoutes.bookSuccess),
+              onPressed: () => context.push(AppRoutes.bookSuccess),
             ),
           ),
         ],

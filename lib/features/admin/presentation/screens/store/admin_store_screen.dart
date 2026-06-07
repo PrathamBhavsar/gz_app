@@ -17,7 +17,7 @@ class AdminStoreScreen extends StatelessWidget {
     _StoreTileData(
       title: 'System Management',
       subtitle: 'Layouts, availability, hardware',
-      route: AppRoutes.adminSystemsMgmt,
+      route: '/admin/systems/list',
       icon: HugeIcons.strokeRoundedInformationCircle,
       iconColor: AppColors.info,
     ),
@@ -80,7 +80,7 @@ class _StoreTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCard),
-      onTap: () => context.go(tile.route),
+      onTap: () => context.push(tile.route),
       child: GzCard(
         child: Row(
           children: [

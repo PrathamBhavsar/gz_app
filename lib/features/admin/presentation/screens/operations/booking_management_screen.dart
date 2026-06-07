@@ -31,6 +31,7 @@ class _BookingManagementScreenState extends State<BookingManagementScreen> {
 
   static const _bookings = [
     _BookingData(
+      id: 'BKG-001',
       name: 'Rahul M.',
       time: '09:00–11:00',
       system: 'PC Station 01',
@@ -39,6 +40,7 @@ class _BookingManagementScreenState extends State<BookingManagementScreen> {
       showAction: true,
     ),
     _BookingData(
+      id: 'BKG-002',
       name: 'Priya S.',
       time: '10:00–12:00',
       system: 'PS5 Console',
@@ -47,6 +49,7 @@ class _BookingManagementScreenState extends State<BookingManagementScreen> {
       showAction: true,
     ),
     _BookingData(
+      id: 'BKG-003',
       name: 'Amit K.',
       time: '11:00–13:00',
       system: 'Xbox Series X',
@@ -54,6 +57,7 @@ class _BookingManagementScreenState extends State<BookingManagementScreen> {
       statusLabel: 'Checked In',
     ),
     _BookingData(
+      id: 'BKG-004',
       name: 'Neha R.',
       time: '14:00–16:00',
       system: 'VR Pod 01',
@@ -162,47 +166,52 @@ class _BookingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(child: Text(data.name, style: AppTypography.h3)),
-                    const SizedBox(width: 8),
-                    GzTag(kind: data.status, label: data.statusLabel),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${data.time} · ${data.system}',
-                  style: AppTypography.small,
-                ),
-              ],
-            ),
-          ),
-          if (data.showAction) ...[
-            const SizedBox(width: 12),
-            SizedBox(
-              width: 92,
-              child: GzButton(
-                label: 'Check In',
-                variant: GzButtonVariant.ghost,
-                small: true,
-                onPressed: () {},
+    return GestureDetector(
+      onTap: () => context.push('/admin/bookings/${data.id}'),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                          child: Text(data.name, style: AppTypography.h3)),
+                      const SizedBox(width: 8),
+                      GzTag(kind: data.status, label: data.statusLabel),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${data.time} · ${data.system}',
+                    style: AppTypography.small,
+                  ),
+                ],
               ),
             ),
+            if (data.showAction) ...[
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 92,
+                child: GzButton(
+                  label: 'Check In',
+                  variant: GzButtonVariant.ghost,
+                  small: true,
+                  onPressed: () =>
+                      context.push('/admin/bookings/${data.id}'),
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -210,6 +219,7 @@ class _BookingCard extends StatelessWidget {
 
 class _BookingData {
   const _BookingData({
+    required this.id,
     required this.name,
     required this.time,
     required this.system,
@@ -218,6 +228,7 @@ class _BookingData {
     this.showAction = false,
   });
 
+  final String id;
   final String name;
   final String time;
   final String system;

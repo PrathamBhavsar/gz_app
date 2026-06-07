@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/navigation/routes.dart';
@@ -7,82 +8,110 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_logo.dart';
 
-class AuthLandingScreen extends StatelessWidget {
+class AuthLandingScreen extends StatefulWidget {
   const AuthLandingScreen({super.key});
 
   @override
+  State<AuthLandingScreen> createState() => _AuthLandingScreenState();
+}
+
+class _AuthLandingScreenState extends State<AuthLandingScreen> {
+  DateTime? _lastBackPress;
+
+  void _onPop(bool didPop, Object? result) {
+    if (didPop) return;
+    final now = DateTime.now();
+    if (_lastBackPress == null ||
+        now.difference(_lastBackPress!) > const Duration(seconds: 2)) {
+      _lastBackPress = now;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Press back again to exit'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      SystemNavigator.pop();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Center(child: GzLogo()),
-              const Spacer(),
-              Text('Welcome back', style: AppTypography.h1),
-              const SizedBox(height: 8),
-              Text('Sign in to continue', style: AppTypography.bodyR),
-              const SizedBox(height: 24),
-              GzButton(
-                label: 'Continue with Google',
-                variant: GzButtonVariant.ghost,
-                icon: const _CircleTextIcon(
-                  label: 'G',
-                  background: AppColors.surface,
-                ),
-                onPressed: () => context.go(AppRoutes.oauthHandler),
-              ),
-              const SizedBox(height: 12),
-              GzButton(
-                label: 'Continue with Apple',
-                variant: GzButtonVariant.ghost,
-                icon: const _CircleTextIcon(
-                  label: 'A',
-                  background: AppColors.textPrimary,
-                  foreground: AppColors.surface,
-                ),
-                onPressed: () => context.go(AppRoutes.oauthHandler),
-              ),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  const Expanded(child: Divider(color: AppColors.rule)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('or', style: AppTypography.small),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: _onPop,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Center(child: GzLogo()),
+                const Spacer(),
+                Text('Welcome back', style: AppTypography.h1),
+                const SizedBox(height: 8),
+                Text('Sign in to continue', style: AppTypography.bodyR),
+                const SizedBox(height: 24),
+                GzButton(
+                  label: 'Continue with Google',
+                  variant: GzButtonVariant.ghost,
+                  icon: const _CircleTextIcon(
+                    label: 'G',
+                    background: AppColors.surface,
                   ),
-                  const Expanded(child: Divider(color: AppColors.rule)),
-                ],
-              ),
-              const SizedBox(height: 18),
-              GzButton(
-                label: 'Continue with email',
-                variant: GzButtonVariant.ghost,
-                onPressed: () => context.go(AppRoutes.emailLogin),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () => context.go(AppRoutes.register),
-                child: Text(
-                  'New here? Create account →',
-                  style: AppTypography.body.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
+                  onPressed: () => context.go(AppRoutes.oauthHandler),
                 ),
-              ),
-              TextButton(
-                onPressed: () => context.go(AppRoutes.adminLogin),
-                child: Text(
-                  'Admin? Sign in →',
-                  style: AppTypography.small.copyWith(
-                    color: AppColors.textSecondary,
+                const SizedBox(height: 12),
+                GzButton(
+                  label: 'Continue with Apple',
+                  variant: GzButtonVariant.ghost,
+                  icon: const _CircleTextIcon(
+                    label: 'A',
+                    background: AppColors.textPrimary,
+                    foreground: AppColors.surface,
+                  ),
+                  onPressed: () => context.go(AppRoutes.oauthHandler),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    const Expanded(child: Divider(color: AppColors.rule)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('or', style: AppTypography.small),
+                    ),
+                    const Expanded(child: Divider(color: AppColors.rule)),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                GzButton(
+                  label: 'Continue with email',
+                  variant: GzButtonVariant.ghost,
+                  onPressed: () => context.push(AppRoutes.emailLogin),
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () => context.push(AppRoutes.register),
+                  child: Text(
+                    'New here? Create account →',
+                    style: AppTypography.body.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
-              ),
-            ],
+                TextButton(
+                  onPressed: () => context.push(AppRoutes.adminLogin),
+                  child: Text(
+                    'Admin? Sign in →',
+                    style: AppTypography.small.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

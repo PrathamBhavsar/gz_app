@@ -7,6 +7,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/gz_card.dart';
 import '../../../../shared/widgets/gz_chip.dart';
 import '../../../../shared/widgets/gz_top_bar.dart';
+import 'notification_detail_sheet.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -21,35 +22,45 @@ class NotificationsScreen extends StatelessWidget {
 
   static const _notifications = <_NotificationItem>[
     _NotificationItem(
+      id: 'notif-001',
       title: 'Booking confirmed',
       subtitle: 'PC Station 01',
       time: 'Just now',
       isUnread: true,
+      type: 'booking',
       icon: HugeIcons.strokeRoundedCalendar03,
     ),
     _NotificationItem(
+      id: 'notif-002',
       title: 'Session ending in 10 min',
       subtitle: 'Wrap up or extend your time',
       time: '2:38 PM',
       isUnread: true,
+      type: 'session',
       icon: HugeIcons.strokeRoundedClock01,
     ),
     _NotificationItem(
+      id: 'notif-003',
       title: 'Welcome Bonus campaign applied',
       subtitle: 'Credits added to your wallet',
       time: 'Yesterday',
+      type: 'credit',
       icon: HugeIcons.strokeRoundedGift,
     ),
     _NotificationItem(
+      id: 'notif-004',
       title: 'Session receipt ready',
       subtitle: 'GZ-2406-4891',
       time: '3 Jun',
+      type: 'session',
       icon: HugeIcons.strokeRoundedInvoice01,
     ),
     _NotificationItem(
+      id: 'notif-005',
       title: 'New campaign: Happy Hours',
-      subtitle: 'Check today’s discounted slots',
+      subtitle: "Check today's discounted slots",
       time: '2 Jun',
+      type: 'credit',
       icon: HugeIcons.strokeRoundedMegaphone01,
     ),
   ];
@@ -85,7 +96,7 @@ class NotificationsScreen extends StatelessWidget {
                     active: index == 0,
                   );
                 },
-                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
                 itemCount: _filters.length,
               ),
             ),
@@ -93,7 +104,19 @@ class NotificationsScreen extends StatelessWidget {
             ..._notifications.map(
               (item) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: _NotificationRow(item: item),
+                child: GestureDetector(
+                  onTap: () => showNotificationDetailSheet(
+                    context,
+                    notifId: item.id,
+                    title: item.title,
+                    body: item.subtitle,
+                    type: item.type,
+                    time: item.time,
+                    actionLabel: 'View Booking',
+                    actionRoute: '/sessions/booking/BKG-001',
+                  ),
+                  child: _NotificationRow(item: item),
+                ),
               ),
             ),
           ],
@@ -177,16 +200,20 @@ class _NotificationRow extends StatelessWidget {
 
 class _NotificationItem {
   const _NotificationItem({
+    required this.id,
     required this.title,
     required this.subtitle,
     required this.time,
     required this.icon,
+    required this.type,
     this.isUnread = false,
   });
 
+  final String id;
   final String title;
   final String subtitle;
   final String time;
   final List<List<dynamic>> icon;
+  final String type;
   final bool isUnread;
 }

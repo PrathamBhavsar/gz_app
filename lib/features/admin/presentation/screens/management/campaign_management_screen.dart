@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -14,6 +16,7 @@ class CampaignManagementScreen extends StatelessWidget {
 
   static const _campaigns = [
     _CampaignData(
+      id: 'CAM-001',
       name: 'Welcome Bonus',
       description: 'Earn 2× credits on first booking',
       redemptions: '142',
@@ -22,6 +25,7 @@ class CampaignManagementScreen extends StatelessWidget {
       tagLabel: 'Active',
     ),
     _CampaignData(
+      id: 'CAM-002',
       name: 'Happy Hours',
       description: '50% off 2–5 PM Mon–Thu',
       redemptions: '89',
@@ -30,6 +34,7 @@ class CampaignManagementScreen extends StatelessWidget {
       tagLabel: 'Active',
     ),
     _CampaignData(
+      id: 'CAM-003',
       name: 'Summer Blast',
       description: 'Free hour with 2-hour booking',
       redemptions: '234',
@@ -43,7 +48,17 @@ class CampaignManagementScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const GzAdminTopBar(title: 'Campaigns'),
+      appBar: GzAdminTopBar(
+        title: 'Campaigns',
+        trailing: GestureDetector(
+          onTap: () => context.push('/admin/campaigns/create'),
+          child: const HugeIcon(
+            icon: HugeIcons.strokeRoundedAdd01,
+            color: AppColors.textSecondary,
+            size: 22,
+          ),
+        ),
+      ),
       body: SafeArea(
         top: false,
         child: GzScrollContent(
@@ -90,21 +105,24 @@ class _CampaignCard extends StatelessWidget {
           GzMetaRow(label: 'Redemptions', value: campaign.redemptions),
           GzMetaRow(label: 'Expires', value: campaign.expires),
           const SizedBox(height: 12),
-          const Row(
+          Row(
             children: [
               Expanded(
                 child: GzButton(
                   label: 'Pause',
                   variant: GzButtonVariant.ghost,
                   small: true,
+                  onPressed: () {},
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 child: GzButton(
                   label: 'Edit',
                   variant: GzButtonVariant.ghost,
                   small: true,
+                  onPressed: () =>
+                      context.push('/admin/campaigns/${campaign.id}/edit'),
                 ),
               ),
             ],
@@ -117,6 +135,7 @@ class _CampaignCard extends StatelessWidget {
 
 class _CampaignData {
   const _CampaignData({
+    required this.id,
     required this.name,
     required this.description,
     required this.redemptions,
@@ -125,6 +144,7 @@ class _CampaignData {
     required this.tagLabel,
   });
 
+  final String id;
   final String name;
   final String description;
   final String redemptions;

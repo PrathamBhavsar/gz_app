@@ -131,7 +131,7 @@ class _SearchResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.go(AppRoutes.storeDetailPath(store.slug)),
+      onTap: () => context.push(AppRoutes.storeDetailPath(store.slug)),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(

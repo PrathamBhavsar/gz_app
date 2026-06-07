@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -12,12 +11,16 @@ import '../../../../../shared/widgets/gz_card.dart';
 import '../../../../../shared/widgets/gz_icon_btn.dart';
 import '../../../../../shared/widgets/gz_scroll_content.dart';
 import '../../../../../shared/widgets/gz_tag.dart';
+import 'edit_staff_sheet.dart';
+// ignore: unused_import — used when routes are registered
+import 'invite_staff_screen.dart';
 
 class StaffManagementScreen extends StatelessWidget {
   const StaffManagementScreen({super.key});
 
   static const _staff = [
     _StaffMember(
+      id: 'STF-001',
       name: 'Pratham Singh',
       email: 'pratham@gzarena.com',
       role: GzTagKind.purple,
@@ -25,6 +28,7 @@ class StaffManagementScreen extends StatelessWidget {
       initials: 'P',
     ),
     _StaffMember(
+      id: 'STF-002',
       name: 'Ritika Sharma',
       email: 'ritika@gzarena.com',
       role: GzTagKind.info,
@@ -33,6 +37,7 @@ class StaffManagementScreen extends StatelessWidget {
       showTrash: true,
     ),
     _StaffMember(
+      id: 'STF-003',
       name: 'Kabir Nair',
       email: 'kabir@gzarena.com',
       role: GzTagKind.mute,
@@ -41,6 +46,7 @@ class StaffManagementScreen extends StatelessWidget {
       showTrash: true,
     ),
     _StaffMember(
+      id: 'STF-004',
       name: 'Megha Jain',
       email: 'megha@gzarena.com',
       role: GzTagKind.mute,
@@ -56,10 +62,9 @@ class StaffManagementScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: GzAdminTopBar(
         title: 'Staff',
-        onBack: () => context.go(AppRoutes.adminSystemsMgmt),
         trailing: GzIconBtn(
           tooltip: 'Add staff',
-          onTap: () {},
+          onTap: () => context.push('/admin/staff/invite'),
           child: const HugeIcon(
             icon: HugeIcons.strokeRoundedAdd01,
             color: AppColors.textPrimary,
@@ -88,7 +93,17 @@ class StaffManagementScreen extends StatelessWidget {
                 ..._staff.map(
                   (member) => Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: _StaffCard(member: member),
+                    child: member.showTrash
+                        ? GestureDetector(
+                            onTap: () => showEditStaffSheet(
+                              context,
+                              staffId: member.id,
+                              staffName: member.name,
+                              currentRole: member.roleLabel,
+                            ),
+                            child: _StaffCard(member: member),
+                          )
+                        : _StaffCard(member: member),
                   ),
                 ),
               ],
@@ -127,7 +142,12 @@ class _StaffCard extends StatelessWidget {
           if (member.showTrash)
             GzIconBtn(
               tooltip: 'Remove staff',
-              onTap: () {},
+              onTap: () => showEditStaffSheet(
+                context,
+                staffId: member.id,
+                staffName: member.name,
+                currentRole: member.roleLabel,
+              ),
               child: const HugeIcon(
                 icon: HugeIcons.strokeRoundedDelete02,
                 color: AppColors.textTertiary,
@@ -142,6 +162,7 @@ class _StaffCard extends StatelessWidget {
 
 class _StaffMember {
   const _StaffMember({
+    required this.id,
     required this.name,
     required this.email,
     required this.role,
@@ -150,6 +171,7 @@ class _StaffMember {
     this.showTrash = false,
   });
 
+  final String id;
   final String name;
   final String email;
   final GzTagKind role;

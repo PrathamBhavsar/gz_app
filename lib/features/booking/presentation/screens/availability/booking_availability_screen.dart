@@ -204,7 +204,7 @@ class _BookingAvailabilityScreenState extends State<BookingAvailabilityScreen> {
                 color: AppColors.buttonFg,
                 size: 18,
               ),
-              onPressed: () => context.go(AppRoutes.bookSystems),
+              onPressed: () => context.push(AppRoutes.bookSystems),
             ),
           ),
         ],

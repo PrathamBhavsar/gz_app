@@ -22,10 +22,7 @@ class PlayerAnalyticsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(
-        title: 'Players',
-        onBack: () => Navigator.of(context).maybePop(),
-      ),
+      appBar: const GzAdminTopBar(title: 'Players'),
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(

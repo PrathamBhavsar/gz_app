@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../../core/theme/app_colors.dart';
@@ -8,30 +9,38 @@ import '../../../../../shared/widgets/gz_admin_top_bar.dart';
 import '../../../../../shared/widgets/gz_card.dart';
 import '../../../../../shared/widgets/gz_scroll_content.dart';
 import '../../../../../shared/widgets/gz_tag.dart';
+// ignore: unused_import — used when routes are registered
+import 'create_pricing_rule_screen.dart';
+// ignore: unused_import — used when routes are registered
+import 'edit_pricing_rule_screen.dart';
 
 class PricingRulesScreen extends StatelessWidget {
   const PricingRulesScreen({super.key});
 
   static const _rules = [
     _PricingRuleData(
+      id: 'PRC-001',
       name: 'Standard Rate',
       rate: '₹80/hour · All day',
       isActive: true,
       tags: ['PC', 'All hours'],
     ),
     _PricingRuleData(
+      id: 'PRC-002',
       name: 'Peak Hour',
       rate: '₹120/hour · 6 PM–10 PM',
       isActive: true,
       tags: ['All', 'Evening'],
     ),
     _PricingRuleData(
+      id: 'PRC-003',
       name: 'Weekend Rate',
       rate: '₹100/hour · Sat–Sun',
       isActive: true,
       tags: ['All', 'Weekend'],
     ),
     _PricingRuleData(
+      id: 'PRC-004',
       name: 'VR Premium',
       rate: '₹150/hour',
       isActive: false,
@@ -45,7 +54,15 @@ class PricingRulesScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: GzAdminTopBar(
         title: 'Pricing Rules',
-        trailing: const _TopBarAction(icon: HugeIcons.strokeRoundedAdd01),
+        onBack: () => context.pop(),
+        trailing: GestureDetector(
+          onTap: () => context.push('/admin/pricing/create'),
+          child: const HugeIcon(
+            icon: HugeIcons.strokeRoundedAdd01,
+            color: AppColors.textSecondary,
+            size: 22,
+          ),
+        ),
       ),
       body: SafeArea(
         top: false,
@@ -57,7 +74,11 @@ class PricingRulesScreen extends StatelessWidget {
                   .map(
                     (rule) => Padding(
                       padding: const EdgeInsets.only(bottom: 10),
-                      child: _PricingRuleCard(rule: rule),
+                      child: GestureDetector(
+                        onTap: () =>
+                            context.push('/admin/pricing/${rule.id}/edit'),
+                        child: _PricingRuleCard(rule: rule),
+                      ),
                     ),
                   )
                   .toList(),
@@ -140,34 +161,17 @@ class _StaticToggle extends StatelessWidget {
   }
 }
 
-class _TopBarAction extends StatelessWidget {
-  const _TopBarAction({required this.icon});
-
-  final dynamic icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
-      ),
-      alignment: Alignment.center,
-      child: HugeIcon(icon: icon, color: AppColors.textTertiary, size: 18),
-    );
-  }
-}
 
 class _PricingRuleData {
   const _PricingRuleData({
+    required this.id,
     required this.name,
     required this.rate,
     required this.isActive,
     required this.tags,
   });
 
+  final String id;
   final String name;
   final String rate;
   final bool isActive;

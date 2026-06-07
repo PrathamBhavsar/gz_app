@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -15,6 +16,7 @@ class DisputeResolutionScreen extends StatelessWidget {
   static const _filters = ['All', 'Open', 'In Review', 'Resolved'];
   static const _disputes = [
     _DisputeData(
+      id: 'DSP-001',
       name: 'Rahul Mehra',
       description: 'Overcharged for session duration',
       date: 'Jun 02, 2025',
@@ -23,6 +25,7 @@ class DisputeResolutionScreen extends StatelessWidget {
       showResolve: true,
     ),
     _DisputeData(
+      id: 'DSP-002',
       name: 'Priya Singh',
       description: 'Credits not applied',
       date: 'Jun 01, 2025',
@@ -31,6 +34,7 @@ class DisputeResolutionScreen extends StatelessWidget {
       showResolve: true,
     ),
     _DisputeData(
+      id: 'DSP-003',
       name: 'Amit Kumar',
       description: 'System not working properly',
       date: 'May 30, 2025',
@@ -38,6 +42,7 @@ class DisputeResolutionScreen extends StatelessWidget {
       tagLabel: 'Resolved',
     ),
     _DisputeData(
+      id: 'DSP-004',
       name: 'Neha Reddy',
       description: 'Booking cancelled, no refund',
       date: 'May 28, 2025',
@@ -111,36 +116,41 @@ class _DisputeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GzCard(
-      padding: 14,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(child: Text(dispute.name, style: AppTypography.h3)),
-              GzTag(kind: dispute.tag, label: dispute.tagLabel),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(dispute.description, style: AppTypography.small),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Text(dispute.date, style: AppTypography.small),
-              const Spacer(),
-              if (dispute.showResolve)
-                const SizedBox(
-                  width: 116,
-                  child: GzButton(
-                    label: 'Resolve →',
-                    variant: GzButtonVariant.ghost,
-                    small: true,
+    return GestureDetector(
+      onTap: () => context.push('/admin/disputes/${dispute.id}'),
+      child: GzCard(
+        padding: 14,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(child: Text(dispute.name, style: AppTypography.h3)),
+                GzTag(kind: dispute.tag, label: dispute.tagLabel),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(dispute.description, style: AppTypography.small),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Text(dispute.date, style: AppTypography.small),
+                const Spacer(),
+                if (dispute.showResolve)
+                  SizedBox(
+                    width: 116,
+                    child: GzButton(
+                      label: 'Resolve →',
+                      variant: GzButtonVariant.ghost,
+                      small: true,
+                      onPressed: () =>
+                          context.push('/admin/disputes/${dispute.id}'),
+                    ),
                   ),
-                ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -148,6 +158,7 @@ class _DisputeCard extends StatelessWidget {
 
 class _DisputeData {
   const _DisputeData({
+    required this.id,
     required this.name,
     required this.description,
     required this.date,
@@ -156,6 +167,7 @@ class _DisputeData {
     this.showResolve = false,
   });
 
+  final String id;
   final String name;
   final String description;
   final String date;

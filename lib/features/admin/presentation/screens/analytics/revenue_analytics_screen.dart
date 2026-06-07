@@ -31,7 +31,6 @@ class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
       backgroundColor: AppColors.background,
       appBar: GzAdminTopBar(
         title: 'Revenue',
-        onBack: () => Navigator.of(context).maybePop(),
       ),
       body: SafeArea(
         top: false,

@@ -82,7 +82,7 @@ class _ManagementTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCard),
-      onTap: () => context.go(data.route),
+      onTap: () => context.push(data.route),
       child: GzCard(
         child: Row(
           children: [

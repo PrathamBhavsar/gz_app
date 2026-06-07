@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
@@ -8,27 +7,18 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_button.dart';
-import '../../providers/auth_notifier.dart';
 
-class RegisterScreen extends ConsumerStatefulWidget {
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   bool _showPassword = false;
 
-  Future<void> _register() async {
-    await ref.read(authNotifierProvider.notifier).register(
-      name: 'Rahul Sharma',
-      email: 'rahul@example.com',
-      phone: '+91 98765 43210',
-    );
-    if (!mounted) return;
-    context.go(AppRoutes.otpVerification);
-  }
+  void _register() => context.push(AppRoutes.otpVerification);
 
   @override
   Widget build(BuildContext context) {

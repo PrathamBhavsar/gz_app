@@ -67,10 +67,7 @@ class SessionStatisticsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(
-        title: 'Session Stats',
-        onBack: () => Navigator.of(context).maybePop(),
-      ),
+      appBar: const GzAdminTopBar(title: 'Session Stats'),
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(

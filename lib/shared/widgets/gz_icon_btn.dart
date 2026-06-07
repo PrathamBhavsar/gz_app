@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
+
 class GzIconBtn extends StatelessWidget {
   const GzIconBtn({
     super.key,
@@ -14,13 +16,19 @@ class GzIconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget btn = GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 38,
-        height: 38,
-        child: Center(child: child),
+    Widget btn = Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        splashColor: AppColors.textPrimary.withValues(alpha: 0.08),
+        highlightColor: AppColors.textPrimary.withValues(alpha: 0.05),
+        child: SizedBox(
+          width: 38,
+          height: 38,
+          child: Center(child: child),
+        ),
       ),
     );
 

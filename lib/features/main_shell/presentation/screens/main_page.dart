@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/routes.dart';
@@ -16,6 +17,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   GzTab _currentTab = GzTab.home;
+  DateTime? _lastBackPress;
 
   @override
   void didChangeDependencies() {
@@ -48,12 +50,33 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  void _onPop(bool didPop, Object? result) {
+    if (didPop) return;
+    final now = DateTime.now();
+    if (_lastBackPress == null ||
+        now.difference(_lastBackPress!) > const Duration(seconds: 2)) {
+      _lastBackPress = now;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Press back again to exit'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      SystemNavigator.pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: widget.child,
-      bottomNavigationBar: GzBottomNav(currentTab: _currentTab, onTap: _onTap),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: _onPop,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: widget.child,
+        bottomNavigationBar: GzBottomNav(currentTab: _currentTab, onTap: _onTap),
+      ),
     );
   }
 }

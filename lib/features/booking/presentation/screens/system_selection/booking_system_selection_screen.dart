@@ -134,7 +134,7 @@ class _BookingSystemSelectionScreenState
             ),
             child: GzButton(
               label: 'Continue to summary',
-              onPressed: () => context.go(AppRoutes.bookSummary),
+              onPressed: () => context.push(AppRoutes.bookSummary),
             ),
           ),
         ],

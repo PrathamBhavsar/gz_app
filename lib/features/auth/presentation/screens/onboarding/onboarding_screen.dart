@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../core/auth/token_storage.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
+  int _currentPage = 0;
 
   static const _slides = [
     (
@@ -31,6 +34,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       subtitle: 'The fastest way to game on demand.',
     ),
   ];
+
+  Future<void> _complete() async {
+    await ref.read(tokenStorageProvider).setHasSeenOnboarding();
+    if (mounted) context.go(AppRoutes.authLanding);
+  }
 
   @override
   void dispose() {
@@ -50,7 +58,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               Align(
                 alignment: Alignment.topRight,
                 child: TextButton(
-                  onPressed: () => context.go(AppRoutes.authLanding),
+                  onPressed: _complete,
                   child: Text(
                     'Skip',
                     style: AppTypography.body.copyWith(
@@ -63,6 +71,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: PageView.builder(
                   controller: _pageController,
                   itemCount: _slides.length,
+                  onPageChanged: (index) => setState(() => _currentPage = index),
                   itemBuilder: (context, index) {
                     final slide = _slides[index];
                     return Padding(
@@ -109,12 +118,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
                   _slides.length,
-                  (index) => Container(
-                    width: index == 0 ? 24 : 8,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: index == _currentPage ? 24 : 8,
                     height: 8,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
-                      color: index == 0
+                      color: index == _currentPage
                           ? AppColors.textPrimary
                           : AppColors.rule,
                       borderRadius: BorderRadius.circular(999),
@@ -124,8 +134,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
               const SizedBox(height: 20),
               GzButton(
-                label: 'Get started',
-                onPressed: () => context.go(AppRoutes.authLanding),
+                label: _currentPage == _slides.length - 1
+                    ? 'Get started'
+                    : 'Next',
+                onPressed: () {
+                  if (_currentPage < _slides.length - 1) {
+                    _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  } else {
+                    _complete();
+                  }
+                },
               ),
             ],
           ),

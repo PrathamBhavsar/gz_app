@@ -1,12 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'routes.dart';
-import '../../features/auth/presentation/providers/auth_notifier.dart';
-import '../../features/auth/presentation/providers/auth_state.dart';
-import '../../features/admin/presentation/providers/admin_auth_provider.dart';
-import '../../features/admin/presentation/providers/admin_auth_state.dart';
 
 import '../../features/auth/presentation/screens/splash/splash_screen.dart';
 import '../../features/auth/presentation/screens/onboarding/onboarding_screen.dart';
@@ -74,47 +69,21 @@ import '../../features/admin/presentation/screens/management/campaign_management
 import '../../features/admin/presentation/screens/management/credits_management_screen.dart';
 import '../../features/admin/presentation/screens/management/dispute_resolution_screen.dart';
 import '../../features/admin/presentation/screens/store/admin_store_screen.dart';
+import '../../features/admin/presentation/screens/store/system_management_screen.dart';
+import '../../features/admin/presentation/screens/store/system_detail_screen.dart';
+import '../../features/admin/presentation/screens/store/add_edit_system_screen.dart';
+import '../../features/admin/presentation/screens/store/invite_staff_screen.dart';
+import '../../features/admin/presentation/screens/management/admin_dispute_detail_screen.dart';
+import '../../features/admin/presentation/screens/management/create_campaign_screen.dart';
+import '../../features/admin/presentation/screens/management/edit_campaign_screen.dart';
+import '../../features/admin/presentation/screens/management/create_pricing_rule_screen.dart';
+import '../../features/admin/presentation/screens/management/edit_pricing_rule_screen.dart';
+import '../../features/admin/presentation/screens/operations/admin_booking_detail_screen.dart';
+import '../../features/sessions/presentation/screens/session_logs_screen.dart';
 
-final routerProvider = Provider<GoRouter>((ref) {
-  // ValueNotifier<int> is intentional here — it is a router-internal Listenable
-  // adapter that bridges Riverpod auth state changes to go_router's
-  // refreshListenable. It holds no app state; incrementing the counter is the
-  // only operation. This is explicitly permitted as core navigation infra.
-  final listenable = ValueNotifier<int>(0);
-  ref.listen<AuthState>(authNotifierProvider, (_, _) => listenable.value++);
-  ref.listen<AdminAuthState>(
-    adminAuthNotifierProvider,
-    (_, _) => listenable.value++,
-  );
-  ref.onDispose(listenable.dispose);
-
+final routerProvider = Provider<GoRouter>((_) {
   return GoRouter(
     initialLocation: AppRoutes.splash,
-    refreshListenable: listenable,
-    redirect: (context, state) {
-      final authState = ref.read(authNotifierProvider);
-      // Let splash screen own the initial routing while auth is resolving
-      if (authState is AuthInitial || authState is AuthLoading) return null;
-
-      final isAuthenticated = authState is AuthAuthenticated;
-      final isAdminAuthenticated =
-          ref.read(adminAuthNotifierProvider) is AdminAuthAuthenticated;
-
-      final loc = state.matchedLocation;
-
-      // Splash and onboarding are managed by SplashNotifier — never interrupt
-      if (loc == AppRoutes.splash || loc == AppRoutes.onboarding) return null;
-
-      final isAuthRoute = loc.startsWith('/auth');
-      final isAdminRoute = loc.startsWith('/admin');
-
-      if (!isAuthenticated && !isAuthRoute && !isAdminRoute) {
-        return AppRoutes.authLanding;
-      }
-      if (isAuthenticated && isAuthRoute) return AppRoutes.home;
-      if (isAdminRoute && !isAdminAuthenticated) return AppRoutes.adminLogin;
-      return null;
-    },
     routes: [
       GoRoute(
         path: AppRoutes.splash,
@@ -373,8 +342,34 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const AdminStoreScreen(),
           ),
           GoRoute(
+            path: AppRoutes.adminSystemsList,
+            builder: (context, state) => const SystemManagementScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.adminAddSystem,
+            builder: (context, state) => const AddEditSystemScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.adminEditSystem,
+            builder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return AddEditSystemScreen(id: id);
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.adminSystemDetail,
+            builder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return SystemDetailScreen(id: id);
+            },
+          ),
+          GoRoute(
             path: AppRoutes.adminStaff,
             builder: (context, state) => const StaffManagementScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.adminInviteStaff,
+            builder: (context, state) => const InviteStaffScreen(),
           ),
           GoRoute(
             path: AppRoutes.adminConfig,
@@ -383,6 +378,43 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.adminNotifications,
             builder: (context, state) => const AdminNotificationsScreen(),
+          ),
+          // Admin CRUD sub-routes (all tabs)
+          GoRoute(
+            path: AppRoutes.adminBookingDetail,
+            builder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return AdminBookingDetailScreen(id: id);
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.adminDisputeDetail,
+            builder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return AdminDisputeDetailScreen(id: id);
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.adminCreateCampaign,
+            builder: (context, state) => const CreateCampaignScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.adminEditCampaign,
+            builder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return EditCampaignScreen(id: id);
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.adminCreatePricing,
+            builder: (context, state) => const CreatePricingRuleScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.adminEditPricing,
+            builder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return EditPricingRuleScreen(id: id);
+            },
           ),
         ],
       ),
@@ -408,6 +440,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.bookSuccess,
         builder: (context, state) => const BookingSuccessScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.sessionLogs,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return SessionLogsScreen(sessionId: id);
+        },
       ),
     ],
   );
