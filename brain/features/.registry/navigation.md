@@ -46,11 +46,12 @@ Lives in `routerProvider` (lib/core/navigation/app_router.dart).
 | `gzapp://reset-password?token=` | `AppRoutes.resetPassword` |
 | `gzapp://stores/:slug` | `AppRoutes.storeDetail` |
 | `gzapp://bookings/:id` | `AppRoutes.bookingDetail` |
-| `gzapp://notifications` | `AppRoutes.notifications` |
+| `gzapp://notifications` | Redirect to player shell, then open Notification Center overlay |
 
 Phase 12 update:
 - `routerProvider` now resolves `gzapp://...` links during startup via `initialLocation` and at runtime via `redirect`.
 - Path-param deep links now interpolate into concrete app routes before screen build.
+- `gzapp://notifications` is treated as an overlay intent, not a full-screen route push.
 
 ---
 

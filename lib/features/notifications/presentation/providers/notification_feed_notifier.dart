@@ -1,4 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'notification_feed_notifier.g.dart';
 
 enum NotificationFeedType { booking, session, credit, dispute, general }
 
@@ -42,7 +44,8 @@ class NotificationFeedItem {
   }
 }
 
-class NotificationFeedNotifier extends Notifier<List<NotificationFeedItem>> {
+@riverpod
+class NotificationFeed extends _$NotificationFeed {
   @override
   List<NotificationFeedItem> build() {
     return [
@@ -153,15 +156,11 @@ class NotificationFeedNotifier extends Notifier<List<NotificationFeedItem>> {
   }
 }
 
-final notificationFeedProvider =
-    NotifierProvider<NotificationFeedNotifier, List<NotificationFeedItem>>(
-      NotificationFeedNotifier.new,
-    );
-
-final unreadNotificationCountProvider = Provider<int>((ref) {
+@riverpod
+int unreadNotificationCount(UnreadNotificationCountRef ref) {
   return ref.watch(
     notificationFeedProvider.select(
       (items) => items.where((item) => item.isUnread).length,
     ),
   );
-});
+}

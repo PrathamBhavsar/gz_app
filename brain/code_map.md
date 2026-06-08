@@ -24,6 +24,9 @@
   - `presentation/`
     - `providers/`
       - `notification_feed_notifier.dart`
+      - `notification_feed_notifier.g.dart`
+    - `screens/`
+      - `notification_center_sheet.dart`
 - `profile/`
 - `sessions/`
 - `wallet/`

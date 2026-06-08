@@ -11,7 +11,7 @@ All four overlays are invoked via standalone functions. They are NOT registered 
 | Item | Detail |
 |---|---|
 | Function | `showNotificationCenter(BuildContext context)` |
-| File | `lib/features/notifications/presentation/widgets/notification_center_sheet.dart` |
+| File | `lib/features/notifications/presentation/screens/notification_center_sheet.dart` |
 | Widget | `NotificationCenterContent` (ConsumerWidget — also reused by `NotificationsMobileLayout`) |
 | State | `notificationsNotifierProvider` — `AsyncValue<NotificationsData>` |
 | Behaviour | Full-screen modal sheet; lists all notifications; "Mark all read" header action; tapping a row → O-39 |
@@ -104,3 +104,4 @@ Key methods:
 - Notification bell unread dot is now rendered in the player headers for Home, Sessions, and Wallet.
 - Notification detail actions now close via `go_router` (`context.pop()`) before pushing target routes.
 - WS `notification.new` is now wired at the player-shell level through `MainPage`.
+- Notification deep links now resolve into this overlay instead of the full-screen notifications route.

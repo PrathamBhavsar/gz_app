@@ -6,10 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/navigation/routes.dart';
+import '../../../../core/navigation/app_router.dart';
 import '../../../../core/auth/token_storage.dart';
 import '../../../../core/network/player_ws_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../notifications/presentation/providers/notification_feed_notifier.dart';
+import '../../../notifications/presentation/screens/notification_center_sheet.dart';
 import '../../../../shared/widgets/gz_bottom_nav.dart';
 
 class MainPage extends ConsumerStatefulWidget {
@@ -36,6 +38,7 @@ class _MainPageState extends ConsumerState<MainPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _currentTab = _tabForLocation(GoRouterState.of(context).matchedLocation);
+    _showPendingDeepLinkOverlayIfNeeded();
   }
 
   Future<void> _connectPlayerWs() async {
@@ -51,6 +54,10 @@ class _MainPageState extends ConsumerState<MainPage> {
   }
 
   void _handleWsEvent(PlayerWsEvent event) {
+    if (!mounted) {
+      return;
+    }
+
     switch (event.type) {
       case PlayerWsEventType.notificationNew:
         ref
@@ -86,6 +93,20 @@ class _MainPageState extends ConsumerState<MainPage> {
       case PlayerWsEventType.unknown:
         break;
     }
+  }
+
+  void _showPendingDeepLinkOverlayIfNeeded() {
+    final overlay = consumePendingDeepLinkOverlay();
+    if (overlay != PendingDeepLinkOverlay.notifications) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      unawaited(showNotificationCenter(context));
+    });
   }
 
   GzTab _tabForLocation(String location) {

@@ -83,6 +83,16 @@ import '../../features/admin/presentation/screens/management/edit_pricing_rule_s
 import '../../features/admin/presentation/screens/operations/admin_booking_detail_screen.dart';
 import '../../features/sessions/presentation/screens/session_logs_screen.dart';
 
+enum PendingDeepLinkOverlay { notifications }
+
+PendingDeepLinkOverlay? _pendingDeepLinkOverlay;
+
+PendingDeepLinkOverlay? consumePendingDeepLinkOverlay() {
+  final overlay = _pendingDeepLinkOverlay;
+  _pendingDeepLinkOverlay = null;
+  return overlay;
+}
+
 final routerProvider = Provider<GoRouter>((_) {
   return GoRouter(
     initialLocation: _initialLocation(),
@@ -479,7 +489,8 @@ String? _mapDeepLinkUriToRoute(Uri? uri) {
         return AppRoutes.storeDetailPath(uri.pathSegments.first);
       }
     case 'notifications':
-      return AppRoutes.notifications;
+      _pendingDeepLinkOverlay = PendingDeepLinkOverlay.notifications;
+      return AppRoutes.home;
     case 'reset-password':
       final token = uri.queryParameters['token'];
       return Uri(
