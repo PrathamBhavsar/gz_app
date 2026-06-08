@@ -99,8 +99,8 @@ Key methods:
 
 ---
 
-## Deferred
+## Phase 12 Updates
 
-- Notification bell icon badge (unread count dot) — count available from `notificationsNotifierProvider` but badge rendering deferred to Phase 10 polish
-- Notification detail deep-link navigation — action button currently pops sheet; full nav wired in Phase 9
-- `prependNew()` WS integration — `PlayerWsService` exists but event dispatch pending Phase 9 app wiring
+- Notification bell unread dot is now rendered in the player headers for Home, Sessions, and Wallet.
+- Notification detail actions now close via `go_router` (`context.pop()`) before pushing target routes.
+- WS `notification.new` is now wired at the player-shell level through `MainPage`.

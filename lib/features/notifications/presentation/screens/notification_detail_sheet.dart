@@ -49,28 +49,28 @@ class NotificationDetailSheet extends StatelessWidget {
   final String? actionLabel, actionRoute;
 
   Color _iconBg() => switch (type) {
-        'booking' => AppColors.infoBg,
-        'session' => AppColors.okBg,
-        'credit' => AppColors.warnBg,
-        'dispute' => AppColors.errBg,
-        _ => AppColors.pillBg,
-      };
+    'booking' => AppColors.infoBg,
+    'session' => AppColors.okBg,
+    'credit' => AppColors.warnBg,
+    'dispute' => AppColors.errBg,
+    _ => AppColors.pillBg,
+  };
 
   Color _iconColor() => switch (type) {
-        'booking' => AppColors.info,
-        'session' => AppColors.ok,
-        'credit' => AppColors.warn,
-        'dispute' => AppColors.err,
-        _ => AppColors.textSecondary,
-      };
+    'booking' => AppColors.info,
+    'session' => AppColors.ok,
+    'credit' => AppColors.warn,
+    'dispute' => AppColors.err,
+    _ => AppColors.textSecondary,
+  };
 
   List<List<dynamic>> _icon() => switch (type) {
-        'booking' => HugeIcons.strokeRoundedCalendar02,
-        'session' => HugeIcons.strokeRoundedGameController01,
-        'credit' => HugeIcons.strokeRoundedCoins01,
-        'dispute' => HugeIcons.strokeRoundedShield01,
-        _ => HugeIcons.strokeRoundedNotification01,
-      };
+    'booking' => HugeIcons.strokeRoundedCalendar02,
+    'session' => HugeIcons.strokeRoundedGameController01,
+    'credit' => HugeIcons.strokeRoundedCoins01,
+    'dispute' => HugeIcons.strokeRoundedShield01,
+    _ => HugeIcons.strokeRoundedNotification01,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -83,8 +83,7 @@ class NotificationDetailSheet extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius:
-                BorderRadius.circular(AppSpacing.borderRadiusCard),
+            borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCard),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
@@ -99,8 +98,9 @@ class NotificationDetailSheet extends StatelessWidget {
                     height: 4,
                     decoration: BoxDecoration(
                       color: AppColors.rule,
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.borderRadiusPill),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadiusPill,
+                      ),
                     ),
                   ),
                 ),
@@ -127,15 +127,9 @@ class NotificationDetailSheet extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            type.toUpperCase(),
-                            style: AppTypography.meta,
-                          ),
+                          Text(type.toUpperCase(), style: AppTypography.meta),
                           const SizedBox(height: 2),
-                          Text(
-                            time,
-                            style: AppTypography.small,
-                          ),
+                          Text(time, style: AppTypography.small),
                         ],
                       ),
                     ),
@@ -150,7 +144,7 @@ class NotificationDetailSheet extends StatelessWidget {
                   GzButton(
                     label: actionLabel!,
                     onPressed: () {
-                      Navigator.pop(context);
+                      context.pop();
                       context.push(actionRoute!);
                     },
                   ),
@@ -159,7 +153,7 @@ class NotificationDetailSheet extends StatelessWidget {
                 GzButton(
                   label: 'Dismiss',
                   variant: GzButtonVariant.ghost,
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => context.pop(),
                 ),
               ],
             ),

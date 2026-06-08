@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -83,7 +85,11 @@ import '../../features/sessions/presentation/screens/session_logs_screen.dart';
 
 final routerProvider = Provider<GoRouter>((_) {
   return GoRouter(
-    initialLocation: AppRoutes.splash,
+    initialLocation: _initialLocation(),
+    overridePlatformDefaultLocation: true,
+    redirect: (context, state) {
+      return _mapDeepLinkUriToRoute(state.uri);
+    },
     routes: [
       GoRoute(
         path: AppRoutes.splash,
@@ -451,3 +457,36 @@ final routerProvider = Provider<GoRouter>((_) {
     ],
   );
 });
+
+String _initialLocation() {
+  final defaultRouteName = PlatformDispatcher.instance.defaultRouteName;
+  final initialUri = Uri.tryParse(defaultRouteName);
+  return _mapDeepLinkUriToRoute(initialUri) ?? AppRoutes.splash;
+}
+
+String? _mapDeepLinkUriToRoute(Uri? uri) {
+  if (uri == null || uri.scheme != 'gzapp') {
+    return null;
+  }
+
+  switch (uri.host) {
+    case 'bookings':
+      if (uri.pathSegments.isNotEmpty) {
+        return AppRoutes.bookingDetailPath(uri.pathSegments.first);
+      }
+    case 'stores':
+      if (uri.pathSegments.isNotEmpty) {
+        return AppRoutes.storeDetailPath(uri.pathSegments.first);
+      }
+    case 'notifications':
+      return AppRoutes.notifications;
+    case 'reset-password':
+      final token = uri.queryParameters['token'];
+      return Uri(
+        path: AppRoutes.resetPassword,
+        queryParameters: token == null ? null : {'token': token},
+      ).toString();
+  }
+
+  return null;
+}

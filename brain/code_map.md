@@ -21,6 +21,9 @@
 - `home/`
 - `main_shell/`
 - `notifications/`
+  - `presentation/`
+    - `providers/`
+      - `notification_feed_notifier.dart`
 - `profile/`
 - `sessions/`
 - `wallet/`

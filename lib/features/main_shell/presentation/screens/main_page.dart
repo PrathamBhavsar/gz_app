@@ -1,28 +1,91 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/navigation/routes.dart';
+import '../../../../core/auth/token_storage.dart';
+import '../../../../core/network/player_ws_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../notifications/presentation/providers/notification_feed_notifier.dart';
 import '../../../../shared/widgets/gz_bottom_nav.dart';
 
-class MainPage extends StatefulWidget {
+class MainPage extends ConsumerStatefulWidget {
   const MainPage({super.key, required this.child});
 
   final Widget child;
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  ConsumerState<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends ConsumerState<MainPage> {
   GzTab _currentTab = GzTab.home;
   DateTime? _lastBackPress;
+  StreamSubscription<PlayerWsEvent>? _wsSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _connectPlayerWs();
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _currentTab = _tabForLocation(GoRouterState.of(context).matchedLocation);
+  }
+
+  Future<void> _connectPlayerWs() async {
+    final userId = await ref.read(tokenStorageProvider).getUserId();
+    if (!mounted || userId == null || userId.isEmpty) {
+      return;
+    }
+
+    final service = ref.read(playerWsServiceProvider);
+    await service.connect(userId);
+
+    _wsSubscription = service.events.listen(_handleWsEvent);
+  }
+
+  void _handleWsEvent(PlayerWsEvent event) {
+    switch (event.type) {
+      case PlayerWsEventType.notificationNew:
+        ref
+            .read(notificationFeedProvider.notifier)
+            .prependFromWs(event.payload);
+        break;
+      case PlayerWsEventType.sessionEnded:
+        final currentPath = GoRouter.of(
+          context,
+        ).routeInformationProvider.value.uri.path;
+        if (currentPath.startsWith('/sessions/active/')) {
+          context.go(AppRoutes.sessions);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Session ended')));
+        }
+        break;
+      case PlayerWsEventType.sessionExtended:
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Session extended')));
+        break;
+      case PlayerWsEventType.sessionStarted:
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Session started')));
+        break;
+      case PlayerWsEventType.bookingCheckedIn:
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Booking checked in')));
+        break;
+      case PlayerWsEventType.unknown:
+        break;
+    }
   }
 
   GzTab _tabForLocation(String location) {
@@ -68,6 +131,13 @@ class _MainPageState extends State<MainPage> {
   }
 
   @override
+  void dispose() {
+    _wsSubscription?.cancel();
+    unawaited(ref.read(playerWsServiceProvider).disconnect());
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
@@ -75,7 +145,10 @@ class _MainPageState extends State<MainPage> {
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: widget.child,
-        bottomNavigationBar: GzBottomNav(currentTab: _currentTab, onTap: _onTap),
+        bottomNavigationBar: GzBottomNav(
+          currentTab: _currentTab,
+          onTap: _onTap,
+        ),
       ),
     );
   }

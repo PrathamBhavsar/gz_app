@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
@@ -6,24 +7,28 @@ import '../../../../core/navigation/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../notifications/presentation/providers/notification_feed_notifier.dart';
 import '../../../../shared/widgets/gz_button.dart';
 import '../../../../shared/widgets/gz_chip.dart';
+import '../../../../shared/widgets/gz_icon_btn.dart';
 import '../../../../shared/widgets/gz_live_dot.dart';
 import '../../../../shared/widgets/gz_tag.dart';
 
-class SessionsScreen extends StatefulWidget {
+class SessionsScreen extends ConsumerStatefulWidget {
   const SessionsScreen({super.key});
 
   @override
-  State<SessionsScreen> createState() => _SessionsScreenState();
+  ConsumerState<SessionsScreen> createState() => _SessionsScreenState();
 }
 
-class _SessionsScreenState extends State<SessionsScreen> {
+class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   int _filterIndex = 0;
   final _filters = ['All', 'Upcoming', 'Active', 'Past'];
 
   @override
   Widget build(BuildContext context) {
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -35,14 +40,42 @@ class _SessionsScreenState extends State<SessionsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Sessions', style: AppTypography.h1),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text('Sessions', style: AppTypography.h1),
+                        ),
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            GzIconBtn(
+                              tooltip: 'Notifications',
+                              onTap: () =>
+                                  context.push(AppRoutes.notifications),
+                              child: const HugeIcon(
+                                icon: HugeIcons.strokeRoundedNotification03,
+                                color: AppColors.textPrimary,
+                                size: 22,
+                              ),
+                            ),
+                            if (unreadCount > 0)
+                              const Positioned(
+                                top: 6,
+                                right: 6,
+                                child: GzLiveDot(size: 6, color: AppColors.err),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 16),
                     SizedBox(
                       height: 36,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: _filters.length,
-                        separatorBuilder: (_, index) => const SizedBox(width: 8),
+                        separatorBuilder: (_, index) =>
+                            const SizedBox(width: 8),
                         itemBuilder: (context, i) => GzChip(
                           label: _filters[i],
                           active: _filterIndex == i,
@@ -71,8 +104,9 @@ class _SessionsScreenState extends State<SessionsScreen> {
                       time: '4:00 PM',
                       tag: const GzTag(kind: GzTagKind.warn, label: 'Unpaid'),
                       actionLabel: 'Pay',
-                      onAction: () =>
-                          context.push(AppRoutes.paymentSheetPath('GZ-2406-4892')),
+                      onAction: () => context.push(
+                        AppRoutes.paymentSheetPath('GZ-2406-4892'),
+                      ),
                     ),
                     const SizedBox(height: 24),
                     Text('Past sessions', style: AppTypography.h2),
@@ -89,8 +123,9 @@ class _SessionsScreenState extends State<SessionsScreen> {
                   date: '4 Jun',
                   duration: '2h 07m',
                   amount: '₹1,740',
-                  onTap: () => context
-                      .push(AppRoutes.sessionHistoryDetailPath('GZ-2406-4891')),
+                  onTap: () => context.push(
+                    AppRoutes.sessionHistoryDetailPath('GZ-2406-4891'),
+                  ),
                 ),
                 _PastSessionRow(
                   store: 'GameZone Indiranagar',
@@ -98,8 +133,9 @@ class _SessionsScreenState extends State<SessionsScreen> {
                   date: '28 May',
                   duration: '1h 30m',
                   amount: '₹1,200',
-                  onTap: () => context
-                      .push(AppRoutes.sessionHistoryDetailPath('GZ-2405-3210')),
+                  onTap: () => context.push(
+                    AppRoutes.sessionHistoryDetailPath('GZ-2405-3210'),
+                  ),
                 ),
                 _PastSessionRow(
                   store: 'GameZone Koramangala',
@@ -107,8 +143,9 @@ class _SessionsScreenState extends State<SessionsScreen> {
                   date: '20 May',
                   duration: '3h 00m',
                   amount: '₹2,400',
-                  onTap: () => context
-                      .push(AppRoutes.sessionHistoryDetailPath('GZ-2405-2100')),
+                  onTap: () => context.push(
+                    AppRoutes.sessionHistoryDetailPath('GZ-2405-2100'),
+                  ),
                 ),
                 const SizedBox(height: 24),
               ]),
@@ -139,22 +176,31 @@ class _ActiveSessionBanner extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('PC Station 03 · Live',
-                      style: AppTypography.h3
-                          .copyWith(color: AppColors.textPrimary)),
+                  Text(
+                    'PC Station 03 · Live',
+                    style: AppTypography.h3.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text('1:22:38 remaining',
-                      style: AppTypography.small
-                          .copyWith(color: AppColors.textSecondary)),
+                  Text(
+                    '1:22:38 remaining',
+                    style: AppTypography.small.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ],
               ),
             ),
             Row(
               children: [
-                Text('View',
-                    style: AppTypography.small.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600)),
+                Text(
+                  'View',
+                  style: AppTypography.small.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(width: 4),
                 const HugeIcon(
                   icon: HugeIcons.strokeRoundedArrowRight01,
@@ -203,9 +249,12 @@ class _UpcomingItem extends StatelessWidget {
               children: [
                 Text(system, style: AppTypography.h3),
                 const SizedBox(height: 4),
-                Text('$date · $time',
-                    style: AppTypography.small
-                        .copyWith(color: AppColors.textSecondary)),
+                Text(
+                  '$date · $time',
+                  style: AppTypography.small.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 tag,
               ],
@@ -262,14 +311,19 @@ class _PastSessionRow extends StatelessWidget {
                 children: [
                   Text(store, style: AppTypography.h3),
                   const SizedBox(height: 2),
-                  Text('$system · $date · $duration',
-                      style: AppTypography.small
-                          .copyWith(color: AppColors.textSecondary)),
+                  Text(
+                    '$system · $date · $duration',
+                    style: AppTypography.small.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ],
               ),
             ),
-            Text(amount,
-                style: AppTypography.num.copyWith(fontWeight: FontWeight.w700)),
+            Text(
+              amount,
+              style: AppTypography.num.copyWith(fontWeight: FontWeight.w700),
+            ),
           ],
         ),
       ),

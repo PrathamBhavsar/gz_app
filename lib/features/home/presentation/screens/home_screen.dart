@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
@@ -6,13 +7,15 @@ import '../../../../core/navigation/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../notifications/presentation/providers/notification_feed_notifier.dart';
 import '../../../../shared/widgets/gz_card.dart';
 import '../../../../shared/widgets/gz_icon_btn.dart';
+import '../../../../shared/widgets/gz_live_dot.dart';
 import '../../../../shared/widgets/gz_store_selector_pill.dart';
 import '../../../../shared/widgets/gz_tag.dart';
 import '../../../../shared/widgets/store_selector_sheet.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   static const _nearbyStores = <_NearbyStore>[
@@ -76,7 +79,9 @@ class HomeScreen extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -91,14 +96,25 @@ class HomeScreen extends StatelessWidget {
                   Expanded(
                     child: Text('Hey, Rahul 👋', style: AppTypography.h1),
                   ),
-                  GzIconBtn(
-                    tooltip: 'Notifications',
-                    onTap: () => context.push(AppRoutes.notifications),
-                    child: const HugeIcon(
-                      icon: HugeIcons.strokeRoundedNotification03,
-                      color: AppColors.textPrimary,
-                      size: 22,
-                    ),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      GzIconBtn(
+                        tooltip: 'Notifications',
+                        onTap: () => context.push(AppRoutes.notifications),
+                        child: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedNotification03,
+                          color: AppColors.textPrimary,
+                          size: 22,
+                        ),
+                      ),
+                      if (unreadCount > 0)
+                        const Positioned(
+                          top: 6,
+                          right: 6,
+                          child: GzLiveDot(size: 6, color: AppColors.err),
+                        ),
+                    ],
                   ),
                 ],
               ),
