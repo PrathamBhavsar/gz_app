@@ -1,7 +1,8 @@
 # RULE: STATE MANAGEMENT
 > **Enforcement Level**: CRITICAL
 
-1. **Riverpod Generator Only:** Hand-written `Provider`, `StateProvider`, `StateNotifierProvider` are FORBIDDEN. Use `@riverpod`.
-2. **No setState:** `setState` and `ChangeNotifier` are strictly forbidden in feature screens.
-3. **Build Runner:** Run `dart run build_runner build --delete-conflicting-outputs` after any provider change.
-4. **Async Handling:** UI must handle `AsyncValue` using `.when(data:, loading:, error:)`.
+1. **Riverpod Style:** Use plain `flutter_riverpod` providers. `Notifier`, `AsyncNotifier`, `Provider`, and `.family` variants are the default tools in this repo.
+2. **Read Screens:** Data-loading screens should expose `AsyncValue<T>` and render via `.when(data:, loading:, error:)`.
+3. **Action Flows:** Submit/login/mutate flows should use a `Notifier` with explicit state classes such as `Initial`, `Loading`, `Success`, and `Error`.
+4. **No setState for app state:** Local widget-only concerns may use `StatefulWidget`, but feature/application state belongs in Riverpod notifiers.
+5. **Refresh and Polling:** Refresh methods should use `AsyncValue.guard`. Timer-based polling must register cleanup with `ref.onDispose`.

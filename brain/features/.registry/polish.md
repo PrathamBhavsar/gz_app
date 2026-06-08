@@ -1,4 +1,9 @@
 # Registry: Polish (Phase 10)
+> TARGET SPEC — not yet implemented
+
+## Reality Check
+This registry outlines pull-to-refresh, empty states, and accessibility enhancements that are targets for the finalized screen implementations. Since the features themselves are currently presentation-only (no data repositories/notifiers wired up), these polish items will be verified and completed as each feature phase finishes.
+
 
 ## Empty States
 

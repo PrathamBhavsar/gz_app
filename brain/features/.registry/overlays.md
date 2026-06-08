@@ -1,4 +1,14 @@
 # Overlays Feature Registry — Phase 8
+> TARGET SPEC — not yet implemented
+
+## Reality Check
+Only presentation overlays exist today:
+- `lib/features/notifications/presentation/screens/notification_center_sheet.dart`
+- `lib/features/notifications/presentation/widgets/notification_detail_sheet.dart`
+- `lib/shared/widgets/store_selector_sheet.dart`
+- `lib/shared/widgets/otp_input_sheet.dart`
+
+No data or application logic notifiers (like `NotificationsNotifier`, `StoreSelectorNotifier`, `ChangePhoneNotifier`) are implemented yet.
 
 ## Global Overlays (Modal Bottom Sheets — not routes)
 

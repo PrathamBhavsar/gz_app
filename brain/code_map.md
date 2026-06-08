@@ -1,36 +1,88 @@
-# 🗺️ FLUTTER WORKSPACE MAP (LIVING INDEX)
-> **STATE SYNC MANDATE**: You MUST update this file immediately whenever a new `.dart` file is created, moved, or deleted. This replaces the need to grep.
+# FLUTTER WORKSPACE MAP
+> Update this file whenever `.dart` files are created, moved, or deleted.
 
-## CORE (`lib/core/`)
-- `network/`
-  - `dio_client.dart`
-  - `exceptions.dart`
-- `storage/`
-- `theme/`
+## Core
+- `lib/core/api/`
+  - `api_client.dart`
+  - `api_constants.dart`
+- `lib/core/auth/`
+  - `token_storage.dart`
+- `lib/core/errors/`
+  - `app_exception.dart`
+  - `error_snackbar.dart`
+- `lib/core/navigation/`
+  - `app_router.dart`
+  - `routes.dart`
+- `lib/core/network/`
+  - `admin_live_service.dart`
+  - `connectivity_service.dart`
+  - `network_checker.dart`
+  - `player_ws_service.dart`
+- `lib/core/responsive/`
+  - `breakpoints.dart`
+  - `responsive_builder.dart`
+- `lib/core/theme/`
+  - `app_colors.dart`
+  - `app_spacing.dart`
+  - `app_theme.dart`
+  - `app_typography.dart`
 
-## SHARED (`lib/shared/`)
-- `widgets/`
+## Models
+- `lib/models/`
+  - `api_responses.dart`
+  - `api_responses_admin.dart`
+  - `core.dart`
+  - `domain_admin.dart`
+  - `domain_analytics.dart`
+  - `domain_billing.dart`
+  - `domain_global.dart`
+  - `domain_loyalty.dart`
+  - `domain_misc.dart`
+  - `domain_systems.dart`
+  - `enums.dart`
 
-## FEATURES (`lib/features/`)
-*(AI: Keep this strictly updated. If adapting an existing project, map the current directories here immediately after creating this file.)*
+## Shared
+- `lib/shared/widgets/`
+  - Base UI primitives and shell widgets
+  - Error/loading widgets: `page_error_display.dart`, `gz_loading_view.dart`
+  - Common overlays: `otp_input_sheet.dart`, `store_selector_sheet.dart`
 
-- `admin/`
-- `auth/`
-- `booking/`
-- `disputes/`
-- `home/`
-- `main_shell/`
-- `notifications/`
-  - `presentation/`
-    - `providers/`
-      - `notification_feed_notifier.dart`
-      - `notification_feed_notifier.g.dart`
-    - `screens/`
-      - `notification_center_sheet.dart`
-- `profile/`
-- `sessions/`
-  - `presentation/`
-    - `providers/`
-      - `session_runtime_providers.dart`
-      - `session_runtime_providers.g.dart`
-- `wallet/`
+## Features
+- `lib/features/auth/`
+  - `presentation/screens/` only today
+- `lib/features/home/`
+  - `presentation/screens/` only today
+- `lib/features/booking/`
+  - `presentation/screens/` only today
+- `lib/features/sessions/`
+  - `presentation/screens/`
+  - `presentation/providers/session_runtime_providers.dart`
+- `lib/features/wallet/`
+  - `presentation/screens/` only today
+- `lib/features/notifications/`
+  - `presentation/screens/`
+  - `presentation/providers/notification_feed_notifier.dart`
+- `lib/features/profile/`
+  - `presentation/screens/` only today
+- `lib/features/disputes/`
+  - `presentation/screens/` only today
+- `lib/features/main_shell/`
+  - `presentation/screens/main_page.dart`
+- `lib/features/admin/`
+  - `presentation/screens/admin_login_screen.dart`
+  - `presentation/screens/admin_password_reset_screen.dart`
+  - `presentation/screens/analytics/`
+  - `presentation/screens/management/`
+  - `presentation/screens/operations/`
+  - `presentation/screens/store/`
+  - `presentation/widgets/admin_shell.dart`
+
+## Target Convention For API Phases
+When feature integration starts, add:
+```text
+lib/features/<feature>/
+  data/repositories/
+  application/
+  presentation/
+```
+Models remain centralized in `lib/models/`.

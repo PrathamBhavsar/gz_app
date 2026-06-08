@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../notifications/presentation/providers/notification_feed_notifier.dart';
+import '../../../notifications/presentation/screens/notification_center_sheet.dart';
 import '../../../../shared/widgets/gz_button.dart';
 import '../../../../shared/widgets/gz_card.dart';
 import '../../../../shared/widgets/gz_icon_btn.dart';
@@ -76,7 +77,7 @@ class WalletScreen extends ConsumerWidget {
                   children: [
                     GzIconBtn(
                       tooltip: 'Notifications',
-                      onTap: () => context.push(AppRoutes.notifications),
+                      onTap: () => showNotificationCenter(context),
                       child: const HugeIcon(
                         icon: HugeIcons.strokeRoundedNotification03,
                         color: AppColors.textPrimary,

@@ -175,7 +175,7 @@ class ApiClient {
     await post(
       ApiConstants.authAdminLogout,
       body: {
-        'refreshToken': ?refreshToken,
+        ...?refreshToken == null ? null : {'refreshToken': refreshToken},
         if (allDevices) 'all': true,
       },
     );

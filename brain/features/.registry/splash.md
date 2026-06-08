@@ -6,53 +6,32 @@ metadata:
 ---
 
 # Feature: Splash (S-01)
+> TARGET SPEC — not yet implemented
 
-**Route**: `/`  
-**Phase**: 2 (DONE — 2026-05-16)
+## Reality Check
+Existing files today:
+- `lib/features/auth/presentation/screens/splash/splash_screen.dart`
 
-## Files
+Missing today:
+- `lib/features/auth/data/repositories/splash_repository.dart`
+- `lib/features/auth/application/splash_notifier.dart`
+- Any splash-specific state classes or auth bootstrap provider wiring
 
-| Layer | File |
-|---|---|
-| Screen | `lib/features/auth/presentation/screens/splash/splash_screen.dart` |
-| Mobile layout | `lib/features/auth/presentation/widgets/splash_mobile_layout.dart` |
-| Tablet layout | `lib/features/auth/presentation/widgets/splash_tablet_layout.dart` |
-| Notifier + sealed state | `lib/features/auth/presentation/providers/splash_notifier.dart` |
-| Repository | `lib/features/auth/data/repositories/splash_repository.dart` |
+## Planned Files
+| File | Purpose | Implemented? |
+|---|---|---|
+| `lib/features/auth/data/repositories/splash_repository.dart` | Thin token/bootstrap helper over `TokenStorage` | No |
+| `lib/features/auth/application/splash_notifier.dart` | Startup routing state machine | No |
 
-## State
+## Planned Logic
+1. Read refresh token and onboarding flags from `TokenStorage`.
+2. If no session exists, route to onboarding or auth landing.
+3. If a session exists, validate bootstrap state through the auth layer.
+4. Route to player home or admin dashboard based on authenticated user type.
 
-`SplashState` (sealed):
-- `SplashChecking` — initial, resolving
-- `SplashToHome` — navigate to `/home`
-- `SplashToAdmin` — navigate to `/admin/dashboard`
-- `SplashToAuth` — navigate to `/auth`
-- `SplashToOnboarding` — navigate to `/onboarding`
+## Planned Route
+- `/`
 
-Provider: `splashNotifierProvider` (`NotifierProvider<SplashNotifier, SplashState>`)
-
-## Logic (in SplashNotifier._resolve)
-
-1. Read `refreshToken` from `TokenStorage`
-2. If null → check `hasSeenOnboarding` → `SplashToOnboarding` or `SplashToAuth`
-3. If exists → call `authNotifierProvider.checkAuthStatus()` (ApiClient handles 401→refresh→retry)
-4. `AuthAuthenticated` → check userType → `SplashToHome` or admin path
-5. `AuthError(NetworkException)` → offline, trust tokens → `SplashToHome`
-6. Other error → clear tokens → `SplashToAuth` or `SplashToOnboarding`
-
-## UI
-
-`SplashScreen` — thin `StatelessWidget`, `ResponsiveBuilderWidget`  
-Layouts — `ConsumerWidget` with `ref.listen(splashNotifierProvider)` for navigation  
-Visual: centered `EmGzLogo` + `EmLiveDot` on `AppColors.background`
-
-## Dependencies
-
-- `splashRepositoryProvider` → wraps `TokenStorage` (getRefreshToken, getHasSeenOnboarding, getUserType)
-- `authNotifierProvider` — validates session and populates user object
-- `adminAuthNotifierProvider` — validates admin session
-- `tokenStorageProvider` — clearAll on auth failure
-
-## API
-
-None called directly (delegated to `authNotifierProvider.checkAuthStatus()`)
+## Notes
+- This registry was previously claiming a completed splash notifier and repository that do not exist in `lib/`.
+- Splash belongs to the broader Phase 1 auth/identity implementation track even though the screen file already exists.

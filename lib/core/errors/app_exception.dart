@@ -1,23 +1,30 @@
-// Typed exceptions for propagation through layers
-class NetworkException implements Exception {
-  const NetworkException([this.message = 'No internet connection']);
+// Typed exceptions for propagation through layers.
+sealed class AppException implements Exception {
+  const AppException(this.message);
+
   final String message;
+
+  @override
+  String toString() => '$runtimeType: $message';
 }
 
-class ApiException implements Exception {
-  const ApiException({required this.statusCode, required this.message});
+class NetworkException extends AppException {
+  const NetworkException([super.message = 'No internet connection']);
+}
+
+class ApiException extends AppException {
+  const ApiException({required this.statusCode, required String message})
+    : super(message);
+
   final int statusCode;
-  final String message;
 }
 
-class UnauthorizedException implements Exception {
-  const UnauthorizedException([this.message = 'Unauthorized']);
-  final String message;
+class UnauthorizedException extends AppException {
+  const UnauthorizedException([super.message = 'Unauthorized']);
 }
 
-class ValidationException implements Exception {
-  const ValidationException(this.message);
-  final String message;
+class ValidationException extends AppException {
+  const ValidationException(super.message);
 }
 
 /// The kind of page-level error being displayed.

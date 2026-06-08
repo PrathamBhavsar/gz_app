@@ -1154,4 +1154,4 @@ All visual specs come from `design/src/`. Key mapping:
 - **Service → Repository → Notifier** chain. Never skip layers.
 - **Icons**: `HugeIcon(icon: HugeIcons.strokeRounded*, color: ...)` only.
 - **Navigation**: `context.go` for tab switches, `context.push` for drill-downs.
-- **Models**: use `@freezed` + `@JsonSerializable` to match `brain/.ai_index.md` and `brain/rules/data_layer.md`.
+- **Models**: use the shared manual classes in `lib/models/` and extend existing `fromJson` parsing only when fields are missing.
