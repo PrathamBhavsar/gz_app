@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../providers/session_runtime_providers.dart';
 import '../../../../shared/widgets/gz_card.dart';
 import '../../../../shared/widgets/gz_chip.dart';
 import '../../../../shared/widgets/gz_collapse.dart';
@@ -13,27 +15,37 @@ import '../../../../shared/widgets/gz_progress_bar.dart';
 import '../../../../shared/widgets/gz_tag.dart';
 import '../../../../shared/widgets/gz_top_bar.dart';
 
-class ActiveSessionDetailScreen extends StatefulWidget {
+class ActiveSessionDetailScreen extends ConsumerStatefulWidget {
   const ActiveSessionDetailScreen({super.key, required this.id});
   final String id;
 
   @override
-  State<ActiveSessionDetailScreen> createState() =>
+  ConsumerState<ActiveSessionDetailScreen> createState() =>
       _ActiveSessionDetailScreenState();
 }
 
 class _ActiveSessionDetailScreenState
-    extends State<ActiveSessionDetailScreen> {
+    extends ConsumerState<ActiveSessionDetailScreen> {
   int _logFilterIndex = 0;
   final _logFilters = ['All', 'System', 'Alerts', 'Activity'];
 
   @override
   Widget build(BuildContext context) {
+    final session = ref.watch(
+      activeSessionDetailStateNotifierProvider(widget.id),
+    );
+    final filteredEvents = [
+      for (final event in session.events)
+        if (_logFilters[_logFilterIndex] == 'All' ||
+            event.category == _logFilters[_logFilterIndex])
+          event,
+    ];
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: GzTopBar(
         title: 'Live session',
-        subtitle: 'GameZone Koramangala',
+        subtitle: session.storeName,
       ),
       body: SafeArea(
         top: false,
@@ -59,7 +71,7 @@ class _ActiveSessionDetailScreenState
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '01:22:38',
+                    formatRemaining(session.remaining),
                     style: AppTypography.h1.copyWith(
                       fontSize: 48,
                       fontWeight: FontWeight.w700,
@@ -69,20 +81,21 @@ class _ActiveSessionDetailScreenState
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '37:22 elapsed',
+                    '${formatElapsed(session.elapsed)} elapsed',
                     style: AppTypography.small
                         .copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 16),
-                  GzProgressBar(value: 0.30),
+                  GzProgressBar(value: session.elapsedProgress),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('30% elapsed',
+                      Text(
+                          '${(session.elapsedProgress * 100).round()}% elapsed',
                           style: AppTypography.small
                               .copyWith(color: AppColors.textSecondary)),
-                      Text('ID: a3f9b2c1',
+                      Text('ID: ${session.sessionCode}',
                           style: AppTypography.small.copyWith(
                             color: AppColors.textTertiary,
                             fontFamily: 'GeistMono',
@@ -120,9 +133,9 @@ class _ActiveSessionDetailScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('PC Station 03', style: AppTypography.h3),
+                        Text(session.systemName, style: AppTypography.h3),
                         const SizedBox(height: 2),
-                        Text('GameZone Koramangala',
+                        Text(session.storeName,
                             style: AppTypography.small
                                 .copyWith(color: AppColors.textSecondary)),
                       ],
@@ -154,9 +167,8 @@ class _ActiveSessionDetailScreenState
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _EventRow(time: '09:41', event: 'Session started'),
-                  _EventRow(time: '09:41', event: 'System online'),
-                  _EventRow(time: '09:45', event: 'Player connected'),
+                  for (final event in filteredEvents)
+                    _EventRow(time: event.time, event: event.event),
                 ],
               ),
             ),

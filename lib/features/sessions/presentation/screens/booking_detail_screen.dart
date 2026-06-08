@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../providers/session_runtime_providers.dart';
 import '../../../../shared/widgets/gz_button.dart';
 import '../../../../shared/widgets/gz_meta_row.dart';
 import '../../../../shared/widgets/gz_tag.dart';
 import '../../../../shared/widgets/gz_top_bar.dart';
 import 'cancel_booking_sheet.dart';
 
-class BookingDetailScreen extends StatelessWidget {
+class BookingDetailScreen extends ConsumerWidget {
   const BookingDetailScreen({super.key, required this.id});
   final String id;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final booking = ref.watch(bookingDetailStateNotifierProvider(id));
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: GzTopBar(title: 'Booking'),
@@ -32,10 +36,13 @@ class BookingDetailScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const GzTag(kind: GzTagKind.ok, label: 'Confirmed'),
+                        GzTag(
+                          kind: _bookingTagKind(booking.status),
+                          label: _bookingTagLabel(booking.status),
+                        ),
                         const SizedBox(height: 8),
                         Text(
-                          id.isEmpty ? 'GZ-2406-4891' : id,
+                          booking.id,
                           style: AppTypography.h3.copyWith(
                             fontFamily: 'GeistMono',
                           ),
@@ -49,38 +56,40 @@ class BookingDetailScreen extends StatelessWidget {
             const SizedBox(height: 12),
             _Card(
               child: Column(
-                children: const [
-                  GzMetaRow(label: 'System', value: 'PC Station 01'),
-                  GzMetaRow(label: 'Seat', value: 'Seat 3'),
-                  GzMetaRow(label: 'Store', value: 'GameZone Koramangala'),
+                children: [
+                  GzMetaRow(label: 'System', value: booking.system),
+                  GzMetaRow(label: 'Seat', value: booking.seat),
+                  GzMetaRow(label: 'Store', value: booking.store),
                 ],
               ),
             ),
             const SizedBox(height: 12),
             _Card(
               child: Column(
-                children: const [
-                  GzMetaRow(label: 'Date', value: 'Wed, 4 Jun'),
-                  GzMetaRow(label: 'Time', value: '6:00 PM – 8:00 PM'),
-                  GzMetaRow(label: 'Duration', value: '2 hours'),
+                children: [
+                  GzMetaRow(label: 'Date', value: booking.date),
+                  GzMetaRow(label: 'Time', value: booking.time),
+                  GzMetaRow(label: 'Duration', value: booking.duration),
                 ],
               ),
             ),
             const SizedBox(height: 12),
             _Card(
               child: Column(
-                children: const [
-                  GzMetaRow(label: 'Total', value: '₹160'),
-                  GzMetaRow(label: 'Status', value: 'Unpaid'),
+                children: [
+                  GzMetaRow(label: 'Total', value: booking.total),
+                  GzMetaRow(label: 'Status', value: booking.paymentStatus),
                 ],
               ),
             ),
             const SizedBox(height: 24),
             GzButton(
-              label: 'Check in',
-              onPressed: () => context.push(
-                AppRoutes.checkInPath(id.isEmpty ? 'GZ-2406-4891' : id),
-              ),
+              label: booking.primaryActionLabel,
+              onPressed: booking.status == SessionUiStatus.checkedIn
+                  ? null
+                  : () => booking.paymentStatus == 'Unpaid'
+                        ? context.push(AppRoutes.paymentSheetPath(booking.id))
+                        : context.push(AppRoutes.checkInPath(booking.id)),
             ),
             const SizedBox(height: 12),
             GzButton(
@@ -88,9 +97,9 @@ class BookingDetailScreen extends StatelessWidget {
               variant: GzButtonVariant.dangerOutline,
               onPressed: () => showCancelBookingSheet(
                 context,
-                bookingId: id,
-                systemName: 'PC Station 01',
-                bookingTime: '09:00 – 11:00',
+                bookingId: booking.id,
+                systemName: booking.system,
+                bookingTime: booking.time,
                 hoursUntilBooking: 26.0,
               ),
             ),
@@ -100,6 +109,22 @@ class BookingDetailScreen extends StatelessWidget {
     );
   }
 }
+
+GzTagKind _bookingTagKind(SessionUiStatus status) => switch (status) {
+  SessionUiStatus.confirmed => GzTagKind.ok,
+  SessionUiStatus.unpaid => GzTagKind.warn,
+  SessionUiStatus.checkedIn => GzTagKind.info,
+  SessionUiStatus.active => GzTagKind.ok,
+  SessionUiStatus.completed => GzTagKind.info,
+};
+
+String _bookingTagLabel(SessionUiStatus status) => switch (status) {
+  SessionUiStatus.confirmed => 'Confirmed',
+  SessionUiStatus.unpaid => 'Unpaid',
+  SessionUiStatus.checkedIn => 'Checked in',
+  SessionUiStatus.active => 'Active',
+  SessionUiStatus.completed => 'Completed',
+};
 
 class _Card extends StatelessWidget {
   const _Card({required this.child});

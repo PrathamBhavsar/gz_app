@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../notifications/presentation/providers/notification_feed_notifier.dart';
+import '../providers/session_runtime_providers.dart';
 import '../../../../shared/widgets/gz_button.dart';
 import '../../../../shared/widgets/gz_chip.dart';
 import '../../../../shared/widgets/gz_icon_btn.dart';
@@ -28,6 +29,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   @override
   Widget build(BuildContext context) {
     final unreadCount = ref.watch(unreadNotificationCountProvider);
+    final hubState = ref.watch(sessionsHubProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -84,30 +86,30 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    _ActiveSessionBanner(),
+                    if (hubState.activeSession != null)
+                      _ActiveSessionBanner(activeSession: hubState.activeSession!),
                     const SizedBox(height: 24),
                     Text('Upcoming', style: AppTypography.h2),
                     const SizedBox(height: 12),
-                    _UpcomingItem(
-                      system: 'PC Station 01',
-                      date: 'Wed 4 Jun',
-                      time: '6:00 PM',
-                      tag: const GzTag(kind: GzTagKind.ok, label: 'Confirmed'),
-                      actionLabel: 'Check in',
-                      onAction: () =>
-                          context.push(AppRoutes.checkInPath('GZ-2406-4891')),
-                    ),
-                    const SizedBox(height: 10),
-                    _UpcomingItem(
-                      system: 'PS5 Console',
-                      date: 'Thu 5 Jun',
-                      time: '4:00 PM',
-                      tag: const GzTag(kind: GzTagKind.warn, label: 'Unpaid'),
-                      actionLabel: 'Pay',
-                      onAction: () => context.push(
-                        AppRoutes.paymentSheetPath('GZ-2406-4892'),
+                    for (final booking in hubState.upcoming) ...[
+                      _UpcomingItem(
+                        system: booking.system,
+                        date: booking.date,
+                        time: booking.time,
+                        tag: GzTag(
+                          kind: _tagKindForStatus(booking.status),
+                          label: _labelForStatus(booking.status),
+                        ),
+                        actionLabel: booking.status == SessionUiStatus.unpaid
+                            ? 'Pay'
+                            : 'Check in',
+                        onAction: () => booking.status == SessionUiStatus.unpaid
+                            ? context.push(AppRoutes.paymentSheetPath(booking.id))
+                            : context.push(AppRoutes.checkInPath(booking.id)),
                       ),
-                    ),
+                      if (booking != hubState.upcoming.last)
+                        const SizedBox(height: 10),
+                    ],
                     const SizedBox(height: 24),
                     Text('Past sessions', style: AppTypography.h2),
                     const SizedBox(height: 12),
@@ -117,36 +119,17 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
             ),
             SliverList(
               delegate: SliverChildListDelegate([
-                _PastSessionRow(
-                  store: 'GameZone Koramangala',
-                  system: 'PC Station 03',
-                  date: '4 Jun',
-                  duration: '2h 07m',
-                  amount: '₹1,740',
-                  onTap: () => context.push(
-                    AppRoutes.sessionHistoryDetailPath('GZ-2406-4891'),
+                for (final session in hubState.past)
+                  _PastSessionRow(
+                    store: session.store,
+                    system: session.system,
+                    date: session.date,
+                    duration: session.duration,
+                    amount: session.amount,
+                    onTap: () => context.push(
+                      AppRoutes.sessionHistoryDetailPath(session.id),
+                    ),
                   ),
-                ),
-                _PastSessionRow(
-                  store: 'GameZone Indiranagar',
-                  system: 'PS5 Console',
-                  date: '28 May',
-                  duration: '1h 30m',
-                  amount: '₹1,200',
-                  onTap: () => context.push(
-                    AppRoutes.sessionHistoryDetailPath('GZ-2405-3210'),
-                  ),
-                ),
-                _PastSessionRow(
-                  store: 'GameZone Koramangala',
-                  system: 'Xbox Series X',
-                  date: '20 May',
-                  duration: '3h 00m',
-                  amount: '₹2,400',
-                  onTap: () => context.push(
-                    AppRoutes.sessionHistoryDetailPath('GZ-2405-2100'),
-                  ),
-                ),
                 const SizedBox(height: 24),
               ]),
             ),
@@ -158,10 +141,15 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
 }
 
 class _ActiveSessionBanner extends StatelessWidget {
+  const _ActiveSessionBanner({required this.activeSession});
+
+  final SessionHubActiveState activeSession;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push(AppRoutes.activeSessionDetailPath('sess-001')),
+      onTap: () =>
+          context.push(AppRoutes.activeSessionDetailPath(activeSession.sessionId)),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -177,14 +165,14 @@ class _ActiveSessionBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'PC Station 03 · Live',
+                    '${activeSession.systemName} · Live',
                     style: AppTypography.h3.copyWith(
                       color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '1:22:38 remaining',
+                    activeSession.remainingLabel,
                     style: AppTypography.small.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -215,6 +203,22 @@ class _ActiveSessionBanner extends StatelessWidget {
     );
   }
 }
+
+GzTagKind _tagKindForStatus(SessionUiStatus status) => switch (status) {
+  SessionUiStatus.confirmed => GzTagKind.ok,
+  SessionUiStatus.unpaid => GzTagKind.warn,
+  SessionUiStatus.checkedIn => GzTagKind.info,
+  SessionUiStatus.active => GzTagKind.ok,
+  SessionUiStatus.completed => GzTagKind.info,
+};
+
+String _labelForStatus(SessionUiStatus status) => switch (status) {
+  SessionUiStatus.confirmed => 'Confirmed',
+  SessionUiStatus.unpaid => 'Unpaid',
+  SessionUiStatus.checkedIn => 'Checked in',
+  SessionUiStatus.active => 'Active',
+  SessionUiStatus.completed => 'Completed',
+};
 
 class _UpcomingItem extends StatelessWidget {
   const _UpcomingItem({

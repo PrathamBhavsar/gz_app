@@ -12,6 +12,7 @@ import '../../../../core/network/player_ws_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../notifications/presentation/providers/notification_feed_notifier.dart';
 import '../../../notifications/presentation/screens/notification_center_sheet.dart';
+import '../../../sessions/presentation/providers/session_runtime_providers.dart';
 import '../../../../shared/widgets/gz_bottom_nav.dart';
 
 class MainPage extends ConsumerStatefulWidget {
@@ -65,6 +66,7 @@ class _MainPageState extends ConsumerState<MainPage> {
             .prependFromWs(event.payload);
         break;
       case PlayerWsEventType.sessionEnded:
+        ref.read(sessionsHubProvider.notifier).handleSessionEnded(event.payload);
         final currentPath = GoRouter.of(
           context,
         ).routeInformationProvider.value.uri.path;
@@ -76,19 +78,31 @@ class _MainPageState extends ConsumerState<MainPage> {
         }
         break;
       case PlayerWsEventType.sessionExtended:
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Session extended')));
+        final sessionId =
+            event.payload['sessionId']?.toString() ??
+            event.payload['id']?.toString();
+        final newEndTime = parseSessionEndTime(event.payload);
+        if (sessionId != null && newEndTime != null) {
+          ref
+              .read(activeSessionDetailStateNotifierProvider(sessionId).notifier)
+              .extendTimer(newEndTime);
+          ref.read(sessionsHubProvider.notifier).handleSessionStarted(event.payload);
+        }
         break;
       case PlayerWsEventType.sessionStarted:
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Session started')));
+        ref.read(sessionsHubProvider.notifier).handleSessionStarted(event.payload);
         break;
       case PlayerWsEventType.bookingCheckedIn:
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Booking checked in')));
+        ref.read(sessionsHubProvider.notifier).handleBookingCheckedIn(event.payload);
+        final bookingId =
+            event.payload['bookingId']?.toString() ??
+            event.payload['id']?.toString() ??
+            event.payload['referenceId']?.toString();
+        if (bookingId != null) {
+          ref
+              .read(bookingDetailStateNotifierProvider(bookingId).notifier)
+              .handleBookingCheckedIn(event.payload);
+        }
         break;
       case PlayerWsEventType.unknown:
         break;

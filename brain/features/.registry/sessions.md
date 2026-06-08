@@ -4,12 +4,9 @@
 
 | Provider | File | Type | Purpose |
 |---|---|---|---|
-| `activityHubProvider` | `presentation/providers/activity_hub_notifier.dart` | `NotifierProvider<ActivityHubNotifier, ActivityHubState>` | Aggregated data (bookings + sessions) + UI tab/expand state |
-| `bookingDetailNotifierProvider(id)` | `presentation/providers/booking_detail_notifier.dart` | `NotifierProviderFamily<BookingDetailNotifier, AsyncValue<BookingModel>, String>` | Single booking detail by ID |
-| `paymentNotifierProvider` | `presentation/providers/payment_notifier.dart` | `NotifierProvider<PaymentNotifier, PaymentState>` | Sealed payment state (Initial/Loading/Success/Error) |
-| `activeSessionNotifierProvider(id)` | `presentation/providers/active_session_notifier.dart` | `NotifierProviderFamily<ActiveSessionNotifier, AsyncValue<SessionModel>, String>` | Live session with 30s polling |
-| `sessionDetailNotifierProvider(id)` | `presentation/providers/session_detail_notifier.dart` | `NotifierProviderFamily<SessionDetailNotifier, AsyncValue<SessionModel>, String>` | Session history detail (no polling) |
-| `billingNotifierProvider` | `presentation/providers/billing_notifier.dart` | `NotifierProvider<BillingNotifier, AsyncValue<List<BillingRow>>>` | Player billing history |
+| `sessionsHubProvider` | `presentation/providers/session_runtime_providers.dart` | `@riverpod` keepAlive notifier | Runtime session-hub state used by `SessionsScreen`, updated by WS `session.started`, `session.ended`, and `booking.checked_in` |
+| `bookingDetailStateNotifierProvider(id)` | `presentation/providers/session_runtime_providers.dart` | `@riverpod` keepAlive family notifier | Runtime booking-detail state used by `BookingDetailScreen`, updated by WS `booking.checked_in` |
+| `activeSessionDetailStateNotifierProvider(id)` | `presentation/providers/session_runtime_providers.dart` | `@riverpod` keepAlive family notifier | Runtime active-session detail state used by `ActiveSessionDetailScreen`, updated by WS `session.extended` |
 
 ## Services
 
@@ -48,6 +45,11 @@
 | `ActiveSessionDetailMobileLayout` | `widgets/active_session_detail_mobile_layout.dart` | Wired to `activeSessionNotifierProvider` with Timer countdown |
 | `SessionHistoryDetailMobileLayout` | `widgets/session_history_detail_mobile_layout.dart` | Wired to `sessionDetailNotifierProvider` |
 | `BillingHistoryMobileLayout` | `widgets/billing_history_mobile_layout.dart` | Grouped by month |
+
+## Phase 12 Runtime Note
+
+- This workspace revision does not contain the richer Phase 5 notifier/data layer described in earlier planning (`activityHubProvider`, `activeSessionNotifierProvider`, `bookingDetailNotifierProvider`).
+- Phase 12 therefore lands on `session_runtime_providers.dart` as the real WS event-dispatch target in the current codebase.
 
 ## Network
 

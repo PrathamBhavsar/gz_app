@@ -29,4 +29,8 @@
       - `notification_center_sheet.dart`
 - `profile/`
 - `sessions/`
+  - `presentation/`
+    - `providers/`
+      - `session_runtime_providers.dart`
+      - `session_runtime_providers.g.dart`
 - `wallet/`
