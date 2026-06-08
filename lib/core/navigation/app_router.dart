@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:flutter/foundation.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'routes.dart';
 
 import '../../features/auth/presentation/screens/splash/splash_screen.dart';
+import '../../features/auth/application/admin_auth_notifier.dart';
+import '../../features/auth/application/auth_notifier.dart';
 import '../../features/auth/presentation/screens/onboarding/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/auth_landing/auth_landing_screen.dart';
 import '../../features/auth/presentation/screens/register/register_screen.dart';
@@ -93,12 +95,39 @@ PendingDeepLinkOverlay? consumePendingDeepLinkOverlay() {
   return overlay;
 }
 
-final routerProvider = Provider<GoRouter>((_) {
+class _RouterRefreshNotifier extends ChangeNotifier {
+  void refresh() => notifyListeners();
+}
+
+final _routerRefreshProvider = Provider<_RouterRefreshNotifier>((ref) {
+  final notifier = _RouterRefreshNotifier();
+  ref.onDispose(notifier.dispose);
+  ref.listen<AuthSessionState>(authNotifierProvider, (previous, next) {
+    notifier.refresh();
+  });
+  ref.listen<AdminAuthSessionState>(adminAuthNotifierProvider, (
+    previous,
+    next,
+  ) {
+    notifier.refresh();
+  });
+  return notifier;
+});
+
+final routerProvider = Provider<GoRouter>((ref) {
+  final refreshListenable = ref.watch(_routerRefreshProvider);
+
   return GoRouter(
     initialLocation: _initialLocation(),
     overridePlatformDefaultLocation: true,
+    refreshListenable: refreshListenable,
     redirect: (context, state) {
-      return _mapDeepLinkUriToRoute(state.uri);
+      final deepLinkRoute = _mapIncomingUriToRoute(state.uri);
+      if (deepLinkRoute != null && deepLinkRoute != state.uri.toString()) {
+        return deepLinkRoute;
+      }
+
+      return _authRedirect(ref, state);
     },
     routes: [
       GoRoute(
@@ -119,7 +148,10 @@ final routerProvider = Provider<GoRouter>((_) {
       ),
       GoRoute(
         path: AppRoutes.otpVerification,
-        builder: (context, state) => const OtpVerificationScreen(),
+        builder: (context, state) => OtpVerificationScreen(
+          phone: state.uri.queryParameters['phone'],
+          email: state.uri.queryParameters['email'],
+        ),
       ),
       GoRoute(
         path: AppRoutes.emailLogin,
@@ -127,7 +159,12 @@ final routerProvider = Provider<GoRouter>((_) {
       ),
       GoRoute(
         path: AppRoutes.oauthHandler,
-        builder: (context, state) => const OAuthHandlerScreen(),
+        builder: (context, state) => OAuthHandlerScreen(
+          provider: state.uri.queryParameters['provider'],
+          code: state.uri.queryParameters['code'],
+          stateParam: state.uri.queryParameters['state'],
+          redirectUri: state.uri.queryParameters['redirectUri'],
+        ),
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
@@ -135,15 +172,19 @@ final routerProvider = Provider<GoRouter>((_) {
       ),
       GoRoute(
         path: AppRoutes.resetPassword,
-        builder: (context, state) => const ResetPasswordScreen(),
+        builder: (context, state) =>
+            ResetPasswordScreen(token: state.uri.queryParameters['token']),
       ),
       GoRoute(
         path: AppRoutes.emailVerificationPending,
-        builder: (context, state) => const EmailVerificationPendingScreen(),
+        builder: (context, state) => EmailVerificationPendingScreen(
+          email: state.uri.queryParameters['email'],
+        ),
       ),
       GoRoute(
         path: AppRoutes.emailVerified,
-        builder: (context, state) => const EmailVerifySuccessScreen(),
+        builder: (context, state) =>
+            EmailVerifySuccessScreen(token: state.uri.queryParameters['token']),
       ),
 
       // Admin Auth Stack
@@ -153,7 +194,8 @@ final routerProvider = Provider<GoRouter>((_) {
       ),
       GoRoute(
         path: AppRoutes.adminPasswordReset,
-        builder: (context, state) => const AdminPasswordResetScreen(),
+        builder: (context, state) =>
+            AdminPasswordResetScreen(token: state.uri.queryParameters['token']),
       ),
 
       // Main App Shell
@@ -468,36 +510,139 @@ final routerProvider = Provider<GoRouter>((_) {
   );
 });
 
-String _initialLocation() {
-  final defaultRouteName = PlatformDispatcher.instance.defaultRouteName;
-  final initialUri = Uri.tryParse(defaultRouteName);
-  return _mapDeepLinkUriToRoute(initialUri) ?? AppRoutes.splash;
-}
-
-String? _mapDeepLinkUriToRoute(Uri? uri) {
-  if (uri == null || uri.scheme != 'gzapp') {
+String? _authRedirect(Ref ref, GoRouterState state) {
+  final location = state.matchedLocation;
+  if (location == AppRoutes.splash || location == AppRoutes.onboarding) {
     return null;
   }
 
-  switch (uri.host) {
-    case 'bookings':
-      if (uri.pathSegments.isNotEmpty) {
-        return AppRoutes.bookingDetailPath(uri.pathSegments.first);
-      }
-    case 'stores':
-      if (uri.pathSegments.isNotEmpty) {
-        return AppRoutes.storeDetailPath(uri.pathSegments.first);
-      }
-    case 'notifications':
-      _pendingDeepLinkOverlay = PendingDeepLinkOverlay.notifications;
-      return AppRoutes.home;
-    case 'reset-password':
-      final token = uri.queryParameters['token'];
-      return Uri(
-        path: AppRoutes.resetPassword,
-        queryParameters: token == null ? null : {'token': token},
-      ).toString();
+  final authState = ref.read(authNotifierProvider);
+  final adminState = ref.read(adminAuthNotifierProvider);
+
+  final isPlayerAuthed = authState is AuthAuthenticated;
+  final isAdminAuthed = adminState is AdminAuthAuthenticated;
+  final isPlayerLoading = authState is AuthInitial || authState is AuthLoading;
+  final isAdminLoading =
+      adminState is AdminAuthInitial || adminState is AdminAuthLoading;
+
+  if (isPlayerLoading || isAdminLoading) {
+    return null;
+  }
+
+  final isPlayerPublicRoute = <String>{
+    AppRoutes.authLanding,
+    AppRoutes.register,
+    AppRoutes.otpVerification,
+    AppRoutes.emailLogin,
+    AppRoutes.oauthHandler,
+    AppRoutes.forgotPassword,
+    AppRoutes.resetPassword,
+    AppRoutes.emailVerificationPending,
+    AppRoutes.emailVerified,
+  }.contains(location);
+
+  final isAdminPublicRoute = <String>{
+    AppRoutes.adminLogin,
+    AppRoutes.adminPasswordReset,
+  }.contains(location);
+
+  final isAdminRoute = location.startsWith('/admin');
+  final isProtectedPlayerRoute =
+      !isPlayerPublicRoute && !isAdminPublicRoute && !isAdminRoute;
+
+  if (isAdminRoute && !isAdminAuthed) {
+    return AppRoutes.adminLogin;
+  }
+
+  if (isProtectedPlayerRoute && !isPlayerAuthed) {
+    return AppRoutes.authLanding;
+  }
+
+  if (isPlayerAuthed && (isPlayerPublicRoute || isAdminPublicRoute)) {
+    return AppRoutes.home;
+  }
+
+  if (isAdminAuthed && (isPlayerPublicRoute || isAdminPublicRoute)) {
+    return AppRoutes.adminDashboard;
   }
 
   return null;
+}
+
+String _initialLocation() {
+  final defaultRouteName = PlatformDispatcher.instance.defaultRouteName;
+  final initialUri = Uri.tryParse(defaultRouteName);
+  return _mapIncomingUriToRoute(initialUri) ?? AppRoutes.splash;
+}
+
+String? _mapIncomingUriToRoute(Uri? uri) {
+  if (uri == null) {
+    return null;
+  }
+
+  final isAppScheme = uri.scheme == 'gzapp';
+  final normalizedPath = uri.path.startsWith('/') ? uri.path : '/${uri.path}';
+
+  if (isAppScheme && uri.host == 'bookings' && uri.pathSegments.isNotEmpty) {
+    return AppRoutes.bookingDetailPath(uri.pathSegments.first);
+  }
+
+  if (isAppScheme && uri.host == 'stores' && uri.pathSegments.isNotEmpty) {
+    return AppRoutes.storeDetailPath(uri.pathSegments.first);
+  }
+
+  if (isAppScheme && uri.host == 'notifications') {
+    _pendingDeepLinkOverlay = PendingDeepLinkOverlay.notifications;
+    return AppRoutes.home;
+  }
+
+  if ((isAppScheme && uri.host == 'reset-password') ||
+      normalizedPath == '/reset-password') {
+    return Uri(
+      path: AppRoutes.resetPassword,
+      queryParameters: _tokenQuery(uri.queryParameters['token']),
+    ).toString();
+  }
+
+  if ((isAppScheme && uri.host == 'verify-email') ||
+      normalizedPath == '/verify-email') {
+    return Uri(
+      path: AppRoutes.emailVerified,
+      queryParameters: _tokenQuery(uri.queryParameters['token']),
+    ).toString();
+  }
+
+  if ((isAppScheme &&
+          uri.host == 'admin' &&
+          normalizedPath == '/reset-password') ||
+      normalizedPath == '/admin/reset-password') {
+    return Uri(
+      path: AppRoutes.adminPasswordReset,
+      queryParameters: _tokenQuery(uri.queryParameters['token']),
+    ).toString();
+  }
+
+  if ((isAppScheme &&
+          uri.host == 'auth' &&
+          normalizedPath == '/oauth-handler') ||
+      normalizedPath == AppRoutes.oauthHandler) {
+    final redirectUri = uri.replace(queryParameters: const {}, fragment: null);
+    return Uri(
+      path: AppRoutes.oauthHandler,
+      queryParameters: {
+        ...uri.queryParameters,
+        if (redirectUri.toString().isNotEmpty)
+          'redirectUri': redirectUri.toString(),
+      },
+    ).toString();
+  }
+
+  return null;
+}
+
+Map<String, String>? _tokenQuery(String? token) {
+  if (token == null || token.isEmpty) {
+    return null;
+  }
+  return {'token': token};
 }

@@ -215,9 +215,14 @@ class ApiClient {
       String errorMessage = 'Request failed';
       try {
         final parsed = jsonDecode(body) as Map<String, dynamic>;
+        final error = parsed['error'];
+        final nestedMessage = error is Map<String, dynamic>
+            ? error['message'] as String?
+            : null;
         errorMessage =
             (parsed['message'] as String?) ??
-            (parsed['error'] as String?) ??
+            nestedMessage ??
+            (error as String?) ??
             _truncate(body, 300);
       } catch (_) {
         errorMessage = _truncate(body, 300);

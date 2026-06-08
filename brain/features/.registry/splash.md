@@ -6,22 +6,22 @@ metadata:
 ---
 
 # Feature: Splash (S-01)
-> TARGET SPEC — not yet implemented
+> IMPLEMENTED — bootstrap now uses `splashNotifierProvider`
 
 ## Reality Check
 Existing files today:
 - `lib/features/auth/presentation/screens/splash/splash_screen.dart`
+- `lib/features/auth/application/splash_notifier.dart`
 
 Missing today:
 - `lib/features/auth/data/repositories/splash_repository.dart`
-- `lib/features/auth/application/splash_notifier.dart`
 - Any splash-specific state classes or auth bootstrap provider wiring
 
 ## Planned Files
 | File | Purpose | Implemented? |
 |---|---|---|
 | `lib/features/auth/data/repositories/splash_repository.dart` | Thin token/bootstrap helper over `TokenStorage` | No |
-| `lib/features/auth/application/splash_notifier.dart` | Startup routing state machine | No |
+| `lib/features/auth/application/splash_notifier.dart` | Startup routing state machine | Yes |
 
 ## Planned Logic
 1. Read refresh token and onboarding flags from `TokenStorage`.
@@ -33,5 +33,5 @@ Missing today:
 - `/`
 
 ## Notes
-- This registry was previously claiming a completed splash notifier and repository that do not exist in `lib/`.
-- Splash belongs to the broader Phase 1 auth/identity implementation track even though the screen file already exists.
+- Splash now belongs to the live Phase 1 auth/identity implementation track.
+- The repository layer was intentionally folded into `AuthRepository` + secure-storage reads instead of a dedicated splash repository.

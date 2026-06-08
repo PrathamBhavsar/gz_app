@@ -1,4 +1,3 @@
-
 // ============================================================
 // StoreConfigModel — Store booking configuration settings
 // GET /stores/:id/config | PATCH /stores/:id/config
@@ -104,14 +103,16 @@ class AdminAuthModel {
     name: json['name']?.toString(),
     email: json['email']?.toString(),
     role: json['role']?.toString(),
-    storeId: json['storeId']?.toString(),
+    storeId: (json['storeId'] ?? json['store_id'])?.toString(),
     permissions: json['permissions'] != null
         ? Map<String, dynamic>.from(json['permissions'] as Map<String, dynamic>)
         : null,
-    lastLoginAt: json['lastLoginAt'] != null
-        ? DateTime.tryParse(json['lastLoginAt'].toString())
+    lastLoginAt: (json['lastLoginAt'] ?? json['last_login_at']) != null
+        ? DateTime.tryParse(
+            (json['lastLoginAt'] ?? json['last_login_at']).toString(),
+          )
         : null,
-    isActive: json['isActive'] as bool?,
+    isActive: (json['isActive'] ?? json['is_active']) as bool?,
   );
 
   Map<String, dynamic> toJson() => {

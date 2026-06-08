@@ -1,29 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-
+import '../../../auth/application/admin_auth_notifier.dart';
+import '../../../auth/data/repositories/admin_auth_repository.dart';
+import '../../../auth/presentation/widgets/auth_input_field.dart';
+import '../../../../core/errors/error_snackbar.dart';
 import '../../../../core/navigation/routes.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/gz_button.dart';
 import '../../../../shared/widgets/gz_top_bar.dart';
 
-class AdminLoginScreen extends StatefulWidget {
+sealed class AdminLoginState {
+  const AdminLoginState();
+}
+
+class AdminLoginInitial extends AdminLoginState {
+  const AdminLoginInitial();
+}
+
+class AdminLoginLoading extends AdminLoginState {
+  const AdminLoginLoading();
+}
+
+class AdminLoginSuccess extends AdminLoginState {
+  const AdminLoginSuccess();
+}
+
+class AdminLoginError extends AdminLoginState {
+  const AdminLoginError(this.error);
+
+  final Object error;
+}
+
+class AdminLoginNotifier extends Notifier<AdminLoginState> {
+  @override
+  AdminLoginState build() => const AdminLoginInitial();
+
+  Future<void> submit({required String email, required String password}) async {
+    state = const AdminLoginLoading();
+    try {
+      final session = await ref
+          .read(adminAuthRepositoryProvider)
+          .login(email: email, password: password);
+      await ref
+          .read(adminAuthNotifierProvider.notifier)
+          .setAuthenticated(session);
+      state = const AdminLoginSuccess();
+    } catch (error) {
+      state = AdminLoginError(error);
+    }
+  }
+}
+
+final adminLoginNotifierProvider =
+    NotifierProvider<AdminLoginNotifier, AdminLoginState>(
+      AdminLoginNotifier.new,
+    );
+
+class AdminLoginScreen extends ConsumerStatefulWidget {
   const AdminLoginScreen({super.key});
 
   @override
-  State<AdminLoginScreen> createState() => _AdminLoginScreenState();
+  ConsumerState<AdminLoginScreen> createState() => _AdminLoginScreenState();
 }
 
-class _AdminLoginScreenState extends State<AdminLoginScreen> {
+class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _showPassword = false;
   DateTime? _lastBackPress;
 
-  void _signIn() {
-    context.go(AppRoutes.adminDashboard);
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _signIn() async {
+    FocusScope.of(context).unfocus();
+    await ref
+        .read(adminLoginNotifierProvider.notifier)
+        .submit(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
   }
 
   void _onPop(bool didPop, Object? result) {
@@ -45,6 +110,18 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AdminLoginState>(adminLoginNotifierProvider, (previous, next) {
+      if (!mounted) return;
+      if (next is AdminLoginSuccess) {
+        context.go(AppRoutes.adminDashboard);
+      } else if (next is AdminLoginError) {
+        showErrorSnackbar(context, next.error);
+      }
+    });
+
+    final loginState = ref.watch(adminLoginNotifierProvider);
+    final isLoading = loginState is AdminLoginLoading;
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: _onPop,
@@ -68,15 +145,31 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   style: AppTypography.bodyR,
                 ),
                 const SizedBox(height: 32),
-                const _AdminField(hint: 'Email address'),
+                AuthInputField(
+                  controller: _emailController,
+                  hint: 'Email address',
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  enabled: !isLoading,
+                ),
                 const SizedBox(height: 14),
-                _AdminField(
+                AuthInputField(
+                  controller: _passwordController,
                   hint: 'Password',
                   obscureText: !_showPassword,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) {
+                    if (!isLoading) {
+                      _signIn();
+                    }
+                  },
+                  enabled: !isLoading,
                   trailing: IconButton(
-                    onPressed: () {
-                      setState(() => _showPassword = !_showPassword);
-                    },
+                    onPressed: isLoading
+                        ? null
+                        : () {
+                            setState(() => _showPassword = !_showPassword);
+                          },
                     icon: HugeIcon(
                       icon: _showPassword
                           ? HugeIcons.strokeRoundedView
@@ -100,7 +193,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                GzButton(label: 'Sign in', onPressed: _signIn),
+                GzButton(
+                  label: 'Sign in',
+                  onPressed: isLoading ? null : _signIn,
+                  loading: isLoading,
+                ),
                 const SizedBox(height: 24),
                 Center(
                   child: Text(
@@ -112,42 +209,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AdminField extends StatelessWidget {
-  const _AdminField({
-    required this.hint,
-    this.trailing,
-    this.obscureText = false,
-  });
-
-  final String hint;
-  final Widget? trailing;
-  final bool obscureText;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.pillBg,
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-      ),
-      child: TextField(
-        readOnly: true,
-        obscureText: obscureText,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: AppTypography.body.copyWith(color: AppColors.textPrimary),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-          suffixIcon: trailing,
         ),
       ),
     );

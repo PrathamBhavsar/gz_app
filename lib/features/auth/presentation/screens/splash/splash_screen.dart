@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/auth/token_storage.dart';
-import '../../../../../core/navigation/routes.dart';
+import '../../../application/splash_notifier.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_logo.dart';
@@ -23,29 +22,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer(const Duration(seconds: 2), _navigate);
-  }
-
-  Future<void> _navigate() async {
-    if (!mounted) return;
-    final storage = ref.read(tokenStorageProvider);
-
-    final hasSeenOnboarding = await storage.getHasSeenOnboarding();
-    if (!hasSeenOnboarding) {
-      if (mounted) context.go(AppRoutes.onboarding);
-      return;
-    }
-
-    final refreshToken = await storage.getRefreshToken();
-    if (refreshToken == null) {
-      if (mounted) context.go(AppRoutes.authLanding);
-      return;
-    }
-
-    final userType = await storage.getUserType();
-    if (mounted) {
-      context.go(userType == 'admin' ? AppRoutes.adminDashboard : AppRoutes.home);
-    }
+    _timer = Timer(const Duration(milliseconds: 900), () {
+      ref.read(splashNotifierProvider.notifier).refresh();
+    });
   }
 
   @override
@@ -56,6 +35,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(splashNotifierProvider);
+    ref.listen<AsyncValue<String>>(splashNotifierProvider, (previous, next) {
+      next.whenData((route) {
+        if (!mounted || GoRouterState.of(context).matchedLocation == route) {
+          return;
+        }
+        context.go(route);
+      });
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Center(

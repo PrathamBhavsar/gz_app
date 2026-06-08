@@ -49,7 +49,20 @@
 
 ## Features
 - `lib/features/auth/`
-  - `presentation/screens/` only today
+  - `data/repositories/auth_repository.dart`
+  - `data/repositories/admin_auth_repository.dart`
+  - `application/`
+    - `auth_notifier.dart`
+    - `admin_auth_notifier.dart`
+    - `email_verification_notifier.dart`
+    - `login_notifier.dart`
+    - `oauth_login_notifier.dart`
+    - `register_notifier.dart`
+    - `otp_notifier.dart`
+    - `password_reset_notifier.dart`
+    - `splash_notifier.dart`
+  - `presentation/screens/`
+  - `presentation/widgets/auth_input_field.dart`
 - `lib/features/home/`
   - `presentation/screens/` only today
 - `lib/features/booking/`
@@ -78,7 +91,7 @@
   - `presentation/widgets/admin_shell.dart`
 
 ## Target Convention For API Phases
-When feature integration starts, add:
+Live phases add:
 ```text
 lib/features/<feature>/
   data/repositories/

@@ -1,25 +1,78 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../core/errors/error_snackbar.dart';
+import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
+import '../../../application/password_reset_notifier.dart';
+import '../../widgets/auth_input_field.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_top_bar.dart';
 
-class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+class ResetPasswordScreen extends ConsumerStatefulWidget {
+  const ResetPasswordScreen({super.key, this.token});
+
+  final String? token;
 
   @override
-  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
+  ConsumerState<ResetPasswordScreen> createState() =>
+      _ResetPasswordScreenState();
 }
 
-class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
+class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _showNewPassword = false;
   bool _showConfirmPassword = false;
 
   @override
+  void dispose() {
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (widget.token == null || widget.token!.isEmpty) {
+      showErrorSnackbar(context, const FormatException('Missing reset token'));
+      return;
+    }
+
+    if (_newPasswordController.text != _confirmPasswordController.text) {
+      showErrorSnackbar(
+        context,
+        const FormatException('Passwords do not match'),
+      );
+      return;
+    }
+
+    await ref
+        .read(passwordResetNotifierProvider.notifier)
+        .confirmPlayerReset(
+          token: widget.token!,
+          password: _newPasswordController.text,
+        );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    ref.listen<PasswordResetState>(passwordResetNotifierProvider, (
+      previous,
+      next,
+    ) {
+      if (!mounted) return;
+      if (next is PasswordResetSuccess) {
+        context.go(AppRoutes.emailLogin);
+      } else if (next is PasswordResetError) {
+        showErrorSnackbar(context, next.error);
+      }
+    });
+
+    final resetState = ref.watch(passwordResetNotifierProvider);
+    final isLoading = resetState is PasswordResetLoading;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const GzTopBar(title: 'Reset password'),
@@ -29,75 +82,63 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
           child: Column(
             children: [
-              _PasswordField(
+              AuthInputField(
+                controller: _newPasswordController,
                 hint: 'New password',
                 obscureText: !_showNewPassword,
-                onToggle: () {
-                  setState(() => _showNewPassword = !_showNewPassword);
-                },
-                isVisible: _showNewPassword,
+                textInputAction: TextInputAction.next,
+                enabled: !isLoading,
+                trailing: IconButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          setState(() => _showNewPassword = !_showNewPassword);
+                        },
+                  icon: HugeIcon(
+                    icon: _showNewPassword
+                        ? HugeIcons.strokeRoundedView
+                        : HugeIcons.strokeRoundedViewOffSlash,
+                    color: AppColors.textTertiary,
+                    size: 18,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
-              _PasswordField(
+              AuthInputField(
+                controller: _confirmPasswordController,
                 hint: 'Confirm password',
                 obscureText: !_showConfirmPassword,
-                onToggle: () {
-                  setState(
-                    () => _showConfirmPassword = !_showConfirmPassword,
-                  );
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) {
+                  if (!isLoading) {
+                    _submit();
+                  }
                 },
-                isVisible: _showConfirmPassword,
+                enabled: !isLoading,
+                trailing: IconButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          setState(() {
+                            _showConfirmPassword = !_showConfirmPassword;
+                          });
+                        },
+                  icon: HugeIcon(
+                    icon: _showConfirmPassword
+                        ? HugeIcons.strokeRoundedView
+                        : HugeIcons.strokeRoundedViewOffSlash,
+                    color: AppColors.textTertiary,
+                    size: 18,
+                  ),
+                ),
               ),
               const Spacer(),
-              const GzButton(label: 'Set new password'),
+              GzButton(
+                label: 'Set new password',
+                onPressed: isLoading ? null : _submit,
+                loading: isLoading,
+              ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PasswordField extends StatelessWidget {
-  const _PasswordField({
-    required this.hint,
-    required this.obscureText,
-    required this.onToggle,
-    required this.isVisible,
-  });
-
-  final String hint;
-  final bool obscureText;
-  final VoidCallback onToggle;
-  final bool isVisible;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.pillBg,
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-      ),
-      child: TextField(
-        readOnly: true,
-        obscureText: obscureText,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: AppTypography.body.copyWith(color: AppColors.textPrimary),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-          suffixIcon: IconButton(
-            onPressed: onToggle,
-            icon: HugeIcon(
-              icon: isVisible
-                  ? HugeIcons.strokeRoundedView
-                  : HugeIcons.strokeRoundedViewOffSlash,
-              color: AppColors.textTertiary,
-              size: 18,
-            ),
           ),
         ),
       ),

@@ -61,7 +61,12 @@ class _AuthLandingScreenState extends State<AuthLandingScreen> {
                     label: 'G',
                     background: AppColors.surface,
                   ),
-                  onPressed: () => context.go(AppRoutes.oauthHandler),
+                  onPressed: () => context.go(
+                    Uri(
+                      path: AppRoutes.oauthHandler,
+                      queryParameters: const {'provider': 'google'},
+                    ).toString(),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 GzButton(
@@ -72,7 +77,12 @@ class _AuthLandingScreenState extends State<AuthLandingScreen> {
                     background: AppColors.textPrimary,
                     foreground: AppColors.surface,
                   ),
-                  onPressed: () => context.go(AppRoutes.oauthHandler),
+                  onPressed: () => context.go(
+                    Uri(
+                      path: AppRoutes.oauthHandler,
+                      queryParameters: const {'provider': 'apple'},
+                    ).toString(),
+                  ),
                 ),
                 const SizedBox(height: 18),
                 Row(

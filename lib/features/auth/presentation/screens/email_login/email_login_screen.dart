@@ -1,32 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-
+import '../../../../../core/errors/app_exception.dart';
+import '../../../../../core/errors/error_snackbar.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../application/login_notifier.dart';
+import '../../widgets/auth_input_field.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_top_bar.dart';
 
-class EmailLoginScreen extends StatefulWidget {
+class EmailLoginScreen extends ConsumerStatefulWidget {
   const EmailLoginScreen({super.key});
 
   @override
-  State<EmailLoginScreen> createState() => _EmailLoginScreenState();
+  ConsumerState<EmailLoginScreen> createState() => _EmailLoginScreenState();
 }
 
-class _EmailLoginScreenState extends State<EmailLoginScreen> {
+class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _showPassword = false;
 
-  void _signIn() {
-    context.go(AppRoutes.home);
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _signIn() async {
+    FocusScope.of(context).unfocus();
+    await ref
+        .read(loginNotifierProvider.notifier)
+        .submit(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<LoginState>(loginNotifierProvider, (previous, next) {
+      if (!mounted) return;
+      if (next is LoginSuccess) {
+        context.go(AppRoutes.home);
+      } else if (next is LoginError) {
+        final error = next.error;
+        if (error is ValidationException &&
+            error.message.contains('verify your email')) {
+          context.go(
+            Uri(
+              path: AppRoutes.emailVerificationPending,
+              queryParameters: {'email': _emailController.text.trim()},
+            ).toString(),
+          );
+          return;
+        }
+        showErrorSnackbar(context, next.error);
+      }
+    });
+
+    final loginState = ref.watch(loginNotifierProvider);
+    final isLoading = loginState is LoginLoading;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const GzTopBar(title: 'Email login'),
@@ -37,15 +78,31 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _FilledField(hint: 'Email address'),
+              AuthInputField(
+                controller: _emailController,
+                hint: 'Email address',
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                enabled: !isLoading,
+              ),
               const SizedBox(height: 16),
-              _FilledField(
+              AuthInputField(
+                controller: _passwordController,
                 hint: 'Password',
                 obscureText: !_showPassword,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) {
+                  if (!isLoading) {
+                    _signIn();
+                  }
+                },
+                enabled: !isLoading,
                 trailing: IconButton(
-                  onPressed: () {
-                    setState(() => _showPassword = !_showPassword);
-                  },
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          setState(() => _showPassword = !_showPassword);
+                        },
                   icon: HugeIcon(
                     icon: _showPassword
                         ? HugeIcons.strokeRoundedView
@@ -69,7 +126,11 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              GzButton(label: 'Sign in', onPressed: _signIn),
+              GzButton(
+                label: 'Sign in',
+                onPressed: isLoading ? null : _signIn,
+                loading: isLoading,
+              ),
               const SizedBox(height: 16),
               Center(
                 child: TextButton(
@@ -84,42 +145,6 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FilledField extends StatelessWidget {
-  const _FilledField({
-    required this.hint,
-    this.trailing,
-    this.obscureText = false,
-  });
-
-  final String hint;
-  final Widget? trailing;
-  final bool obscureText;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.pillBg,
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-      ),
-      child: TextField(
-        readOnly: true,
-        obscureText: obscureText,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: AppTypography.body.copyWith(color: AppColors.textPrimary),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-          suffixIcon: trailing,
         ),
       ),
     );
