@@ -128,6 +128,10 @@ class ApiConstants {
   // ─── Store Config Endpoints ───────────────────────────────────────
   static const String storeConfig = '/stores/{id}/config';
 
+  // ─── Public Store Discovery Endpoints ─────────────────────────────
+  static const String storesList = '/stores';
+  static const String storeBySlug = '/stores/{slug}';
+
   // ─── System Types Endpoints ───────────────────────────────────────
   static const String systemTypes = '/stores/{storeId}/system-types';
 

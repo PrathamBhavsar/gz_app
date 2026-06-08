@@ -64,7 +64,13 @@
   - `presentation/screens/`
   - `presentation/widgets/auth_input_field.dart`
 - `lib/features/home/`
-  - `presentation/screens/` only today
+  - `data/repositories/store_repository.dart`
+  - `application/`
+    - `active_store_notifier.dart`
+    - `home_notifier.dart`
+    - `store_detail_notifier.dart`
+    - `store_search_notifier.dart`
+  - `presentation/screens/`
 - `lib/features/booking/`
   - `presentation/screens/` only today
 - `lib/features/sessions/`
@@ -99,3 +105,6 @@ lib/features/<feature>/
   presentation/
 ```
 Models remain centralized in `lib/models/`.
+
+## Phase 2 Notes
+- `lib/shared/widgets/store_selector_sheet.dart` now consumes `homeNotifierProvider` for store lists and `activeStoreNotifierProvider` for persisted selection instead of a separate overlay-specific notifier file.

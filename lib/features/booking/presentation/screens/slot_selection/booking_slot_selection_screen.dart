@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
@@ -6,6 +7,7 @@ import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../home/application/active_store_notifier.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_card.dart';
 import '../../../../../shared/widgets/gz_chip.dart';
@@ -13,16 +15,16 @@ import '../../../../../shared/widgets/gz_store_selector_pill.dart';
 import '../../../../../shared/widgets/gz_tag.dart';
 import '../../../../../shared/widgets/store_selector_sheet.dart';
 
-class BookingSlotSelectionScreen extends StatefulWidget {
+class BookingSlotSelectionScreen extends ConsumerStatefulWidget {
   const BookingSlotSelectionScreen({super.key});
 
   @override
-  State<BookingSlotSelectionScreen> createState() =>
+  ConsumerState<BookingSlotSelectionScreen> createState() =>
       _BookingSlotSelectionScreenState();
 }
 
 class _BookingSlotSelectionScreenState
-    extends State<BookingSlotSelectionScreen> {
+    extends ConsumerState<BookingSlotSelectionScreen> {
   static const _filters = ['All', 'PC', 'PS5', 'Xbox', 'VR', 'Other'];
 
   static const _systems = <_SystemCardData>[
@@ -72,6 +74,10 @@ class _BookingSlotSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
+    final activeStoreState = ref.watch(activeStoreNotifierProvider);
+    final storeName =
+        activeStoreState.selectedStore?.name ??
+        (activeStoreState.isLoading ? 'Loading store...' : 'Select store');
     final visibleSystems = _selectedFilter == 'All'
         ? _systems
         : _systems.where((system) => system.filter == _selectedFilter).toList();
@@ -96,7 +102,7 @@ class _BookingSlotSelectionScreenState
                         ),
                         const SizedBox(width: 12),
                         GzStoreSelectorPill(
-                          storeName: 'GameZone Koramangala',
+                          storeName: storeName,
                           onTap: () => showStoreSelectorSheet(context),
                         ),
                       ],

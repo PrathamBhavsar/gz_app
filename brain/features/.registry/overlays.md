@@ -44,10 +44,10 @@ All four overlays are invoked via standalone functions. They are NOT registered 
 | Function | `showStoreSelectorSheet(BuildContext context)` |
 | File | `lib/shared/widgets/store_selector_sheet.dart` |
 | Widget | `StoreSelectorSheet` (ConsumerStatefulWidget — has search TextField) |
-| State | `storeSelectorNotifierProvider` — `AsyncValue<List<StoreModel>>` |
-| State file | `lib/features/home/presentation/providers/store_selector_notifier.dart` |
+| State | `homeNotifierProvider` + `activeStoreNotifierProvider` |
+| State file | `lib/features/home/application/home_notifier.dart`, `lib/features/home/application/active_store_notifier.dart` |
 | On select | Updates `activeStoreIdProvider` + persists via `TokenStorage.saveActiveStoreId` |
-| Wired in | `WalletMobileLayout`, `BookingSlotSelectionMobileLayout` (+ `_NoStoreMessage`) |
+| Wired in | `HomeScreen`, `BookingSlotSelectionMobileLayout` (+ `_NoStoreMessage`) |
 
 ## OTP Input Sheet
 
@@ -85,17 +85,11 @@ Key methods:
 - `markAllRead()` — optimistic update + POST /notifications/read-all
 - `prependNew(NotificationModel)` — called by WS events (Phase 5 wire-up pending Phase 9)
 
-### StoreSelectorNotifier
+### Store Selector State
 
-```dart
-// lib/features/home/presentation/providers/store_selector_notifier.dart
-class StoreSelectorNotifier extends Notifier<AsyncValue<List<StoreModel>>> { ... }
-final storeSelectorNotifierProvider = NotifierProvider<...>(...);
-```
-
-Key methods:
-- `search(String query)` — debounced 300ms, calls StoreRepository.fetchStores
-- `refresh()` — re-fetch without search
+`StoreSelectorSheet` now reuses the Phase 2 home providers instead of owning a separate notifier:
+- `homeNotifierProvider` provides the live store list
+- `activeStoreNotifierProvider.selectStore(store)` persists and exposes the selected store
 
 ---
 
