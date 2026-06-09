@@ -140,6 +140,9 @@ class ApiConstants {
   // ─── Player Endpoints ──────────────────────────────────────────────
   static const String sessionsMy = '/stores/{storeId}/sessions/my';
   static const String bookingsMyList = '/stores/{storeId}/bookings/my';
+  static const String playerBookingDetail = '/stores/{storeId}/bookings/{id}';
+  static const String playerSessionDetail = '/stores/{storeId}/sessions/{id}';
+  static const String playerSessionLogs = '/stores/{storeId}/sessions/{id}/logs';
   static const String billingMy = '/stores/{storeId}/billing/my';
   static const String bookingPayment = '/stores/{storeId}/bookings/{id}/pay';
   static const String wsPlayerNotify = '/ws/users/{userId}/notify';

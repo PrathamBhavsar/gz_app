@@ -87,6 +87,19 @@
     - `booking_presenters.dart`
     - `screens/`
 - `lib/features/sessions/`
+  - `data/repositories/`
+    - `billing_repository.dart`
+    - `bookings_repository.dart`
+    - `sessions_repository.dart`
+  - `application/`
+    - `activity_hub_notifier.dart`
+    - `active_session_notifier.dart`
+    - `billing_notifier.dart`
+    - `booking_detail_notifier.dart`
+    - `payment_notifier.dart`
+    - `session_detail_notifier.dart`
+    - `session_logs_notifier.dart`
+    - `session_ui_models.dart`
   - `presentation/screens/`
   - `presentation/providers/session_runtime_providers.dart`
 - `lib/features/wallet/`

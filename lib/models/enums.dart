@@ -21,24 +21,45 @@ enum TransactionType { topUp, refund, booking, purchase }
 
 // Safe parsing extensions
 extension ParseEnums on String {
-  SystemStatus? toSystemStatus() => SystemStatus.values.cast<SystemStatus?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  BookingStatus? toBookingStatus() => BookingStatus.values.cast<BookingStatus?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  SessionStatus? toSessionStatus() => SessionStatus.values.cast<SessionStatus?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  BookingType? toBookingType() => BookingType.values.cast<BookingType?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  PaymentMethod? toPaymentMethod() => PaymentMethod.values.cast<PaymentMethod?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  PaymentStatus? toPaymentStatus() => PaymentStatus.values.cast<PaymentStatus?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  PricingRuleType? toPricingRuleType() => PricingRuleType.values.cast<PricingRuleType?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  OverrideType? toOverrideType() => OverrideType.values.cast<OverrideType?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  AuthMethod? toAuthMethod() => AuthMethod.values.cast<AuthMethod?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  AdminRole? toAdminRole() => AdminRole.values.cast<AdminRole?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  SystemPlatform? toSystemPlatform() => SystemPlatform.values.cast<SystemPlatform?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  DisputeStatus? toDisputeStatus() => DisputeStatus.values.cast<DisputeStatus?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  DisputeResolution? toDisputeResolution() => DisputeResolution.values.cast<DisputeResolution?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  CampaignType? toCampaignType() => CampaignType.values.cast<CampaignType?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  CampaignStatus? toCampaignStatus() => CampaignStatus.values.cast<CampaignStatus?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  NotificationChannel? toNotificationChannel() => NotificationChannel.values.cast<NotificationChannel?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  NotificationStatus? toNotificationStatus() => NotificationStatus.values.cast<NotificationStatus?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  VerificationPurpose? toVerificationPurpose() => VerificationPurpose.values.cast<VerificationPurpose?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  CreditTransactionType? toCreditTransactionType() => CreditTransactionType.values.cast<CreditTransactionType?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
-  TransactionType? toTransactionType() => TransactionType.values.cast<TransactionType?>().firstWhere((e) => e.toString().split('.').last == this, orElse: () => null);
+  SystemStatus? toSystemStatus() => _parseEnum(SystemStatus.values, this);
+  BookingStatus? toBookingStatus() => _parseEnum(BookingStatus.values, this);
+  SessionStatus? toSessionStatus() => _parseEnum(SessionStatus.values, this);
+  BookingType? toBookingType() => _parseEnum(BookingType.values, this);
+  PaymentMethod? toPaymentMethod() => _parseEnum(PaymentMethod.values, this);
+  PaymentStatus? toPaymentStatus() {
+    switch (_normalizeEnumValue(this)) {
+      case 'paid':
+        return PaymentStatus.completed;
+      default:
+        return _parseEnum(PaymentStatus.values, this);
+    }
+  }
+  PricingRuleType? toPricingRuleType() => _parseEnum(PricingRuleType.values, this);
+  OverrideType? toOverrideType() => _parseEnum(OverrideType.values, this);
+  AuthMethod? toAuthMethod() => _parseEnum(AuthMethod.values, this);
+  AdminRole? toAdminRole() => _parseEnum(AdminRole.values, this);
+  SystemPlatform? toSystemPlatform() => _parseEnum(SystemPlatform.values, this);
+  DisputeStatus? toDisputeStatus() => _parseEnum(DisputeStatus.values, this);
+  DisputeResolution? toDisputeResolution() => _parseEnum(DisputeResolution.values, this);
+  CampaignType? toCampaignType() => _parseEnum(CampaignType.values, this);
+  CampaignStatus? toCampaignStatus() => _parseEnum(CampaignStatus.values, this);
+  NotificationChannel? toNotificationChannel() => _parseEnum(NotificationChannel.values, this);
+  NotificationStatus? toNotificationStatus() => _parseEnum(NotificationStatus.values, this);
+  VerificationPurpose? toVerificationPurpose() => _parseEnum(VerificationPurpose.values, this);
+  CreditTransactionType? toCreditTransactionType() => _parseEnum(CreditTransactionType.values, this);
+  TransactionType? toTransactionType() => _parseEnum(TransactionType.values, this);
+}
+
+T? _parseEnum<T extends Enum>(List<T> values, String raw) {
+  final normalized = _normalizeEnumValue(raw);
+  for (final value in values) {
+    if (_normalizeEnumValue(value.name) == normalized) {
+      return value;
+    }
+  }
+  return null;
+}
+
+String _normalizeEnumValue(String raw) {
+  return raw.replaceAll('_', '').replaceAll('-', '').toLowerCase();
 }

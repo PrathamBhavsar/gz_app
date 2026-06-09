@@ -3,13 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../core/errors/app_exception.dart';
 import '../../../../core/navigation/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/widgets/gz_loading_view.dart';
+import '../../../../shared/widgets/page_error_display.dart';
 import '../../../notifications/presentation/providers/notification_feed_notifier.dart';
 import '../../../notifications/presentation/screens/notification_center_sheet.dart';
-import '../providers/session_runtime_providers.dart';
+import '../../application/activity_hub_notifier.dart';
+import '../../application/session_ui_models.dart';
 import '../../../../shared/widgets/gz_button.dart';
 import '../../../../shared/widgets/gz_chip.dart';
 import '../../../../shared/widgets/gz_icon_btn.dart';
@@ -30,110 +34,165 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   @override
   Widget build(BuildContext context) {
     final unreadCount = ref.watch(unreadNotificationCountProvider);
-    final hubState = ref.watch(sessionsHubProvider);
+    final hubState = ref.watch(activityHubNotifierProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text('Sessions', style: AppTypography.h1),
-                        ),
-                        Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            GzIconBtn(
-                              tooltip: 'Notifications',
-                              onTap: () => showNotificationCenter(context),
-                              child: const HugeIcon(
-                                icon: HugeIcons.strokeRoundedNotification03,
-                                color: AppColors.textPrimary,
-                                size: 22,
+        child: hubState.when(
+          loading: () => const GzLoadingView(message: 'Loading sessions...'),
+          error: (error, _) => PageErrorDisplay(
+            error: AppPageError.from(error),
+            onRetry: () => ref.read(activityHubNotifierProvider.notifier).refresh(),
+          ),
+          data: (data) {
+            if (data.activeSession == null &&
+                data.upcoming.isEmpty &&
+                data.past.isEmpty) {
+              return PageErrorDisplay(
+                error: const AppPageError(
+                  title: 'No sessions yet',
+                  message: 'Your bookings and sessions will appear here.',
+                  icon: 'inbox',
+                  kind: AppPageErrorKind.empty,
+                ),
+                onRetry: () =>
+                    ref.read(activityHubNotifierProvider.notifier).refresh(),
+              );
+            }
+
+            final visibleUpcoming = switch (_filters[_filterIndex]) {
+              'Upcoming' || 'All' => data.upcoming,
+              _ => const <UpcomingBookingState>[],
+            };
+            final visiblePast = switch (_filters[_filterIndex]) {
+              'Past' || 'All' => data.past,
+              _ => const <PastSessionState>[],
+            };
+            final showActive = (switch (_filters[_filterIndex]) {
+                  'Active' || 'All' => true,
+                  _ => false,
+                }) &&
+                data.activeSession != null;
+
+            return RefreshIndicator(
+              onRefresh: () =>
+                  ref.read(activityHubNotifierProvider.notifier).refresh(),
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text('Sessions', style: AppTypography.h1),
+                              ),
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  GzIconBtn(
+                                    tooltip: 'Notifications',
+                                    onTap: () => showNotificationCenter(context),
+                                    child: const HugeIcon(
+                                      icon: HugeIcons.strokeRoundedNotification03,
+                                      color: AppColors.textPrimary,
+                                      size: 22,
+                                    ),
+                                  ),
+                                  if (unreadCount > 0)
+                                    const Positioned(
+                                      top: 6,
+                                      right: 6,
+                                      child: GzLiveDot(
+                                        size: 6,
+                                        color: AppColors.err,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            height: 36,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: _filters.length,
+                              separatorBuilder: (_, index) =>
+                                  const SizedBox(width: 8),
+                              itemBuilder: (context, i) => GzChip(
+                                label: _filters[i],
+                                active: _filterIndex == i,
+                                onTap: () => setState(() => _filterIndex = i),
                               ),
                             ),
-                            if (unreadCount > 0)
-                              const Positioned(
-                                top: 6,
-                                right: 6,
-                                child: GzLiveDot(size: 6, color: AppColors.err),
-                              ),
+                          ),
+                          if (showActive) ...[
+                            const SizedBox(height: 20),
+                            _ActiveSessionBanner(activeSession: data.activeSession!),
                           ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      height: 36,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _filters.length,
-                        separatorBuilder: (_, index) =>
-                            const SizedBox(width: 8),
-                        itemBuilder: (context, i) => GzChip(
-                          label: _filters[i],
-                          active: _filterIndex == i,
-                          onTap: () => setState(() => _filterIndex = i),
-                        ),
+                          if (visibleUpcoming.isNotEmpty) ...[
+                            const SizedBox(height: 24),
+                            Text('Upcoming', style: AppTypography.h2),
+                            const SizedBox(height: 12),
+                            for (final booking in visibleUpcoming) ...[
+                              _UpcomingItem(
+                                system: booking.system,
+                                date: booking.date,
+                                time: booking.time,
+                                tag: GzTag(
+                                  kind: _tagKindForStatus(booking.status),
+                                  label: _labelForStatus(booking.status),
+                                ),
+                                actionLabel: booking.status == SessionUiStatus.unpaid
+                                    ? 'Pay'
+                                    : 'Check in',
+                                onAction: () =>
+                                    booking.status == SessionUiStatus.unpaid
+                                    ? context.push(
+                                        AppRoutes.paymentSheetPath(booking.id),
+                                      )
+                                    : context.push(
+                                        AppRoutes.checkInPath(booking.id),
+                                      ),
+                              ),
+                              if (booking != visibleUpcoming.last)
+                                const SizedBox(height: 10),
+                            ],
+                          ],
+                          if (visiblePast.isNotEmpty) ...[
+                            const SizedBox(height: 24),
+                            Text('Past sessions', style: AppTypography.h2),
+                            const SizedBox(height: 12),
+                          ],
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    if (hubState.activeSession != null)
-                      _ActiveSessionBanner(activeSession: hubState.activeSession!),
-                    const SizedBox(height: 24),
-                    Text('Upcoming', style: AppTypography.h2),
-                    const SizedBox(height: 12),
-                    for (final booking in hubState.upcoming) ...[
-                      _UpcomingItem(
-                        system: booking.system,
-                        date: booking.date,
-                        time: booking.time,
-                        tag: GzTag(
-                          kind: _tagKindForStatus(booking.status),
-                          label: _labelForStatus(booking.status),
-                        ),
-                        actionLabel: booking.status == SessionUiStatus.unpaid
-                            ? 'Pay'
-                            : 'Check in',
-                        onAction: () => booking.status == SessionUiStatus.unpaid
-                            ? context.push(AppRoutes.paymentSheetPath(booking.id))
-                            : context.push(AppRoutes.checkInPath(booking.id)),
-                      ),
-                      if (booking != hubState.upcoming.last)
-                        const SizedBox(height: 10),
-                    ],
-                    const SizedBox(height: 24),
-                    Text('Past sessions', style: AppTypography.h2),
-                    const SizedBox(height: 12),
-                  ],
-                ),
-              ),
-            ),
-            SliverList(
-              delegate: SliverChildListDelegate([
-                for (final session in hubState.past)
-                  _PastSessionRow(
-                    store: session.store,
-                    system: session.system,
-                    date: session.date,
-                    duration: session.duration,
-                    amount: session.amount,
-                    onTap: () => context.push(
-                      AppRoutes.sessionHistoryDetailPath(session.id),
                     ),
                   ),
-                const SizedBox(height: 24),
-              ]),
-            ),
-          ],
+                  SliverList(
+                    delegate: SliverChildListDelegate([
+                      for (final session in visiblePast)
+                        _PastSessionRow(
+                          store: session.store,
+                          system: session.system,
+                          date: session.date,
+                          duration: session.duration,
+                          amount: session.amount,
+                          onTap: () => context.push(
+                            AppRoutes.sessionHistoryDetailPath(session.id),
+                          ),
+                        ),
+                      const SizedBox(height: 24),
+                    ]),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
