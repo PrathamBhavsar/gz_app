@@ -75,6 +75,8 @@ class ApiConstants {
 
   // ─── Bookings Admin Endpoints ──────────────────────────────────────
   static const String bookingsList = '/stores/{storeId}/bookings';
+  static const String bookingsAvailability =
+      '/stores/{storeId}/bookings/availability';
   static const String bookingWalkIn = '/stores/{storeId}/bookings/walk-in';
   static const String bookingCheckIn =
       '/stores/{storeId}/bookings/{id}/check-in';
@@ -139,8 +141,7 @@ class ApiConstants {
   static const String sessionsMy = '/stores/{storeId}/sessions/my';
   static const String bookingsMyList = '/stores/{storeId}/bookings/my';
   static const String billingMy = '/stores/{storeId}/billing/my';
-  static const String bookingPayment =
-      '/stores/{storeId}/bookings/{id}/payment';
+  static const String bookingPayment = '/stores/{storeId}/bookings/{id}/pay';
   static const String wsPlayerNotify = '/ws/users/{userId}/notify';
 
   // ─── Player Credits Endpoints ──────────────────────────────────────────────

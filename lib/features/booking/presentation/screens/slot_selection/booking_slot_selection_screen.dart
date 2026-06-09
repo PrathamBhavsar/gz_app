@@ -3,85 +3,41 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/errors/app_exception.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
-import '../../../../home/application/active_store_notifier.dart';
+import '../../../../../models/domain_systems.dart';
+import '../../../../../models/enums.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_card.dart';
 import '../../../../../shared/widgets/gz_chip.dart';
+import '../../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../../shared/widgets/gz_store_selector_pill.dart';
 import '../../../../../shared/widgets/gz_tag.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
 import '../../../../../shared/widgets/store_selector_sheet.dart';
+import '../../../../home/application/active_store_notifier.dart';
+import '../../../application/booking_notifier.dart';
+import '../../../application/system_types_notifier.dart';
+import '../../../application/systems_notifier.dart';
+import '../../booking_presenters.dart';
 
-class BookingSlotSelectionScreen extends ConsumerStatefulWidget {
+class BookingSlotSelectionScreen extends ConsumerWidget {
   const BookingSlotSelectionScreen({super.key});
 
   @override
-  ConsumerState<BookingSlotSelectionScreen> createState() =>
-      _BookingSlotSelectionScreenState();
-}
-
-class _BookingSlotSelectionScreenState
-    extends ConsumerState<BookingSlotSelectionScreen> {
-  static const _filters = ['All', 'PC', 'PS5', 'Xbox', 'VR', 'Other'];
-
-  static const _systems = <_SystemCardData>[
-    _SystemCardData(
-      title: 'PC Station 01',
-      seat: 'Seat 1',
-      status: 'Available',
-      statusKind: GzTagKind.ok,
-      icon: HugeIcons.strokeRoundedComputerDesk01,
-      filter: 'PC',
-    ),
-    _SystemCardData(
-      title: 'PC Station 02',
-      seat: 'Seat 2',
-      status: 'Booked',
-      statusKind: GzTagKind.mute,
-      icon: HugeIcons.strokeRoundedComputerDesk01,
-      filter: 'PC',
-    ),
-    _SystemCardData(
-      title: 'PS5 Console 01',
-      seat: 'Seat 3',
-      status: 'Available',
-      statusKind: GzTagKind.ok,
-      icon: HugeIcons.strokeRoundedGameController02,
-      filter: 'PS5',
-    ),
-    _SystemCardData(
-      title: 'Xbox Series X',
-      seat: 'Seat 4',
-      status: 'Booked',
-      statusKind: GzTagKind.mute,
-      icon: HugeIcons.strokeRoundedGameController01,
-      filter: 'Xbox',
-    ),
-    _SystemCardData(
-      title: 'VR Pod 01',
-      seat: 'Seat 5',
-      status: 'Available',
-      statusKind: GzTagKind.ok,
-      icon: HugeIcons.strokeRoundedVirtualRealityVr01,
-      filter: 'VR',
-    ),
-  ];
-
-  String _selectedFilter = 'All';
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final activeStoreState = ref.watch(activeStoreNotifierProvider);
+    final bookingState = ref.watch(bookingNotifierProvider);
+    final systems = ref.watch(filteredSystemsProvider);
+    final systemTypes = ref.watch(systemTypesNotifierProvider);
+    final canProceed = activeStoreState.selectedStore != null;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
     final storeName =
         activeStoreState.selectedStore?.name ??
         (activeStoreState.isLoading ? 'Loading store...' : 'Select store');
-    final visibleSystems = _selectedFilter == 'All'
-        ? _systems
-        : _systems.where((system) => system.filter == _selectedFilter).toList();
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -89,8 +45,8 @@ class _BookingSlotSelectionScreenState
         child: Column(
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -107,32 +63,81 @@ class _BookingSlotSelectionScreenState
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Live systems refresh every 30 seconds.',
+                      style: AppTypography.bodyR,
+                    ),
                     const SizedBox(height: 20),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: _filters.map((filter) {
-                          final isActive = filter == _selectedFilter;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: GzChip(
-                              label: filter,
-                              active: isActive,
-                              onTap: () {
-                                setState(() => _selectedFilter = filter);
-                              },
+                    systemTypes.when(
+                      loading: () => const SizedBox(
+                        height: 40,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      ),
+                      error: (_, _) => const SizedBox.shrink(),
+                      data: (types) => SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: GzChip(
+                                label: 'All',
+                                active:
+                                    bookingState.selectedSystemTypeId == null,
+                                onTap: () => ref
+                                    .read(bookingNotifierProvider.notifier)
+                                    .setSystemType(
+                                      systemTypeId: null,
+                                      systemTypeName: null,
+                                    ),
+                              ),
                             ),
-                          );
-                        }).toList(),
+                            ...types.map((type) {
+                              final typeId = type.id;
+                              final active =
+                                  typeId != null &&
+                                  bookingState.selectedSystemTypeId == typeId;
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: GzChip(
+                                  label: type.name ?? 'Type',
+                                  active: active,
+                                  onTap: () => ref
+                                      .read(bookingNotifierProvider.notifier)
+                                      .setSystemType(
+                                        systemTypeId: typeId,
+                                        systemTypeName: type.name,
+                                      ),
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     const Divider(height: 1, color: AppColors.rule),
                     const SizedBox(height: 16),
-                    ...visibleSystems.map(
-                      (system) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _SystemCard(system: system),
+                    Expanded(
+                      child: _SystemsBody(
+                        activeStoreState: activeStoreState,
+                        systems: systems,
+                        onRefresh: () async {
+                          await ref
+                              .read(systemTypesNotifierProvider.notifier)
+                              .refresh();
+                          await ref
+                              .read(systemsNotifierProvider.notifier)
+                              .refresh();
+                        },
                       ),
                     ),
                   ],
@@ -147,7 +152,9 @@ class _BookingSlotSelectionScreenState
               ),
               child: GzButton(
                 label: 'Check Availability',
-                onPressed: () => context.push(AppRoutes.bookAvailability),
+                onPressed: canProceed
+                    ? () => context.push(AppRoutes.bookAvailability)
+                    : null,
               ),
             ),
           ],
@@ -157,13 +164,80 @@ class _BookingSlotSelectionScreenState
   }
 }
 
-class _SystemCard extends StatelessWidget {
-  const _SystemCard({required this.system});
+class _SystemsBody extends StatelessWidget {
+  const _SystemsBody({
+    required this.activeStoreState,
+    required this.systems,
+    required this.onRefresh,
+  });
 
-  final _SystemCardData system;
+  final ActiveStoreState activeStoreState;
+  final AsyncValue<List<SystemModel>> systems;
+  final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context) {
+    if (activeStoreState.isLoading) {
+      return const GzLoadingView(message: 'Loading your active store...');
+    }
+
+    if (activeStoreState.selectedStore == null) {
+      return const PageErrorDisplay(
+        error: AppPageError(
+          title: 'Select a store',
+          message:
+              'Choose a store first so the booking flow knows where to load systems from.',
+          icon: 'alert_circle',
+        ),
+      );
+    }
+
+    return systems.when(
+      loading: () =>
+          const GzLoadingView(message: 'Loading available systems...'),
+      error: (error, _) =>
+          PageErrorDisplay(error: AppPageError.from(error), onRetry: onRefresh),
+      data: (items) {
+        if (items.isEmpty) {
+          return const PageErrorDisplay(
+            error: AppPageError(
+              title: 'No systems available',
+              message:
+                  'Try a different system type or check back after the next refresh.',
+              icon: 'inbox',
+              kind: AppPageErrorKind.empty,
+            ),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: onRefresh,
+          child: ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: items.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
+            itemBuilder: (context, index) => _SystemCard(system: items[index]),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SystemCard extends StatelessWidget {
+  const _SystemCard({required this.system});
+
+  final SystemModel system;
+
+  @override
+  Widget build(BuildContext context) {
+    final status = system.status == SystemStatus.available
+        ? 'Available'
+        : 'Busy';
+    final tagKind = system.status == SystemStatus.available
+        ? GzTagKind.ok
+        : GzTagKind.mute;
+
     return GzCard(
       padding: 14,
       child: Row(
@@ -177,7 +251,7 @@ class _SystemCard extends StatelessWidget {
             ),
             child: Center(
               child: HugeIcon(
-                icon: system.icon,
+                icon: platformIcon(system.platform),
                 color: AppColors.textSecondary,
                 size: 22,
               ),
@@ -188,39 +262,28 @@ class _SystemCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(system.title, style: AppTypography.h3),
+                Text(system.name ?? 'Unnamed system', style: AppTypography.h3),
                 const SizedBox(height: 4),
-                Text(
-                  system.seat,
-                  style: AppTypography.small.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
+                Text(systemSeatLabel(system), style: AppTypography.small),
+                const SizedBox(height: 4),
+                Text(systemSpecsLabel(system), style: AppTypography.bodyR),
               ],
             ),
           ),
           const SizedBox(width: 12),
-          GzTag(kind: system.statusKind, label: system.status),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              GzTag(kind: tagKind, label: status),
+              const SizedBox(height: 8),
+              Text(
+                formatPricePerHour(system.pricePerHour),
+                style: AppTypography.num.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
-}
-
-class _SystemCardData {
-  const _SystemCardData({
-    required this.title,
-    required this.seat,
-    required this.status,
-    required this.statusKind,
-    required this.icon,
-    required this.filter,
-  });
-
-  final String title;
-  final String seat;
-  final String status;
-  final GzTagKind statusKind;
-  final dynamic icon;
-  final String filter;
 }

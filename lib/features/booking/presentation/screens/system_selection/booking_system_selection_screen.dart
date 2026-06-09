@@ -1,129 +1,88 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/errors/app_exception.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_card.dart';
-import '../../../../../shared/widgets/gz_chip.dart';
-import '../../../../../shared/widgets/gz_tag.dart';
+import '../../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
+import '../../../../../models/domain_systems.dart';
+import '../../../application/booking_notifier.dart';
+import '../../../application/systems_notifier.dart';
+import '../../booking_presenters.dart';
 
-class BookingSystemSelectionScreen extends StatefulWidget {
+class BookingSystemSelectionScreen extends ConsumerWidget {
   const BookingSystemSelectionScreen({super.key});
 
   @override
-  State<BookingSystemSelectionScreen> createState() =>
-      _BookingSystemSelectionScreenState();
-}
-
-class _BookingSystemSelectionScreenState
-    extends State<BookingSystemSelectionScreen> {
-  static const _sortOptions = [
-    'Recommended',
-    'Price ↑',
-    'Price ↓',
-    'Availability',
-  ];
-
-  static const _systems = <_SelectableSystem>[
-    _SelectableSystem(
-      name: 'RTX 4090 Gaming PC',
-      seat: 'Seat 3',
-      details: 'RTX 4090 · 32GB · 240Hz · 4K',
-      price: '₹80/hr',
-      tagLabel: 'Available',
-      tagKind: GzTagKind.ok,
-      recommended: true,
-    ),
-    _SelectableSystem(
-      name: 'RTX 3080 Gaming PC',
-      seat: 'Seat 7',
-      details: 'RTX 3080 · 16GB · 165Hz',
-      price: '₹70/hr',
-      tagLabel: 'Available',
-      tagKind: GzTagKind.ok,
-    ),
-    _SelectableSystem(
-      name: 'RTX 3070 Gaming PC',
-      seat: 'Seat 1',
-      details: 'RTX 3070 · 16GB · 144Hz',
-      price: '₹65/hr',
-      tagLabel: 'In use · free 5:30 PM',
-      tagKind: GzTagKind.info,
-    ),
-    _SelectableSystem(
-      name: 'RTX 3060 Gaming PC',
-      seat: 'Seat 9',
-      details: 'RTX 3060 · 16GB · 144Hz',
-      price: '₹55/hr',
-      tagLabel: 'Available',
-      tagKind: GzTagKind.ok,
-    ),
-    _SelectableSystem(
-      name: 'i9 High Perf PC',
-      seat: 'Seat 2',
-      details: 'Core i9 · 64GB · Creator setup',
-      price: '₹90/hr',
-      tagLabel: 'Unavailable',
-      tagKind: GzTagKind.mute,
-    ),
-  ];
-
-  String _selectedSort = 'Recommended';
-  int _selectedIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bookingState = ref.watch(bookingNotifierProvider);
+    final systems = ref.watch(filteredSystemsProvider);
+    final selectedSystemId = bookingState.selectedSystem?.id;
+    final slot = bookingState.selectedSlot;
+    final start = parseSlotTime(slot?.startTime);
+    final end = parseSlotTime(slot?.endTime);
+    final subtitle = start != null && end != null
+        ? '${formatBookingDate(start)} · ${formatTimeRange(start, end)}'
+        : 'Pick a slot first';
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const GzTopBar(
-        title: 'Pick your system',
-        subtitle: 'Wed 4 · 6:00 PM – 8:00 PM',
-      ),
+      appBar: GzTopBar(title: 'Pick your system', subtitle: subtitle),
       body: Column(
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: _sortOptions.map((option) {
-                        final isActive = option == _selectedSort;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: GzChip(
-                            label: option,
-                            active: isActive,
-                            onTap: () => setState(() => _selectedSort = option),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  ...List.generate(_systems.length, (index) {
-                    final system = _systems[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _SystemOptionCard(
-                        system: system,
-                        selected: _selectedIndex == index,
-                        onTap: () => setState(() => _selectedIndex = index),
-                      ),
-                    );
-                  }),
-                ],
+            child: systems.when(
+              loading: () => const GzLoadingView(message: 'Loading systems...'),
+              error: (error, _) => PageErrorDisplay(
+                error: AppPageError.from(error),
+                onRetry: () =>
+                    ref.read(systemsNotifierProvider.notifier).refresh(),
               ),
+              data: (items) {
+                if (slot == null || start == null || end == null) {
+                  return const PageErrorDisplay(
+                    error: AppPageError(
+                      title: 'Pick a slot first',
+                      message:
+                          'Go back and choose an available time before selecting a system.',
+                      icon: 'alert_circle',
+                    ),
+                  );
+                }
+
+                if (items.isEmpty) {
+                  return const PageErrorDisplay(error: AppPageError.empty);
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () =>
+                      ref.read(systemsNotifierProvider.notifier).refresh(),
+                  child: ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                    itemCount: items.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final system = items[index];
+                      return _SystemOptionCard(
+                        system: system,
+                        selected: selectedSystemId == system.id,
+                        onTap: () => ref
+                            .read(bookingNotifierProvider.notifier)
+                            .setSelectedSystem(system),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
           ),
           Container(
@@ -134,7 +93,9 @@ class _BookingSystemSelectionScreenState
             ),
             child: GzButton(
               label: 'Continue to summary',
-              onPressed: () => context.push(AppRoutes.bookSummary),
+              onPressed: bookingState.selectedSystem != null
+                  ? () => context.push(AppRoutes.bookSummary)
+                  : null,
             ),
           ),
         ],
@@ -150,7 +111,7 @@ class _SystemOptionCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final _SelectableSystem system;
+  final SystemModel system;
   final bool selected;
   final VoidCallback onTap;
 
@@ -183,9 +144,9 @@ class _SystemOptionCard extends StatelessWidget {
                     AppSpacing.borderRadiusLg,
                   ),
                 ),
-                child: const Center(
+                child: Center(
                   child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedComputerDesk01,
+                    icon: platformIcon(system.platform),
                     color: AppColors.textPrimary,
                     size: 22,
                   ),
@@ -196,49 +157,29 @@ class _SystemOptionCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(system.name, style: AppTypography.h3),
-                        ),
-                        if (system.recommended)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceTintStrong,
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.borderRadiusPill,
-                              ),
-                            ),
-                            child: Text(
-                              'Recommended',
-                              style: AppTypography.small.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
                     Text(
-                      system.seat,
-                      style: AppTypography.small.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                      system.name ?? 'Unnamed system',
+                      style: AppTypography.h3,
                     ),
                     const SizedBox(height: 4),
-                    Text(system.details, style: AppTypography.small),
+                    Text(systemSeatLabel(system), style: AppTypography.small),
+                    const SizedBox(height: 4),
+                    Text(systemSpecsLabel(system), style: AppTypography.bodyR),
                     const SizedBox(height: 10),
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(system.price, style: AppTypography.h3),
+                        Text(
+                          formatPricePerHour(system.pricePerHour),
+                          style: AppTypography.num.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                         const Spacer(),
-                        GzTag(kind: system.tagKind, label: system.tagLabel),
+                        GzButton(
+                          label: selected ? 'Selected' : 'Select',
+                          small: true,
+                          onPressed: onTap,
+                        ),
                       ],
                     ),
                   ],
@@ -250,24 +191,4 @@ class _SystemOptionCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _SelectableSystem {
-  const _SelectableSystem({
-    required this.name,
-    required this.seat,
-    required this.details,
-    required this.price,
-    required this.tagLabel,
-    required this.tagKind,
-    this.recommended = false,
-  });
-
-  final String name;
-  final String seat;
-  final String details;
-  final String price;
-  final String tagLabel;
-  final GzTagKind tagKind;
-  final bool recommended;
 }

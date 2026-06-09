@@ -72,7 +72,20 @@
     - `store_search_notifier.dart`
   - `presentation/screens/`
 - `lib/features/booking/`
-  - `presentation/screens/` only today
+  - `data/repositories/`
+    - `booking_repository.dart`
+    - `systems_repository.dart`
+  - `application/`
+    - `availability_notifier.dart`
+    - `booking_form_notifier.dart`
+    - `booking_notifier.dart`
+    - `booking_payment_notifier.dart`
+    - `booking_summary_ui_notifier.dart`
+    - `system_types_notifier.dart`
+    - `systems_notifier.dart`
+  - `presentation/`
+    - `booking_presenters.dart`
+    - `screens/`
 - `lib/features/sessions/`
   - `presentation/screens/`
   - `presentation/providers/session_runtime_providers.dart`
