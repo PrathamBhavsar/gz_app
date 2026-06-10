@@ -10,7 +10,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../shared/widgets/page_error_display.dart';
-import '../../../notifications/presentation/providers/notification_feed_notifier.dart';
+import '../../../notifications/application/notifications_notifier.dart';
 import '../../../notifications/presentation/screens/notification_center_sheet.dart';
 import '../../application/activity_hub_notifier.dart';
 import '../../application/session_ui_models.dart';
@@ -43,7 +43,8 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
           loading: () => const GzLoadingView(message: 'Loading sessions...'),
           error: (error, _) => PageErrorDisplay(
             error: AppPageError.from(error),
-            onRetry: () => ref.read(activityHubNotifierProvider.notifier).refresh(),
+            onRetry: () =>
+                ref.read(activityHubNotifierProvider.notifier).refresh(),
           ),
           data: (data) {
             if (data.activeSession == null &&
@@ -69,7 +70,8 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
               'Past' || 'All' => data.past,
               _ => const <PastSessionState>[],
             };
-            final showActive = (switch (_filters[_filterIndex]) {
+            final showActive =
+                (switch (_filters[_filterIndex]) {
                   'Active' || 'All' => true,
                   _ => false,
                 }) &&
@@ -89,16 +91,21 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                           Row(
                             children: [
                               Expanded(
-                                child: Text('Sessions', style: AppTypography.h1),
+                                child: Text(
+                                  'Sessions',
+                                  style: AppTypography.h1,
+                                ),
                               ),
                               Stack(
                                 clipBehavior: Clip.none,
                                 children: [
                                   GzIconBtn(
                                     tooltip: 'Notifications',
-                                    onTap: () => showNotificationCenter(context),
+                                    onTap: () =>
+                                        showNotificationCenter(context),
                                     child: const HugeIcon(
-                                      icon: HugeIcons.strokeRoundedNotification03,
+                                      icon:
+                                          HugeIcons.strokeRoundedNotification03,
                                       color: AppColors.textPrimary,
                                       size: 22,
                                     ),
@@ -133,7 +140,9 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                           ),
                           if (showActive) ...[
                             const SizedBox(height: 20),
-                            _ActiveSessionBanner(activeSession: data.activeSession!),
+                            _ActiveSessionBanner(
+                              activeSession: data.activeSession!,
+                            ),
                           ],
                           if (visibleUpcoming.isNotEmpty) ...[
                             const SizedBox(height: 24),
@@ -148,7 +157,8 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                                   kind: _tagKindForStatus(booking.status),
                                   label: _labelForStatus(booking.status),
                                 ),
-                                actionLabel: booking.status == SessionUiStatus.unpaid
+                                actionLabel:
+                                    booking.status == SessionUiStatus.unpaid
                                     ? 'Pay'
                                     : 'Check in',
                                 onAction: () =>
@@ -207,8 +217,9 @@ class _ActiveSessionBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () =>
-          context.push(AppRoutes.activeSessionDetailPath(activeSession.sessionId)),
+      onTap: () => context.push(
+        AppRoutes.activeSessionDetailPath(activeSession.sessionId),
+      ),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(

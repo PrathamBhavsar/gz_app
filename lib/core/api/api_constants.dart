@@ -142,7 +142,8 @@ class ApiConstants {
   static const String bookingsMyList = '/stores/{storeId}/bookings/my';
   static const String playerBookingDetail = '/stores/{storeId}/bookings/{id}';
   static const String playerSessionDetail = '/stores/{storeId}/sessions/{id}';
-  static const String playerSessionLogs = '/stores/{storeId}/sessions/{id}/logs';
+  static const String playerSessionLogs =
+      '/stores/{storeId}/sessions/{id}/logs';
   static const String billingMy = '/stores/{storeId}/billing/my';
   static const String bookingPayment = '/stores/{storeId}/bookings/{id}/pay';
   static const String wsPlayerNotify = '/ws/users/{userId}/notify';
@@ -169,6 +170,7 @@ class ApiConstants {
 
   // ─── Player Notifications Endpoints ────────────────────────────────────────
   static const String playerNotifications = '/notifications';
+  static const String playerNotificationDetail = '/notifications/{id}';
   static const String playerNotificationRead = '/notifications/{id}/read';
   static const String playerNotificationsReadAll = '/notifications/read-all';
   static const String playerNotifPrefs = '/notifications/preferences';

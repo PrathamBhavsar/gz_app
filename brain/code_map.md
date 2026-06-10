@@ -113,10 +113,16 @@
     - `wallet_ui_models.dart`
   - `presentation/screens/`
 - `lib/features/notifications/`
+  - `data/repositories/notifications_repository.dart`
+  - `application/`
+    - `notifications_notifier.dart`
+    - `notification_detail_notifier.dart`
+    - `notifications_ui_models.dart`
   - `presentation/screens/`
-  - `presentation/providers/notification_feed_notifier.dart`
 - `lib/features/profile/`
-  - `presentation/screens/` only today
+  - `application/`
+    - `notif_prefs_notifier.dart`
+  - `presentation/screens/`
 - `lib/features/disputes/`
   - `presentation/screens/` only today
 - `lib/features/main_shell/`

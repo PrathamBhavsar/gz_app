@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gz_app/core/theme/app_theme.dart';
-import 'package:gz_app/features/notifications/presentation/providers/notification_feed_notifier.dart';
+import 'package:gz_app/features/notifications/application/notifications_notifier.dart';
 import 'package:gz_app/features/sessions/application/activity_hub_notifier.dart';
 import 'package:gz_app/features/sessions/application/session_ui_models.dart';
 import 'package:gz_app/features/sessions/presentation/screens/sessions_screen.dart';
@@ -29,10 +30,7 @@ class _DataHubNotifier extends ActivityHubNotifier {
 Widget _wrap(List<Override> overrides) {
   return ProviderScope(
     overrides: overrides,
-    child: MaterialApp(
-      theme: AppTheme.light,
-      home: const SessionsScreen(),
-    ),
+    child: MaterialApp(theme: AppTheme.light, home: const SessionsScreen()),
   );
 }
 
@@ -54,11 +52,7 @@ void main() {
         unreadNotificationCountProvider.overrideWithValue(0),
         activityHubNotifierProvider.overrideWith(
           () => _DataHubNotifier(
-            const SessionsHubState(
-              activeSession: null,
-              upcoming: [],
-              past: [],
-            ),
+            const SessionsHubState(activeSession: null, upcoming: [], past: []),
           ),
         ),
       ]),

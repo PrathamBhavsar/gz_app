@@ -1,80 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../core/errors/app_exception.dart';
+import '../../../../core/navigation/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../models/domain_misc.dart';
 import '../../../../shared/widgets/gz_button.dart';
+import '../../../../shared/widgets/page_error_display.dart';
+import '../../application/notification_detail_notifier.dart';
 
 Future<void> showNotificationDetailSheet(
   BuildContext context, {
-  required String notifId,
-  required String title,
-  required String body,
-  required String type,
-  required String time,
-  String? actionLabel,
-  String? actionRoute,
+  required String notificationId,
+  required NotificationModel initialNotification,
 }) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (context) => NotificationDetailSheet(
-      notifId: notifId,
-      title: title,
-      body: body,
-      type: type,
-      time: time,
-      actionLabel: actionLabel,
-      actionRoute: actionRoute,
+      notificationId: notificationId,
+      initialNotification: initialNotification,
     ),
   );
 }
 
-class NotificationDetailSheet extends StatelessWidget {
+class NotificationDetailSheet extends ConsumerWidget {
   const NotificationDetailSheet({
     super.key,
-    required this.notifId,
-    required this.title,
-    required this.body,
-    required this.type,
-    required this.time,
-    this.actionLabel,
-    this.actionRoute,
+    required this.notificationId,
+    required this.initialNotification,
   });
 
-  final String notifId, title, body, type, time;
-  final String? actionLabel, actionRoute;
-
-  Color _iconBg() => switch (type) {
-    'booking' => AppColors.infoBg,
-    'session' => AppColors.okBg,
-    'credit' => AppColors.warnBg,
-    'dispute' => AppColors.errBg,
-    _ => AppColors.pillBg,
-  };
-
-  Color _iconColor() => switch (type) {
-    'booking' => AppColors.info,
-    'session' => AppColors.ok,
-    'credit' => AppColors.warn,
-    'dispute' => AppColors.err,
-    _ => AppColors.textSecondary,
-  };
-
-  List<List<dynamic>> _icon() => switch (type) {
-    'booking' => HugeIcons.strokeRoundedCalendar02,
-    'session' => HugeIcons.strokeRoundedGameController01,
-    'credit' => HugeIcons.strokeRoundedCoins01,
-    'dispute' => HugeIcons.strokeRoundedShield01,
-    _ => HugeIcons.strokeRoundedNotification01,
-  };
+  final String notificationId;
+  final NotificationModel initialNotification;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final detail = ref.watch(
+      notificationDetailNotifierProvider(notificationId),
+    );
+    final notification = detail.valueOrNull ?? initialNotification;
+    final type = _typeKeyFor(notification);
+    final actionLabel = _actionLabelFor(notification);
+    final actionRoute = _actionRouteFor(notification);
 
     return SafeArea(
       top: false,
@@ -91,7 +65,6 @@ class NotificationDetailSheet extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Drag handle
                 Center(
                   child: Container(
                     width: 42,
@@ -111,14 +84,14 @@ class NotificationDetailSheet extends StatelessWidget {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: _iconBg(),
+                        color: _iconBg(type),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
                         child: HugeIcon(
-                          icon: _icon(),
+                          icon: _icon(type),
                           size: 22,
-                          color: _iconColor(),
+                          color: _iconColor(type),
                         ),
                       ),
                     ),
@@ -129,23 +102,51 @@ class NotificationDetailSheet extends StatelessWidget {
                         children: [
                           Text(type.toUpperCase(), style: AppTypography.meta),
                           const SizedBox(height: 2),
-                          Text(time, style: AppTypography.small),
+                          Text(
+                            _formatTimestamp(_timestampFor(notification)),
+                            style: AppTypography.small,
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                Text(title, style: AppTypography.h2),
+                Text(
+                  notification.title ?? 'Notification',
+                  style: AppTypography.h2,
+                ),
                 const SizedBox(height: 10),
-                Text(body, style: AppTypography.bodyR),
+                detail.when(
+                  loading: () => Text(
+                    notification.body ?? 'Loading details...',
+                    style: AppTypography.bodyR,
+                  ),
+                  error: (error, _) => SizedBox(
+                    height: 180,
+                    child: PageErrorDisplay(
+                      error: AppPageError.from(error),
+                      onRetry: () => ref
+                          .read(
+                            notificationDetailNotifierProvider(
+                              notificationId,
+                            ).notifier,
+                          )
+                          .refresh(),
+                    ),
+                  ),
+                  data: (loaded) => Text(
+                    loaded.body ?? 'No additional details available.',
+                    style: AppTypography.bodyR,
+                  ),
+                ),
                 const SizedBox(height: 20),
                 if (actionLabel != null && actionRoute != null) ...[
                   GzButton(
-                    label: actionLabel!,
+                    label: actionLabel,
                     onPressed: () {
                       context.pop();
-                      context.push(actionRoute!);
+                      context.push(actionRoute);
                     },
                   ),
                   const SizedBox(height: 8),
@@ -163,3 +164,73 @@ class NotificationDetailSheet extends StatelessWidget {
     );
   }
 }
+
+Color _iconBg(String type) => switch (type) {
+  'booking' => AppColors.infoBg,
+  'session' => AppColors.okBg,
+  'credit' => AppColors.warnBg,
+  'dispute' => AppColors.errBg,
+  _ => AppColors.pillBg,
+};
+
+Color _iconColor(String type) => switch (type) {
+  'booking' => AppColors.info,
+  'session' => AppColors.ok,
+  'credit' => AppColors.warn,
+  'dispute' => AppColors.err,
+  _ => AppColors.textSecondary,
+};
+
+List<List<dynamic>> _icon(String type) => switch (type) {
+  'booking' => HugeIcons.strokeRoundedCalendar02,
+  'session' => HugeIcons.strokeRoundedGameController01,
+  'credit' => HugeIcons.strokeRoundedCoins01,
+  'dispute' => HugeIcons.strokeRoundedShield01,
+  _ => HugeIcons.strokeRoundedNotification01,
+};
+
+DateTime _timestampFor(NotificationModel item) =>
+    item.createdAt ?? item.sentAt ?? item.deliveredAt ?? DateTime.now();
+
+String _formatTimestamp(DateTime timestamp) {
+  final hour = timestamp.hour > 12 ? timestamp.hour - 12 : timestamp.hour;
+  final normalizedHour = hour == 0 ? 12 : hour;
+  final minute = timestamp.minute.toString().padLeft(2, '0');
+  final suffix = timestamp.hour >= 12 ? 'PM' : 'AM';
+  return '${timestamp.day}/${timestamp.month}/${timestamp.year} • '
+      '$normalizedHour:$minute $suffix';
+}
+
+String _typeKeyFor(NotificationModel item) {
+  final raw = item.referenceType?.trim().toLowerCase();
+  switch (raw) {
+    case 'booking':
+      return 'booking';
+    case 'session':
+      return 'session';
+    case 'credit':
+    case 'campaign':
+    case 'promotion':
+      return 'credit';
+    case 'dispute':
+      return 'dispute';
+    default:
+      return 'general';
+  }
+}
+
+String? _actionLabelFor(NotificationModel item) => switch (_typeKeyFor(item)) {
+  'booking' when item.referenceId != null => 'View Booking',
+  'session' when item.referenceId != null => 'View Session',
+  _ => null,
+};
+
+String? _actionRouteFor(NotificationModel item) => switch (_typeKeyFor(item)) {
+  'booking' when item.referenceId != null => AppRoutes.bookingDetailPath(
+    item.referenceId!,
+  ),
+  'session' when item.referenceId != null => AppRoutes.sessionHistoryDetailPath(
+    item.referenceId!,
+  ),
+  _ => null,
+};

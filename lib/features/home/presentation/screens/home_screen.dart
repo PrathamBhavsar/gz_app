@@ -19,7 +19,7 @@ import '../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../../../../shared/widgets/store_selector_sheet.dart';
 import '../../../auth/application/auth_notifier.dart';
-import '../../../notifications/presentation/providers/notification_feed_notifier.dart';
+import '../../../notifications/application/notifications_notifier.dart';
 import '../../../notifications/presentation/screens/notification_center_sheet.dart';
 import '../../application/active_store_notifier.dart';
 import '../../application/home_notifier.dart';
@@ -34,10 +34,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    ref.listen<ActiveStoreState>(activeStoreNotifierProvider, (
-      previous,
-      next,
-    ) {
+    ref.listen<ActiveStoreState>(activeStoreNotifierProvider, (previous, next) {
       final error = next.actionError;
       if (error != null && error != previous?.actionError) {
         showErrorSnackbar(context, error);
@@ -50,8 +47,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final activeStoreState = ref.watch(activeStoreNotifierProvider);
     final authState = ref.watch(authNotifierProvider);
     final userName = switch (authState) {
-      AuthAuthenticated(:final user) when user.name != null && user.name!.isNotEmpty
-          => user.name!,
+      AuthAuthenticated(:final user)
+          when user.name != null && user.name!.isNotEmpty =>
+        user.name!,
       _ => 'Player',
     };
 
@@ -73,7 +71,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   icon: 'inbox',
                   kind: AppPageErrorKind.empty,
                 ),
-                onRetry: () => ref.read(homeNotifierProvider.notifier).refresh(),
+                onRetry: () =>
+                    ref.read(homeNotifierProvider.notifier).refresh(),
               );
             }
 
@@ -248,7 +247,9 @@ class _StoreCard extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   color: AppColors.surfaceTint,
-                  borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+                  borderRadius: BorderRadius.circular(
+                    AppSpacing.borderRadiusLg,
+                  ),
                 ),
                 child: const Center(
                   child: HugeIcon(

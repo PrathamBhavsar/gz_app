@@ -2,20 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-import '../../../../core/navigation/routes.dart';
+import '../../../../core/errors/app_exception.dart';
+import '../../../../core/errors/error_snackbar.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../providers/notification_feed_notifier.dart';
+import '../../../../models/domain_misc.dart';
 import '../../../../shared/widgets/gz_card.dart';
 import '../../../../shared/widgets/gz_chip.dart';
+import '../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../shared/widgets/gz_top_bar.dart';
+import '../../../../shared/widgets/page_error_display.dart';
+import '../../application/notifications_notifier.dart';
+import '../../application/notifications_ui_models.dart';
 import 'notification_detail_sheet.dart';
 
-class NotificationsScreen extends ConsumerWidget {
+class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
 
-  static const _filters = <String>[
+  static const filters = <String>[
     'All',
     'Unread',
     'Bookings',
@@ -24,78 +29,160 @@ class NotificationsScreen extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final notifications = ref.watch(notificationFeedProvider);
+  ConsumerState<NotificationsScreen> createState() =>
+      _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
+  String _activeFilter = NotificationsScreen.filters.first;
+
+  @override
+  Widget build(BuildContext context) {
+    final notifications = ref.watch(notificationsNotifierProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: GzTopBar(
         title: 'Notifications',
         trailingWidth: 104,
-        trailing: GestureDetector(
-          onTap: () =>
-              ref.read(notificationFeedProvider.notifier).markAllRead(),
-          child: Text(
-            'Mark all read',
-            textAlign: TextAlign.right,
-            style: AppTypography.small.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
+        trailing: notifications.maybeWhen(
+          data: (data) => GestureDetector(
+            onTap: data.hasUnread ? () => _markAllRead(context) : null,
+            child: Text(
+              'Mark all read',
+              textAlign: TextAlign.right,
+              style: AppTypography.small.copyWith(
+                color: data.hasUnread
+                    ? AppColors.textSecondary
+                    : AppColors.textSecondary.withValues(alpha: 0.55),
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
+          orElse: () => const SizedBox.shrink(),
         ),
       ),
       body: SafeArea(
         top: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          children: [
-            SizedBox(
-              height: 30,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (context, index) {
-                  return GzChip(label: _filters[index], active: index == 0);
-                },
-                separatorBuilder: (context, index) => const SizedBox(width: 8),
-                itemCount: _filters.length,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ...notifications.map(
-              (item) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: GestureDetector(
-                  onTap: () {
-                    ref
-                        .read(notificationFeedProvider.notifier)
-                        .markRead(item.id);
-                    showNotificationDetailSheet(
-                      context,
-                      notifId: item.id,
-                      title: item.title,
-                      body: item.subtitle,
-                      type: item.type.name,
-                      time: _formatTimestamp(item.timestamp),
-                      actionLabel: _actionLabelFor(item),
-                      actionRoute: _actionRouteFor(item),
-                    );
-                  },
-                  child: _NotificationRow(item: item),
+        child: notifications.when(
+          loading: () => const GzLoadingView(message: 'Loading notifications'),
+          error: (error, _) => PageErrorDisplay(
+            error: AppPageError.from(error),
+            onRetry: () =>
+                ref.read(notificationsNotifierProvider.notifier).refresh(),
+          ),
+          data: (data) {
+            final items = _filteredItems(data);
+            if (items.isEmpty) {
+              return PageErrorDisplay(
+                error: _activeFilter == 'All'
+                    ? AppPageError.empty
+                    : const AppPageError(
+                        title: 'No matches',
+                        message: 'There are no notifications for this filter.',
+                        icon: 'inbox',
+                        kind: AppPageErrorKind.empty,
+                      ),
+              );
+            }
+
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              children: [
+                SizedBox(
+                  height: 30,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      final filter = NotificationsScreen.filters[index];
+                      return GestureDetector(
+                        onTap: () => setState(() => _activeFilter = filter),
+                        child: GzChip(
+                          label: filter,
+                          active: filter == _activeFilter,
+                        ),
+                      );
+                    },
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                    itemCount: NotificationsScreen.filters.length,
+                  ),
                 ),
-              ),
-            ),
-          ],
+                const SizedBox(height: 16),
+                ...items.map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: GestureDetector(
+                      onTap: () => _openDetail(context, item),
+                      child: _NotificationRow(item: item),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
+  }
+
+  List<NotificationModel> _filteredItems(NotificationsData data) {
+    return data.items
+        .where((item) {
+          switch (_activeFilter) {
+            case 'Unread':
+              return isUnreadNotification(item);
+            case 'Bookings':
+              return _typeKeyFor(item) == 'booking';
+            case 'Sessions':
+              return _typeKeyFor(item) == 'session';
+            case 'Promo':
+              return _typeKeyFor(item) == 'credit';
+            default:
+              return true;
+          }
+        })
+        .toList(growable: false);
+  }
+
+  Future<void> _openDetail(BuildContext context, NotificationModel item) async {
+    final id = item.id;
+    if (id == null || id.isEmpty) {
+      return;
+    }
+
+    try {
+      await ref.read(notificationsNotifierProvider.notifier).markRead(id);
+    } catch (error) {
+      if (context.mounted) {
+        showErrorSnackbar(context, error);
+      }
+    }
+    if (!context.mounted) {
+      return;
+    }
+
+    await showNotificationDetailSheet(
+      context,
+      notificationId: id,
+      initialNotification: item,
+    );
+  }
+
+  Future<void> _markAllRead(BuildContext context) async {
+    try {
+      await ref.read(notificationsNotifierProvider.notifier).markAllRead();
+    } catch (error) {
+      if (context.mounted) {
+        showErrorSnackbar(context, error);
+      }
+    }
   }
 }
 
 class _NotificationRow extends StatelessWidget {
   const _NotificationRow({required this.item});
 
-  final NotificationFeedItem item;
+  final NotificationModel item;
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +202,7 @@ class _NotificationRow extends StatelessWidget {
                   ),
                 ),
                 child: HugeIcon(
-                  icon: _iconFor(item.type),
+                  icon: _iconFor(_typeKeyFor(item)),
                   color: AppColors.textPrimary,
                   size: 18,
                 ),
@@ -125,10 +212,10 @@ class _NotificationRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.title, style: AppTypography.h3),
+                    Text(item.title ?? 'Notification', style: AppTypography.h3),
                     const SizedBox(height: 4),
                     Text(
-                      item.subtitle,
+                      item.body ?? 'Open notification for details',
                       style: AppTypography.bodyR.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -138,13 +225,13 @@ class _NotificationRow extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                _formatTimestamp(item.timestamp),
+                _formatTimestamp(_timestampFor(item)),
                 style: AppTypography.small,
               ),
             ],
           ),
         ),
-        if (item.isUnread)
+        if (isUnreadNotification(item))
           Positioned(
             left: 0,
             top: 12,
@@ -164,13 +251,34 @@ class _NotificationRow extends StatelessWidget {
   }
 }
 
-List<List<dynamic>> _iconFor(NotificationFeedType type) => switch (type) {
-  NotificationFeedType.booking => HugeIcons.strokeRoundedCalendar03,
-  NotificationFeedType.session => HugeIcons.strokeRoundedClock01,
-  NotificationFeedType.credit => HugeIcons.strokeRoundedGift,
-  NotificationFeedType.dispute => HugeIcons.strokeRoundedShield01,
-  NotificationFeedType.general => HugeIcons.strokeRoundedNotification03,
+List<List<dynamic>> _iconFor(String type) => switch (type) {
+  'booking' => HugeIcons.strokeRoundedCalendar03,
+  'session' => HugeIcons.strokeRoundedClock01,
+  'credit' => HugeIcons.strokeRoundedGift,
+  'dispute' => HugeIcons.strokeRoundedShield01,
+  _ => HugeIcons.strokeRoundedNotification03,
 };
+
+DateTime _timestampFor(NotificationModel item) =>
+    item.createdAt ?? item.sentAt ?? item.deliveredAt ?? DateTime.now();
+
+String _typeKeyFor(NotificationModel item) {
+  final raw = item.referenceType?.trim().toLowerCase();
+  switch (raw) {
+    case 'booking':
+      return 'booking';
+    case 'session':
+      return 'session';
+    case 'credit':
+    case 'campaign':
+    case 'promotion':
+      return 'credit';
+    case 'dispute':
+      return 'dispute';
+    default:
+      return 'general';
+  }
+}
 
 String _formatTimestamp(DateTime timestamp) {
   final now = DateTime.now();
@@ -212,21 +320,3 @@ String _formatTimestamp(DateTime timestamp) {
   ];
   return '${timestamp.day} ${months[timestamp.month - 1]}';
 }
-
-String? _actionLabelFor(NotificationFeedItem item) => switch (item.type) {
-  NotificationFeedType.booking =>
-    item.referenceId != null ? 'View Booking' : null,
-  NotificationFeedType.session =>
-    item.referenceId != null ? 'View Session' : null,
-  NotificationFeedType.credit => null,
-  NotificationFeedType.dispute => null,
-  NotificationFeedType.general => null,
-};
-
-String? _actionRouteFor(NotificationFeedItem item) => switch (item.type) {
-  NotificationFeedType.booking when item.referenceId != null =>
-    AppRoutes.bookingDetailPath(item.referenceId!),
-  NotificationFeedType.session when item.referenceId != null =>
-    AppRoutes.sessionHistoryDetailPath(item.referenceId!),
-  _ => null,
-};

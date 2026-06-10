@@ -1,14 +1,20 @@
 # Overlays Feature Registry — Phase 8
-> TARGET SPEC — not yet implemented
+> PARTIALLY IMPLEMENTED — notification overlays are now wired to the live API in Phase 6; other overlay notes remain target specs unless stated otherwise.
 
 ## Reality Check
-Only presentation overlays exist today:
+Implemented notification overlay artifacts:
 - `lib/features/notifications/presentation/screens/notification_center_sheet.dart`
-- `lib/features/notifications/presentation/widgets/notification_detail_sheet.dart`
+- `lib/features/notifications/presentation/screens/notification_detail_sheet.dart`
+- `lib/features/notifications/data/repositories/notifications_repository.dart`
+- `lib/features/notifications/application/notifications_notifier.dart`
+- `lib/features/notifications/application/notification_detail_notifier.dart`
+- `lib/features/notifications/application/notifications_ui_models.dart`
+
+Other overlays are still presentation-only today:
 - `lib/shared/widgets/store_selector_sheet.dart`
 - `lib/shared/widgets/otp_input_sheet.dart`
 
-No data or application logic notifiers (like `NotificationsNotifier`, `StoreSelectorNotifier`, `ChangePhoneNotifier`) are implemented yet.
+Store selector and change-phone notes below should still be treated as target specs where not otherwise implemented.
 
 ## Global Overlays (Modal Bottom Sheets — not routes)
 
@@ -31,11 +37,12 @@ All four overlays are invoked via standalone functions. They are NOT registered 
 
 | Item | Detail |
 |---|---|
-| Function | `showNotificationDetail(BuildContext context, WidgetRef ref, NotificationModel notification)` |
-| File | `lib/features/notifications/presentation/widgets/notification_detail_sheet.dart` |
-| Widget | `NotificationDetailSheet` (StatelessWidget) |
-| Auto-read | Marks notification as read on open via `notificationsNotifierProvider.notifier.markRead(id)` |
-| Deep link CTA | Action button label derived from `referenceType`; currently pops sheet (deep-link wiring Phase 9) |
+| Function | `showNotificationDetailSheet(BuildContext context, notificationId, initialNotification)` |
+| File | `lib/features/notifications/presentation/screens/notification_detail_sheet.dart` |
+| Widget | `NotificationDetailSheet` (ConsumerWidget) |
+| Data source | `notificationDetailNotifierProvider(id)` fetches `GET /notifications/:id` and merges detail back into the list notifier |
+| Auto-read | Tapping a row marks it read through `notificationsNotifierProvider.notifier.markRead(id)` before opening the sheet |
+| Deep link CTA | Action button derives from `referenceType` and pushes the relevant route when `referenceId` is present |
 
 ## O-40 Store Selector
 
@@ -67,7 +74,7 @@ All four overlays are invoked via standalone functions. They are NOT registered 
 ### NotificationsNotifier
 
 ```dart
-// lib/features/notifications/presentation/providers/notifications_notifier.dart
+// lib/features/notifications/application/notifications_notifier.dart
 class NotificationsData {
   final List<NotificationModel> items;
   final int unreadCount;
@@ -76,14 +83,14 @@ class NotificationsData {
 }
 
 class NotificationsNotifier extends Notifier<AsyncValue<NotificationsData>> { ... }
-final notificationsNotifierProvider = NotifierProvider<...>(...);
+final notificationsNotifierProvider = AsyncNotifierProvider<...>(...);
 ```
 
 Key methods:
 - `refresh()` — re-fetches from API
 - `markRead(String id)` — optimistic update + API call
 - `markAllRead()` — optimistic update + POST /notifications/read-all
-- `prependNew(NotificationModel)` — called by WS events (Phase 5 wire-up pending Phase 9)
+- `prependFromWs(Map<String, dynamic>)` — called by `PlayerWsService` in `MainPage`
 
 ### Store Selector State
 

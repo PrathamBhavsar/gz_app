@@ -11,8 +11,7 @@ Existing files today:
 
 Missing today:
 - `lib/features/profile/data/`
-- `lib/features/profile/application/`
-- Any profile-specific providers or repositories
+- Most profile-specific providers or repositories beyond notification preferences
 
 ## Planned Files
 | File | Purpose | Implemented? |
@@ -21,7 +20,7 @@ Missing today:
 | `lib/features/profile/application/profile_notifier.dart` | Load `/profile` data | No |
 | `lib/features/profile/application/edit_profile_notifier.dart` | Edit profile action flow | No |
 | `lib/features/profile/application/change_phone_notifier.dart` | Change-phone action flow | No |
-| `lib/features/profile/application/notif_prefs_notifier.dart` | Notification preferences read/write state | No |
+| `lib/features/profile/application/notif_prefs_notifier.dart` | Notification preferences read/write state | Yes |
 
 ## Planned Screens
 | Screen | Route | File |
@@ -40,5 +39,5 @@ Missing today:
 - `PATCH /notifications/preferences`
 
 ## Notes
-- Phase 7 is expected to reuse auth and notifications backend contracts where sensible, but those notifiers do not exist in this repo yet.
+- Notification preferences now reuse the notifications backend contract through `notif_prefs_notifier.dart` and `NotificationsRepository`.
 - Stats and derived profile summaries should stay out of the UI until there is a real backend source for them.

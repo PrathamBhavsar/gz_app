@@ -16,7 +16,7 @@ import '../../../../shared/widgets/gz_live_dot.dart';
 import '../../../../shared/widgets/gz_tag.dart';
 import '../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../shared/widgets/page_error_display.dart';
-import '../../../notifications/presentation/providers/notification_feed_notifier.dart';
+import '../../../notifications/application/notifications_notifier.dart';
 import '../../../notifications/presentation/screens/notification_center_sheet.dart';
 import '../../application/wallet_notifier.dart';
 import '../../application/wallet_ui_models.dart';
