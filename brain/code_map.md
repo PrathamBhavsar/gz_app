@@ -103,7 +103,15 @@
   - `presentation/screens/`
   - `presentation/providers/session_runtime_providers.dart`
 - `lib/features/wallet/`
-  - `presentation/screens/` only today
+  - `data/repositories/wallet_repository.dart`
+  - `application/`
+    - `campaign_detail_notifier.dart`
+    - `campaigns_notifier.dart`
+    - `credit_history_notifier.dart`
+    - `redeem_credits_notifier.dart`
+    - `wallet_notifier.dart`
+    - `wallet_ui_models.dart`
+  - `presentation/screens/`
 - `lib/features/notifications/`
   - `presentation/screens/`
   - `presentation/providers/notification_feed_notifier.dart`
