@@ -83,7 +83,9 @@ class _BillingOverrideSheetState extends State<BillingOverrideSheet> {
                     height: 4,
                     decoration: BoxDecoration(
                       color: AppColors.rule,
-                      borderRadius: BorderRadius.circular(AppSpacing.borderRadiusPill),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadiusPill,
+                      ),
                     ),
                   ),
                 ),
@@ -102,7 +104,10 @@ class _BillingOverrideSheetState extends State<BillingOverrideSheet> {
                   child: Column(
                     children: [
                       GzMetaRow(label: 'Player', value: widget.playerName),
-                      GzMetaRow(label: 'Original amount', value: widget.originalAmount),
+                      GzMetaRow(
+                        label: 'Original amount',
+                        value: widget.originalAmount,
+                      ),
                       GzMetaRow(label: 'Reference', value: widget.billingId),
                     ],
                   ),
@@ -113,10 +118,15 @@ class _BillingOverrideSheetState extends State<BillingOverrideSheet> {
                 Text('Override amount (₹)', style: AppTypography.small),
                 const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.pillBg,
-                    borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.borderRadiusLg,
+                    ),
                   ),
                   child: TextField(
                     controller: _overrideController,
@@ -137,10 +147,15 @@ class _BillingOverrideSheetState extends State<BillingOverrideSheet> {
                 Text('Reason (required for audit)', style: AppTypography.small),
                 const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.pillBg,
-                    borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.borderRadiusLg,
+                    ),
                   ),
                   child: TextField(
                     controller: _reasonController,
@@ -151,7 +166,9 @@ class _BillingOverrideSheetState extends State<BillingOverrideSheet> {
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    style: AppTypography.bodyR.copyWith(color: AppColors.textPrimary),
+                    style: AppTypography.bodyR.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -183,7 +200,9 @@ class _BillingOverrideSheetState extends State<BillingOverrideSheet> {
                 // Action button
                 GzButton(
                   label: _done ? 'Done' : 'Confirm Override',
-                  variant: _done ? GzButtonVariant.ghost : GzButtonVariant.primary,
+                  variant: _done
+                      ? GzButtonVariant.ghost
+                      : GzButtonVariant.primary,
                   onPressed: _done
                       ? () => Navigator.pop(context)
                       : () => setState(() => _done = true),

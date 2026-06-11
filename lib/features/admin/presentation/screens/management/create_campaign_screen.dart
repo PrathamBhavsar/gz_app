@@ -24,7 +24,12 @@ class _CreateCampaignScreenState extends State<CreateCampaignScreen> {
   final Set<String> _selectedSystems = {};
   bool _saved = false;
 
-  static const _types = ['Discount %', 'Bonus Credits', 'Happy Hour', 'First Visit'];
+  static const _types = [
+    'Discount %',
+    'Bonus Credits',
+    'Happy Hour',
+    'First Visit',
+  ];
   static const _systemTypes = ['All Systems', 'PC Gaming', 'PS5', 'Xbox', 'VR'];
 
   @override
@@ -56,7 +61,9 @@ class _CreateCampaignScreenState extends State<CreateCampaignScreen> {
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: hint,
-              hintStyle: AppTypography.bodyR.copyWith(color: AppColors.textMuted),
+              hintStyle: AppTypography.bodyR.copyWith(
+                color: AppColors.textMuted,
+              ),
               isDense: true,
               contentPadding: EdgeInsets.zero,
             ),
@@ -93,10 +100,7 @@ class _CreateCampaignScreenState extends State<CreateCampaignScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(
-        title: 'New Campaign',
-        onBack: () => context.pop(),
-      ),
+      appBar: GzAdminTopBar(title: 'New Campaign', onBack: () => context.pop()),
       body: SafeArea(
         top: false,
         child: GzScrollContent(
@@ -221,8 +225,9 @@ class _CreateCampaignScreenState extends State<CreateCampaignScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.pillBg,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.borderRadiusLg),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.borderRadiusLg,
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -234,8 +239,9 @@ class _CreateCampaignScreenState extends State<CreateCampaignScreen> {
                       ),
                       Text(
                         '2',
-                        style: AppTypography.body
-                            .copyWith(fontWeight: FontWeight.w600),
+                        style: AppTypography.body.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -250,9 +256,7 @@ class _CreateCampaignScreenState extends State<CreateCampaignScreen> {
                       padding: 12,
                       child: Text(
                         'Campaign created!',
-                        style: AppTypography.body.copyWith(
-                          color: AppColors.ok,
-                        ),
+                        style: AppTypography.body.copyWith(color: AppColors.ok),
                       ),
                     ),
                   ),

@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+
 import '../api/api_constants.dart';
+import '../auth/token_storage.dart';
 
 /// WebSocket event types from the Store Live Feed.
 enum WsEventType {
@@ -47,9 +50,8 @@ class WsEvent {
 class AdminLiveService {
   final String Function() _getAccessToken;
 
-  AdminLiveService({
-    required String Function() getAccessToken,
-  }) : _getAccessToken = getAccessToken;
+  AdminLiveService({required String Function() getAccessToken})
+    : _getAccessToken = getAccessToken;
 
   WebSocketChannel? _channel;
   StreamSubscription? _subscription;
@@ -86,7 +88,9 @@ class AdminLiveService {
 
     // Build WS URL from base URL (swap http → ws)
     final baseUrl = ApiConstants.baseUrl;
-    final wsBase = baseUrl.replaceFirst('http://', 'ws://').replaceFirst('https://', 'wss://');
+    final wsBase = baseUrl
+        .replaceFirst('http://', 'ws://')
+        .replaceFirst('https://', 'wss://');
     final wsUrl = '$wsBase/ws/stores/$storeId/live?token=$token';
 
     try {
@@ -184,3 +188,27 @@ class AdminLiveService {
     });
   }
 }
+
+final adminLiveServiceProvider = Provider<AdminLiveService>((ref) {
+  return AdminLiveService(
+    getAccessToken: () => ref.read(accessTokenProvider) ?? '',
+  );
+});
+
+final adminLiveEventsProvider = StreamProvider.autoDispose<WsEvent>((
+  ref,
+) async* {
+  final storage = ref.watch(tokenStorageProvider);
+  final storeId = await storage.getAdminStoreId();
+  if (storeId == null || storeId.isEmpty) {
+    throw Exception('Missing admin store context');
+  }
+
+  final service = ref.watch(adminLiveServiceProvider);
+  await service.connect(storeId);
+  ref.onDispose(() {
+    service.disconnect();
+  });
+
+  yield* service.events;
+});

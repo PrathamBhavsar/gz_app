@@ -136,10 +136,7 @@ class _SystemCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Text(
-            'Utilization: ${data.utilization}%',
-            style: AppTypography.small,
-          ),
+          Text('Utilization: ${data.utilization}%', style: AppTypography.small),
           const SizedBox(height: 4),
           GzProgressBar(
             value: data.utilization / 100,

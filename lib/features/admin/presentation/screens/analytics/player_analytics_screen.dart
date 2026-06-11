@@ -39,10 +39,7 @@ class PlayerAnalyticsScreen extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: _SegmentCell(
-                            value: '68',
-                            label: 'New',
-                          ),
+                          child: _SegmentCell(value: '68', label: 'New'),
                         ),
                         SizedBox(
                           width: 1,
@@ -50,10 +47,7 @@ class PlayerAnalyticsScreen extends StatelessWidget {
                           child: ColoredBox(color: AppColors.rule),
                         ),
                         Expanded(
-                          child: _SegmentCell(
-                            value: '74',
-                            label: 'Returning',
-                          ),
+                          child: _SegmentCell(value: '74', label: 'Returning'),
                         ),
                       ],
                     ),
@@ -143,10 +137,7 @@ class PlayerAnalyticsScreen extends StatelessWidget {
 }
 
 class _SegmentCell extends StatelessWidget {
-  const _SegmentCell({
-    required this.value,
-    required this.label,
-  });
+  const _SegmentCell({required this.value, required this.label});
 
   final String value;
   final String label;

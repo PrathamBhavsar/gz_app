@@ -1,40 +1,85 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/errors/app_exception.dart';
+import '../../../../../core/errors/error_snackbar.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_card.dart';
 import '../../../../../shared/widgets/gz_meta_row.dart';
+import '../../../application/admin_booking_command_notifier.dart';
+import '../../../application/admin_command_state.dart';
 
 Future<void> showAdminCancelBookingSheet(
   BuildContext context, {
   required String id,
+  required String playerLabel,
+  required String systemLabel,
+  required String timeLabel,
+  VoidCallback? onCompleted,
 }) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (context) => AdminCancelBookingSheet(id: id),
+    builder: (context) => AdminCancelBookingSheet(
+      id: id,
+      playerLabel: playerLabel,
+      systemLabel: systemLabel,
+      timeLabel: timeLabel,
+      onCompleted: onCompleted,
+    ),
   );
 }
 
-class AdminCancelBookingSheet extends StatefulWidget {
-  const AdminCancelBookingSheet({super.key, required this.id});
+class AdminCancelBookingSheet extends ConsumerStatefulWidget {
+  const AdminCancelBookingSheet({
+    super.key,
+    required this.id,
+    required this.playerLabel,
+    required this.systemLabel,
+    required this.timeLabel,
+    this.onCompleted,
+  });
 
   final String id;
+  final String playerLabel;
+  final String systemLabel;
+  final String timeLabel;
+  final VoidCallback? onCompleted;
 
   @override
-  State<AdminCancelBookingSheet> createState() =>
+  ConsumerState<AdminCancelBookingSheet> createState() =>
       _AdminCancelBookingSheetState();
 }
 
-class _AdminCancelBookingSheetState extends State<AdminCancelBookingSheet> {
-  bool _confirmed = false;
+class _AdminCancelBookingSheetState
+    extends ConsumerState<AdminCancelBookingSheet> {
+  final _reasonController = TextEditingController(text: 'Admin override');
+
+  @override
+  void dispose() {
+    _reasonController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(adminBookingCommandNotifierProvider(widget.id), (_, next) {
+      if (next is AdminCommandSuccess) {
+        showSuccessSnackbar(context, next.message);
+        widget.onCompleted?.call();
+        Navigator.of(context).pop();
+      } else if (next is AdminCommandError) {
+        showErrorSnackbar(context, ValidationException(next.message));
+      }
+    });
+
+    final state = ref.watch(adminBookingCommandNotifierProvider(widget.id));
+    final loading = state is AdminCommandLoading;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     return SafeArea(
       top: false,
@@ -51,7 +96,6 @@ class _AdminCancelBookingSheetState extends State<AdminCancelBookingSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // drag handle
                 Center(
                   child: Container(
                     width: 42,
@@ -65,66 +109,56 @@ class _AdminCancelBookingSheetState extends State<AdminCancelBookingSheet> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                Row(
+                const Row(
                   children: [
-                    const HugeIcon(
+                    HugeIcon(
                       icon: HugeIcons.strokeRoundedAlertCircle,
                       color: AppColors.err,
                       size: 24,
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
-                      child: const Text(
-                        'Cancel booking',
-                        style: AppTypography.h1,
-                      ),
+                      child: Text('Cancel booking', style: AppTypography.h1),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  'Booking #${widget.id.substring(0, widget.id.length >= 6 ? 6 : widget.id.length).toUpperCase()}',
-                  style: AppTypography.bodyR,
-                ),
+                Text(widget.id, style: AppTypography.bodyR),
                 const SizedBox(height: 16),
                 GzCard(
                   variant: CardVariant.inset,
                   child: Column(
-                    children: const [
-                      GzMetaRow(label: 'Player', value: 'Rahul Mehra'),
-                      GzMetaRow(label: 'Time', value: '09:00 – 11:00'),
-                      GzMetaRow(label: 'System', value: 'PC Station 01'),
-                      GzMetaRow(
-                        label: 'Refund',
-                        value: 'None (admin cancel)',
-                      ),
+                    children: [
+                      GzMetaRow(label: 'Player', value: widget.playerLabel),
+                      GzMetaRow(label: 'Time', value: widget.timeLabel),
+                      GzMetaRow(label: 'System', value: widget.systemLabel),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'This will immediately cancel the booking. The player will be notified.',
-                  style: AppTypography.bodyR,
-                ),
-                const SizedBox(height: 18),
-                if (_confirmed) ...[
-                  GzCard(
-                    variant: CardVariant.tint,
-                    child: Text(
-                      'Booking cancelled.',
-                      style: AppTypography.body.copyWith(
-                        color: AppColors.ok,
-                      ),
+                TextField(
+                  controller: _reasonController,
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    hintText: 'Cancellation reason',
+                    filled: true,
+                    fillColor: AppColors.pillBg,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                ],
+                ),
+                const SizedBox(height: 18),
                 GzButton(
-                  label: _confirmed ? 'Done' : 'Confirm Cancel',
+                  label: 'Confirm Cancel',
+                  loading: loading,
                   variant: GzButtonVariant.dangerOutline,
-                  onPressed: _confirmed
-                      ? () => Navigator.pop(context)
-                      : () => setState(() => _confirmed = true),
+                  onPressed: () => ref
+                      .read(
+                        adminBookingCommandNotifierProvider(widget.id).notifier,
+                      )
+                      .cancel(reason: _reasonController.text.trim()),
                 ),
               ],
             ),

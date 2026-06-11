@@ -71,11 +71,7 @@ class _EditPricingRuleScreenState extends State<EditPricingRuleScreen> {
     super.dispose();
   }
 
-  Widget _inputField(
-    String label,
-    TextEditingController ctrl, {
-    String? hint,
-  }) {
+  Widget _inputField(String label, TextEditingController ctrl, {String? hint}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -138,17 +134,22 @@ class _EditPricingRuleScreenState extends State<EditPricingRuleScreen> {
             child: GestureDetector(
               onTap: () => setState(() => onSelect(o)),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected ? AppColors.textPrimary : AppColors.pillBg,
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.borderRadiusPill),
+                  borderRadius: BorderRadius.circular(
+                    AppSpacing.borderRadiusPill,
+                  ),
                 ),
                 child: Text(
                   o,
                   style: AppTypography.body.copyWith(
-                    color:
-                        isSelected ? AppColors.surface : AppColors.textPrimary,
+                    color: isSelected
+                        ? AppColors.surface
+                        : AppColors.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -205,10 +206,7 @@ class _EditPricingRuleScreenState extends State<EditPricingRuleScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(
-        title: 'Edit Rule',
-        onBack: () => context.pop(),
-      ),
+      appBar: GzAdminTopBar(title: 'Edit Rule', onBack: () => context.pop()),
       body: SafeArea(
         top: false,
         child: GzScrollContent(
@@ -217,7 +215,11 @@ class _EditPricingRuleScreenState extends State<EditPricingRuleScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _inputField('Rule name', _nameController, hint: 'e.g. Peak Hours'),
+                _inputField(
+                  'Rule name',
+                  _nameController,
+                  hint: 'e.g. Peak Hours',
+                ),
                 _inputField('Rate (₹ per hour)', _rateController, hint: '80'),
                 _section('Applicable systems', _systemsChips()),
                 _section(
@@ -243,9 +245,7 @@ class _EditPricingRuleScreenState extends State<EditPricingRuleScreen> {
                       variant: CardVariant.tint,
                       child: Text(
                         'Changes saved!',
-                        style: AppTypography.body.copyWith(
-                          color: AppColors.ok,
-                        ),
+                        style: AppTypography.body.copyWith(color: AppColors.ok),
                       ),
                     ),
                   ),

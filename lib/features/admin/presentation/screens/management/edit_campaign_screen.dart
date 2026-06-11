@@ -37,7 +37,12 @@ class _EditCampaignScreenState extends State<EditCampaignScreen> {
   final Set<String> _selectedSystems = {};
   bool _saved = false;
 
-  static const _types = ['Discount %', 'Bonus Credits', 'Happy Hour', 'First Visit'];
+  static const _types = [
+    'Discount %',
+    'Bonus Credits',
+    'Happy Hour',
+    'First Visit',
+  ];
   static const _systemTypes = ['All Systems', 'PC Gaming', 'PS5', 'Xbox', 'VR'];
 
   @override
@@ -77,7 +82,9 @@ class _EditCampaignScreenState extends State<EditCampaignScreen> {
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: hint,
-              hintStyle: AppTypography.bodyR.copyWith(color: AppColors.textMuted),
+              hintStyle: AppTypography.bodyR.copyWith(
+                color: AppColors.textMuted,
+              ),
               isDense: true,
               contentPadding: EdgeInsets.zero,
             ),
@@ -242,8 +249,9 @@ class _EditCampaignScreenState extends State<EditCampaignScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.pillBg,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.borderRadiusLg),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.borderRadiusLg,
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -255,8 +263,9 @@ class _EditCampaignScreenState extends State<EditCampaignScreen> {
                       ),
                       Text(
                         '2',
-                        style: AppTypography.body
-                            .copyWith(fontWeight: FontWeight.w600),
+                        style: AppTypography.body.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -271,9 +280,7 @@ class _EditCampaignScreenState extends State<EditCampaignScreen> {
                       padding: 12,
                       child: Text(
                         'Changes saved!',
-                        style: AppTypography.body.copyWith(
-                          color: AppColors.ok,
-                        ),
+                        style: AppTypography.body.copyWith(color: AppColors.ok),
                       ),
                     ),
                   ),

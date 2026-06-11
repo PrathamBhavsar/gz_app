@@ -162,10 +162,7 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                GzButton(
-                  label: 'Send notification',
-                  onPressed: () {},
-                ),
+                GzButton(label: 'Send notification', onPressed: () {}),
               ],
             ),
           ),

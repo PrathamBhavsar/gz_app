@@ -134,10 +134,15 @@ class SessionStatisticsScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     item.title,
-                                    style: AppTypography.body.copyWith(fontSize: 13),
+                                    style: AppTypography.body.copyWith(
+                                      fontSize: 13,
+                                    ),
                                   ),
                                   const SizedBox(height: 2),
-                                  Text(item.duration, style: AppTypography.small),
+                                  Text(
+                                    item.duration,
+                                    style: AppTypography.small,
+                                  ),
                                 ],
                               ),
                             ),
@@ -208,7 +213,10 @@ class _KpiCard extends StatelessWidget {
         children: [
           HugeIcon(icon: data.icon, color: data.accent, size: 18),
           const Spacer(),
-          Text(data.value, style: AppTypography.h1.copyWith(fontFamily: 'GeistMono')),
+          Text(
+            data.value,
+            style: AppTypography.h1.copyWith(fontFamily: 'GeistMono'),
+          ),
           const SizedBox(height: 4),
           Text(
             data.label,

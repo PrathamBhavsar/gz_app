@@ -1,148 +1,44 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-
 import '../../../../../core/navigation/routes.dart';
+import '../../../../../core/errors/app_exception.dart';
+import '../../../../../core/network/admin_live_service.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../models/domain_admin.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
 import '../../../../../shared/widgets/gz_chip.dart';
-import '../../../../../shared/widgets/gz_live_dot.dart';
+import '../../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../../shared/widgets/gz_tag.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
+import '../../../../auth/application/admin_auth_notifier.dart';
+import '../../../application/admin_dashboard_notifier.dart';
 
-class AdminDashboardScreen extends StatefulWidget {
+class AdminDashboardScreen extends ConsumerStatefulWidget {
   const AdminDashboardScreen({super.key});
 
   @override
-  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+  ConsumerState<AdminDashboardScreen> createState() =>
+      _AdminDashboardScreenState();
 }
 
-class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   static const _filters = ['All', 'PC', 'Console', 'VR', 'Maintenance'];
-
-  static const _systems = [
-    _SystemTileData(
-      name: 'PC Station 01',
-      type: 'PC',
-      status: _SystemStatus.available,
-    ),
-    _SystemTileData(
-      name: 'PC Station 02',
-      type: 'PC',
-      status: _SystemStatus.inUse,
-      user: 'Rahul M.',
-      time: '1h 22m',
-      endingSoon: true,
-    ),
-    _SystemTileData(
-      name: 'PC Station 03',
-      type: 'PC',
-      status: _SystemStatus.inUse,
-      user: 'Priya S.',
-      time: '0h 45m',
-    ),
-    _SystemTileData(
-      name: 'PC Station 04',
-      type: 'PC',
-      status: _SystemStatus.inUse,
-      user: 'Amit K.',
-      time: '2h 10m',
-    ),
-    _SystemTileData(
-      name: 'PS5 Console 01',
-      type: 'Console',
-      status: _SystemStatus.available,
-    ),
-    _SystemTileData(
-      name: 'PS5 Console 02',
-      type: 'Console',
-      status: _SystemStatus.inUse,
-      user: 'Neha R.',
-      time: '1h 05m',
-    ),
-    _SystemTileData(
-      name: 'Xbox 01',
-      type: 'Xbox',
-      status: _SystemStatus.offline,
-    ),
-    _SystemTileData(
-      name: 'Xbox Station 02',
-      type: 'Console',
-      status: _SystemStatus.maintenance,
-    ),
-    _SystemTileData(
-      name: 'VR Pod 01',
-      type: 'VR',
-      status: _SystemStatus.available,
-    ),
-    _SystemTileData(
-      name: 'VR Pod 02',
-      type: 'VR',
-      status: _SystemStatus.maintenance,
-    ),
-    _SystemTileData(
-      name: 'PC Station 05',
-      type: 'PC',
-      status: _SystemStatus.available,
-    ),
-    _SystemTileData(
-      name: 'PC Station 06',
-      type: 'PC',
-      status: _SystemStatus.inUse,
-      user: 'Kiran P.',
-      time: '1h 50m',
-    ),
-  ];
-
   String _activeFilter = 'All';
-
-  List<_SystemTileData> get _visibleSystems {
-    switch (_activeFilter) {
-      case 'PC':
-        return _systems.where((tile) => tile.type == 'PC').toList();
-      case 'Console':
-        return _systems
-            .where((tile) => tile.type == 'Console' || tile.type == 'Xbox')
-            .toList();
-      case 'VR':
-        return _systems.where((tile) => tile.type == 'VR').toList();
-      case 'Maintenance':
-        return _systems
-            .where((tile) => tile.status == _SystemStatus.maintenance)
-            .toList();
-      default:
-        return _systems;
-    }
-  }
-
-  Future<void> _logout() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text('Sign out', style: AppTypography.h2),
-        content: Text('Sign out of admin portal?', style: AppTypography.bodyR),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancel', style: AppTypography.body.copyWith(color: AppColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Sign out', style: AppTypography.body.copyWith(color: AppColors.err)),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    if (mounted) context.go(AppRoutes.adminLogin);
-  }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(adminLiveEventsProvider, (_, next) {
+      next.whenData((_) {
+        ref.read(adminDashboardNotifierProvider.notifier).refresh();
+      });
+    });
+
+    final dashboard = ref.watch(adminDashboardNotifierProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: GzAdminTopBar(
@@ -163,8 +59,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints.tightFor(width: 36, height: 36),
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
             ),
           ],
         ),
@@ -179,86 +73,196 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           size: 24,
         ),
       ),
-      body: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 104),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Row(
+      body: dashboard.when(
+        loading: () => const GzLoadingView(message: 'Loading floor status'),
+        error: (error, _) => PageErrorDisplay(
+          error: AppPageError.from(error),
+          onRetry: () =>
+              ref.read(adminDashboardNotifierProvider.notifier).refresh(),
+        ),
+        data: (data) {
+          if (data.liveSystems.isEmpty) {
+            return const PageErrorDisplay(error: AppPageError.empty);
+          }
+          final visibleSystems = _filteredSystems(data.liveSystems);
+          return SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 104),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: _KpiCard(
-                      icon: HugeIcons.strokeRoundedDashboardSpeed01,
-                      accent: AppColors.rose,
-                      value: '8/12',
-                      label: 'Occupancy',
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _KpiCard(
+                          icon: HugeIcons.strokeRoundedDashboardSpeed01,
+                          accent: AppColors.rose,
+                          value: _occupancyLabel(data.liveSystems),
+                          label: 'Occupancy',
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: _KpiCard(
+                          icon: HugeIcons.strokeRoundedTimer01,
+                          accent: AppColors.ok,
+                          value: '${data.dashboard.totalSessions ?? 0}',
+                          label: 'Sessions',
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: _KpiCard(
+                          icon: HugeIcons.strokeRoundedGameboy,
+                          accent: AppColors.textTertiary,
+                          value: '${_availableCount(data.liveSystems)}',
+                          label: 'Available',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _SummaryRow(
+                    revenue: _currencyLabel(data.dashboard.totalRevenue),
+                    players: '${data.dashboard.uniquePlayers ?? 0} players',
+                    refreshedAt: _formatClock(data.loadedAt),
+                  ),
+                  const SizedBox(height: 14),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: _filters
+                          .map(
+                            (filter) => Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: GzChip(
+                                label: filter,
+                                active: _activeFilter == filter,
+                                onTap: () =>
+                                    setState(() => _activeFilter = filter),
+                              ),
+                            ),
+                          )
+                          .toList(),
                     ),
                   ),
-                  SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: _KpiCard(
-                      icon: HugeIcons.strokeRoundedTimer01,
-                      accent: AppColors.ok,
-                      value: '8',
-                      label: 'Sessions',
-                    ),
-                  ),
-                  SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: _KpiCard(
-                      icon: HugeIcons.strokeRoundedGameboy,
-                      accent: AppColors.textTertiary,
-                      value: '4',
-                      label: 'Available',
-                    ),
+                  const SizedBox(height: 12),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: visibleSystems.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                          mainAxisExtent: 130,
+                        ),
+                    itemBuilder: (context, index) {
+                      final system = visibleSystems[index];
+                      return _SystemTile(
+                        data: system,
+                        onTap: () => context.go(
+                          '${AppRoutes.adminSessions}?systemId=${Uri.encodeComponent(system.systemId ?? system.name ?? '')}',
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: _filters
-                      .map(
-                        (filter) => Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: GzChip(
-                            label: filter,
-                            active: _activeFilter == filter,
-                            onTap: () => setState(() => _activeFilter = filter),
-                          ),
-                        ),
-                      )
-                      .toList(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _visibleSystems.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  mainAxisExtent: 122,
-                ),
-                itemBuilder: (context, index) {
-                  final system = _visibleSystems[index];
-                  return _SystemTile(
-                    data: system,
-                    onTap: () => context.go(
-                      '${AppRoutes.adminSessions}?systemId=${Uri.encodeComponent(system.name)}',
-                    ),
-                  );
-                },
-              ),
-            ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  List<LiveSystemStatusModel> _filteredSystems(
+    List<LiveSystemStatusModel> systems,
+  ) {
+    switch (_activeFilter) {
+      case 'PC':
+        return systems
+            .where((item) => (item.platform ?? '').toLowerCase() == 'pc')
+            .toList();
+      case 'Console':
+        return systems.where((item) {
+          final platform = (item.platform ?? '').toLowerCase();
+          return platform.contains('ps') ||
+              platform.contains('xbox') ||
+              platform.contains('console');
+        }).toList();
+      case 'VR':
+        return systems
+            .where((item) => (item.platform ?? '').toLowerCase() == 'vr')
+            .toList();
+      case 'Maintenance':
+        return systems.where((item) => item.status == 'maintenance').toList();
+      default:
+        return systems;
+    }
+  }
+
+  Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Sign out', style: AppTypography.h2),
+        content: const Text(
+          'Sign out of admin portal?',
+          style: AppTypography.bodyR,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Sign out'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref.read(adminAuthNotifierProvider.notifier).logout();
+    }
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  const _SummaryRow({
+    required this.revenue,
+    required this.players,
+    required this.refreshedAt,
+  });
+
+  final String revenue;
+  final String players;
+  final String refreshedAt;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            'Revenue $revenue',
+            style: AppTypography.small.copyWith(color: AppColors.textSecondary),
           ),
         ),
-      ),
+        Text(
+          players,
+          style: AppTypography.small.copyWith(color: AppColors.textSecondary),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          refreshedAt,
+          style: AppTypography.small.copyWith(color: AppColors.textTertiary),
+        ),
+      ],
     );
   }
 }
@@ -277,7 +281,7 @@ class _LivePill extends StatelessWidget {
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          GzLiveDot(size: 6),
+          Icon(Icons.circle, size: 8, color: AppColors.ok),
           SizedBox(width: 4),
           Text(
             'Live',
@@ -318,16 +322,9 @@ class _KpiCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          HugeIcon(icon: icon, color: accent, size: 20),
-          const SizedBox(height: 14),
-          Text(
-            value,
-            style: AppTypography.h2.copyWith(
-              fontFamily: 'GeistMono',
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          HugeIcon(icon: icon, color: accent, size: 18),
+          const SizedBox(height: 12),
+          Text(value, style: AppTypography.h2),
           const SizedBox(height: 2),
           Text(label, style: AppTypography.small),
         ],
@@ -339,127 +336,135 @@ class _KpiCard extends StatelessWidget {
 class _SystemTile extends StatelessWidget {
   const _SystemTile({required this.data, required this.onTap});
 
-  final _SystemTileData data;
+  final LiveSystemStatusModel data;
   final VoidCallback onTap;
-
-  Color get _borderColor => switch (data.status) {
-    _SystemStatus.available => AppColors.ok,
-    _SystemStatus.inUse => AppColors.info,
-    _SystemStatus.maintenance => AppColors.warn,
-    _SystemStatus.offline => AppColors.err,
-  };
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: _borderColor, width: 2),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      data.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.body.copyWith(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+    final current = data.currentSession;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    data.name ?? 'System',
+                    style: AppTypography.h3,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  Container(
-                    width: 8,
-                    height: 8,
-                    margin: const EdgeInsets.only(top: 4),
-                    decoration: BoxDecoration(
-                      color: _borderColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
+                ),
+                GzTag(
+                  kind: _statusKind(data.status),
+                  label: _statusLabel(data.status),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              data.platform?.toUpperCase() ?? data.systemTypeName ?? 'System',
+              style: AppTypography.small,
+            ),
+            const Spacer(),
+            if (current != null) ...[
+              Text(
+                current.userName ?? current.userId ?? 'Current player',
+                style: AppTypography.small.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 4),
-              Text(data.type, style: AppTypography.small),
-              const Spacer(),
-              switch (data.status) {
-                _SystemStatus.available => Text(
-                  'Available',
-                  style: AppTypography.small.copyWith(color: AppColors.ok),
+              const SizedBox(height: 2),
+              Text(
+                _sessionAge(current.startedAt),
+                style: AppTypography.small.copyWith(
+                  color: AppColors.textSecondary,
                 ),
-                _SystemStatus.inUse => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      data.user!,
-                      style: AppTypography.small.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    Text(data.time!, style: AppTypography.small),
-                    if (data.endingSoon) ...[
-                      const SizedBox(height: 4),
-                      const GzTag(kind: GzTagKind.err, label: 'Ending soon'),
-                    ],
-                  ],
+              ),
+            ] else
+              Text(
+                'Tap for session control',
+                style: AppTypography.small.copyWith(
+                  color: AppColors.textSecondary,
                 ),
-                _SystemStatus.maintenance => Row(
-                  children: [
-                    const HugeIcon(
-                      icon: HugeIcons.strokeRoundedWrench01,
-                      color: AppColors.warn,
-                      size: 14,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Maintenance',
-                      style: AppTypography.small.copyWith(
-                        color: AppColors.warn,
-                      ),
-                    ),
-                  ],
-                ),
-                _SystemStatus.offline => Text(
-                  'Offline',
-                  style: AppTypography.small.copyWith(color: AppColors.err),
-                ),
-              },
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );
   }
 }
 
-enum _SystemStatus { available, inUse, maintenance, offline }
+String _occupancyLabel(List<LiveSystemStatusModel> systems) {
+  final inUse = systems.where((item) => item.status == 'in_use').length;
+  return '$inUse/${systems.length}';
+}
 
-class _SystemTileData {
-  const _SystemTileData({
-    required this.name,
-    required this.type,
-    required this.status,
-    this.user,
-    this.time,
-    this.endingSoon = false,
-  });
+int _availableCount(List<LiveSystemStatusModel> systems) {
+  return systems.where((item) => item.status == 'available').length;
+}
 
-  final String name;
-  final String type;
-  final _SystemStatus status;
-  final String? user;
-  final String? time;
-  final bool endingSoon;
+String _currencyLabel(String? value) {
+  if (value == null || value.isEmpty) {
+    return '₹0';
+  }
+  return value.startsWith('₹') ? value : '₹$value';
+}
+
+String _formatClock(DateTime value) {
+  final hour = value.hour > 12
+      ? value.hour - 12
+      : (value.hour == 0 ? 12 : value.hour);
+  final minute = value.minute.toString().padLeft(2, '0');
+  final suffix = value.hour >= 12 ? 'PM' : 'AM';
+  return '$hour:$minute $suffix';
+}
+
+String _sessionAge(DateTime? startedAt) {
+  if (startedAt == null) {
+    return 'Live now';
+  }
+  final diff = DateTime.now().difference(startedAt);
+  final hours = diff.inHours;
+  final minutes = diff.inMinutes.remainder(60);
+  if (hours > 0) {
+    return '${hours}h ${minutes}m live';
+  }
+  return '${minutes}m live';
+}
+
+GzTagKind _statusKind(String? status) {
+  switch (status) {
+    case 'in_use':
+      return GzTagKind.ok;
+    case 'maintenance':
+      return GzTagKind.warn;
+    case 'offline':
+      return GzTagKind.err;
+    default:
+      return GzTagKind.mute;
+  }
+}
+
+String _statusLabel(String? status) {
+  switch (status) {
+    case 'in_use':
+      return 'In use';
+    case 'maintenance':
+      return 'Maintenance';
+    case 'offline':
+      return 'Offline';
+    default:
+      return 'Available';
+  }
 }

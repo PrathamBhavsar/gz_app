@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/errors/app_exception.dart';
+import '../../../../../core/errors/error_snackbar.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_card.dart';
 import '../../../../../shared/widgets/gz_meta_row.dart';
+import '../../../application/admin_command_state.dart';
+import '../../../application/admin_session_command_notifier.dart';
 
 Future<void> showExtendSessionSheet(
   BuildContext context, {
   required String sessionId,
   required String systemName,
+  VoidCallback? onCompleted,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -19,31 +25,51 @@ Future<void> showExtendSessionSheet(
     builder: (context) => ExtendSessionSheet(
       sessionId: sessionId,
       systemName: systemName,
+      onCompleted: onCompleted,
     ),
   );
 }
 
-class ExtendSessionSheet extends StatefulWidget {
+class ExtendSessionSheet extends ConsumerStatefulWidget {
   const ExtendSessionSheet({
     super.key,
     required this.sessionId,
     required this.systemName,
+    this.onCompleted,
   });
 
   final String sessionId;
   final String systemName;
+  final VoidCallback? onCompleted;
 
   @override
-  State<ExtendSessionSheet> createState() => _ExtendSessionSheetState();
+  ConsumerState<ExtendSessionSheet> createState() => _ExtendSessionSheetState();
 }
 
-class _ExtendSessionSheetState extends State<ExtendSessionSheet> {
+class _ExtendSessionSheetState extends ConsumerState<ExtendSessionSheet> {
   int _minutes = 30;
 
-  static const _options = [15, 30, 45, 60];
+  static const _options = [15, 30, 60, 120];
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(adminSessionCommandNotifierProvider(widget.sessionId), (
+      _,
+      next,
+    ) {
+      if (next is AdminCommandSuccess) {
+        showSuccessSnackbar(context, next.message);
+        widget.onCompleted?.call();
+        Navigator.of(context).pop();
+      } else if (next is AdminCommandError) {
+        showErrorSnackbar(context, ValidationException(next.message));
+      }
+    });
+
+    final state = ref.watch(
+      adminSessionCommandNotifierProvider(widget.sessionId),
+    );
+    final loading = state is AdminCommandLoading;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     return SafeArea(
       top: false,
@@ -60,7 +86,6 @@ class _ExtendSessionSheetState extends State<ExtendSessionSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // drag handle
                 Center(
                   child: Container(
                     width: 42,
@@ -86,8 +111,7 @@ class _ExtendSessionSheetState extends State<ExtendSessionSheet> {
                       if (i > 0) const SizedBox(width: 8),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () =>
-                              setState(() => _minutes = _options[i]),
+                          onTap: () => setState(() => _minutes = _options[i]),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 14,
@@ -123,13 +147,12 @@ class _ExtendSessionSheetState extends State<ExtendSessionSheet> {
                   child: Column(
                     children: [
                       GzMetaRow(
-                        label: 'Additional cost',
-                        value:
-                            '₹${(_minutes / 60 * 80).toStringAsFixed(0)}',
+                        label: 'Requested extension',
+                        value: '$_minutes minutes',
                       ),
                       const GzMetaRow(
-                        label: 'New end time',
-                        value: '07:22 PM',
+                        label: 'Backend rule',
+                        value: 'Availability is revalidated before extending',
                       ),
                     ],
                   ),
@@ -137,7 +160,14 @@ class _ExtendSessionSheetState extends State<ExtendSessionSheet> {
                 const SizedBox(height: 18),
                 GzButton(
                   label: 'Extend by $_minutes min',
-                  onPressed: () => Navigator.pop(context),
+                  loading: loading,
+                  onPressed: () => ref
+                      .read(
+                        adminSessionCommandNotifierProvider(
+                          widget.sessionId,
+                        ).notifier,
+                      )
+                      .extend(_minutes),
                 ),
               ],
             ),

@@ -226,15 +226,21 @@ class BookingModel {
   final String? id;
   final String? storeId;
   final String? userId;
+  final String? userName;
   final String? systemId;
+  final String? systemName;
   final BookingType? bookingType;
   final BookingStatus? status;
   final DateTime? scheduledStart;
   final DateTime? scheduledEnd;
   final DateTime? actualStart;
   final DateTime? actualEnd;
+  final int? durationMinutes;
   final double? amount;
   final bool? isPaid;
+  final String? paymentMethod;
+  final String? paymentStatus;
+  final String? paymentReference;
   final DateTime? expiresAt;
   final String? cancelledReason;
   final String? cancelledBy;
@@ -248,15 +254,21 @@ class BookingModel {
     this.id,
     this.storeId,
     this.userId,
+    this.userName,
     this.systemId,
+    this.systemName,
     this.bookingType,
     this.status,
     this.scheduledStart,
     this.scheduledEnd,
     this.actualStart,
     this.actualEnd,
+    this.durationMinutes,
     this.amount,
     this.isPaid,
+    this.paymentMethod,
+    this.paymentStatus,
+    this.paymentReference,
     this.expiresAt,
     this.cancelledReason,
     this.cancelledBy,
@@ -271,7 +283,14 @@ class BookingModel {
     id: json['id']?.toString(),
     storeId: json['store_id']?.toString(),
     userId: json['user_id']?.toString(),
+    userName:
+        json['user_name']?.toString() ??
+        json['userName']?.toString() ??
+        json['player_name']?.toString() ??
+        json['playerName']?.toString(),
     systemId: json['system_id']?.toString(),
+    systemName:
+        json['system_name']?.toString() ?? json['systemName']?.toString(),
     bookingType: json['booking_type']?.toString().toBookingType(),
     status: json['status']?.toString().toBookingStatus(),
     scheduledStart: json['scheduled_start'] != null
@@ -286,8 +305,17 @@ class BookingModel {
     actualEnd: json['actual_end'] != null
         ? DateTime.tryParse(json['actual_end'].toString())
         : null,
+    durationMinutes:
+        json['duration_minutes'] as int? ?? json['durationMinutes'] as int?,
     amount: double.tryParse(json['amount']?.toString() ?? ''),
     isPaid: json['is_paid'] as bool?,
+    paymentMethod:
+        json['payment_method']?.toString() ?? json['paymentMethod']?.toString(),
+    paymentStatus:
+        json['payment_status']?.toString() ?? json['paymentStatus']?.toString(),
+    paymentReference:
+        json['payment_reference']?.toString() ??
+        json['paymentReference']?.toString(),
     expiresAt: json['expires_at'] != null
         ? DateTime.tryParse(json['expires_at'].toString())
         : null,
@@ -308,15 +336,21 @@ class BookingModel {
     'id': id,
     'store_id': storeId,
     'user_id': userId,
+    'user_name': userName,
     'system_id': systemId,
+    'system_name': systemName,
     'booking_type': bookingType?.name,
     'status': status?.name,
     'scheduled_start': scheduledStart?.toIso8601String(),
     'scheduled_end': scheduledEnd?.toIso8601String(),
     'actual_start': actualStart?.toIso8601String(),
     'actual_end': actualEnd?.toIso8601String(),
+    'duration_minutes': durationMinutes,
     'amount': amount,
     'is_paid': isPaid,
+    'payment_method': paymentMethod,
+    'payment_status': paymentStatus,
+    'payment_reference': paymentReference,
     'expires_at': expiresAt?.toIso8601String(),
     'cancelled_reason': cancelledReason,
     'cancelled_by': cancelledBy,
@@ -333,11 +367,14 @@ class SessionModel {
   final String? storeId;
   final String? bookingId;
   final String? userId;
+  final String? userName;
   final String? systemId;
+  final String? systemName;
   final SessionStatus? status;
   final DateTime? startedAt;
   final DateTime? endedAt;
   final int? durationMinutes;
+  final double? billedAmount;
   final bool? isBilled;
   final String? walkInPhone;
   final String? notes;
@@ -350,11 +387,14 @@ class SessionModel {
     this.storeId,
     this.bookingId,
     this.userId,
+    this.userName,
     this.systemId,
+    this.systemName,
     this.status,
     this.startedAt,
     this.endedAt,
     this.durationMinutes,
+    this.billedAmount,
     this.isBilled,
     this.walkInPhone,
     this.notes,
@@ -368,7 +408,14 @@ class SessionModel {
     storeId: json['store_id']?.toString(),
     bookingId: json['booking_id']?.toString(),
     userId: json['user_id']?.toString(),
+    userName:
+        json['user_name']?.toString() ??
+        json['userName']?.toString() ??
+        json['player_name']?.toString() ??
+        json['playerName']?.toString(),
     systemId: json['system_id']?.toString(),
+    systemName:
+        json['system_name']?.toString() ?? json['systemName']?.toString(),
     status: json['status']?.toString().toSessionStatus(),
     startedAt: json['started_at'] != null
         ? DateTime.tryParse(json['started_at'].toString())
@@ -377,6 +424,9 @@ class SessionModel {
         ? DateTime.tryParse(json['ended_at'].toString())
         : null,
     durationMinutes: json['duration_minutes'] as int?,
+    billedAmount: double.tryParse(
+      (json['billed_amount'] ?? json['billedAmount']).toString(),
+    ),
     isBilled: json['is_billed'] as bool?,
     walkInPhone: json['walk_in_phone']?.toString(),
     notes: json['notes']?.toString(),
@@ -394,11 +444,14 @@ class SessionModel {
     'store_id': storeId,
     'booking_id': bookingId,
     'user_id': userId,
+    'user_name': userName,
     'system_id': systemId,
+    'system_name': systemName,
     'status': status?.name,
     'started_at': startedAt?.toIso8601String(),
     'ended_at': endedAt?.toIso8601String(),
     'duration_minutes': durationMinutes,
+    'billed_amount': billedAmount,
     'is_billed': isBilled,
     'walk_in_phone': walkInPhone,
     'notes': notes,

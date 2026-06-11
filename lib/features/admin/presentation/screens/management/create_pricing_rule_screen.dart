@@ -47,11 +47,7 @@ class _CreatePricingRuleScreenState extends State<CreatePricingRuleScreen> {
     super.dispose();
   }
 
-  Widget _inputField(
-    String label,
-    TextEditingController ctrl, {
-    String? hint,
-  }) {
+  Widget _inputField(String label, TextEditingController ctrl, {String? hint}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -114,15 +110,22 @@ class _CreatePricingRuleScreenState extends State<CreatePricingRuleScreen> {
             child: GestureDetector(
               onTap: () => setState(() => onSelect(o)),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected ? AppColors.textPrimary : AppColors.pillBg,
-                  borderRadius: BorderRadius.circular(AppSpacing.borderRadiusPill),
+                  borderRadius: BorderRadius.circular(
+                    AppSpacing.borderRadiusPill,
+                  ),
                 ),
                 child: Text(
                   o,
                   style: AppTypography.body.copyWith(
-                    color: isSelected ? AppColors.surface : AppColors.textPrimary,
+                    color: isSelected
+                        ? AppColors.surface
+                        : AppColors.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -196,11 +199,7 @@ class _CreatePricingRuleScreenState extends State<CreatePricingRuleScreen> {
                   _nameController,
                   hint: 'e.g. Peak Hours',
                 ),
-                _inputField(
-                  'Rate (₹ per hour)',
-                  _rateController,
-                  hint: '80',
-                ),
+                _inputField('Rate (₹ per hour)', _rateController, hint: '80'),
                 _section('Applicable systems', _systemsChips()),
                 _section(
                   'Day filter',
@@ -225,9 +224,7 @@ class _CreatePricingRuleScreenState extends State<CreatePricingRuleScreen> {
                       variant: CardVariant.tint,
                       child: Text(
                         'Pricing rule created!',
-                        style: AppTypography.body.copyWith(
-                          color: AppColors.ok,
-                        ),
+                        style: AppTypography.body.copyWith(color: AppColors.ok),
                       ),
                     ),
                   ),

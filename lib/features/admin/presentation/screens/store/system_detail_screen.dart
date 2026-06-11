@@ -65,11 +65,11 @@ class SystemDetailScreen extends StatelessWidget {
   }
 
   List<List<dynamic>> _iconForType(String type) => switch (type) {
-        'PS5' => HugeIcons.strokeRoundedGameController01,
-        'Xbox' => HugeIcons.strokeRoundedGameController01,
-        'VR' => HugeIcons.strokeRoundedVirtualRealityVr01,
-        _ => HugeIcons.strokeRoundedComputerDesk01,
-      };
+    'PS5' => HugeIcons.strokeRoundedGameController01,
+    'Xbox' => HugeIcons.strokeRoundedGameController01,
+    'VR' => HugeIcons.strokeRoundedVirtualRealityVr01,
+    _ => HugeIcons.strokeRoundedComputerDesk01,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +113,8 @@ class SystemDetailScreen extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: AppColors.pillBg,
                               borderRadius: BorderRadius.circular(
-                                  AppSpacing.borderRadiusLg),
+                                AppSpacing.borderRadiusLg,
+                              ),
                             ),
                             alignment: Alignment.center,
                             child: HugeIcon(
@@ -225,11 +226,7 @@ class SystemDetailScreen extends StatelessWidget {
         player: 'Priya S.',
         tag: GzTag(kind: GzTagKind.warn, label: 'Unpaid'),
       ),
-      _ScheduleSlot(
-        time: '14:00–16:00',
-        player: null,
-        tag: null,
-      ),
+      _ScheduleSlot(time: '14:00–16:00', player: null, tag: null),
     ];
 
     return List.generate(slots.length, (i) {
@@ -240,16 +237,11 @@ class SystemDetailScreen extends StatelessWidget {
         decoration: BoxDecoration(
           border: isLast
               ? null
-              : const Border(
-                  bottom: BorderSide(color: AppColors.rule),
-                ),
+              : const Border(bottom: BorderSide(color: AppColors.rule)),
         ),
         child: Row(
           children: [
-            Text(
-              slot.time,
-              style: AppTypography.num.copyWith(fontSize: 13),
-            ),
+            Text(slot.time, style: AppTypography.num.copyWith(fontSize: 13)),
             const SizedBox(width: 8),
             if (slot.player != null)
               Text(slot.player!, style: AppTypography.body)

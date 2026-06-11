@@ -29,9 +29,7 @@ class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(
-        title: 'Revenue',
-      ),
+      appBar: GzAdminTopBar(title: 'Revenue'),
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(

@@ -64,8 +64,7 @@ class _EditStaffSheetState extends State<EditStaffSheet> {
         child: Container(
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius:
-                BorderRadius.circular(AppSpacing.borderRadiusCard),
+            borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCard),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
@@ -80,7 +79,8 @@ class _EditStaffSheetState extends State<EditStaffSheet> {
                     decoration: BoxDecoration(
                       color: AppColors.rule,
                       borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadiusPill),
+                        AppSpacing.borderRadiusPill,
+                      ),
                     ),
                   ),
                 ),
@@ -116,13 +116,16 @@ class _EditStaffSheetState extends State<EditStaffSheet> {
                         onTap: () => setState(() => _selectedRole = o),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 8),
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? AppColors.textPrimary
                                 : AppColors.pillBg,
                             borderRadius: BorderRadius.circular(
-                                AppSpacing.borderRadiusPill),
+                              AppSpacing.borderRadiusPill,
+                            ),
                           ),
                           child: Text(
                             o,
@@ -146,9 +149,7 @@ class _EditStaffSheetState extends State<EditStaffSheet> {
                       variant: CardVariant.tint,
                       child: Text(
                         'Role updated to $_selectedRole',
-                        style: AppTypography.body.copyWith(
-                          color: AppColors.ok,
-                        ),
+                        style: AppTypography.body.copyWith(color: AppColors.ok),
                       ),
                     ),
                   ),
@@ -170,9 +171,7 @@ class _EditStaffSheetState extends State<EditStaffSheet> {
                     variant: CardVariant.inset,
                     child: Text(
                       '${widget.staffName} has been removed.',
-                      style: AppTypography.body.copyWith(
-                        color: AppColors.err,
-                      ),
+                      style: AppTypography.body.copyWith(color: AppColors.err),
                     ),
                   ),
               ],

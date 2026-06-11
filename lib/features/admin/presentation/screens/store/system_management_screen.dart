@@ -13,16 +13,16 @@ enum SystemStatus { available, inUse, maintenance }
 
 extension SystemStatusX on SystemStatus {
   GzTagKind get tagKind => switch (this) {
-        SystemStatus.available => GzTagKind.ok,
-        SystemStatus.inUse => GzTagKind.info,
-        SystemStatus.maintenance => GzTagKind.warn,
-      };
+    SystemStatus.available => GzTagKind.ok,
+    SystemStatus.inUse => GzTagKind.info,
+    SystemStatus.maintenance => GzTagKind.warn,
+  };
 
   String get label => switch (this) {
-        SystemStatus.available => 'Available',
-        SystemStatus.inUse => 'In Use',
-        SystemStatus.maintenance => 'Maintenance',
-      };
+    SystemStatus.available => 'Available',
+    SystemStatus.inUse => 'In Use',
+    SystemStatus.maintenance => 'Maintenance',
+  };
 }
 
 class _SystemData {
@@ -111,20 +111,23 @@ class _SystemManagementScreenState extends State<SystemManagementScreen> {
       : _systems.where((s) => s.type == _selectedType).toList();
 
   List<List<dynamic>> _iconForType(String type) => switch (type) {
-        'PC' => HugeIcons.strokeRoundedComputerDesk01,
-        'PS5' => HugeIcons.strokeRoundedGameController01,
-        'Xbox' => HugeIcons.strokeRoundedGameController01,
-        'VR' => HugeIcons.strokeRoundedVirtualRealityVr01,
-        _ => HugeIcons.strokeRoundedComputerDesk01,
-      };
+    'PC' => HugeIcons.strokeRoundedComputerDesk01,
+    'PS5' => HugeIcons.strokeRoundedGameController01,
+    'Xbox' => HugeIcons.strokeRoundedGameController01,
+    'VR' => HugeIcons.strokeRoundedVirtualRealityVr01,
+    _ => HugeIcons.strokeRoundedComputerDesk01,
+  };
 
   @override
   Widget build(BuildContext context) {
     final filtered = _filtered;
     final totalCount = _systems.length;
-    final inUseCount = _systems.where((s) => s.status == SystemStatus.inUse).length;
-    final maintenanceCount =
-        _systems.where((s) => s.status == SystemStatus.maintenance).length;
+    final inUseCount = _systems
+        .where((s) => s.status == SystemStatus.inUse)
+        .length;
+    final maintenanceCount = _systems
+        .where((s) => s.status == SystemStatus.maintenance)
+        .length;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -161,9 +164,12 @@ class _SystemManagementScreenState extends State<SystemManagementScreen> {
                         height: 30,
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          color: isActive ? AppColors.buttonBg : AppColors.surface,
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.borderRadiusChip),
+                          color: isActive
+                              ? AppColors.buttonBg
+                              : AppColors.surface,
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.borderRadiusChip,
+                          ),
                           border: isActive
                               ? null
                               : Border.all(color: AppColors.rule),
@@ -197,8 +203,7 @@ class _SystemManagementScreenState extends State<SystemManagementScreen> {
                       padding: 12,
                       child: Column(
                         children: [
-                          Text('$totalCount',
-                              style: AppTypography.h2),
+                          Text('$totalCount', style: AppTypography.h2),
                           Text('Total', style: AppTypography.small),
                         ],
                       ),
@@ -211,9 +216,12 @@ class _SystemManagementScreenState extends State<SystemManagementScreen> {
                       padding: 12,
                       child: Column(
                         children: [
-                          Text('$inUseCount',
-                              style: AppTypography.h2.copyWith(
-                                  color: AppColors.info)),
+                          Text(
+                            '$inUseCount',
+                            style: AppTypography.h2.copyWith(
+                              color: AppColors.info,
+                            ),
+                          ),
                           Text('In Use', style: AppTypography.small),
                         ],
                       ),
@@ -226,9 +234,12 @@ class _SystemManagementScreenState extends State<SystemManagementScreen> {
                       padding: 12,
                       child: Column(
                         children: [
-                          Text('$maintenanceCount',
-                              style: AppTypography.h2.copyWith(
-                                  color: AppColors.warn)),
+                          Text(
+                            '$maintenanceCount',
+                            style: AppTypography.h2.copyWith(
+                              color: AppColors.warn,
+                            ),
+                          ),
                           Text('Maint.', style: AppTypography.small),
                         ],
                       ),
@@ -247,14 +258,14 @@ class _SystemManagementScreenState extends State<SystemManagementScreen> {
                 itemBuilder: (context, index) {
                   final system = filtered[index];
                   return GestureDetector(
-                    onTap: () =>
-                        context.push('/admin/systems/${system.id}'),
+                    onTap: () => context.push('/admin/systems/${system.id}'),
                     child: Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(
-                            AppSpacing.borderRadiusCard),
+                          AppSpacing.borderRadiusCard,
+                        ),
                       ),
                       child: Row(
                         children: [

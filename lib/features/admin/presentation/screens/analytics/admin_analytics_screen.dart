@@ -112,7 +112,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                   childAspectRatio: 1.25,
                 ),
                 itemCount: _kpis.length,
-                itemBuilder: (context, index) => _AnalyticsKpiCard(data: _kpis[index]),
+                itemBuilder: (context, index) =>
+                    _AnalyticsKpiCard(data: _kpis[index]),
               ),
               const SizedBox(height: 14),
               SingleChildScrollView(
@@ -259,7 +260,10 @@ class _AnalyticsKpiCard extends StatelessWidget {
         children: [
           HugeIcon(icon: data.icon, color: data.accent, size: 18),
           const Spacer(),
-          Text(data.value, style: AppTypography.h1.copyWith(fontFamily: 'GeistMono')),
+          Text(
+            data.value,
+            style: AppTypography.h1.copyWith(fontFamily: 'GeistMono'),
+          ),
           const SizedBox(height: 4),
           Text(
             data.label,
@@ -290,11 +294,7 @@ class _QuickNavCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            HugeIcon(
-              icon: data.icon,
-              color: AppColors.textTertiary,
-              size: 18,
-            ),
+            HugeIcon(icon: data.icon, color: AppColors.textTertiary, size: 18),
             const SizedBox(height: 6),
             Text(
               data.label,

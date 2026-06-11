@@ -137,11 +137,33 @@
 - `lib/features/main_shell/`
   - `presentation/screens/main_page.dart`
 - `lib/features/admin/`
+  - `data/repositories/`
+    - `admin_bookings_repository.dart`
+    - `admin_dashboard_repository.dart`
+    - `admin_sessions_repository.dart`
+  - `application/`
+    - `admin_booking_command_notifier.dart`
+    - `admin_booking_detail_notifier.dart`
+    - `admin_bookings_notifier.dart`
+    - `admin_command_state.dart`
+    - `admin_dashboard_notifier.dart`
+    - `admin_operations_models.dart`
+    - `admin_session_command_notifier.dart`
+    - `admin_sessions_notifier.dart`
+    - `admin_walk_in_notifier.dart`
   - `presentation/screens/admin_login_screen.dart`
   - `presentation/screens/admin_password_reset_screen.dart`
   - `presentation/screens/analytics/`
   - `presentation/screens/management/`
   - `presentation/screens/operations/`
+    - `admin_booking_detail_screen.dart`
+    - `admin_dashboard_screen.dart`
+    - `booking_management_screen.dart`
+    - `cancel_booking_sheet.dart`
+    - `end_session_sheet.dart`
+    - `extend_session_sheet.dart`
+    - `session_management_screen.dart`
+    - `walk_in_booking_screen.dart`
   - `presentation/screens/store/`
   - `presentation/widgets/admin_shell.dart`
 

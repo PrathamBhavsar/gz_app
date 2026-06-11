@@ -76,9 +76,7 @@ class _InviteStaffScreenState extends State<InviteStaffScreen> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Expanded(
-            child: Text(label, style: AppTypography.body),
-          ),
+          Expanded(child: Text(label, style: AppTypography.body)),
           HugeIcon(
             icon: granted
                 ? HugeIcons.strokeRoundedCheckmarkCircle02
@@ -95,10 +93,7 @@ class _InviteStaffScreenState extends State<InviteStaffScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(
-        title: 'Invite Staff',
-        onBack: () => context.pop(),
-      ),
+      appBar: GzAdminTopBar(title: 'Invite Staff', onBack: () => context.pop()),
       body: SafeArea(
         top: false,
         child: GzScrollContent(
@@ -135,17 +130,19 @@ class _InviteStaffScreenState extends State<InviteStaffScreen> {
                           return Padding(
                             padding: EdgeInsets.only(right: isLast ? 0 : 8),
                             child: GestureDetector(
-                              onTap: () =>
-                                  setState(() => _selectedRole = o),
+                              onTap: () => setState(() => _selectedRole = o),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 8),
+                                  horizontal: 14,
+                                  vertical: 8,
+                                ),
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? AppColors.textPrimary
                                       : AppColors.pillBg,
                                   borderRadius: BorderRadius.circular(
-                                      AppSpacing.borderRadiusPill),
+                                    AppSpacing.borderRadiusPill,
+                                  ),
                                 ),
                                 child: Text(
                                   o,
@@ -175,8 +172,7 @@ class _InviteStaffScreenState extends State<InviteStaffScreen> {
                       _permRow('View analytics', true),
                       _permRow('Manage bookings', true),
                       _permRow('Manage sessions', true),
-                      _permRow(
-                          'Edit store config', _selectedRole == 'Admin'),
+                      _permRow('Edit store config', _selectedRole == 'Admin'),
                       _permRow('Manage staff', _selectedRole == 'Admin'),
                     ],
                   ),
@@ -189,9 +185,7 @@ class _InviteStaffScreenState extends State<InviteStaffScreen> {
                       variant: CardVariant.tint,
                       child: Text(
                         'Invitation sent to ${_emailController.text.isEmpty ? "staff member" : _emailController.text}!',
-                        style: AppTypography.body.copyWith(
-                          color: AppColors.ok,
-                        ),
+                        style: AppTypography.body.copyWith(color: AppColors.ok),
                       ),
                     ),
                   ),

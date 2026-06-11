@@ -106,10 +106,7 @@ class _AdminDisputeDetailScreenState extends State<AdminDisputeDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'TIMELINE',
-                        style: AppTypography.meta,
-                      ),
+                      Text('TIMELINE', style: AppTypography.meta),
                       const SizedBox(height: 12),
                       ..._timeline.asMap().entries.map((entry) {
                         final idx = entry.key;
@@ -143,10 +140,7 @@ class _AdminDisputeDetailScreenState extends State<AdminDisputeDetailScreen> {
                               ],
                             ),
                             if (idx < _timeline.length - 1)
-                              const Divider(
-                                height: 20,
-                                color: AppColors.rule,
-                              ),
+                              const Divider(height: 20, color: AppColors.rule),
                           ],
                         );
                       }),

@@ -65,6 +65,8 @@ class ApiConstants {
   static const String systemsAvailable = '/stores/{storeId}/systems/available';
 
   // ─── Sessions Admin Endpoints ──────────────────────────────────────
+  static const String sessionsList = '/stores/{storeId}/sessions';
+  static const String sessionCreate = '/stores/{storeId}/sessions';
   static const String sessionsActive = '/stores/{storeId}/sessions/active';
   static const String sessionDetail = '/stores/{storeId}/sessions/{id}';
   static const String sessionPause = '/stores/{storeId}/sessions/{id}/pause';
@@ -75,6 +77,8 @@ class ApiConstants {
 
   // ─── Bookings Admin Endpoints ──────────────────────────────────────
   static const String bookingsList = '/stores/{storeId}/bookings';
+  static const String bookingDetail = '/stores/{storeId}/bookings/{id}';
+  static const String bookingUpdate = '/stores/{storeId}/bookings/{id}';
   static const String bookingsAvailability =
       '/stores/{storeId}/bookings/availability';
   static const String bookingWalkIn = '/stores/{storeId}/bookings/walk-in';

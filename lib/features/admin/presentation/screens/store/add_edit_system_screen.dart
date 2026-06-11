@@ -145,9 +145,7 @@ class _AddEditSystemScreenState extends State<AddEditSystemScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(
-        title: isEdit ? 'Edit System' : 'Add System',
-      ),
+      appBar: GzAdminTopBar(title: isEdit ? 'Edit System' : 'Add System'),
       body: SafeArea(
         top: false,
         child: GzScrollContent(
@@ -182,11 +180,7 @@ class _AddEditSystemScreenState extends State<AddEditSystemScreen> {
                 const SizedBox(height: 16),
 
                 // 3. Seat number
-                _inputField(
-                  'Seat / bay number',
-                  _seatCtrl,
-                  hint: '04',
-                ),
+                _inputField('Seat / bay number', _seatCtrl, hint: '04'),
 
                 // 4. Rate
                 _inputField(
@@ -229,8 +223,7 @@ class _AddEditSystemScreenState extends State<AddEditSystemScreen> {
                       padding: 14,
                       child: Text(
                         isEdit ? 'Changes saved!' : 'System added!',
-                        style:
-                            AppTypography.body.copyWith(color: AppColors.ok),
+                        style: AppTypography.body.copyWith(color: AppColors.ok),
                       ),
                     ),
                   ),

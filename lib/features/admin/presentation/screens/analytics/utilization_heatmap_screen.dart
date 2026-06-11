@@ -15,7 +15,22 @@ class UtilizationHeatmapScreen extends StatefulWidget {
 
 class _UtilizationHeatmapScreenState extends State<UtilizationHeatmapScreen> {
   static const _filters = ['Day', 'Week'];
-  static const _hours = ['10', '11', '12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+  static const _hours = [
+    '10',
+    '11',
+    '12',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '10',
+    '11',
+  ];
   static const _rows = 12;
   static const _cols = 14;
 
@@ -67,7 +82,9 @@ class _UtilizationHeatmapScreenState extends State<UtilizationHeatmapScreen> {
                 children: List.generate(
                   _filters.length,
                   (index) => Padding(
-                    padding: EdgeInsets.only(right: index == _filters.length - 1 ? 0 : 8),
+                    padding: EdgeInsets.only(
+                      right: index == _filters.length - 1 ? 0 : 8,
+                    ),
                     child: _RoseChip(
                       label: _filters[index],
                       active: _activeFilter == index,
@@ -128,30 +145,29 @@ class _UtilizationHeatmapScreenState extends State<UtilizationHeatmapScreen> {
                     ...List.generate(
                       _rows,
                       (row) => Padding(
-                        padding: EdgeInsets.only(bottom: row == _rows - 1 ? 0 : 2),
+                        padding: EdgeInsets.only(
+                          bottom: row == _rows - 1 ? 0 : 2,
+                        ),
                         child: Row(
-                          children: List.generate(
-                            _cols,
-                            (col) {
-                              final color = _colorFor(_intensity(row, col));
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  right: col == _cols - 1 ? 0 : 2,
+                          children: List.generate(_cols, (col) {
+                            final color = _colorFor(_intensity(row, col));
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                right: col == _cols - 1 ? 0 : 2,
+                              ),
+                              child: Container(
+                                width: 18,
+                                height: 18,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  borderRadius: BorderRadius.circular(3),
+                                  border: color == AppColors.surface
+                                      ? Border.all(color: AppColors.rule)
+                                      : null,
                                 ),
-                                child: Container(
-                                  width: 18,
-                                  height: 18,
-                                  decoration: BoxDecoration(
-                                    color: color,
-                                    borderRadius: BorderRadius.circular(3),
-                                    border: color == AppColors.surface
-                                        ? Border.all(color: AppColors.rule)
-                                        : null,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          }),
                         ),
                       ),
                     ),

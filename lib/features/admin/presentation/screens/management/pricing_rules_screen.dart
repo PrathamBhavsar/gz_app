@@ -161,7 +161,6 @@ class _StaticToggle extends StatelessWidget {
   }
 }
 
-
 class _PricingRuleData {
   const _PricingRuleData({
     required this.id,

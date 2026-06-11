@@ -86,7 +86,9 @@ class _AdjustCreditsSheetState extends State<AdjustCreditsSheet> {
                     height: 4,
                     decoration: BoxDecoration(
                       color: AppColors.rule,
-                      borderRadius: BorderRadius.circular(AppSpacing.borderRadiusPill),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadiusPill,
+                      ),
                     ),
                   ),
                 ),
@@ -140,14 +142,21 @@ class _AdjustCreditsSheetState extends State<AdjustCreditsSheet> {
                 Text('Amount', style: AppTypography.small),
                 const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.pillBg,
-                    borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.borderRadiusLg,
+                    ),
                   ),
                   child: TextField(
                     controller: _amountController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: false,
+                    ),
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
                       border: InputBorder.none,
@@ -165,10 +174,15 @@ class _AdjustCreditsSheetState extends State<AdjustCreditsSheet> {
                 Text('Reason (required)', style: AppTypography.small),
                 const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.pillBg,
-                    borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.borderRadiusLg,
+                    ),
                   ),
                   child: TextField(
                     controller: _reasonController,
@@ -179,7 +193,9 @@ class _AdjustCreditsSheetState extends State<AdjustCreditsSheet> {
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    style: AppTypography.bodyR.copyWith(color: AppColors.textPrimary),
+                    style: AppTypography.bodyR.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -205,7 +221,9 @@ class _AdjustCreditsSheetState extends State<AdjustCreditsSheet> {
                   label: _done
                       ? 'Done'
                       : (isAdd ? 'Add Credits' : 'Deduct Credits'),
-                  variant: _done ? GzButtonVariant.ghost : GzButtonVariant.primary,
+                  variant: _done
+                      ? GzButtonVariant.ghost
+                      : GzButtonVariant.primary,
                   onPressed: _done
                       ? () => Navigator.pop(context)
                       : () => setState(() => _done = true),
