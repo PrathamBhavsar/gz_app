@@ -136,25 +136,34 @@
   - `presentation/screens/`
 - `lib/features/main_shell/`
   - `presentation/screens/main_page.dart`
-- `lib/features/admin/`
+  - `lib/features/admin/`
   - `data/repositories/`
+    - `admin_billing_repository.dart`
     - `admin_notify_send_repository.dart`
     - `admin_bookings_repository.dart`
+    - `admin_credits_repository.dart`
     - `admin_dashboard_repository.dart`
     - `admin_sessions_repository.dart`
     - `admin_store_repository_support.dart`
+    - `payments_repository.dart`
+    - `pricing_repository.dart`
     - `store_admins_repository.dart`
     - `store_config_repository.dart`
     - `systems_admin_repository.dart`
     - `system_types_repository.dart`
   - `application/`
     - `admin_booking_command_notifier.dart`
+    - `admin_billing_notifier.dart`
     - `admin_booking_detail_notifier.dart`
     - `admin_bookings_notifier.dart`
     - `admin_command_state.dart`
+    - `admin_credits_command_notifier.dart`
+    - `admin_credits_notifier.dart`
     - `admin_dashboard_notifier.dart`
+    - `admin_management_models.dart`
     - `admin_notify_send_notifier.dart`
     - `admin_operations_models.dart`
+    - `admin_pricing_notifier.dart`
     - `admin_store_models.dart`
     - `admin_system_command_notifier.dart`
     - `admin_system_detail_notifier.dart`
@@ -163,6 +172,8 @@
     - `admin_session_command_notifier.dart`
     - `admin_sessions_notifier.dart`
     - `admin_walk_in_notifier.dart`
+    - `billing_override_notifier.dart`
+    - `pricing_rule_command_notifier.dart`
     - `store_admin_command_notifier.dart`
     - `store_admins_notifier.dart`
     - `store_config_command_notifier.dart`
@@ -171,6 +182,14 @@
   - `presentation/screens/admin_password_reset_screen.dart`
   - `presentation/screens/analytics/`
   - `presentation/screens/management/`
+    - `adjust_credits_sheet.dart`
+    - `billing_override_sheet.dart`
+    - `billing_payments_screen.dart`
+    - `create_pricing_rule_screen.dart`
+    - `credits_management_screen.dart`
+    - `edit_pricing_rule_screen.dart`
+    - `pricing_rule_form_support.dart`
+    - `pricing_rules_screen.dart`
   - `presentation/screens/operations/`
     - `admin_booking_detail_screen.dart`
     - `admin_dashboard_screen.dart`

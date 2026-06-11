@@ -1,29 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../core/errors/app_exception.dart';
+import '../../../../../core/errors/error_snackbar.dart';
+import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../../shared/widgets/gz_scroll_content.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
+import '../../../application/admin_command_state.dart';
+import '../../../application/admin_pricing_notifier.dart';
+import '../../../application/pricing_rule_command_notifier.dart';
+import 'pricing_rule_form_support.dart';
 
-class CreatePricingRuleScreen extends StatefulWidget {
+class CreatePricingRuleScreen extends ConsumerStatefulWidget {
   const CreatePricingRuleScreen({super.key});
 
   @override
-  State<CreatePricingRuleScreen> createState() =>
+  ConsumerState<CreatePricingRuleScreen> createState() =>
       _CreatePricingRuleScreenState();
 }
 
-class _CreatePricingRuleScreenState extends State<CreatePricingRuleScreen> {
+class _CreatePricingRuleScreenState
+    extends ConsumerState<CreatePricingRuleScreen> {
   final _nameController = TextEditingController();
   final _rateController = TextEditingController();
   String _selectedDays = 'All days';
   String _selectedTimeWindow = 'All hours';
-  Set<String> _selectedSystems = {'All Systems'};
-  bool _saved = false;
+  String? _selectedSystemTypeId;
 
   static const _dayOptions = ['All days', 'Weekdays', 'Weekends'];
   static const _timeOptions = [
@@ -31,13 +41,6 @@ class _CreatePricingRuleScreenState extends State<CreatePricingRuleScreen> {
     'Morning 8AM-12PM',
     'Afternoon 12-6PM',
     'Evening 6-10PM',
-  ];
-  static const _systemOptions = [
-    'All Systems',
-    'PC Gaming',
-    'PS5',
-    'Xbox',
-    'VR',
   ];
 
   @override
@@ -47,14 +50,114 @@ class _CreatePricingRuleScreenState extends State<CreatePricingRuleScreen> {
     super.dispose();
   }
 
-  Widget _inputField(String label, TextEditingController ctrl, {String? hint}) {
+  @override
+  Widget build(BuildContext context) {
+    final pricingState = ref.watch(adminPricingNotifierProvider);
+    final commandState = ref.watch(pricingRuleCommandNotifierProvider);
+    ref.listen<AdminCommandState>(pricingRuleCommandNotifierProvider, (
+      _,
+      next,
+    ) {
+      if (next is AdminCommandSuccess) {
+        showSuccessSnackbar(context, next.message);
+        ref.read(pricingRuleCommandNotifierProvider.notifier).reset();
+        context.go(AppRoutes.adminPricing);
+      } else if (next is AdminCommandError) {
+        showErrorSnackbar(context, ValidationException(next.message));
+      }
+    });
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: GzAdminTopBar(
+        title: 'New Pricing Rule',
+        onBack: () => context.pop(),
+      ),
+      body: pricingState.when(
+        loading: () => const GzLoadingView(message: 'Loading pricing setup'),
+        error: (error, _) => PageErrorDisplay(
+          error: AppPageError.from(error),
+          onRetry: () =>
+              ref.read(adminPricingNotifierProvider.notifier).refresh(),
+        ),
+        data: (data) {
+          final options = [
+            const SystemTypeOption(id: null, label: 'All Systems'),
+            ...data.systemTypes.map(
+              (type) => SystemTypeOption(
+                id: type.id,
+                label: type.name ?? 'System type',
+              ),
+            ),
+          ];
+          return SafeArea(
+            top: false,
+            child: GzScrollContent(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _inputField(
+                      'Rule name',
+                      _nameController,
+                      hint: 'e.g. Peak Hours',
+                    ),
+                    _inputField(
+                      'Rate (₹ per hour)',
+                      _rateController,
+                      hint: '80',
+                    ),
+                    _section('Applicable systems', _systemsChips(options)),
+                    _section(
+                      'Day filter',
+                      _chipRow(
+                        _dayOptions,
+                        _selectedDays,
+                        (value) => _selectedDays = value,
+                      ),
+                    ),
+                    _section(
+                      'Time window',
+                      _chipRow(
+                        _timeOptions,
+                        _selectedTimeWindow,
+                        (value) => _selectedTimeWindow = value,
+                      ),
+                    ),
+                    GzCard(
+                      variant: CardVariant.inset,
+                      child: Text(
+                        'This form submits a fixed hourly rule with optional system-type, day, and time filters.',
+                        style: AppTypography.bodyR,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    GzButton(
+                      label: 'Create Rule',
+                      loading: commandState is AdminCommandLoading,
+                      onPressed: _submit,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _inputField(
+    String label,
+    TextEditingController controller, {
+    String? hint,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (label.isNotEmpty) ...[
-          Text(label, style: AppTypography.small),
-          const SizedBox(height: 6),
-        ],
+        Text(label, style: AppTypography.small),
+        const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
@@ -62,7 +165,7 @@ class _CreatePricingRuleScreenState extends State<CreatePricingRuleScreen> {
             borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
           ),
           child: TextField(
-            controller: ctrl,
+            controller: controller,
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: hint,
@@ -101,14 +204,13 @@ class _CreatePricingRuleScreenState extends State<CreatePricingRuleScreen> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: options.asMap().entries.map((entry) {
-          final i = entry.key;
-          final o = entry.value;
-          final isSelected = o == selected;
-          final isLast = i == options.length - 1;
+          final isSelected = entry.value == selected;
           return Padding(
-            padding: EdgeInsets.only(right: isLast ? 0 : 8),
+            padding: EdgeInsets.only(
+              right: entry.key == options.length - 1 ? 0 : 8,
+            ),
             child: GestureDetector(
-              onTap: () => setState(() => onSelect(o)),
+              onTap: () => setState(() => onSelect(entry.value)),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
@@ -121,7 +223,7 @@ class _CreatePricingRuleScreenState extends State<CreatePricingRuleScreen> {
                   ),
                 ),
                 child: Text(
-                  o,
+                  entry.value,
                   style: AppTypography.body.copyWith(
                     color: isSelected
                         ? AppColors.surface
@@ -137,28 +239,14 @@ class _CreatePricingRuleScreenState extends State<CreatePricingRuleScreen> {
     );
   }
 
-  Widget _systemsChips() {
+  Widget _systemsChips(List<SystemTypeOption> options) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: _systemOptions.map((o) {
-        final isSelected = _selectedSystems.contains(o);
+      children: options.map((option) {
+        final isSelected = option.id == _selectedSystemTypeId;
         return GestureDetector(
-          onTap: () => setState(() {
-            if (o == 'All Systems') {
-              _selectedSystems = {'All Systems'};
-            } else {
-              _selectedSystems.remove('All Systems');
-              if (isSelected) {
-                _selectedSystems.remove(o);
-                if (_selectedSystems.isEmpty) {
-                  _selectedSystems = {'All Systems'};
-                }
-              } else {
-                _selectedSystems.add(o);
-              }
-            }
-          }),
+          onTap: () => setState(() => _selectedSystemTypeId = option.id),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
@@ -166,7 +254,7 @@ class _CreatePricingRuleScreenState extends State<CreatePricingRuleScreen> {
               borderRadius: BorderRadius.circular(AppSpacing.borderRadiusPill),
             ),
             child: Text(
-              o,
+              option.label,
               style: AppTypography.body.copyWith(
                 color: isSelected ? AppColors.surface : AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
@@ -178,65 +266,27 @@ class _CreatePricingRuleScreenState extends State<CreatePricingRuleScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(
-        title: 'New Pricing Rule',
-        onBack: () => context.pop(),
-      ),
-      body: SafeArea(
-        top: false,
-        child: GzScrollContent(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _inputField(
-                  'Rule name',
-                  _nameController,
-                  hint: 'e.g. Peak Hours',
-                ),
-                _inputField('Rate (₹ per hour)', _rateController, hint: '80'),
-                _section('Applicable systems', _systemsChips()),
-                _section(
-                  'Day filter',
-                  _chipRow(
-                    _dayOptions,
-                    _selectedDays,
-                    (v) => _selectedDays = v,
-                  ),
-                ),
-                _section(
-                  'Time window',
-                  _chipRow(
-                    _timeOptions,
-                    _selectedTimeWindow,
-                    (v) => _selectedTimeWindow = v,
-                  ),
-                ),
-                if (_saved)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: GzCard(
-                      variant: CardVariant.tint,
-                      child: Text(
-                        'Pricing rule created!',
-                        style: AppTypography.body.copyWith(color: AppColors.ok),
-                      ),
-                    ),
-                  ),
-                GzButton(
-                  label: 'Create Rule',
-                  onPressed: () => setState(() => _saved = true),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+  void _submit() {
+    final name = _nameController.text.trim();
+    final rate = double.tryParse(_rateController.text.trim());
+    if (name.isEmpty || rate == null) {
+      showErrorSnackbar(
+        context,
+        const ValidationException('Name and numeric hourly rate are required'),
+      );
+      return;
+    }
+    final time = pricingTimeWindowRange(_selectedTimeWindow);
+    ref.read(pricingRuleCommandNotifierProvider.notifier).createRule({
+      'name': name,
+      'rule_type': 'custom',
+      'fixed_rate': rate,
+      'day_of_week': pricingDayFilter(_selectedDays),
+      'start_time': time.$1,
+      'end_time': time.$2,
+      if (_selectedSystemTypeId != null)
+        'system_type_id': _selectedSystemTypeId,
+      'is_active': true,
+    });
   }
 }

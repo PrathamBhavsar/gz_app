@@ -19,7 +19,9 @@ class SystemTypesRepository {
   Future<List<SystemTypeModel>> fetchSystemTypes() async {
     await _net.assertConnection();
 
-    final raw = await _api.get(await adminStorePath(_storage, ApiConstants.systemTypes));
+    final raw = await _api.get(
+      await adminStorePath(_storage, ApiConstants.systemTypes),
+    );
     final map = adminStoreAsMap(raw, responseName: 'system types');
     final paginated = PaginatedSystemTypesResponse.fromJson(map).data;
     if (paginated != null && paginated.isNotEmpty) {
@@ -27,9 +29,15 @@ class SystemTypesRepository {
     }
 
     return adminStoreExtractList(
-      map,
-      dataKeys: const ['systemTypes', 'types', 'items'],
-    ).map((item) => SystemTypeModel.fromJson(adminStoreAsMap(item, responseName: 'system types'))).toList(growable: false);
+          map,
+          dataKeys: const ['systemTypes', 'types', 'items'],
+        )
+        .map(
+          (item) => SystemTypeModel.fromJson(
+            adminStoreAsMap(item, responseName: 'system types'),
+          ),
+        )
+        .toList(growable: false);
   }
 
   Future<SystemTypeModel> createSystemType({
@@ -38,14 +46,17 @@ class SystemTypesRepository {
     double? hourlyBaseRate,
   }) async {
     await _net.assertConnection();
+    final body = <String, dynamic>{'name': name};
+    if (description?.isNotEmpty == true) {
+      body['description'] = description;
+    }
+    if (hourlyBaseRate != null) {
+      body['hourly_base_rate'] = hourlyBaseRate;
+    }
 
     final raw = await _api.post(
       await adminStorePath(_storage, ApiConstants.systemTypes),
-      body: {
-        'name': name,
-        if (description?.isNotEmpty ?? false) 'description': description,
-        if (hourlyBaseRate != null) 'hourly_base_rate': hourlyBaseRate,
-      },
+      body: body,
     );
     return _parseTypeMutation(raw);
   }
@@ -57,14 +68,17 @@ class SystemTypesRepository {
     double? hourlyBaseRate,
   }) async {
     await _net.assertConnection();
+    final body = <String, dynamic>{'name': name};
+    if (description != null) {
+      body['description'] = description;
+    }
+    if (hourlyBaseRate != null) {
+      body['hourly_base_rate'] = hourlyBaseRate;
+    }
 
     final raw = await _api.patch(
       await adminStorePath(_storage, ApiConstants.systemTypeDetail, id: id),
-      body: {
-        'name': name,
-        if (description != null) 'description': description,
-        if (hourlyBaseRate != null) 'hourly_base_rate': hourlyBaseRate,
-      },
+      body: body,
     );
     return _parseTypeMutation(raw);
   }

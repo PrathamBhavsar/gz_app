@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../core/errors/app_exception.dart';
+import '../../../../../core/errors/error_snackbar.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_card.dart';
 import '../../../../../shared/widgets/gz_meta_row.dart';
+import '../../../application/admin_command_state.dart';
+import '../../../application/billing_override_notifier.dart';
 
 Future<void> showBillingOverrideSheet(
   BuildContext context, {
@@ -27,7 +33,7 @@ Future<void> showBillingOverrideSheet(
   );
 }
 
-class BillingOverrideSheet extends StatefulWidget {
+class BillingOverrideSheet extends ConsumerStatefulWidget {
   const BillingOverrideSheet({
     super.key,
     required this.billingId,
@@ -42,13 +48,13 @@ class BillingOverrideSheet extends StatefulWidget {
   final String description;
 
   @override
-  State<BillingOverrideSheet> createState() => _BillingOverrideSheetState();
+  ConsumerState<BillingOverrideSheet> createState() =>
+      _BillingOverrideSheetState();
 }
 
-class _BillingOverrideSheetState extends State<BillingOverrideSheet> {
+class _BillingOverrideSheetState extends ConsumerState<BillingOverrideSheet> {
   final _overrideController = TextEditingController();
   final _reasonController = TextEditingController();
-  bool _done = false;
 
   @override
   void dispose() {
@@ -60,6 +66,16 @@ class _BillingOverrideSheetState extends State<BillingOverrideSheet> {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final commandState = ref.watch(billingOverrideNotifierProvider);
+    ref.listen<AdminCommandState>(billingOverrideNotifierProvider, (_, next) {
+      if (next is AdminCommandSuccess) {
+        showSuccessSnackbar(context, next.message);
+        ref.read(billingOverrideNotifierProvider.notifier).reset();
+        context.pop();
+      } else if (next is AdminCommandError) {
+        showErrorSnackbar(context, ValidationException(next.message));
+      }
+    });
 
     return SafeArea(
       top: false,
@@ -76,7 +92,6 @@ class _BillingOverrideSheetState extends State<BillingOverrideSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Drag handle
                 Center(
                   child: Container(
                     width: 42,
@@ -90,14 +105,10 @@ class _BillingOverrideSheetState extends State<BillingOverrideSheet> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Title + description
                 Text('Override billing', style: AppTypography.h1),
                 const SizedBox(height: 4),
                 Text(widget.description, style: AppTypography.bodyR),
                 const SizedBox(height: 16),
-
-                // Info summary card
                 GzCard(
                   variant: CardVariant.inset,
                   padding: 14,
@@ -113,66 +124,23 @@ class _BillingOverrideSheetState extends State<BillingOverrideSheet> {
                   ),
                 ),
                 const SizedBox(height: 14),
-
-                // Override amount field
                 Text('Override amount (₹)', style: AppTypography.small),
                 const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.pillBg,
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.borderRadiusLg,
-                    ),
-                  ),
-                  child: TextField(
-                    controller: _overrideController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: widget.originalAmount,
-                      hintStyle: AppTypography.bodyR,
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    style: AppTypography.h1,
-                  ),
+                _field(
+                  controller: _overrideController,
+                  hintText: widget.originalAmount,
+                  keyboardType: TextInputType.number,
+                  textStyle: AppTypography.h1,
                 ),
                 const SizedBox(height: 12),
-
-                // Reason field
                 Text('Reason (required for audit)', style: AppTypography.small),
                 const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.pillBg,
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.borderRadiusLg,
-                    ),
-                  ),
-                  child: TextField(
-                    controller: _reasonController,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'e.g. System error during session',
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    style: AppTypography.bodyR.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
+                _field(
+                  controller: _reasonController,
+                  hintText: 'e.g. System error during session',
+                  maxLines: 2,
                 ),
                 const SizedBox(height: 8),
-
                 Text(
                   'This will mark the billing record as overridden.',
                   style: AppTypography.bodyR.copyWith(
@@ -181,31 +149,10 @@ class _BillingOverrideSheetState extends State<BillingOverrideSheet> {
                   ),
                 ),
                 const SizedBox(height: 18),
-
-                // Success confirmation
-                if (_done) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: GzCard(
-                      variant: CardVariant.tint,
-                      padding: 14,
-                      child: Text(
-                        'Billing overridden. Record updated.',
-                        style: AppTypography.body.copyWith(color: AppColors.ok),
-                      ),
-                    ),
-                  ),
-                ],
-
-                // Action button
                 GzButton(
-                  label: _done ? 'Done' : 'Confirm Override',
-                  variant: _done
-                      ? GzButtonVariant.ghost
-                      : GzButtonVariant.primary,
-                  onPressed: _done
-                      ? () => Navigator.pop(context)
-                      : () => setState(() => _done = true),
+                  label: 'Confirm Override',
+                  loading: commandState is AdminCommandLoading,
+                  onPressed: _submit,
                 ),
               ],
             ),
@@ -213,5 +160,49 @@ class _BillingOverrideSheetState extends State<BillingOverrideSheet> {
         ),
       ),
     );
+  }
+
+  Widget _field({
+    required TextEditingController controller,
+    required String hintText,
+    TextInputType? keyboardType,
+    TextStyle? textStyle,
+    int maxLines = 1,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.pillBg,
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+      ),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: hintText,
+          hintStyle: AppTypography.bodyR,
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
+        ),
+        style: textStyle ?? AppTypography.bodyR,
+      ),
+    );
+  }
+
+  void _submit() {
+    final amount = double.tryParse(_overrideController.text.trim());
+    final reason = _reasonController.text.trim();
+    if (amount == null || reason.isEmpty) {
+      showErrorSnackbar(
+        context,
+        const ValidationException('Override amount and reason are required'),
+      );
+      return;
+    }
+    ref
+        .read(billingOverrideNotifierProvider.notifier)
+        .submit(billingId: widget.billingId, amount: amount, reason: reason);
   }
 }

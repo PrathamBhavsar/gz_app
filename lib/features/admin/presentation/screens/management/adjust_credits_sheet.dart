@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/errors/app_exception.dart';
+import '../../../../../core/errors/error_snackbar.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_avatar.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_card.dart';
+import '../../../application/admin_command_state.dart';
+import '../../../application/admin_credits_command_notifier.dart';
 
 Future<void> showAdjustCreditsSheet(
   BuildContext context, {
@@ -29,7 +35,7 @@ Future<void> showAdjustCreditsSheet(
   );
 }
 
-class AdjustCreditsSheet extends StatefulWidget {
+class AdjustCreditsSheet extends ConsumerStatefulWidget {
   const AdjustCreditsSheet({
     super.key,
     required this.userId,
@@ -44,13 +50,12 @@ class AdjustCreditsSheet extends StatefulWidget {
   final String mode;
 
   @override
-  State<AdjustCreditsSheet> createState() => _AdjustCreditsSheetState();
+  ConsumerState<AdjustCreditsSheet> createState() => _AdjustCreditsSheetState();
 }
 
-class _AdjustCreditsSheetState extends State<AdjustCreditsSheet> {
+class _AdjustCreditsSheetState extends ConsumerState<AdjustCreditsSheet> {
   final _amountController = TextEditingController();
   final _reasonController = TextEditingController();
-  bool _done = false;
 
   @override
   void dispose() {
@@ -63,6 +68,19 @@ class _AdjustCreditsSheetState extends State<AdjustCreditsSheet> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final isAdd = widget.mode == 'add';
+    final commandState = ref.watch(adminCreditsCommandNotifierProvider);
+    ref.listen<AdminCommandState>(adminCreditsCommandNotifierProvider, (
+      _,
+      next,
+    ) {
+      if (next is AdminCommandSuccess) {
+        showSuccessSnackbar(context, next.message);
+        ref.read(adminCreditsCommandNotifierProvider.notifier).reset();
+        context.pop();
+      } else if (next is AdminCommandError) {
+        showErrorSnackbar(context, ValidationException(next.message));
+      }
+    });
 
     return SafeArea(
       top: false,
@@ -79,7 +97,6 @@ class _AdjustCreditsSheetState extends State<AdjustCreditsSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Drag handle
                 Center(
                   child: Container(
                     width: 42,
@@ -93,8 +110,6 @@ class _AdjustCreditsSheetState extends State<AdjustCreditsSheet> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Avatar + name row
                 Row(
                   children: [
                     GzAvatar(letter: widget.userName[0], size: GzAvatarSize.lg),
@@ -112,8 +127,6 @@ class _AdjustCreditsSheetState extends State<AdjustCreditsSheet> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
-                // Mode indicator card
                 GzCard(
                   variant: CardVariant.inset,
                   padding: 12,
@@ -137,96 +150,26 @@ class _AdjustCreditsSheetState extends State<AdjustCreditsSheet> {
                   ),
                 ),
                 const SizedBox(height: 14),
-
-                // Amount field
                 Text('Amount', style: AppTypography.small),
                 const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.pillBg,
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.borderRadiusLg,
-                    ),
-                  ),
-                  child: TextField(
-                    controller: _amountController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: false,
-                    ),
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: '0',
-                      hintStyle: AppTypography.bodyR,
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    style: AppTypography.h1,
-                  ),
+                _field(
+                  controller: _amountController,
+                  hintText: '0',
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
                 const SizedBox(height: 12),
-
-                // Reason field
                 Text('Reason (required)', style: AppTypography.small),
                 const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.pillBg,
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.borderRadiusLg,
-                    ),
-                  ),
-                  child: TextField(
-                    controller: _reasonController,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'e.g. Compensation for technical issue',
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    style: AppTypography.bodyR.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
+                _field(
+                  controller: _reasonController,
+                  hintText: 'e.g. Compensation for technical issue',
+                  maxLines: 2,
                 ),
                 const SizedBox(height: 18),
-
-                // Success confirmation
-                if (_done) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: GzCard(
-                      variant: CardVariant.tint,
-                      padding: 14,
-                      child: Text(
-                        '${isAdd ? '+' : '−'}${_amountController.text} credits '
-                        '${isAdd ? 'added to' : 'deducted from'} ${widget.userName}.',
-                        style: AppTypography.body.copyWith(color: AppColors.ok),
-                      ),
-                    ),
-                  ),
-                ],
-
-                // Action button
                 GzButton(
-                  label: _done
-                      ? 'Done'
-                      : (isAdd ? 'Add Credits' : 'Deduct Credits'),
-                  variant: _done
-                      ? GzButtonVariant.ghost
-                      : GzButtonVariant.primary,
-                  onPressed: _done
-                      ? () => Navigator.pop(context)
-                      : () => setState(() => _done = true),
+                  label: isAdd ? 'Add Credits' : 'Deduct Credits',
+                  loading: commandState is AdminCommandLoading,
+                  onPressed: _submit,
                 ),
               ],
             ),
@@ -234,5 +177,54 @@ class _AdjustCreditsSheetState extends State<AdjustCreditsSheet> {
         ),
       ),
     );
+  }
+
+  Widget _field({
+    required TextEditingController controller,
+    required String hintText,
+    List<TextInputFormatter>? inputFormatters,
+    int maxLines = 1,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.pillBg,
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+      ),
+      child: TextField(
+        controller: controller,
+        maxLines: maxLines,
+        keyboardType: TextInputType.number,
+        inputFormatters: inputFormatters,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: hintText,
+          hintStyle: AppTypography.bodyR,
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
+        ),
+        style: AppTypography.bodyR.copyWith(color: AppColors.textPrimary),
+      ),
+    );
+  }
+
+  void _submit() {
+    final amount = int.tryParse(_amountController.text.trim());
+    final reason = _reasonController.text.trim();
+    if (amount == null || amount <= 0 || reason.isEmpty) {
+      showErrorSnackbar(
+        context,
+        const ValidationException('Amount and reason are required'),
+      );
+      return;
+    }
+    ref
+        .read(adminCreditsCommandNotifierProvider.notifier)
+        .adjustCredits(
+          userId: widget.userId,
+          amount: amount,
+          reason: reason,
+          isAddition: widget.mode == 'add',
+        );
   }
 }

@@ -1,62 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/errors/app_exception.dart';
+import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../models/domain_billing.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
 import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../../shared/widgets/gz_scroll_content.dart';
 import '../../../../../shared/widgets/gz_tag.dart';
-// ignore: unused_import — used when routes are registered
-import 'create_pricing_rule_screen.dart';
-// ignore: unused_import — used when routes are registered
-import 'edit_pricing_rule_screen.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
+import '../../../application/admin_pricing_notifier.dart';
 
-class PricingRulesScreen extends StatelessWidget {
+class PricingRulesScreen extends ConsumerWidget {
   const PricingRulesScreen({super.key});
 
-  static const _rules = [
-    _PricingRuleData(
-      id: 'PRC-001',
-      name: 'Standard Rate',
-      rate: '₹80/hour · All day',
-      isActive: true,
-      tags: ['PC', 'All hours'],
-    ),
-    _PricingRuleData(
-      id: 'PRC-002',
-      name: 'Peak Hour',
-      rate: '₹120/hour · 6 PM–10 PM',
-      isActive: true,
-      tags: ['All', 'Evening'],
-    ),
-    _PricingRuleData(
-      id: 'PRC-003',
-      name: 'Weekend Rate',
-      rate: '₹100/hour · Sat–Sun',
-      isActive: true,
-      tags: ['All', 'Weekend'],
-    ),
-    _PricingRuleData(
-      id: 'PRC-004',
-      name: 'VR Premium',
-      rate: '₹150/hour',
-      isActive: false,
-      tags: ['VR', 'All hours'],
-    ),
-  ];
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pricing = ref.watch(adminPricingNotifierProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: GzAdminTopBar(
         title: 'Pricing Rules',
         onBack: () => context.pop(),
         trailing: GestureDetector(
-          onTap: () => context.push('/admin/pricing/create'),
+          onTap: () => context.push(AppRoutes.adminCreatePricing),
           child: const HugeIcon(
             icon: HugeIcons.strokeRoundedAdd01,
             color: AppColors.textSecondary,
@@ -64,36 +37,60 @@ class PricingRulesScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: SafeArea(
-        top: false,
-        child: GzScrollContent(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            child: Column(
-              children: _rules
-                  .map(
-                    (rule) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: GestureDetector(
-                        onTap: () =>
-                            context.push('/admin/pricing/${rule.id}/edit'),
-                        child: _PricingRuleCard(rule: rule),
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ),
+      body: pricing.when(
+        loading: () => const GzLoadingView(message: 'Loading pricing rules'),
+        error: (error, _) => PageErrorDisplay(
+          error: AppPageError.from(error),
+          onRetry: () =>
+              ref.read(adminPricingNotifierProvider.notifier).refresh(),
         ),
+        data: (data) {
+          if (data.rules.isEmpty) {
+            return const PageErrorDisplay(error: AppPageError.empty);
+          }
+          return SafeArea(
+            top: false,
+            child: RefreshIndicator(
+              onRefresh: () =>
+                  ref.read(adminPricingNotifierProvider.notifier).refresh(),
+              child: GzScrollContent(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                  child: Column(
+                    children: data.rules
+                        .map(
+                          (rule) => Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: GestureDetector(
+                              onTap: () => context.push(
+                                AppRoutes.adminEditPricingPath(rule.id ?? ''),
+                              ),
+                              child: _PricingRuleCard(
+                                rule: rule,
+                                systemLabel: data.systemTypeName(
+                                  rule.systemTypeId,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 }
 
 class _PricingRuleCard extends StatelessWidget {
-  const _PricingRuleCard({required this.rule});
+  const _PricingRuleCard({required this.rule, required this.systemLabel});
 
-  final _PricingRuleData rule;
+  final PricingRuleModel rule;
+  final String systemLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -108,26 +105,42 @@ class _PricingRuleCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(rule.name, style: AppTypography.h3),
+                    Text(rule.name ?? 'Pricing rule', style: AppTypography.h3),
                     const SizedBox(height: 2),
-                    Text(rule.rate, style: AppTypography.small),
+                    Text(_rateLabel(rule), style: AppTypography.small),
                   ],
                 ),
               ),
-              _StaticToggle(isActive: rule.isActive),
+              _StaticToggle(isActive: rule.isActive ?? false),
             ],
           ),
           const SizedBox(height: 10),
           Wrap(
             spacing: 6,
             runSpacing: 6,
-            children: rule.tags
-                .map((tag) => GzTag(kind: GzTagKind.mute, label: tag))
-                .toList(),
+            children: [
+              GzTag(kind: GzTagKind.mute, label: systemLabel),
+              GzTag(kind: GzTagKind.mute, label: _dayLabel(rule.dayOfWeek)),
+              GzTag(
+                kind: GzTagKind.mute,
+                label: _timeLabel(rule.startTime, rule.endTime),
+              ),
+            ],
           ),
         ],
       ),
     );
+  }
+
+  String _rateLabel(PricingRuleModel rule) {
+    final rate = rule.fixedRate ?? rule.multiplier;
+    if (rate == null) {
+      return 'Rate unavailable';
+    }
+    final formatted = rate.truncateToDouble() == rate
+        ? rate.toStringAsFixed(0)
+        : rate.toStringAsFixed(2);
+    return '₹$formatted/hour';
   }
 }
 
@@ -161,18 +174,23 @@ class _StaticToggle extends StatelessWidget {
   }
 }
 
-class _PricingRuleData {
-  const _PricingRuleData({
-    required this.id,
-    required this.name,
-    required this.rate,
-    required this.isActive,
-    required this.tags,
-  });
+String _dayLabel(List<int>? days) {
+  if (days == null || days.isEmpty) {
+    return 'All days';
+  }
+  final normalized = days.toSet();
+  if (normalized.containsAll({1, 2, 3, 4, 5}) && normalized.length == 5) {
+    return 'Weekdays';
+  }
+  if (normalized.containsAll({6, 7}) && normalized.length == 2) {
+    return 'Weekends';
+  }
+  return '${normalized.length} days';
+}
 
-  final String id;
-  final String name;
-  final String rate;
-  final bool isActive;
-  final List<String> tags;
+String _timeLabel(String? start, String? end) {
+  if ((start == null || start.isEmpty) && (end == null || end.isEmpty)) {
+    return 'All hours';
+  }
+  return '${start ?? '--'}-${end ?? '--'}';
 }
