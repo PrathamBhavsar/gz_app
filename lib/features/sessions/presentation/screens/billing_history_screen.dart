@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/app_exception.dart';
+import '../../../../core/navigation/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -50,25 +52,29 @@ class _BillingHistoryScreenState extends ConsumerState<BillingHistoryScreen> {
                   icon: 'inbox',
                   kind: AppPageErrorKind.empty,
                 ),
-                onRetry: () => ref.read(billingNotifierProvider.notifier).refresh(),
+                onRetry: () =>
+                    ref.read(billingNotifierProvider.notifier).refresh(),
               );
             }
 
-            final visibleRows = rows.where((row) {
-              switch (_filters[_filterIndex]) {
-                case 'Paid':
-                  return _statusLabel(row) == 'Paid';
-                case 'Unpaid':
-                  return _statusLabel(row) == 'Unpaid';
-                case 'Overdue':
-                  return _statusLabel(row) == 'Overdue';
-                default:
-                  return true;
-              }
-            }).toList(growable: false);
+            final visibleRows = rows
+                .where((row) {
+                  switch (_filters[_filterIndex]) {
+                    case 'Paid':
+                      return _statusLabel(row) == 'Paid';
+                    case 'Unpaid':
+                      return _statusLabel(row) == 'Unpaid';
+                    case 'Overdue':
+                      return _statusLabel(row) == 'Overdue';
+                    default:
+                      return true;
+                  }
+                })
+                .toList(growable: false);
 
             return RefreshIndicator(
-              onRefresh: () => ref.read(billingNotifierProvider.notifier).refresh(),
+              onRefresh: () =>
+                  ref.read(billingNotifierProvider.notifier).refresh(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -79,7 +85,8 @@ class _BillingHistoryScreenState extends ConsumerState<BillingHistoryScreen> {
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: _filters.length,
-                        separatorBuilder: (_, index) => const SizedBox(width: 8),
+                        separatorBuilder: (_, index) =>
+                            const SizedBox(width: 8),
                         itemBuilder: (context, i) => GzChip(
                           label: _filters[i],
                           active: _filterIndex == i,
@@ -98,6 +105,7 @@ class _BillingHistoryScreenState extends ConsumerState<BillingHistoryScreen> {
                       itemBuilder: (context, index) {
                         final row = visibleRows[index];
                         return _BillingRow(
+                          row: row,
                           store: billingStoreName(row),
                           date: formatReadableDate(row.date),
                           duration: row.durationMinutes == null
@@ -139,6 +147,7 @@ GzTagKind _tagKindForBilling(BillingRow row) {
 
 class _BillingRow extends StatelessWidget {
   const _BillingRow({
+    required this.row,
     required this.store,
     required this.date,
     required this.duration,
@@ -146,6 +155,7 @@ class _BillingRow extends StatelessWidget {
     required this.tag,
   });
 
+  final BillingRow row;
   final String store;
   final String date;
   final String duration;
@@ -168,16 +178,45 @@ class _BillingRow extends StatelessWidget {
               children: [
                 Text(store, style: AppTypography.h3),
                 const SizedBox(height: 4),
-                Text('$date · $duration',
-                    style: AppTypography.small
-                        .copyWith(color: AppColors.textSecondary)),
+                Text(
+                  '$date · $duration',
+                  style: AppTypography.small.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 tag,
+                if (row.id.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  TextButton(
+                    onPressed: () {
+                      final location = Uri(
+                        path: AppRoutes.disputeCreate,
+                        queryParameters: {'billingId': row.id},
+                      ).toString();
+                      context.push(location);
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      'Raise dispute',
+                      style: AppTypography.small.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
-          Text(amount,
-              style: AppTypography.num.copyWith(fontWeight: FontWeight.w700)),
+          Text(
+            amount,
+            style: AppTypography.num.copyWith(fontWeight: FontWeight.w700),
+          ),
         ],
       ),
     );

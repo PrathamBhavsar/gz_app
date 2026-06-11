@@ -126,8 +126,14 @@
     - `notif_prefs_notifier.dart`
     - `profile_notifier.dart`
   - `presentation/screens/`
+    - `disputes_list_screen.dart`
 - `lib/features/disputes/`
-  - `presentation/screens/` only today
+  - `data/repositories/disputes_repository.dart`
+  - `application/`
+    - `create_dispute_notifier.dart`
+    - `dispute_detail_notifier.dart`
+    - `my_disputes_notifier.dart`
+  - `presentation/screens/`
 - `lib/features/main_shell/`
   - `presentation/screens/main_page.dart`
 - `lib/features/admin/`

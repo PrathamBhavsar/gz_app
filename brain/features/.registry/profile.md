@@ -42,3 +42,4 @@ Missing today:
 - Notification preferences now reuse the notifications backend contract through `notif_prefs_notifier.dart` and `NotificationsRepository`.
 - Phase 7 now reuses `AuthRepository` directly for `GET /auth/me`, `PATCH /auth/me`, and `POST /auth/phone/change` instead of adding a profile-specific repository layer.
 - Stats and derived profile summaries should stay out of the UI until there is a real backend source for them.
+- `disputes_list_screen.dart` is now backed by `myDisputesNotifierProvider` from the disputes feature instead of inline mock rows.

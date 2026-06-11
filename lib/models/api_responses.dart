@@ -457,23 +457,20 @@ class NotificationPreferencesResponse
 class DisputeResponse extends SuccessResponse<BillingDisputeModel> {
   const DisputeResponse({super.message, super.data});
 
-  factory DisputeResponse.fromJson(Map<String, dynamic> json) =>
-      DisputeResponse(
-        message: json['message'] as String?,
-        data: json['dispute'] != null
-            ? BillingDisputeModel.fromJson(
-                json['dispute'] as Map<String, dynamic>,
-              )
-            : null,
-      );
+  factory DisputeResponse.fromJson(Map<String, dynamic> json) {
+    final payload = _extractDisputeObject(json);
+    return DisputeResponse(
+      message: json['message'] as String?,
+      data: payload == null ? null : BillingDisputeModel.fromJson(payload),
+    );
+  }
 }
 
 class DisputeListResponse extends SuccessResponse<List<BillingDisputeModel>> {
   const DisputeListResponse({super.message, super.data});
 
   factory DisputeListResponse.fromJson(Map<String, dynamic> json) {
-    final rawDisputes =
-        json['disputes'] as List<dynamic>? ?? json['data'] as List<dynamic>?;
+    final rawDisputes = _extractDisputeList(json);
     return DisputeListResponse(
       message: json['message'] as String?,
       data: rawDisputes
@@ -481,6 +478,60 @@ class DisputeListResponse extends SuccessResponse<List<BillingDisputeModel>> {
           .toList(),
     );
   }
+}
+
+Map<String, dynamic>? _extractDisputeObject(Map<String, dynamic> json) {
+  final dispute = json['dispute'];
+  if (dispute is Map<String, dynamic>) {
+    return dispute;
+  }
+  if (dispute is Map) {
+    return dispute.map((key, value) => MapEntry(key.toString(), value));
+  }
+
+  final data = json['data'];
+  if (data is Map<String, dynamic>) {
+    final nested = data['dispute'];
+    if (nested is Map<String, dynamic>) {
+      return nested;
+    }
+    if (nested is Map) {
+      return nested.map((key, value) => MapEntry(key.toString(), value));
+    }
+    return data;
+  }
+  if (data is Map) {
+    return data.map((key, value) => MapEntry(key.toString(), value));
+  }
+
+  return null;
+}
+
+List<dynamic>? _extractDisputeList(Map<String, dynamic> json) {
+  final disputes = json['disputes'];
+  if (disputes is List<dynamic>) {
+    return disputes;
+  }
+
+  final data = json['data'];
+  if (data is List<dynamic>) {
+    return data;
+  }
+  if (data is Map<String, dynamic>) {
+    final nested = data['disputes'];
+    if (nested is List<dynamic>) {
+      return nested;
+    }
+  }
+  if (data is Map) {
+    final map = data.map((key, value) => MapEntry(key.toString(), value));
+    final nested = map['disputes'];
+    if (nested is List<dynamic>) {
+      return nested;
+    }
+  }
+
+  return null;
 }
 
 // --- BILLING ROW (player billing history) ---

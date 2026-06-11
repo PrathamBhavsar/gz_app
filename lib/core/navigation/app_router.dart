@@ -310,7 +310,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.disputeCreate,
-        builder: (context, state) => const CreateDisputeScreen(),
+        builder: (context, state) => CreateDisputeScreen(
+          prefilledBillingId: state.uri.queryParameters['billingId'],
+        ),
       ),
       GoRoute(
         path: AppRoutes.disputeDetail,
