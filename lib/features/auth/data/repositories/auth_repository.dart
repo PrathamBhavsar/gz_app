@@ -202,6 +202,29 @@ class AuthRepository {
     );
   }
 
+  Future<String> requestPhoneChange({required String newPhone}) async {
+    await _net.assertConnection();
+    final raw = await _api.post(
+      ApiConstants.authPhoneChange,
+      body: {'newPhone': newPhone},
+    );
+    return (raw as Map<String, dynamic>)['message']?.toString() ??
+        'OTP sent to your new phone number.';
+  }
+
+  Future<String> verifyPhoneChange({
+    required String newPhone,
+    required String otp,
+  }) async {
+    await _net.assertConnection();
+    final raw = await _api.post(
+      ApiConstants.authPhoneChangeVerify,
+      body: {'phone': newPhone, 'code': otp},
+    );
+    return (raw as Map<String, dynamic>)['message']?.toString() ??
+        'Phone number updated.';
+  }
+
   Future<void> registerDeviceToken(String token) async {
     await _net.assertConnection();
     await _api.patch(

@@ -17,9 +17,9 @@ Missing today:
 | File | Purpose | Implemented? |
 |---|---|---|
 | `lib/features/profile/data/repositories/profile_repository.dart` | Optional profile-focused wrapper if auth repository reuse becomes noisy | No |
-| `lib/features/profile/application/profile_notifier.dart` | Load `/profile` data | No |
-| `lib/features/profile/application/edit_profile_notifier.dart` | Edit profile action flow | No |
-| `lib/features/profile/application/change_phone_notifier.dart` | Change-phone action flow | No |
+| `lib/features/profile/application/profile_notifier.dart` | Load `/profile` data | Yes |
+| `lib/features/profile/application/edit_profile_notifier.dart` | Edit profile action flow | Yes |
+| `lib/features/profile/application/change_phone_notifier.dart` | Change-phone action flow | Yes |
 | `lib/features/profile/application/notif_prefs_notifier.dart` | Notification preferences read/write state | Yes |
 
 ## Planned Screens
@@ -40,4 +40,5 @@ Missing today:
 
 ## Notes
 - Notification preferences now reuse the notifications backend contract through `notif_prefs_notifier.dart` and `NotificationsRepository`.
+- Phase 7 now reuses `AuthRepository` directly for `GET /auth/me`, `PATCH /auth/me`, and `POST /auth/phone/change` instead of adding a profile-specific repository layer.
 - Stats and derived profile summaries should stay out of the UI until there is a real backend source for them.

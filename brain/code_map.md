@@ -121,7 +121,10 @@
   - `presentation/screens/`
 - `lib/features/profile/`
   - `application/`
+    - `change_phone_notifier.dart`
+    - `edit_profile_notifier.dart`
     - `notif_prefs_notifier.dart`
+    - `profile_notifier.dart`
   - `presentation/screens/`
 - `lib/features/disputes/`
   - `presentation/screens/` only today

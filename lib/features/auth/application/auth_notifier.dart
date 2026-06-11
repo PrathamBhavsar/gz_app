@@ -50,6 +50,16 @@ class AuthNotifier extends Notifier<AuthSessionState> {
     state = AuthAuthenticated(user);
   }
 
+  Future<UserModel> refreshCurrentUser() async {
+    final user = await ref.read(authRepositoryProvider).fetchCurrentUser();
+    state = AuthAuthenticated(user);
+    return user;
+  }
+
+  void setCurrentUser(UserModel user) {
+    state = AuthAuthenticated(user);
+  }
+
   Future<void> logout() async {
     state = const AuthLoading();
     try {
