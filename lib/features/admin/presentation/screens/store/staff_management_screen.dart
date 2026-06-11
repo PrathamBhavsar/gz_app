@@ -1,70 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/errors/app_exception.dart';
+import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../models/domain_systems.dart';
+import '../../../../../models/enums.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
 import '../../../../../shared/widgets/gz_avatar.dart';
 import '../../../../../shared/widgets/gz_card.dart';
 import '../../../../../shared/widgets/gz_icon_btn.dart';
+import '../../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../../shared/widgets/gz_scroll_content.dart';
 import '../../../../../shared/widgets/gz_tag.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
+import '../../../application/store_admins_notifier.dart';
 import 'edit_staff_sheet.dart';
-// ignore: unused_import — used when routes are registered
-import 'invite_staff_screen.dart';
 
-class StaffManagementScreen extends StatelessWidget {
+class StaffManagementScreen extends ConsumerWidget {
   const StaffManagementScreen({super.key});
 
-  static const _staff = [
-    _StaffMember(
-      id: 'STF-001',
-      name: 'Pratham Singh',
-      email: 'pratham@gzarena.com',
-      role: GzTagKind.purple,
-      roleLabel: 'Super Admin',
-      initials: 'P',
-    ),
-    _StaffMember(
-      id: 'STF-002',
-      name: 'Ritika Sharma',
-      email: 'ritika@gzarena.com',
-      role: GzTagKind.info,
-      roleLabel: 'Admin',
-      initials: 'R',
-      showTrash: true,
-    ),
-    _StaffMember(
-      id: 'STF-003',
-      name: 'Kabir Nair',
-      email: 'kabir@gzarena.com',
-      role: GzTagKind.mute,
-      roleLabel: 'Staff',
-      initials: 'K',
-      showTrash: true,
-    ),
-    _StaffMember(
-      id: 'STF-004',
-      name: 'Megha Jain',
-      email: 'megha@gzarena.com',
-      role: GzTagKind.mute,
-      roleLabel: 'Staff',
-      initials: 'M',
-      showTrash: true,
-    ),
-  ];
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final staffState = ref.watch(storeAdminsNotifierProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: GzAdminTopBar(
         title: 'Staff',
         trailing: GzIconBtn(
           tooltip: 'Add staff',
-          onTap: () => context.push('/admin/staff/invite'),
+          onTap: () => context.push(AppRoutes.adminInviteStaff),
           child: const HugeIcon(
             icon: HugeIcons.strokeRoundedAdd01,
             color: AppColors.textPrimary,
@@ -74,41 +43,53 @@ class StaffManagementScreen extends StatelessWidget {
       ),
       body: SafeArea(
         top: false,
-        child: GzScrollContent(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: const [
-                    GzTag(kind: GzTagKind.purple, label: 'Super Admin'),
-                    GzTag(kind: GzTagKind.info, label: 'Admin'),
-                    GzTag(kind: GzTagKind.mute, label: 'Staff'),
+        child: staffState.when(
+          loading: () => const GzLoadingView(message: 'Loading staff'),
+          error: (error, _) => PageErrorDisplay(
+            error: AppPageError.from(error),
+            onRetry: () => ref.read(storeAdminsNotifierProvider.notifier).refresh(),
+          ),
+          data: (members) {
+            final activeMembers = members
+                .where((item) => item.isActive ?? true)
+                .toList(growable: false);
+            if (activeMembers.isEmpty) {
+              return const PageErrorDisplay(error: AppPageError.empty);
+            }
+
+            return GzScrollContent(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: const [
+                        GzTag(kind: GzTagKind.purple, label: 'Super Admin'),
+                        GzTag(kind: GzTagKind.info, label: 'Admin'),
+                        GzTag(kind: GzTagKind.mute, label: 'Staff'),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    ...activeMembers.map(
+                      (member) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: GestureDetector(
+                          onTap: () => showEditStaffSheet(
+                            context,
+                            member: member,
+                          ),
+                          child: _StaffCard(member: member),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.md),
-                ..._staff.map(
-                  (member) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: member.showTrash
-                        ? GestureDetector(
-                            onTap: () => showEditStaffSheet(
-                              context,
-                              staffId: member.id,
-                              staffName: member.name,
-                              currentRole: member.roleLabel,
-                            ),
-                            child: _StaffCard(member: member),
-                          )
-                        : _StaffCard(member: member),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -118,64 +99,77 @@ class StaffManagementScreen extends StatelessWidget {
 class _StaffCard extends StatelessWidget {
   const _StaffCard({required this.member});
 
-  final _StaffMember member;
+  final StoreAdminModel member;
 
   @override
   Widget build(BuildContext context) {
     return GzCard(
       child: Row(
         children: [
-          GzAvatar(letter: member.initials, size: GzAvatarSize.lg),
+          GzAvatar(
+            letter: _initial(member),
+            size: GzAvatarSize.lg,
+          ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(member.name, style: AppTypography.h3),
+                Text(member.name ?? 'Unknown', style: AppTypography.h3),
                 const SizedBox(height: 2),
-                Text(member.email, style: AppTypography.small),
+                Text(member.email ?? 'No email', style: AppTypography.small),
+                if (member.lastLoginAt != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    'Last login ${_dateLabel(member.lastLoginAt)}',
+                    style: AppTypography.small.copyWith(
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.sm),
-                GzTag(kind: member.role, label: member.roleLabel),
+                GzTag(
+                  kind: _roleKind(member.role),
+                  label: _roleLabel(member.role),
+                ),
               ],
             ),
           ),
-          if (member.showTrash)
-            GzIconBtn(
-              tooltip: 'Remove staff',
-              onTap: () => showEditStaffSheet(
-                context,
-                staffId: member.id,
-                staffName: member.name,
-                currentRole: member.roleLabel,
-              ),
-              child: const HugeIcon(
-                icon: HugeIcons.strokeRoundedDelete02,
-                color: AppColors.textTertiary,
-                size: 18,
-              ),
-            ),
+          const HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowRight01,
+            color: AppColors.textTertiary,
+            size: 18,
+          ),
         ],
       ),
     );
   }
 }
 
-class _StaffMember {
-  const _StaffMember({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.role,
-    required this.roleLabel,
-    required this.initials,
-    this.showTrash = false,
-  });
+String _initial(StoreAdminModel member) {
+  final source = member.name ?? member.email ?? '?';
+  return source.substring(0, 1).toUpperCase();
+}
 
-  final String id;
-  final String name;
-  final String email;
-  final GzTagKind role;
-  final String roleLabel;
-  final String initials;
-  final bool showTrash;
+GzTagKind _roleKind(AdminRole? role) => switch (role) {
+  AdminRole.superAdmin => GzTagKind.purple,
+  AdminRole.admin => GzTagKind.info,
+  AdminRole.staff => GzTagKind.mute,
+  null => GzTagKind.mute,
+};
+
+String _roleLabel(AdminRole? role) => switch (role) {
+  AdminRole.superAdmin => 'Super Admin',
+  AdminRole.admin => 'Admin',
+  AdminRole.staff => 'Staff',
+  null => 'Unknown',
+};
+
+String _dateLabel(DateTime? value) {
+  if (value == null) {
+    return 'unknown';
+  }
+  final local = value.toLocal();
+  final minute = local.minute.toString().padLeft(2, '0');
+  return '${local.day}/${local.month}/${local.year} ${local.hour}:$minute';
 }

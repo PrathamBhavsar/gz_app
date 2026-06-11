@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/errors/app_exception.dart';
+import '../../../../../core/errors/error_snackbar.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -10,21 +13,21 @@ import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_card.dart';
 import '../../../../../shared/widgets/gz_scroll_content.dart';
 import '../../../../../shared/widgets/gz_section_head.dart';
+import '../../../application/admin_command_state.dart';
+import '../../../application/admin_notify_send_notifier.dart';
 
-class AdminNotificationsScreen extends StatefulWidget {
+class AdminNotificationsScreen extends ConsumerStatefulWidget {
   const AdminNotificationsScreen({super.key});
 
   @override
-  State<AdminNotificationsScreen> createState() =>
+  ConsumerState<AdminNotificationsScreen> createState() =>
       _AdminNotificationsScreenState();
 }
 
-class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
-  final _titleCtrl = TextEditingController(text: 'Tonight at GZ Arena');
-  final _bodyCtrl = TextEditingController(
-    text:
-        'Walk-in lanes open after 8 PM. Claim double credits on every 2-hour session.',
-  );
+class _AdminNotificationsScreenState
+    extends ConsumerState<AdminNotificationsScreen> {
+  final _titleCtrl = TextEditingController();
+  final _bodyCtrl = TextEditingController();
   String _channel = 'push';
   String _audience = 'all';
 
@@ -43,6 +46,19 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
     final previewBody = _bodyCtrl.text.trim().isEmpty
         ? 'Notification body preview'
         : _bodyCtrl.text.trim();
+    final commandState = ref.watch(adminNotifySendNotifierProvider);
+
+    ref.listen<AdminCommandState>(adminNotifySendNotifierProvider, (_, next) {
+      if (next is AdminCommandSuccess) {
+        showSuccessSnackbar(context, next.message);
+        ref.read(adminNotifySendNotifierProvider.notifier).reset();
+        _titleCtrl.clear();
+        _bodyCtrl.clear();
+        setState(() {});
+      } else if (next is AdminCommandError) {
+        showErrorSnackbar(context, ValidationException(next.message));
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -162,12 +178,34 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                GzButton(label: 'Send notification', onPressed: () {}),
+                GzButton(
+                  label: 'Send notification',
+                  loading: commandState is AdminCommandLoading,
+                  onPressed: _send,
+                ),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  void _send() {
+    final title = _titleCtrl.text.trim();
+    final body = _bodyCtrl.text.trim();
+    if (title.isEmpty || body.isEmpty) {
+      showErrorSnackbar(
+        context,
+        const ValidationException('Title and body are required'),
+      );
+      return;
+    }
+    ref.read(adminNotifySendNotifierProvider.notifier).send(
+      title: title,
+      body: body,
+      channel: _channel,
+      audience: _audience,
     );
   }
 }

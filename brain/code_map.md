@@ -138,19 +138,35 @@
   - `presentation/screens/main_page.dart`
 - `lib/features/admin/`
   - `data/repositories/`
+    - `admin_notify_send_repository.dart`
     - `admin_bookings_repository.dart`
     - `admin_dashboard_repository.dart`
     - `admin_sessions_repository.dart`
+    - `admin_store_repository_support.dart`
+    - `store_admins_repository.dart`
+    - `store_config_repository.dart`
+    - `systems_admin_repository.dart`
+    - `system_types_repository.dart`
   - `application/`
     - `admin_booking_command_notifier.dart`
     - `admin_booking_detail_notifier.dart`
     - `admin_bookings_notifier.dart`
     - `admin_command_state.dart`
     - `admin_dashboard_notifier.dart`
+    - `admin_notify_send_notifier.dart`
     - `admin_operations_models.dart`
+    - `admin_store_models.dart`
+    - `admin_system_command_notifier.dart`
+    - `admin_system_detail_notifier.dart`
+    - `admin_system_type_command_notifier.dart`
+    - `admin_systems_notifier.dart`
     - `admin_session_command_notifier.dart`
     - `admin_sessions_notifier.dart`
     - `admin_walk_in_notifier.dart`
+    - `store_admin_command_notifier.dart`
+    - `store_admins_notifier.dart`
+    - `store_config_command_notifier.dart`
+    - `store_config_notifier.dart`
   - `presentation/screens/admin_login_screen.dart`
   - `presentation/screens/admin_password_reset_screen.dart`
   - `presentation/screens/analytics/`
@@ -165,6 +181,15 @@
     - `session_management_screen.dart`
     - `walk_in_booking_screen.dart`
   - `presentation/screens/store/`
+    - `add_edit_system_screen.dart`
+    - `admin_notifications_screen.dart`
+    - `admin_store_screen.dart`
+    - `edit_staff_sheet.dart`
+    - `invite_staff_screen.dart`
+    - `staff_management_screen.dart`
+    - `store_config_screen.dart`
+    - `system_detail_screen.dart`
+    - `system_management_screen.dart`
   - `presentation/widgets/admin_shell.dart`
 
 ## Target Convention For API Phases

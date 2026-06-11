@@ -1,49 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../core/errors/app_exception.dart';
+import '../../../../../core/errors/error_snackbar.dart';
+import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../models/domain_systems.dart';
+import '../../../../../models/enums.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
 import '../../../../../shared/widgets/gz_button.dart';
-import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../../shared/widgets/gz_scroll_content.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
+import '../../../application/admin_command_state.dart';
+import '../../../application/admin_store_models.dart';
+import '../../../application/admin_system_command_notifier.dart';
+import '../../../application/admin_system_detail_notifier.dart';
+import '../../../application/admin_systems_notifier.dart';
 
-class AddEditSystemScreen extends StatefulWidget {
+class AddEditSystemScreen extends ConsumerStatefulWidget {
   const AddEditSystemScreen({super.key, this.id});
 
   final String? id;
 
   @override
-  State<AddEditSystemScreen> createState() => _AddEditSystemScreenState();
+  ConsumerState<AddEditSystemScreen> createState() => _AddEditSystemScreenState();
 }
 
-class _AddEditSystemScreenState extends State<AddEditSystemScreen> {
+class _AddEditSystemScreenState extends ConsumerState<AddEditSystemScreen> {
   final _nameCtrl = TextEditingController();
   final _seatCtrl = TextEditingController();
   final _rateCtrl = TextEditingController();
   final _specsCtrl = TextEditingController();
 
-  String _selectedType = 'PC';
-  String _selectedStatus = 'Available';
-  bool _saved = false;
-
-  static const _types = ['PC', 'PS5', 'Xbox', 'VR', 'Other'];
-  static const _statusOptions = ['Available', 'Maintenance'];
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.id != null) {
-      // Fill with demo values for edit mode
-      _nameCtrl.text = 'PC Station 01';
-      _seatCtrl.text = '01';
-      _rateCtrl.text = '80';
-      _specsCtrl.text = 'RTX 4090 · 32GB · 240Hz';
-      _selectedType = 'PC';
-      _selectedStatus = 'Available';
-    }
-  }
+  String? _selectedTypeId;
+  SystemStatus _selectedStatus = SystemStatus.available;
+  bool _seeded = false;
+  bool _deleteRequested = false;
 
   @override
   void dispose() {
@@ -54,11 +50,174 @@ class _AddEditSystemScreenState extends State<AddEditSystemScreen> {
     super.dispose();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final isEdit = widget.id != null;
+    final systemsState = ref.watch(adminSystemsNotifierProvider);
+    final detailState = isEdit
+        ? ref.watch(adminSystemDetailNotifierProvider(widget.id!))
+        : const AsyncValue<AdminSystemDetailData?>.data(null);
+    final commandState = ref.watch(adminSystemCommandNotifierProvider);
+
+    ref.listen<AdminCommandState>(adminSystemCommandNotifierProvider, (_, next) {
+      if (next is AdminCommandSuccess) {
+        showSuccessSnackbar(context, next.message);
+        ref.read(adminSystemCommandNotifierProvider.notifier).reset();
+        if (_deleteRequested) {
+          _deleteRequested = false;
+          context.go(AppRoutes.adminSystemsList);
+          return;
+        }
+        final target = widget.id;
+        if (target == null) {
+          context.go(AppRoutes.adminSystemsList);
+        } else {
+          context.go(AppRoutes.adminSystemDetailPath(target));
+        }
+      } else if (next is AdminCommandError) {
+        showErrorSnackbar(context, ValidationException(next.message));
+      }
+    });
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: GzAdminTopBar(title: isEdit ? 'Edit System' : 'Add System'),
+      body: SafeArea(
+        top: false,
+        child: systemsState.when(
+          loading: () => const GzLoadingView(message: 'Loading system types'),
+          error: (error, _) => PageErrorDisplay(
+            error: AppPageError.from(error),
+            onRetry: () => ref.read(adminSystemsNotifierProvider.notifier).refresh(),
+          ),
+          data: (systemsData) {
+            if (systemsData.systemTypes.isEmpty) {
+              return const PageErrorDisplay(error: AppPageError.empty);
+            }
+
+            return detailState.when(
+              loading: () => const GzLoadingView(message: 'Loading system detail'),
+              error: (error, _) => PageErrorDisplay(
+                error: AppPageError.from(error),
+                onRetry: isEdit
+                    ? () => ref
+                          .read(
+                            adminSystemDetailNotifierProvider(widget.id!).notifier,
+                          )
+                          .refresh()
+                    : null,
+              ),
+              data: (detailData) {
+                _seedFormIfNeeded(
+                  systemsData.systemTypes,
+                  detailData?.system,
+                );
+                return GzScrollContent(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _inputField(
+                          'System name',
+                          _nameCtrl,
+                          hint: 'e.g. PC Station 04',
+                        ),
+                        Text('System type', style: AppTypography.small),
+                        const SizedBox(height: 8),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: systemsData.systemTypes.map((type) {
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: _typeChip(type),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _inputField(
+                          'Seat / bay number',
+                          _seatCtrl,
+                          hint: '04',
+                          keyboardType: TextInputType.number,
+                        ),
+                        _inputField(
+                          'Rate (Rs per hour)',
+                          _rateCtrl,
+                          hint: '80',
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                        ),
+                        _inputField(
+                          'Specs / description',
+                          _specsCtrl,
+                          hint: 'RTX 4090 · 32GB · 240Hz',
+                        ),
+                        if (isEdit) ...[
+                          Text('Status', style: AppTypography.small),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: SystemStatus.values.map((status) {
+                              return _statusChip(status);
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                        GzButton(
+                          label: isEdit ? 'Save Changes' : 'Add System',
+                          loading: commandState is AdminCommandLoading,
+                          onPressed: () => _submit(isEdit),
+                        ),
+                        if (isEdit) ...[
+                          const SizedBox(height: 8),
+                          GzButton(
+                            label: 'Remove System',
+                            variant: GzButtonVariant.dangerOutline,
+                            loading: _deleteRequested &&
+                                commandState is AdminCommandLoading,
+                            onPressed: _confirmDelete,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _seedFormIfNeeded(
+    List<SystemTypeModel> systemTypes,
+    SystemModel? system,
+  ) {
+    if (_seeded) {
+      return;
+    }
+    _seeded = true;
+    _selectedTypeId = system?.systemTypeId ?? systemTypes.first.id;
+    if (system != null) {
+      _nameCtrl.text = system.name ?? '';
+      _seatCtrl.text = system.stationNumber?.toString() ?? '';
+      _rateCtrl.text = system.pricePerHour?.toString() ?? '';
+      _specsCtrl.text = system.specs?['summary']?.toString() ?? '';
+      _selectedStatus = system.status ?? SystemStatus.available;
+    }
+  }
+
   Widget _inputField(
     String label,
     TextEditingController ctrl, {
     String? hint,
-    TextInputType? kbType,
+    TextInputType? keyboardType,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +232,7 @@ class _AddEditSystemScreenState extends State<AddEditSystemScreen> {
           ),
           child: TextField(
             controller: ctrl,
-            keyboardType: kbType ?? TextInputType.text,
+            keyboardType: keyboardType ?? TextInputType.text,
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: hint,
@@ -89,166 +248,157 @@ class _AddEditSystemScreenState extends State<AddEditSystemScreen> {
     );
   }
 
-  Widget _typeChip(String type) {
-    final isActive = _selectedType == type;
+  Widget _typeChip(SystemTypeModel type) {
+    final selected = _selectedTypeId == type.id;
     return GestureDetector(
-      onTap: () => setState(() => _selectedType = type),
+      onTap: () => setState(() => _selectedTypeId = type.id),
       child: Container(
         height: 30,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.buttonBg : AppColors.surface,
+          color: selected ? AppColors.buttonBg : AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.borderRadiusChip),
-          border: isActive ? null : Border.all(color: AppColors.rule),
+          border: selected ? null : Border.all(color: AppColors.rule),
         ),
         alignment: Alignment.center,
         child: Text(
-          type,
+          type.name ?? 'Type',
           style: AppTypography.small.copyWith(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: isActive ? AppColors.buttonFg : AppColors.textPrimary,
+            color: selected ? AppColors.buttonFg : AppColors.textPrimary,
           ),
         ),
       ),
     );
   }
 
-  Widget _statusChip(String status) {
-    final isActive = _selectedStatus == status;
+  Widget _statusChip(SystemStatus status) {
+    final selected = _selectedStatus == status;
     return GestureDetector(
       onTap: () => setState(() => _selectedStatus = status),
       child: Container(
         height: 30,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.buttonBg : AppColors.surface,
+          color: selected ? AppColors.buttonBg : AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.borderRadiusChip),
-          border: isActive ? null : Border.all(color: AppColors.rule),
+          border: selected ? null : Border.all(color: AppColors.rule),
         ),
         alignment: Alignment.center,
         child: Text(
-          status,
+          switch (status) {
+            SystemStatus.available => 'Available',
+            SystemStatus.inUse => 'In Use',
+            SystemStatus.maintenance => 'Maintenance',
+            SystemStatus.offline => 'Offline',
+          },
           style: AppTypography.small.copyWith(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: isActive ? AppColors.buttonFg : AppColors.textPrimary,
+            color: selected ? AppColors.buttonFg : AppColors.textPrimary,
           ),
         ),
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final isEdit = widget.id != null;
+  void _submit(bool isEdit) {
+    final name = _nameCtrl.text.trim();
+    final seatNumber = int.tryParse(_seatCtrl.text.trim());
+    final rate = double.tryParse(_rateCtrl.text.trim());
+    final typeId = _selectedTypeId;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(title: isEdit ? 'Edit System' : 'Add System'),
-      body: SafeArea(
-        top: false,
-        child: GzScrollContent(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 1. System name
-                _inputField(
-                  'System name',
-                  _nameCtrl,
-                  hint: 'e.g. PC Station 04',
-                ),
+    if (name.isEmpty || seatNumber == null || rate == null || typeId == null) {
+      showErrorSnackbar(
+        context,
+        const ValidationException('Fill the required system fields first'),
+      );
+      return;
+    }
 
-                // 2. System type
-                Text('System type', style: AppTypography.small),
-                const SizedBox(height: 8),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: List.generate(_types.length, (i) {
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          right: i == _types.length - 1 ? 0 : 8,
-                        ),
-                        child: _typeChip(_types[i]),
-                      );
-                    }),
-                  ),
-                ),
-                const SizedBox(height: 16),
+    final notifier = ref.read(adminSystemCommandNotifierProvider.notifier);
+    if (isEdit) {
+      notifier.updateSystem(
+        id: widget.id!,
+        name: name,
+        systemTypeId: typeId,
+        stationNumber: seatNumber,
+        pricePerHour: rate,
+        platform: _platformForTypeName(typeId),
+        status: _selectedStatus,
+        specs: _specsCtrl.text.trim().isEmpty
+            ? null
+            : {'summary': _specsCtrl.text.trim()},
+      );
+      return;
+    }
 
-                // 3. Seat number
-                _inputField('Seat / bay number', _seatCtrl, hint: '04'),
+    notifier.createSystem(
+      name: name,
+      systemTypeId: typeId,
+      stationNumber: seatNumber,
+      pricePerHour: rate,
+      platform: _platformForTypeName(typeId),
+      specs: _specsCtrl.text.trim().isEmpty
+          ? null
+          : {'summary': _specsCtrl.text.trim()},
+    );
+  }
 
-                // 4. Rate
-                _inputField(
-                  'Rate (₹ per hour)',
-                  _rateCtrl,
-                  hint: '80',
-                  kbType: TextInputType.number,
-                ),
+  SystemPlatform _platformForTypeName(String systemTypeId) {
+    final data = ref.read(adminSystemsNotifierProvider).value;
+    final name = data?.systemTypes
+        .where((item) => item.id == systemTypeId)
+        .map((item) => item.name?.toLowerCase() ?? '')
+        .firstOrNull;
+    if (name == null) {
+      return SystemPlatform.other;
+    }
+    if (name.contains('ps5')) {
+      return SystemPlatform.ps5;
+    }
+    if (name.contains('ps4')) {
+      return SystemPlatform.ps4;
+    }
+    if (name.contains('xbox')) {
+      return SystemPlatform.xbox;
+    }
+    if (name.contains('vr')) {
+      return SystemPlatform.vr;
+    }
+    if (name.contains('pc')) {
+      return SystemPlatform.pc;
+    }
+    return SystemPlatform.other;
+  }
 
-                // 5. Specs
-                _inputField(
-                  'Specs / description',
-                  _specsCtrl,
-                  hint: 'RTX 4090 · 32GB · 240Hz',
-                ),
-
-                // 6. Status (edit mode only)
-                if (isEdit) ...[
-                  Text('Status', style: AppTypography.small),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: List.generate(_statusOptions.length, (i) {
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          right: i == _statusOptions.length - 1 ? 0 : 8,
-                        ),
-                        child: _statusChip(_statusOptions[i]),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-
-                // 7. Success confirmation
-                if (_saved) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: GzCard(
-                      variant: CardVariant.tint,
-                      padding: 14,
-                      child: Text(
-                        isEdit ? 'Changes saved!' : 'System added!',
-                        style: AppTypography.body.copyWith(color: AppColors.ok),
-                      ),
-                    ),
-                  ),
-                ],
-
-                // 8. Primary action
-                GzButton(
-                  label: isEdit ? 'Save Changes' : 'Add System',
-                  onPressed: () => setState(() => _saved = true),
-                ),
-
-                // 9. Remove (edit mode only)
-                if (isEdit) ...[
-                  const SizedBox(height: 8),
-                  GzButton(
-                    label: 'Remove System',
-                    variant: GzButtonVariant.dangerOutline,
-                    onPressed: () => context.pop(),
-                  ),
-                ],
-              ],
-            ),
-          ),
+  Future<void> _confirmDelete() async {
+    final approved = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove system?'),
+        content: const Text(
+          'This will deactivate the system and remove it from the admin list.',
         ),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => context.pop(true),
+            child: const Text('Remove'),
+          ),
+        ],
       ),
+    );
+    if (approved != true || widget.id == null) {
+      return;
+    }
+    _deleteRequested = true;
+    await ref.read(adminSystemCommandNotifierProvider.notifier).deleteSystem(
+      widget.id!,
     );
   }
 }

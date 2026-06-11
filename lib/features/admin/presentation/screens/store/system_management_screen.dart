@@ -1,140 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/errors/app_exception.dart';
+import '../../../../../core/errors/error_snackbar.dart';
+import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../models/domain_systems.dart';
+import '../../../../../models/enums.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_card.dart';
+import '../../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../../shared/widgets/gz_tag.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
+import '../../../application/admin_command_state.dart';
+import '../../../application/admin_store_models.dart';
+import '../../../application/admin_system_type_command_notifier.dart';
+import '../../../application/admin_systems_notifier.dart';
 
-enum SystemStatus { available, inUse, maintenance }
-
-extension SystemStatusX on SystemStatus {
-  GzTagKind get tagKind => switch (this) {
-    SystemStatus.available => GzTagKind.ok,
-    SystemStatus.inUse => GzTagKind.info,
-    SystemStatus.maintenance => GzTagKind.warn,
-  };
-
-  String get label => switch (this) {
-    SystemStatus.available => 'Available',
-    SystemStatus.inUse => 'In Use',
-    SystemStatus.maintenance => 'Maintenance',
-  };
-}
-
-class _SystemData {
-  const _SystemData({
-    required this.id,
-    required this.name,
-    required this.type,
-    required this.seatNumber,
-    required this.specs,
-    required this.status,
-  });
-
-  final String id;
-  final String name;
-  final String type;
-  final String seatNumber;
-  final String specs;
-  final SystemStatus status;
-}
-
-class SystemManagementScreen extends StatefulWidget {
+class SystemManagementScreen extends ConsumerStatefulWidget {
   const SystemManagementScreen({super.key});
 
   @override
-  State<SystemManagementScreen> createState() => _SystemManagementScreenState();
+  ConsumerState<SystemManagementScreen> createState() =>
+      _SystemManagementScreenState();
 }
 
-class _SystemManagementScreenState extends State<SystemManagementScreen> {
-  String _selectedType = 'All';
+class _SystemManagementScreenState extends ConsumerState<SystemManagementScreen> {
+  static const _allType = '__all__';
 
-  static const _types = ['All', 'PC', 'PS5', 'Xbox', 'VR'];
-
-  static const _systems = [
-    _SystemData(
-      id: 'SYS-001',
-      name: 'PC Station 01',
-      type: 'PC',
-      seatNumber: '01',
-      specs: 'RTX 4090 · 32GB · 240Hz',
-      status: SystemStatus.available,
-    ),
-    _SystemData(
-      id: 'SYS-002',
-      name: 'PC Station 02',
-      type: 'PC',
-      seatNumber: '02',
-      specs: 'RTX 4080 · 16GB · 165Hz',
-      status: SystemStatus.inUse,
-    ),
-    _SystemData(
-      id: 'SYS-003',
-      name: 'PC Station 03',
-      type: 'PC',
-      seatNumber: '03',
-      specs: 'RTX 4090 · 32GB · 240Hz',
-      status: SystemStatus.inUse,
-    ),
-    _SystemData(
-      id: 'SYS-004',
-      name: 'PS5 Console 01',
-      type: 'PS5',
-      seatNumber: '01',
-      specs: 'PlayStation 5 · 4K',
-      status: SystemStatus.available,
-    ),
-    _SystemData(
-      id: 'SYS-005',
-      name: 'Xbox Series X',
-      type: 'Xbox',
-      seatNumber: '01',
-      specs: 'Xbox Series X · 4K',
-      status: SystemStatus.maintenance,
-    ),
-    _SystemData(
-      id: 'SYS-006',
-      name: 'VR Pod 01',
-      type: 'VR',
-      seatNumber: '01',
-      specs: 'Meta Quest 3 · 120Hz',
-      status: SystemStatus.available,
-    ),
-  ];
-
-  List<_SystemData> get _filtered => _selectedType == 'All'
-      ? _systems
-      : _systems.where((s) => s.type == _selectedType).toList();
-
-  List<List<dynamic>> _iconForType(String type) => switch (type) {
-    'PC' => HugeIcons.strokeRoundedComputerDesk01,
-    'PS5' => HugeIcons.strokeRoundedGameController01,
-    'Xbox' => HugeIcons.strokeRoundedGameController01,
-    'VR' => HugeIcons.strokeRoundedVirtualRealityVr01,
-    _ => HugeIcons.strokeRoundedComputerDesk01,
-  };
+  String _selectedTypeId = _allType;
 
   @override
   Widget build(BuildContext context) {
-    final filtered = _filtered;
-    final totalCount = _systems.length;
-    final inUseCount = _systems
-        .where((s) => s.status == SystemStatus.inUse)
-        .length;
-    final maintenanceCount = _systems
-        .where((s) => s.status == SystemStatus.maintenance)
-        .length;
-
+    final systemsState = ref.watch(adminSystemsNotifierProvider);
+    ref.listen<AdminCommandState>(adminSystemTypeCommandNotifierProvider, (
+      _,
+      next,
+    ) {
+      if (next is AdminCommandSuccess) {
+        showSuccessSnackbar(context, next.message);
+        ref.read(adminSystemTypeCommandNotifierProvider.notifier).reset();
+      } else if (next is AdminCommandError) {
+        showErrorSnackbar(context, ValidationException(next.message));
+      }
+    });
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: GzAdminTopBar(
         title: 'Systems',
         trailing: GestureDetector(
-          onTap: () => context.push('/admin/systems/add'),
+          onTap: () => context.push(AppRoutes.adminAddSystemPath()),
           child: const HugeIcon(
             icon: HugeIcons.strokeRoundedAdd01,
             color: AppColors.textSecondary,
@@ -144,167 +64,654 @@ class _SystemManagementScreenState extends State<SystemManagementScreen> {
       ),
       body: SafeArea(
         top: false,
-        child: Column(
-          children: [
-            // Filter chips
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
-              child: Row(
-                children: List.generate(_types.length, (i) {
-                  final type = _types[i];
-                  final isActive = _selectedType == type;
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      right: i == _types.length - 1 ? 0 : 8,
-                    ),
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selectedType = type),
-                      child: Container(
-                        height: 30,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: isActive
-                              ? AppColors.buttonBg
-                              : AppColors.surface,
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.borderRadiusChip,
-                          ),
-                          border: isActive
-                              ? null
-                              : Border.all(color: AppColors.rule),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          type,
-                          style: AppTypography.small.copyWith(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isActive
-                                ? AppColors.buttonFg
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ),
+        child: systemsState.when(
+          loading: () => const GzLoadingView(message: 'Loading systems'),
+          error: (error, _) => PageErrorDisplay(
+            error: AppPageError.from(error),
+            onRetry: () => ref.read(adminSystemsNotifierProvider.notifier).refresh(),
+          ),
+          data: (data) {
+            final typesById = {
+              for (final type in data.systemTypes)
+                if (type.id != null) type.id!: type.name ?? 'Type',
+            };
+            final filtered = _selectedTypeId == _allType
+                ? data.systems
+                : data.systems
+                      .where((item) => item.systemTypeId == _selectedTypeId)
+                      .toList(growable: false);
 
-            // Stats row
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GzCard(
-                      variant: CardVariant.inset,
-                      padding: 12,
-                      child: Column(
-                        children: [
-                          Text('$totalCount', style: AppTypography.h2),
-                          Text('Total', style: AppTypography.small),
-                        ],
+            return Column(
+              children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+                  child: Row(
+                    children: [
+                      _TypeChip(
+                        label: 'All',
+                        active: _selectedTypeId == _allType,
+                        onTap: () => setState(() => _selectedTypeId = _allType),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: GzCard(
-                      variant: CardVariant.inset,
-                      padding: 12,
-                      child: Column(
-                        children: [
-                          Text(
-                            '$inUseCount',
-                            style: AppTypography.h2.copyWith(
-                              color: AppColors.info,
+                      for (final type in data.systemTypes)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: _TypeChip(
+                            label: type.name ?? 'Type',
+                            active: _selectedTypeId == type.id,
+                            onTap: () => setState(
+                              () => _selectedTypeId = type.id ?? _allType,
                             ),
                           ),
-                          Text('In Use', style: AppTypography.small),
-                        ],
-                      ),
-                    ),
+                        ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                  child: GestureDetector(
+                    onTap: () => _showSystemTypesSheet(context, ref, data),
                     child: GzCard(
                       variant: CardVariant.inset,
-                      padding: 12,
-                      child: Column(
-                        children: [
-                          Text(
-                            '$maintenanceCount',
-                            style: AppTypography.h2.copyWith(
-                              color: AppColors.warn,
-                            ),
-                          ),
-                          Text('Maint.', style: AppTypography.small),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // System list
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                itemCount: filtered.length,
-                separatorBuilder: (context, i) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final system = filtered[index];
-                  return GestureDetector(
-                    onTap: () => context.push('/admin/systems/${system.id}'),
-                    child: Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.borderRadiusCard,
-                        ),
-                      ),
+                      padding: 14,
                       child: Row(
                         children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: AppColors.pillBg,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            alignment: Alignment.center,
-                            child: HugeIcon(
-                              icon: _iconForType(system.type),
-                              size: 20,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
+                          const Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(system.name, style: AppTypography.h3),
-                                Text(system.specs, style: AppTypography.small),
+                                Text(
+                                  'Manage system types',
+                                  style: AppTypography.h3,
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'Create, rename, or deactivate the types used by systems.',
+                                  style: AppTypography.small,
+                                ),
                               ],
                             ),
                           ),
-                          GzTag(
-                            kind: system.status.tagKind,
-                            label: system.status.label,
+                          const SizedBox(width: 12),
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.borderRadiusLg,
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: const HugeIcon(
+                              icon: HugeIcons.strokeRoundedArrowRight01,
+                              color: AppColors.textSecondary,
+                              size: 18,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _StatCard(
+                          value: '${data.totalCount}',
+                          label: 'Total',
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _StatCard(
+                          value: '${data.inUseCount}',
+                          label: 'In Use',
+                          color: AppColors.info,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _StatCard(
+                          value: '${data.maintenanceCount}',
+                          label: 'Maint.',
+                          color: AppColors.warn,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: data.systems.isEmpty
+                      ? const PageErrorDisplay(error: AppPageError.empty)
+                      : filtered.isEmpty
+                      ? const PageErrorDisplay(error: AppPageError.empty)
+                      : ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                          itemCount: filtered.length,
+                          separatorBuilder: (_, _) => const SizedBox(height: 8),
+                          itemBuilder: (context, index) {
+                            final system = filtered[index];
+                            return GestureDetector(
+                              onTap: () => context.push(
+                                AppRoutes.adminSystemDetailPath(system.id ?? ''),
+                              ),
+                              child: GzCard(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 48,
+                                      height: 48,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.pillBg,
+                                        borderRadius: BorderRadius.circular(
+                                          AppSpacing.borderRadiusLg,
+                                        ),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: HugeIcon(
+                                        icon: _iconForPlatform(system.platform),
+                                        color: AppColors.textSecondary,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            system.name ?? 'System',
+                                            style: AppTypography.h3,
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            [
+                                              typesById[system.systemTypeId] ??
+                                                  system.platform?.name.toUpperCase(),
+                                              if (system.stationNumber != null)
+                                                'Seat ${system.stationNumber}',
+                                              _systemSpecs(system),
+                                            ].whereType<String>().where((item) => item.isNotEmpty).join(' · '),
+                                            style: AppTypography.small,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              GzTag(
+                                                kind: _tagKindForStatus(
+                                                  system.status,
+                                                ),
+                                                label: _statusLabel(system.status),
+                                              ),
+                                              const Spacer(),
+                                              Text(
+                                                _priceLabel(system),
+                                                style: AppTypography.num.copyWith(
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _TypeChip extends StatelessWidget {
+  const _TypeChip({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 30,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: active ? AppColors.buttonBg : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusChip),
+          border: active ? null : Border.all(color: AppColors.rule),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: AppTypography.small.copyWith(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: active ? AppColors.buttonFg : AppColors.textPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  const _StatCard({
+    required this.value,
+    required this.label,
+    this.color,
+  });
+
+  final String value;
+  final String label;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return GzCard(
+      variant: CardVariant.inset,
+      padding: 12,
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: AppTypography.h2.copyWith(color: color),
+          ),
+          Text(label, style: AppTypography.small),
+        ],
+      ),
+    );
+  }
+}
+
+dynamic _iconForPlatform(SystemPlatform? platform) => switch (platform) {
+  SystemPlatform.ps5 => HugeIcons.strokeRoundedGameController01,
+  SystemPlatform.ps4 => HugeIcons.strokeRoundedGameController01,
+  SystemPlatform.xbox => HugeIcons.strokeRoundedGameController01,
+  SystemPlatform.vr => HugeIcons.strokeRoundedVirtualRealityVr01,
+  _ => HugeIcons.strokeRoundedComputerDesk01,
+};
+
+GzTagKind _tagKindForStatus(SystemStatus? status) => switch (status) {
+  SystemStatus.available => GzTagKind.ok,
+  SystemStatus.inUse => GzTagKind.info,
+  SystemStatus.maintenance => GzTagKind.warn,
+  SystemStatus.offline => GzTagKind.mute,
+  null => GzTagKind.mute,
+};
+
+String _statusLabel(SystemStatus? status) => switch (status) {
+  SystemStatus.available => 'Available',
+  SystemStatus.inUse => 'In Use',
+  SystemStatus.maintenance => 'Maintenance',
+  SystemStatus.offline => 'Offline',
+  null => 'Unknown',
+};
+
+String _priceLabel(SystemModel system) {
+  final price = system.pricePerHour;
+  if (price == null) {
+    return 'Rate pending';
+  }
+  final normalized = price == price.roundToDouble()
+      ? price.toInt().toString()
+      : price.toStringAsFixed(0);
+  return 'Rs $normalized/hr';
+}
+
+String _systemSpecs(SystemModel system) {
+  final specs = system.specs;
+  if (specs == null || specs.isEmpty) {
+    return '';
+  }
+
+  final summary = specs['summary']?.toString();
+  if (summary != null && summary.isNotEmpty) {
+    return summary;
+  }
+
+  return specs.entries
+      .take(3)
+      .map((entry) => '${entry.key}: ${entry.value}')
+      .join(' · ');
+}
+
+Future<void> _showSystemTypesSheet(
+  BuildContext context,
+  WidgetRef ref,
+  AdminSystemsOverviewData data,
+) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => _SystemTypesSheet(data: data),
+  );
+}
+
+class _SystemTypesSheet extends ConsumerStatefulWidget {
+  const _SystemTypesSheet({required this.data});
+
+  final AdminSystemsOverviewData data;
+
+  @override
+  ConsumerState<_SystemTypesSheet> createState() => _SystemTypesSheetState();
+}
+
+class _SystemTypesSheetState extends ConsumerState<_SystemTypesSheet> {
+  final _nameController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _rateController = TextEditingController();
+
+  String? _editingId;
+
+  bool get _editing => _editingId != null;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _rateController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final commandState = ref.watch(adminSystemTypeCommandNotifierProvider);
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(12, 12, 12, bottomInset + 12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCard),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.rule,
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadiusPill,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text('System types', style: AppTypography.h2),
+                const SizedBox(height: 4),
+                Text(
+                  'These types power the list filters and system creation flow.',
+                  style: AppTypography.small,
+                ),
+                const SizedBox(height: 16),
+                ...widget.data.systemTypes.map(
+                  (type) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _SystemTypeRow(
+                      type: type,
+                      onEdit: () => _beginEdit(type),
+                      onDelete: type.id == null
+                          ? null
+                          : () => _deleteType(type.id!),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _editing ? 'Edit type' : 'Create type',
+                  style: AppTypography.h3,
+                ),
+                const SizedBox(height: 10),
+                _SheetField(
+                  label: 'Type name',
+                  controller: _nameController,
+                  hintText: 'e.g. PS5',
+                ),
+                const SizedBox(height: 10),
+                _SheetField(
+                  label: 'Description',
+                  controller: _descriptionController,
+                  hintText: 'Optional operator-facing note',
+                ),
+                const SizedBox(height: 10),
+                _SheetField(
+                  label: 'Base rate',
+                  controller: _rateController,
+                  hintText: 'Optional hourly base rate',
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                GzButton(
+                  label: _editing ? 'Save type' : 'Create type',
+                  loading: commandState is AdminCommandLoading,
+                  onPressed: _submit,
+                ),
+                if (_editing) ...[
+                  const SizedBox(height: 8),
+                  GzButton(
+                    label: 'Cancel edit',
+                    variant: GzButtonVariant.ghost,
+                    onPressed: _resetForm,
+                  ),
+                ],
+              ],
             ),
-          ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _beginEdit(SystemTypeModel type) {
+    setState(() {
+      _editingId = type.id;
+      _nameController.text = type.name ?? '';
+      _descriptionController.text = type.description ?? '';
+      _rateController.text = type.hourlyBaseRate?.toString() ?? '';
+    });
+  }
+
+  void _resetForm() {
+    setState(() {
+      _editingId = null;
+      _nameController.clear();
+      _descriptionController.clear();
+      _rateController.clear();
+    });
+  }
+
+  void _submit() {
+    final name = _nameController.text.trim();
+    final description = _descriptionController.text.trim();
+    final rate = _rateController.text.trim().isEmpty
+        ? null
+        : double.tryParse(_rateController.text.trim());
+    if (name.isEmpty) {
+      showErrorSnackbar(
+        context,
+        const ValidationException('Type name is required'),
+      );
+      return;
+    }
+    if (_rateController.text.trim().isNotEmpty && rate == null) {
+      showErrorSnackbar(
+        context,
+        const ValidationException('Base rate must be a valid number'),
+      );
+      return;
+    }
+
+    final notifier = ref.read(adminSystemTypeCommandNotifierProvider.notifier);
+    if (_editingId != null) {
+      notifier.updateType(
+        id: _editingId!,
+        name: name,
+        description: description.isEmpty ? null : description,
+        hourlyBaseRate: rate,
+      );
+    } else {
+      notifier.createType(
+        name: name,
+        description: description.isEmpty ? null : description,
+        hourlyBaseRate: rate,
+      );
+    }
+    _resetForm();
+  }
+
+  Future<void> _deleteType(String id) async {
+    final approved = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove system type?'),
+        content: const Text(
+          'This will deactivate the selected type for future system assignment.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => context.pop(true),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+    if (approved != true) {
+      return;
+    }
+    ref.read(adminSystemTypeCommandNotifierProvider.notifier).deleteType(id);
+  }
+}
+
+class _SystemTypeRow extends StatelessWidget {
+  const _SystemTypeRow({
+    required this.type,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final SystemTypeModel type;
+  final VoidCallback onEdit;
+  final VoidCallback? onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final subtitle = [
+      if ((type.description ?? '').isNotEmpty) type.description!,
+      if (type.hourlyBaseRate != null) 'Base Rs ${type.hourlyBaseRate}',
+    ].join(' · ');
+
+    return GzCard(
+      padding: 14,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(type.name ?? 'Unnamed type', style: AppTypography.h3),
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: AppTypography.small),
+                ],
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onEdit,
+            icon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedEdit02,
+              color: AppColors.textSecondary,
+              size: 18,
+            ),
+          ),
+          IconButton(
+            onPressed: onDelete,
+            icon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedDelete02,
+              color: AppColors.err,
+              size: 18,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SheetField extends StatelessWidget {
+  const _SheetField({
+    required this.label,
+    required this.controller,
+    required this.hintText,
+    this.keyboardType,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final String hintText;
+  final TextInputType? keyboardType;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: AppTypography.body,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hintText,
+        labelStyle: AppTypography.small,
+        filled: true,
+        fillColor: AppColors.pillBg,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+          borderSide: const BorderSide(color: AppColors.rule),
         ),
       ),
     );

@@ -1,62 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../core/errors/app_exception.dart';
+import '../../../../../core/errors/error_snackbar.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../models/domain_systems.dart';
+import '../../../../../models/enums.dart';
 import '../../../../../shared/widgets/gz_avatar.dart';
 import '../../../../../shared/widgets/gz_button.dart';
-import '../../../../../shared/widgets/gz_card.dart';
+import '../../../application/admin_command_state.dart';
+import '../../../application/store_admin_command_notifier.dart';
 
 Future<void> showEditStaffSheet(
   BuildContext context, {
-  required String staffId,
-  required String staffName,
-  required String currentRole,
+  required StoreAdminModel member,
 }) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (context) => EditStaffSheet(
-      staffId: staffId,
-      staffName: staffName,
-      currentRole: currentRole,
-    ),
+    builder: (context) => EditStaffSheet(member: member),
   );
 }
 
-class EditStaffSheet extends StatefulWidget {
-  const EditStaffSheet({
-    super.key,
-    required this.staffId,
-    required this.staffName,
-    required this.currentRole,
-  });
+class EditStaffSheet extends ConsumerStatefulWidget {
+  const EditStaffSheet({super.key, required this.member});
 
-  final String staffId;
-  final String staffName;
-  final String currentRole;
+  final StoreAdminModel member;
 
   @override
-  State<EditStaffSheet> createState() => _EditStaffSheetState();
+  ConsumerState<EditStaffSheet> createState() => _EditStaffSheetState();
 }
 
-class _EditStaffSheetState extends State<EditStaffSheet> {
-  late String _selectedRole;
-  bool _removed = false;
-  bool _saved = false;
-
-  static const _roleOptions = ['Admin', 'Staff'];
+class _EditStaffSheetState extends ConsumerState<EditStaffSheet> {
+  late AdminRole _selectedRole;
+  bool _removeRequested = false;
 
   @override
   void initState() {
     super.initState();
-    _selectedRole = widget.currentRole;
+    _selectedRole = widget.member.role ?? AdminRole.staff;
   }
 
   @override
   Widget build(BuildContext context) {
+    final commandState = ref.watch(storeAdminCommandNotifierProvider);
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final isSuperAdmin = widget.member.role == AdminRole.superAdmin;
+
+    ref.listen<AdminCommandState>(storeAdminCommandNotifierProvider, (_, next) {
+      if (next is AdminCommandSuccess) {
+        showSuccessSnackbar(context, next.message);
+        ref.read(storeAdminCommandNotifierProvider.notifier).reset();
+        context.pop();
+      } else if (next is AdminCommandError) {
+        showErrorSnackbar(context, ValidationException(next.message));
+      }
+    });
+
     return SafeArea(
       top: false,
       child: Padding(
@@ -88,15 +92,21 @@ class _EditStaffSheetState extends State<EditStaffSheet> {
                 Row(
                   children: [
                     GzAvatar(
-                      letter: widget.staffName.substring(0, 1),
+                      letter: _initial(widget.member),
                       size: GzAvatarSize.lg,
                     ),
                     const SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(widget.staffName, style: AppTypography.h2),
-                        Text(widget.currentRole, style: AppTypography.bodyR),
+                        Text(
+                          widget.member.name ?? 'Unknown',
+                          style: AppTypography.h2,
+                        ),
+                        Text(
+                          _roleLabel(widget.member.role),
+                          style: AppTypography.bodyR,
+                        ),
                       ],
                     ),
                   ],
@@ -105,22 +115,21 @@ class _EditStaffSheetState extends State<EditStaffSheet> {
                 Text('Change role', style: AppTypography.h3),
                 const SizedBox(height: 10),
                 Row(
-                  children: _roleOptions.asMap().entries.map((entry) {
-                    final i = entry.key;
-                    final o = entry.value;
-                    final isSelected = o == _selectedRole;
-                    final isLast = i == _roleOptions.length - 1;
+                  children: [AdminRole.admin, AdminRole.staff].map((role) {
+                    final selected = role == _selectedRole;
                     return Padding(
-                      padding: EdgeInsets.only(right: isLast ? 0 : 8),
+                      padding: const EdgeInsets.only(right: 8),
                       child: GestureDetector(
-                        onTap: () => setState(() => _selectedRole = o),
+                        onTap: isSuperAdmin
+                            ? null
+                            : () => setState(() => _selectedRole = role),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 14,
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: isSelected
+                            color: selected
                                 ? AppColors.textPrimary
                                 : AppColors.pillBg,
                             borderRadius: BorderRadius.circular(
@@ -128,9 +137,9 @@ class _EditStaffSheetState extends State<EditStaffSheet> {
                             ),
                           ),
                           child: Text(
-                            o,
+                            role == AdminRole.admin ? 'Admin' : 'Staff',
                             style: AppTypography.body.copyWith(
-                              color: isSelected
+                              color: selected
                                   ? AppColors.surface
                                   : AppColors.textPrimary,
                               fontWeight: FontWeight.w600,
@@ -141,38 +150,30 @@ class _EditStaffSheetState extends State<EditStaffSheet> {
                     );
                   }).toList(),
                 ),
-                const SizedBox(height: 18),
-                if (_saved)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: GzCard(
-                      variant: CardVariant.tint,
-                      child: Text(
-                        'Role updated to $_selectedRole',
-                        style: AppTypography.body.copyWith(color: AppColors.ok),
-                      ),
+                if (isSuperAdmin) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    'Super admin access is kept read-only here.',
+                    style: AppTypography.small.copyWith(
+                      color: AppColors.textMuted,
                     ),
                   ),
+                ],
+                const SizedBox(height: 18),
                 GzButton(
-                  label: _saved ? 'Done' : 'Save Role',
-                  onPressed: _saved
-                      ? () => Navigator.pop(context)
-                      : () => setState(() => _saved = true),
+                  label: 'Save Role',
+                  loading: !_removeRequested &&
+                      commandState is AdminCommandLoading,
+                  onPressed: isSuperAdmin ? null : _saveRole,
                 ),
                 const SizedBox(height: 8),
-                if (!_removed)
+                if (!isSuperAdmin)
                   GzButton(
                     label: 'Remove from staff',
                     variant: GzButtonVariant.dangerOutline,
-                    onPressed: () => setState(() => _removed = true),
-                  ),
-                if (_removed)
-                  GzCard(
-                    variant: CardVariant.inset,
-                    child: Text(
-                      '${widget.staffName} has been removed.',
-                      style: AppTypography.body.copyWith(color: AppColors.err),
-                    ),
+                    loading: _removeRequested &&
+                        commandState is AdminCommandLoading,
+                    onPressed: _remove,
                   ),
               ],
             ),
@@ -181,4 +182,46 @@ class _EditStaffSheetState extends State<EditStaffSheet> {
       ),
     );
   }
+
+  void _saveRole() {
+    final id = widget.member.id;
+    if (id == null || id.isEmpty) {
+      showErrorSnackbar(
+        context,
+        const ValidationException('Missing staff identifier'),
+      );
+      return;
+    }
+    _removeRequested = false;
+    ref.read(storeAdminCommandNotifierProvider.notifier).updateAdmin(
+      id: id,
+      role: _selectedRole,
+      name: widget.member.name,
+    );
+  }
+
+  void _remove() {
+    final id = widget.member.id;
+    if (id == null || id.isEmpty) {
+      showErrorSnackbar(
+        context,
+        const ValidationException('Missing staff identifier'),
+      );
+      return;
+    }
+    _removeRequested = true;
+    ref.read(storeAdminCommandNotifierProvider.notifier).deactivateAdmin(id);
+  }
 }
+
+String _initial(StoreAdminModel member) {
+  final source = member.name ?? member.email ?? '?';
+  return source.substring(0, 1).toUpperCase();
+}
+
+String _roleLabel(AdminRole? role) => switch (role) {
+  AdminRole.superAdmin => 'Super Admin',
+  AdminRole.admin => 'Admin',
+  AdminRole.staff => 'Staff',
+  null => 'Unknown',
+};

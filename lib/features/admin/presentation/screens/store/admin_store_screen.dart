@@ -17,7 +17,7 @@ class AdminStoreScreen extends StatelessWidget {
     _StoreTileData(
       title: 'System Management',
       subtitle: 'Layouts, availability, hardware',
-      route: '/admin/systems/list',
+      route: AppRoutes.adminSystemsList,
       icon: HugeIcons.strokeRoundedInformationCircle,
       iconColor: AppColors.info,
     ),

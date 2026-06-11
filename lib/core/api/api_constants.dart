@@ -140,6 +140,7 @@ class ApiConstants {
 
   // ─── System Types Endpoints ───────────────────────────────────────
   static const String systemTypes = '/stores/{storeId}/system-types';
+  static const String systemTypeDetail = '/stores/{storeId}/system-types/{id}';
 
   // ─── Player Endpoints ──────────────────────────────────────────────
   static const String sessionsMy = '/stores/{storeId}/sessions/my';
