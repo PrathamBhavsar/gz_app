@@ -7,6 +7,7 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../auth/application/admin_auth_notifier.dart';
 import '../../../auth/data/repositories/admin_auth_repository.dart';
 import '../../../auth/presentation/widgets/auth_input_field.dart';
+import '../../../auth/presentation/widgets/credential_chips.dart';
 import '../../../../core/errors/error_snackbar.dart';
 import '../../../../core/navigation/routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -65,10 +66,10 @@ class AdminLoginScreen extends ConsumerStatefulWidget {
   const AdminLoginScreen({super.key});
 
   @override
-  ConsumerState<AdminLoginScreen> createState() => _AdminLoginScreenState();
+  ConsumerState<AdminLoginScreen> createState() => _EmailLoginScreenState();
 }
 
-class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
+class _EmailLoginScreenState extends ConsumerState<AdminLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _showPassword = false;
@@ -133,80 +134,114 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
         ),
         body: SafeArea(
           top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Admin Portal', style: AppTypography.h1),
-                const SizedBox(height: 4),
-                Text(
-                  'Sign in to manage your store',
-                  style: AppTypography.bodyR,
-                ),
-                const SizedBox(height: 32),
-                AuthInputField(
-                  controller: _emailController,
-                  hint: 'Email address',
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  enabled: !isLoading,
-                ),
-                const SizedBox(height: 14),
-                AuthInputField(
-                  controller: _passwordController,
-                  hint: 'Password',
-                  obscureText: !_showPassword,
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) {
-                    if (!isLoading) {
-                      _signIn();
-                    }
-                  },
-                  enabled: !isLoading,
-                  trailing: IconButton(
-                    onPressed: isLoading
-                        ? null
-                        : () {
-                            setState(() => _showPassword = !_showPassword);
-                          },
-                    icon: HugeIcon(
-                      icon: _showPassword
-                          ? HugeIcons.strokeRoundedView
-                          : HugeIcons.strokeRoundedViewOffSlash,
-                      color: AppColors.textTertiary,
-                      size: 18,
-                    ),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Admin Portal', style: AppTypography.h1),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Sign in to manage your store',
+                    style: AppTypography.bodyR,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => context.push(AppRoutes.adminPasswordReset),
-                    child: Text(
-                      'Forgot password?',
-                      style: AppTypography.small.copyWith(
-                        color: AppColors.textPrimary,
+                  const SizedBox(height: 32),
+                  AuthInputField(
+                    controller: _emailController,
+                    hint: 'Email address',
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    enabled: !isLoading,
+                  ),
+                  const SizedBox(height: 14),
+                  AuthInputField(
+                    controller: _passwordController,
+                    hint: 'Password',
+                    obscureText: !_showPassword,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) {
+                      if (!isLoading) {
+                        _signIn();
+                      }
+                    },
+                    enabled: !isLoading,
+                    trailing: IconButton(
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              setState(() => _showPassword = !_showPassword);
+                            },
+                      icon: HugeIcon(
+                        icon: _showPassword
+                            ? HugeIcons.strokeRoundedView
+                            : HugeIcons.strokeRoundedViewOffSlash,
+                        color: AppColors.textTertiary,
+                        size: 18,
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                GzButton(
-                  label: 'Sign in',
-                  onPressed: isLoading ? null : _signIn,
-                  loading: isLoading,
-                ),
-                const SizedBox(height: 24),
-                Center(
-                  child: Text(
-                    'Staff access · GameZone Operator',
-                    style: AppTypography.small,
-                    textAlign: TextAlign.center,
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => context.push(AppRoutes.adminPasswordReset),
+                      child: Text(
+                        'Forgot password?',
+                        style: AppTypography.small.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 24),
+                  GzButton(
+                    label: 'Sign in',
+                    onPressed: isLoading ? null : _signIn,
+                    loading: isLoading,
+                  ),
+                  const SizedBox(height: 24),
+                  Center(
+                    child: Text(
+                      'Staff access · GameZone Operator',
+                      style: AppTypography.small,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Divider(color: AppColors.rule),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: CredentialChips(
+                          title: 'SUPER ADMINS',
+                          credentials: DeveloperCredentials.admins,
+                          horizontal: false,
+                          onTap: (email, password) {
+                            _emailController.text = email;
+                            _passwordController.text = password;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: CredentialChips(
+                          title: 'STAFF MEMBERS',
+                          credentials: DeveloperCredentials.staff,
+                          horizontal: false,
+                          onTap: (email, password) {
+                            _emailController.text = email;
+                            _passwordController.text = password;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

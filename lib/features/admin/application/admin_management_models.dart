@@ -1,4 +1,5 @@
 import '../../../../models/domain_admin.dart';
+import '../../../../models/domain_analytics.dart';
 import '../../../../models/domain_billing.dart';
 import '../../../../models/domain_global.dart';
 import '../../../../models/domain_loyalty.dart';
@@ -109,6 +110,102 @@ class AdminDisputeData {
     };
     if (status == null) return disputes;
     return disputes.where((d) => d.status == status).toList();
+  }
+}
+
+class AdminAnalyticsDashboardData {
+  const AdminAnalyticsDashboardData({
+    required this.dashboard,
+    required this.revenueRows,
+    required this.selectedPeriod,
+    required this.loadedAt,
+  });
+
+  final AnalyticsDashboardModel dashboard;
+  final List<RevenueAnalyticsRow> revenueRows;
+  final String selectedPeriod;
+  final DateTime loadedAt;
+
+  List<double> get barHeights {
+    if (revenueRows.isEmpty) return const [];
+    final values = revenueRows
+        .map((r) => double.tryParse(r.revenue ?? '0') ?? 0.0)
+        .toList();
+    final max = values.reduce((a, b) => a > b ? a : b);
+    if (max == 0) return values.map((_) => 0.0).toList();
+    return values.map((v) => (v / max).clamp(0.05, 1.0)).toList();
+  }
+
+  String get totalRevenue {
+    if (revenueRows.isEmpty) {
+      return dashboard.totalRevenue ?? '—';
+    }
+    final total = revenueRows.fold<double>(
+      0,
+      (sum, r) => sum + (double.tryParse(r.revenue ?? '0') ?? 0.0),
+    );
+    return '₹${total.toStringAsFixed(0)}';
+  }
+}
+
+class AdminRevenueData {
+  const AdminRevenueData({
+    required this.model,
+    required this.selectedFilter,
+    required this.loadedAt,
+  });
+
+  final RevenueAnalyticsModel model;
+  final String selectedFilter;
+  final DateTime loadedAt;
+
+  List<RevenueAnalyticsRow> get rows => model.data ?? const [];
+
+  String get totalRevenue {
+    final total = rows.fold<double>(
+      0,
+      (sum, r) => sum + (double.tryParse(r.revenue ?? '0') ?? 0.0),
+    );
+    return '₹${total.toStringAsFixed(0)}';
+  }
+}
+
+class AdminUtilizationData {
+  const AdminUtilizationData({
+    required this.model,
+    required this.selectedFilter,
+    required this.loadedAt,
+  });
+
+  final UtilizationModel model;
+  final String selectedFilter;
+  final DateTime loadedAt;
+
+  List<UtilizationHourModel> get sortedHours {
+    final hours = List<UtilizationHourModel>.from(model.data ?? const []);
+    hours.sort((a, b) => (a.hourOfDay ?? 0).compareTo(b.hourOfDay ?? 0));
+    return hours;
+  }
+
+  UtilizationHourModel? get peakHour {
+    final hours = sortedHours;
+    if (hours.isEmpty) return null;
+    return hours.reduce(
+      (a, b) =>
+          (a.activeSessionsPeak ?? 0) >= (b.activeSessionsPeak ?? 0) ? a : b,
+    );
+  }
+
+  double get avgOccupancy {
+    final hours = sortedHours;
+    if (hours.isEmpty) return 0.0;
+    final total = hours.fold<double>(
+      0,
+      (sum, h) =>
+          sum +
+          ((h.systemsInUse ?? 0) / ((h.totalSystems ?? 1).clamp(1, 999))),
+    );
+    return total / hours.length;
   }
 }
 

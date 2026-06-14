@@ -1,171 +1,187 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/errors/app_exception.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../models/domain_analytics.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
-import '../../../../../shared/widgets/gz_meta_row.dart';
+import '../../../../../shared/widgets/gz_loading_view.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
+import '../../../../admin/application/admin_analytics_notifier.dart';
+import '../../../../admin/application/admin_management_models.dart';
 
-class RevenueAnalyticsScreen extends StatefulWidget {
+class RevenueAnalyticsScreen extends ConsumerWidget {
   const RevenueAnalyticsScreen({super.key});
 
+  static const _filters = ['Daily', 'Weekly', 'Monthly'];
+
   @override
-  State<RevenueAnalyticsScreen> createState() => _RevenueAnalyticsScreenState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: const GzAdminTopBar(title: 'Revenue'),
+      body: SafeArea(
+        top: false,
+        child: ref
+            .watch(adminRevenueAnalyticsNotifierProvider)
+            .when(
+              loading: () =>
+                  const GzLoadingView(message: 'Loading revenue data'),
+              error: (e, _) => PageErrorDisplay(
+                error: AppPageError.from(e),
+                onRetry: () => ref
+                    .read(adminRevenueAnalyticsNotifierProvider.notifier)
+                    .refresh(),
+              ),
+              data: (data) => _Body(data: data, filters: _filters),
+            ),
+      ),
+    );
+  }
 }
 
-class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
-  static const _filters = ['Daily', 'Weekly', 'Monthly'];
-  static const _rows = [
-    _RevenueRow(date: 'Jun 01', sessions: '28', revenue: '₹8,400'),
-    _RevenueRow(date: 'Jun 02', sessions: '31', revenue: '₹9,300'),
-    _RevenueRow(date: 'Jun 03', sessions: '25', revenue: '₹7,500'),
-    _RevenueRow(date: 'Jun 04', sessions: '29', revenue: '₹8,700'),
-    _RevenueRow(date: 'Jun 05', sessions: '33', revenue: '₹9,900'),
-    _RevenueRow(date: 'Jun 06', sessions: '34', revenue: '₹10,200'),
-  ];
+class _Body extends ConsumerWidget {
+  const _Body({required this.data, required this.filters});
 
-  int _activeFilter = 0;
+  final AdminRevenueData data;
+  final List<String> filters;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: filters.map((f) {
+              final isLast = f == filters.last;
+              return Padding(
+                padding: EdgeInsets.only(right: isLast ? 0 : 8),
+                child: _RoseChip(
+                  label: f,
+                  active: data.selectedFilter == f,
+                  onTap: () => ref
+                      .read(adminRevenueAnalyticsNotifierProvider.notifier)
+                      .selectFilter(f),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          _Card(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Total Revenue', style: AppTypography.meta),
+                const SizedBox(height: 6),
+                Text(data.totalRevenue, style: AppTypography.heroMd),
+                const SizedBox(height: 6),
+                Text(
+                  data.model.dateFrom != null && data.model.dateTo != null
+                      ? '${_shortDate(data.model.dateFrom)} – ${_shortDate(data.model.dateTo)}'
+                      : 'Last period',
+                  style: AppTypography.small,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          _Card(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Breakdown', style: AppTypography.h3),
+                const SizedBox(height: 12),
+                if (data.rows.isEmpty)
+                  Text('No data available', style: AppTypography.small)
+                else ...[
+                  const Row(
+                    children: [
+                      Expanded(
+                        child: Text('DATE', style: AppTypography.meta),
+                      ),
+                      SizedBox(
+                        width: 70,
+                        child: Text(
+                          'SESSIONS',
+                          textAlign: TextAlign.right,
+                          style: AppTypography.meta,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      SizedBox(
+                        width: 80,
+                        child: Text(
+                          'REVENUE',
+                          textAlign: TextAlign.right,
+                          style: AppTypography.meta,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Divider(height: 1, color: AppColors.rule),
+                  ...List.generate(data.rows.length, (index) {
+                    final row = data.rows[index];
+                    final isLast = index == data.rows.length - 1;
+                    return _RevenueTableRow(
+                      row: row,
+                      isLast: isLast,
+                    );
+                  }),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RevenueTableRow extends StatelessWidget {
+  const _RevenueTableRow({required this.row, required this.isLast});
+
+  final RevenueAnalyticsRow row;
+  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(title: 'Revenue'),
-      body: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: List.generate(
-                  _filters.length,
-                  (index) => Padding(
-                    padding: EdgeInsets.only(
-                      right: index == _filters.length - 1 ? 0 : 8,
-                    ),
-                    child: _RoseChip(
-                      label: _filters[index],
-                      active: _activeFilter == index,
-                      onTap: () => setState(() => _activeFilter = index),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              const _Card(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Total Revenue', style: AppTypography.meta),
-                    SizedBox(height: 6),
-                    Text('₹1,84,200', style: AppTypography.heroMd),
-                    SizedBox(height: 6),
-                    Text('Last 30 days', style: AppTypography.small),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              const _Card(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Payment breakdown', style: AppTypography.h3),
-                    SizedBox(height: 14),
-                    GzMetaRow(label: 'Cash', value: '₹72,400'),
-                    GzMetaRow(label: 'UPI', value: '₹89,200'),
-                    GzMetaRow(label: 'Credits', value: '₹22,600'),
-                    Divider(height: 16, color: AppColors.rule),
-                    GzMetaRow(
-                      label: 'Total',
-                      value: '₹1,84,200',
-                      valueStyle: TextStyle(
-                        fontFamily: 'Geist',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              _Card(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Daily breakdown', style: AppTypography.h3),
-                    const SizedBox(height: 12),
-                    const Row(
-                      children: [
-                        Expanded(
-                          child: Text('DATE', style: AppTypography.meta),
-                        ),
-                        SizedBox(
-                          width: 70,
-                          child: Text(
-                            'SESSIONS',
-                            textAlign: TextAlign.right,
-                            style: AppTypography.meta,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        SizedBox(
-                          width: 80,
-                          child: Text(
-                            'REVENUE',
-                            textAlign: TextAlign.right,
-                            style: AppTypography.meta,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Divider(height: 1, color: AppColors.rule),
-                    ...List.generate(_rows.length, (index) {
-                      final row = _rows[index];
-                      return Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          border: index == _rows.length - 1
-                              ? null
-                              : const Border(
-                                  bottom: BorderSide(color: AppColors.rule),
-                                ),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(row.date, style: AppTypography.num),
-                            ),
-                            SizedBox(
-                              width: 70,
-                              child: Text(
-                                row.sessions,
-                                textAlign: TextAlign.right,
-                                style: AppTypography.num,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            SizedBox(
-                              width: 80,
-                              child: Text(
-                                row.revenue,
-                                textAlign: TextAlign.right,
-                                style: AppTypography.num,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                  ],
-                ),
-              ),
-            ],
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        border: isLast
+            ? null
+            : const Border(bottom: BorderSide(color: AppColors.rule)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              _shortDate(row.date),
+              style: AppTypography.num,
+            ),
           ),
-        ),
+          SizedBox(
+            width: 70,
+            child: Text(
+              '${row.sessions ?? 0}',
+              textAlign: TextAlign.right,
+              style: AppTypography.num,
+            ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 80,
+            child: Text(
+              _fmtAmt(row.revenue),
+              textAlign: TextAlign.right,
+              style: AppTypography.num,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -226,14 +242,34 @@ class _Card extends StatelessWidget {
   }
 }
 
-class _RevenueRow {
-  const _RevenueRow({
-    required this.date,
-    required this.sessions,
-    required this.revenue,
-  });
+String _fmtAmt(String? s) {
+  if (s == null) return '—';
+  final v = double.tryParse(s);
+  if (v == null) return s;
+  return '₹${v.toStringAsFixed(0)}';
+}
 
-  final String date;
-  final String sessions;
-  final String revenue;
+String _shortDate(String? isoDate) {
+  if (isoDate == null) return '—';
+  try {
+    final d = DateTime.parse(isoDate);
+    const months = [
+      '',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${months[d.month]} ${d.day}';
+  } catch (_) {
+    return isoDate;
+  }
 }

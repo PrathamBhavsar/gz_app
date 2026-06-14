@@ -1,84 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/errors/app_exception.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../models/domain_analytics.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../../shared/widgets/gz_progress_bar.dart';
 import '../../../../../shared/widgets/gz_tag.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
+import '../../../../admin/application/admin_analytics_notifier.dart';
 
-class SystemPerformanceScreen extends StatelessWidget {
+class SystemPerformanceScreen extends ConsumerWidget {
   const SystemPerformanceScreen({super.key});
 
-  static const _systems = [
-    _SystemCardData(
-      name: 'PC Station 01',
-      type: 'PC Gaming Rig',
-      icon: HugeIcons.strokeRoundedComputer,
-      revenue: '₹12,400',
-      utilization: 78,
-    ),
-    _SystemCardData(
-      name: 'PC Station 02',
-      type: 'PC Gaming Rig',
-      icon: HugeIcons.strokeRoundedComputer,
-      revenue: '₹11,200',
-      utilization: 72,
-    ),
-    _SystemCardData(
-      name: 'PS5 Console 01',
-      type: 'PlayStation 5',
-      icon: HugeIcons.strokeRoundedGameController01,
-      revenue: '₹9,800',
-      utilization: 65,
-    ),
-    _SystemCardData(
-      name: 'Xbox Series X',
-      type: 'Xbox Gaming',
-      icon: HugeIcons.strokeRoundedGameboy,
-      revenue: '₹7,400',
-      utilization: 45,
-      lowUsage: true,
-    ),
-    _SystemCardData(
-      name: 'VR Pod 01',
-      type: 'VR Experience',
-      icon: HugeIcons.strokeRoundedGameController02,
-      revenue: '₹14,200',
-      utilization: 88,
-    ),
-    _SystemCardData(
-      name: 'PC Station 03',
-      type: 'PC Gaming Rig',
-      icon: HugeIcons.strokeRoundedComputer,
-      revenue: '₹6,100',
-      utilization: 38,
-      lowUsage: true,
-    ),
-  ];
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const GzAdminTopBar(title: 'System Performance'),
       body: SafeArea(
         top: false,
-        child: ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          itemBuilder: (context, index) => _SystemCard(data: _systems[index]),
-          separatorBuilder: (context, index) => const SizedBox(height: 10),
-          itemCount: _systems.length,
-        ),
+        child: ref
+            .watch(adminSystemPerformanceNotifierProvider)
+            .when(
+              loading: () =>
+                  const GzLoadingView(message: 'Loading system data'),
+              error: (e, _) => PageErrorDisplay(
+                error: AppPageError.from(e),
+                onRetry: () => ref
+                    .read(adminSystemPerformanceNotifierProvider.notifier)
+                    .refresh(),
+              ),
+              data: (perf) {
+                final systems = perf.systems ?? const [];
+                if (systems.isEmpty) {
+                  return const PageErrorDisplay(error: AppPageError.empty);
+                }
+                return ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  itemBuilder: (context, index) =>
+                      _SystemCard(system: systems[index]),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 10),
+                  itemCount: systems.length,
+                );
+              },
+            ),
       ),
     );
   }
 }
 
 class _SystemCard extends StatelessWidget {
-  const _SystemCard({required this.data});
+  const _SystemCard({required this.system});
 
-  final _SystemCardData data;
+  final SystemPerformanceEntry system;
+
+  bool get _lowUsage {
+    final rate = double.tryParse(system.utilizationRate ?? '');
+    return rate != null && rate < 40;
+  }
+
+  double get _utilizationValue {
+    final rate = double.tryParse(system.utilizationRate ?? '');
+    return (rate ?? 0.0).clamp(0.0, 100.0) / 100;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,8 +91,8 @@ class _SystemCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 alignment: Alignment.center,
-                child: HugeIcon(
-                  icon: data.icon,
+                child: const HugeIcon(
+                  icon: HugeIcons.strokeRoundedComputer,
                   color: AppColors.textTertiary,
                   size: 18,
                 ),
@@ -113,9 +102,12 @@ class _SystemCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(data.name, style: AppTypography.h3),
+                    Text(
+                      system.name ?? 'System ${system.stationNumber ?? ''}',
+                      style: AppTypography.h3,
+                    ),
                     const SizedBox(height: 2),
-                    Text(data.type, style: AppTypography.small),
+                    Text(system.platform ?? '—', style: AppTypography.small),
                   ],
                 ),
               ),
@@ -123,7 +115,7 @@ class _SystemCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    data.revenue,
+                    _fmtAmt(system.totalRevenue),
                     style: AppTypography.body.copyWith(
                       fontFamily: 'GeistMono',
                       fontWeight: FontWeight.w600,
@@ -136,14 +128,17 @@ class _SystemCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Text('Utilization: ${data.utilization}%', style: AppTypography.small),
+          Text(
+            'Utilization: ${system.utilizationRate ?? 0}%',
+            style: AppTypography.small,
+          ),
           const SizedBox(height: 4),
           GzProgressBar(
-            value: data.utilization / 100,
+            value: _utilizationValue,
             height: 6,
             fillColor: AppColors.surfaceTintStrong,
           ),
-          if (data.lowUsage) ...[
+          if (_lowUsage) ...[
             const SizedBox(height: 8),
             const GzTag(
               kind: GzTagKind.warn,
@@ -156,20 +151,9 @@ class _SystemCard extends StatelessWidget {
   }
 }
 
-class _SystemCardData {
-  const _SystemCardData({
-    required this.name,
-    required this.type,
-    required this.icon,
-    required this.revenue,
-    required this.utilization,
-    this.lowUsage = false,
-  });
-
-  final String name;
-  final String type;
-  final List<List<dynamic>> icon;
-  final String revenue;
-  final int utilization;
-  final bool lowUsage;
+String _fmtAmt(String? s) {
+  if (s == null) return '—';
+  final v = double.tryParse(s);
+  if (v == null) return s;
+  return '₹${v.toStringAsFixed(0)}';
 }

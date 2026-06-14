@@ -1,162 +1,131 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/errors/app_exception.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
+import '../../../../../models/domain_analytics.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../../shared/widgets/gz_progress_bar.dart';
-import '../../../../../shared/widgets/gz_tag.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
+import '../../../../admin/application/admin_analytics_notifier.dart';
 
-class SessionStatisticsScreen extends StatelessWidget {
+class SessionStatisticsScreen extends ConsumerWidget {
   const SessionStatisticsScreen({super.key});
 
-  static const _kpis = [
-    _KpiData(
-      label: 'Avg Duration',
-      value: '87 min',
-      icon: HugeIcons.strokeRoundedClock01,
-      accent: AppColors.info,
-    ),
-    _KpiData(
-      label: 'Completion',
-      value: '94%',
-      icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-      accent: AppColors.ok,
-    ),
-    _KpiData(
-      label: 'Walk-ins',
-      value: '34',
-      icon: HugeIcons.strokeRoundedGameboy,
-      accent: AppColors.rose,
-    ),
-    _KpiData(
-      label: 'Bookings',
-      value: '108',
-      icon: HugeIcons.strokeRoundedCalendar03,
-      accent: AppColors.textTertiary,
-    ),
-  ];
-  static const _sessions = [
-    _SessionRow(
-      title: 'Rahul M. · PC Station 01',
-      duration: '2h 10m',
-      tag: GzTagKind.ok,
-      tagLabel: 'Completed',
-    ),
-    _SessionRow(
-      title: 'Priya S. · PS5 Console',
-      duration: '1h 30m',
-      tag: GzTagKind.ok,
-      tagLabel: 'Completed',
-    ),
-    _SessionRow(
-      title: 'Amit K. · Xbox Series X',
-      duration: '0h 45m',
-      tag: GzTagKind.warn,
-      tagLabel: 'Early end',
-    ),
-    _SessionRow(
-      title: 'Neha R. · VR Pod 01',
-      duration: '2h 00m',
-      tag: GzTagKind.ok,
-      tagLabel: 'Completed',
-    ),
-  ];
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const GzAdminTopBar(title: 'Session Stats'),
       body: SafeArea(
         top: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: ref
+            .watch(adminSessionStatsNotifierProvider)
+            .when(
+              loading: () =>
+                  const GzLoadingView(message: 'Loading session stats'),
+              error: (e, _) => PageErrorDisplay(
+                error: AppPageError.from(e),
+                onRetry: () => ref
+                    .read(adminSessionStatsNotifierProvider.notifier)
+                    .refresh(),
+              ),
+              data: (stats) => _Body(stats: stats),
+            ),
+      ),
+    );
+  }
+}
+
+class _Body extends StatelessWidget {
+  const _Body({required this.stats});
+
+  final SessionStatsModel stats;
+
+  double get _completionRate {
+    final total = stats.totalSessions ?? 0;
+    if (total == 0) return 0;
+    return ((stats.completed ?? 0) / total).clamp(0.0, 1.0);
+  }
+
+  double get _walkInRate {
+    final total = stats.totalSessions ?? 0;
+    if (total == 0) return 0;
+    return ((stats.walkInCount ?? 0) / total).clamp(0.0, 1.0);
+  }
+
+  double get _bookingRate {
+    final total = stats.totalSessions ?? 0;
+    if (total == 0) return 0;
+    return ((stats.bookingCount ?? 0) / total).clamp(0.0, 1.0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            childAspectRatio: 1.25,
             children: [
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 1.25,
-                ),
-                itemCount: _kpis.length,
-                itemBuilder: (context, index) => _KpiCard(data: _kpis[index]),
+              _KpiCard(
+                label: 'Avg Duration',
+                value: '${stats.avgDurationMinutes ?? 0} min',
+                icon: HugeIcons.strokeRoundedClock01,
+                accent: AppColors.info,
               ),
-              const SizedBox(height: 14),
-              const _Card(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Session types', style: AppTypography.h3),
-                    SizedBox(height: 14),
-                    _TypeBreakdownRow(
-                      label: 'Walk-in',
-                      percent: 24,
-                      color: AppColors.rose,
-                    ),
-                    SizedBox(height: 8),
-                    _TypeBreakdownRow(
-                      label: 'Booking',
-                      percent: 76,
-                      color: AppColors.info,
-                    ),
-                  ],
-                ),
+              _KpiCard(
+                label: 'Completion',
+                value: '${(_completionRate * 100).toStringAsFixed(0)}%',
+                icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+                accent: AppColors.ok,
               ),
-              const SizedBox(height: 12),
-              _Card(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Recent sessions', style: AppTypography.h3),
-                    const SizedBox(height: 12),
-                    ...List.generate(_sessions.length, (index) {
-                      final item = _sessions[index];
-                      return Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          border: index == 0
-                              ? null
-                              : const Border(
-                                  top: BorderSide(color: AppColors.rule),
-                                ),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.title,
-                                    style: AppTypography.body.copyWith(
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    item.duration,
-                                    style: AppTypography.small,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            GzTag(kind: item.tag, label: item.tagLabel),
-                          ],
-                        ),
-                      );
-                    }),
-                  ],
-                ),
+              _KpiCard(
+                label: 'Walk-ins',
+                value: '${stats.walkInCount ?? 0}',
+                icon: HugeIcons.strokeRoundedGameboy,
+                accent: AppColors.rose,
+              ),
+              _KpiCard(
+                label: 'Bookings',
+                value: '${stats.bookingCount ?? 0}',
+                icon: HugeIcons.strokeRoundedCalendar03,
+                accent: AppColors.textTertiary,
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 14),
+          _Card(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Session types', style: AppTypography.h3),
+                const SizedBox(height: 14),
+                _TypeBreakdownRow(
+                  label: 'Walk-in',
+                  percent: (_walkInRate * 100).round(),
+                  color: AppColors.rose,
+                ),
+                const SizedBox(height: 8),
+                _TypeBreakdownRow(
+                  label: 'Booking',
+                  percent: (_bookingRate * 100).round(),
+                  color: AppColors.info,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -201,9 +170,17 @@ class _TypeBreakdownRow extends StatelessWidget {
 }
 
 class _KpiCard extends StatelessWidget {
-  const _KpiCard({required this.data});
+  const _KpiCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.accent,
+  });
 
-  final _KpiData data;
+  final String label;
+  final String value;
+  final List<List<dynamic>> icon;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
@@ -211,15 +188,15 @@ class _KpiCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          HugeIcon(icon: data.icon, color: data.accent, size: 18),
+          HugeIcon(icon: icon, color: accent, size: 18),
           const Spacer(),
           Text(
-            data.value,
+            value,
             style: AppTypography.h1.copyWith(fontFamily: 'GeistMono'),
           ),
           const SizedBox(height: 4),
           Text(
-            data.label,
+            label,
             style: AppTypography.small.copyWith(color: AppColors.textSecondary),
           ),
         ],
@@ -244,32 +221,4 @@ class _Card extends StatelessWidget {
       child: child,
     );
   }
-}
-
-class _KpiData {
-  const _KpiData({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.accent,
-  });
-
-  final String label;
-  final String value;
-  final List<List<dynamic>> icon;
-  final Color accent;
-}
-
-class _SessionRow {
-  const _SessionRow({
-    required this.title,
-    required this.duration,
-    required this.tag,
-    required this.tagLabel,
-  });
-
-  final String title;
-  final String duration;
-  final GzTagKind tag;
-  final String tagLabel;
 }

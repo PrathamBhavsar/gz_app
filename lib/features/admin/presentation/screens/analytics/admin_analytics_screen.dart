@@ -1,210 +1,214 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/errors/app_exception.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
+import '../../../../../shared/widgets/gz_loading_view.dart';
+import '../../../../../shared/widgets/page_error_display.dart';
+import '../../../../admin/application/admin_analytics_notifier.dart';
+import '../../../../admin/application/admin_management_models.dart';
 
-class AdminAnalyticsScreen extends StatefulWidget {
+class AdminAnalyticsScreen extends ConsumerWidget {
   const AdminAnalyticsScreen({super.key});
 
-  @override
-  State<AdminAnalyticsScreen> createState() => _AdminAnalyticsScreenState();
-}
-
-class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
-  static const _filters = ['Today', '7 Days', 'Custom'];
-  static const _kpis = [
-    _KpiData(
-      label: 'Revenue',
-      value: '₹18,420',
-      icon: HugeIcons.strokeRoundedCoinsDollar,
-      accent: AppColors.ok,
-    ),
-    _KpiData(
-      label: 'Sessions',
-      value: '142',
-      icon: HugeIcons.strokeRoundedClock01,
-      accent: AppColors.info,
-    ),
-    _KpiData(
-      label: 'Avg. Duration',
-      value: '87m',
-      icon: HugeIcons.strokeRoundedCalendar03,
-      accent: AppColors.textTertiary,
-    ),
-    _KpiData(
-      label: 'Walk-ins',
-      value: '34',
-      icon: HugeIcons.strokeRoundedGameboy,
-      accent: AppColors.rose,
-    ),
-  ];
-  static const _quickLinks = [
-    _QuickLinkData(
-      label: 'Revenue',
-      route: AppRoutes.adminRevenue,
-      icon: HugeIcons.strokeRoundedCoinsDollar,
-    ),
-    _QuickLinkData(
-      label: 'Utilization',
-      route: AppRoutes.adminUtilization,
-      icon: HugeIcons.strokeRoundedCalendar03,
-    ),
-    _QuickLinkData(
-      label: 'Sessions',
-      route: AppRoutes.adminSessionStats,
-      icon: HugeIcons.strokeRoundedClock01,
-    ),
-    _QuickLinkData(
-      label: 'Players',
-      route: AppRoutes.adminPlayers,
-      icon: HugeIcons.strokeRoundedUserGroup,
-    ),
-    _QuickLinkData(
-      label: 'Systems',
-      route: AppRoutes.adminSystems,
-      icon: HugeIcons.strokeRoundedComputer,
-    ),
-  ];
-  static const _barHeights = [0.40, 0.55, 0.35, 0.60, 0.70, 0.50, 0.80];
-  static const _days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-  int _activeFilter = 0;
+  static const _filters = ['Today', '7 Days'];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const GzAdminTopBar(title: 'Analytics', disableBack: true),
       body: SafeArea(
         top: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: ref
+            .watch(adminAnalyticsDashboardNotifierProvider)
+            .when(
+              loading: () => const GzLoadingView(message: 'Loading analytics'),
+              error: (e, _) => PageErrorDisplay(
+                error: AppPageError.from(e),
+                onRetry: () => ref
+                    .read(adminAnalyticsDashboardNotifierProvider.notifier)
+                    .refresh(),
+              ),
+              data: (data) => _Body(data: data, filters: _filters),
+            ),
+      ),
+    );
+  }
+}
+
+class _Body extends ConsumerWidget {
+  const _Body({required this.data, required this.filters});
+
+  final AdminAnalyticsDashboardData data;
+  final List<String> filters;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bars = data.barHeights;
+    final rows = data.revenueRows;
+    final d = data.dashboard;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: filters.map((f) {
+              final isLast = f == filters.last;
+              return Padding(
+                padding: EdgeInsets.only(right: isLast ? 0 : 8),
+                child: _RoseChip(
+                  label: f,
+                  active: data.selectedPeriod == f,
+                  onTap: () => ref
+                      .read(adminAnalyticsDashboardNotifierProvider.notifier)
+                      .selectFilter(f),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            childAspectRatio: 1.25,
             children: [
-              Row(
-                children: List.generate(
-                  _filters.length,
-                  (index) => Padding(
-                    padding: EdgeInsets.only(
-                      right: index == _filters.length - 1 ? 0 : 8,
-                    ),
-                    child: _RoseChip(
-                      label: _filters[index],
-                      active: _activeFilter == index,
-                      onTap: () => setState(() => _activeFilter = index),
-                    ),
-                  ),
-                ),
+              _KpiCard(
+                label: 'Revenue',
+                value: _fmtAmt(d.totalRevenue),
+                icon: HugeIcons.strokeRoundedCoinsDollar,
+                accent: AppColors.ok,
               ),
-              const SizedBox(height: 12),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 1.25,
-                ),
-                itemCount: _kpis.length,
-                itemBuilder: (context, index) =>
-                    _AnalyticsKpiCard(data: _kpis[index]),
+              _KpiCard(
+                label: 'Sessions',
+                value: '${d.totalSessions ?? 0}',
+                icon: HugeIcons.strokeRoundedClock01,
+                accent: AppColors.info,
               ),
-              const SizedBox(height: 14),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: _quickLinks
-                      .map(
-                        (link) => Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child: _QuickNavCard(data: link),
-                        ),
-                      )
-                      .toList(),
-                ),
+              _KpiCard(
+                label: 'Avg. Duration',
+                value: '${d.avgSessionDurationMinutes ?? 0}m',
+                icon: HugeIcons.strokeRoundedCalendar03,
+                accent: AppColors.textTertiary,
               ),
-              const SizedBox(height: 14),
-              _SurfaceCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Today's revenue", style: AppTypography.h3),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 100,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: List.generate(_barHeights.length, (index) {
-                          final isLast = index == _barHeights.length - 1;
-                          return Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                right: index == _barHeights.length - 1 ? 0 : 8,
-                              ),
-                              child: Align(
-                                alignment: Alignment.bottomCenter,
-                                child: FractionallySizedBox(
-                                  heightFactor: _barHeights[index],
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: isLast
-                                          ? AppColors.buttonBg
-                                          : AppColors.surfaceTint,
-                                      borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(4),
-                                      ),
+              _KpiCard(
+                label: 'Occupancy',
+                value: d.occupancyRate != null
+                    ? '${double.tryParse(d.occupancyRate!)?.toStringAsFixed(0) ?? d.occupancyRate}%'
+                    : '—',
+                icon: HugeIcons.strokeRoundedGameboy,
+                accent: AppColors.rose,
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _QuickNavCard(
+                  label: 'Revenue',
+                  route: AppRoutes.adminRevenue,
+                  icon: HugeIcons.strokeRoundedCoinsDollar,
+                ),
+                const SizedBox(width: 10),
+                _QuickNavCard(
+                  label: 'Utilization',
+                  route: AppRoutes.adminUtilization,
+                  icon: HugeIcons.strokeRoundedCalendar03,
+                ),
+                const SizedBox(width: 10),
+                _QuickNavCard(
+                  label: 'Sessions',
+                  route: AppRoutes.adminSessionStats,
+                  icon: HugeIcons.strokeRoundedClock01,
+                ),
+                const SizedBox(width: 10),
+                _QuickNavCard(
+                  label: 'Players',
+                  route: AppRoutes.adminPlayers,
+                  icon: HugeIcons.strokeRoundedUserGroup,
+                ),
+                const SizedBox(width: 10),
+                _QuickNavCard(
+                  label: 'Systems',
+                  route: AppRoutes.adminSystems,
+                  icon: HugeIcons.strokeRoundedComputer,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          if (bars.isNotEmpty)
+            _SurfaceCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Revenue trend', style: AppTypography.h3),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 100,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: List.generate(bars.length, (i) {
+                        final isLast = i == bars.length - 1;
+                        return Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: isLast ? 0 : 6),
+                            child: Align(
+                              alignment: Alignment.bottomCenter,
+                              child: FractionallySizedBox(
+                                heightFactor: bars[i],
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: isLast
+                                        ? AppColors.buttonBg
+                                        : AppColors.surfaceTint,
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(4),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          );
-                        }),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: List.generate(
-                        _days.length,
-                        (index) => Expanded(
-                          child: Text(
-                            _days[index],
-                            textAlign: TextAlign.center,
-                            style: AppTypography.small.copyWith(fontSize: 10),
                           ),
-                        ),
-                      ),
+                        );
+                      }),
                     ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Text(
-                          'Total: ₹18,420',
-                          style: AppTypography.body.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: rows.map((r) {
+                      return Expanded(
+                        child: Text(
+                          _dayLabel(r.date),
+                          textAlign: TextAlign.center,
+                          style: AppTypography.small.copyWith(fontSize: 10),
                         ),
-                        const Spacer(),
-                        Text(
-                          'vs ₹15,200 yesterday ↑',
-                          style: AppTypography.small.copyWith(
-                            color: AppColors.ok,
-                          ),
-                        ),
-                      ],
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Total: ${data.totalRevenue}',
+                    style: AppTypography.body.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -247,10 +251,18 @@ class _RoseChip extends StatelessWidget {
   }
 }
 
-class _AnalyticsKpiCard extends StatelessWidget {
-  const _AnalyticsKpiCard({required this.data});
+class _KpiCard extends StatelessWidget {
+  const _KpiCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.accent,
+  });
 
-  final _KpiData data;
+  final String label;
+  final String value;
+  final List<List<dynamic>> icon;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
@@ -258,16 +270,18 @@ class _AnalyticsKpiCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          HugeIcon(icon: data.icon, color: data.accent, size: 18),
+          HugeIcon(icon: icon, color: accent, size: 18),
           const Spacer(),
           Text(
-            data.value,
+            value,
             style: AppTypography.h1.copyWith(fontFamily: 'GeistMono'),
           ),
           const SizedBox(height: 4),
           Text(
-            data.label,
-            style: AppTypography.small.copyWith(color: AppColors.textSecondary),
+            label,
+            style: AppTypography.small.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -276,14 +290,20 @@ class _AnalyticsKpiCard extends StatelessWidget {
 }
 
 class _QuickNavCard extends StatelessWidget {
-  const _QuickNavCard({required this.data});
+  const _QuickNavCard({
+    required this.label,
+    required this.route,
+    required this.icon,
+  });
 
-  final _QuickLinkData data;
+  final String label;
+  final String route;
+  final List<List<dynamic>> icon;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push(data.route),
+      onTap: () => context.push(route),
       child: Container(
         width: 100,
         padding: const EdgeInsets.all(12),
@@ -294,10 +314,10 @@ class _QuickNavCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            HugeIcon(icon: data.icon, color: AppColors.textTertiary, size: 18),
+            HugeIcon(icon: icon, color: AppColors.textTertiary, size: 18),
             const SizedBox(height: 6),
             Text(
-              data.label,
+              label,
               style: AppTypography.small.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -327,28 +347,20 @@ class _SurfaceCard extends StatelessWidget {
   }
 }
 
-class _KpiData {
-  const _KpiData({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.accent,
-  });
-
-  final String label;
-  final String value;
-  final List<List<dynamic>> icon;
-  final Color accent;
+String _fmtAmt(String? s) {
+  if (s == null) return '—';
+  final v = double.tryParse(s);
+  if (v == null) return s;
+  return '₹${v.toStringAsFixed(0)}';
 }
 
-class _QuickLinkData {
-  const _QuickLinkData({
-    required this.label,
-    required this.route,
-    required this.icon,
-  });
-
-  final String label;
-  final String route;
-  final List<List<dynamic>> icon;
+String _dayLabel(String? isoDate) {
+  if (isoDate == null) return '';
+  try {
+    final d = DateTime.parse(isoDate);
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[d.weekday - 1];
+  } catch (_) {
+    return isoDate.length > 5 ? isoDate.substring(5) : isoDate;
+  }
 }

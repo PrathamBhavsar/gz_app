@@ -11,6 +11,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../application/login_notifier.dart';
 import '../../widgets/auth_input_field.dart';
+import '../../widgets/credential_chips.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_top_bar.dart';
 
@@ -73,77 +74,91 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
       appBar: const GzTopBar(title: 'Email login'),
       body: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AuthInputField(
-                controller: _emailController,
-                hint: 'Email address',
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                enabled: !isLoading,
-              ),
-              const SizedBox(height: 16),
-              AuthInputField(
-                controller: _passwordController,
-                hint: 'Password',
-                obscureText: !_showPassword,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) {
-                  if (!isLoading) {
-                    _signIn();
-                  }
-                },
-                enabled: !isLoading,
-                trailing: IconButton(
-                  onPressed: isLoading
-                      ? null
-                      : () {
-                          setState(() => _showPassword = !_showPassword);
-                        },
-                  icon: HugeIcon(
-                    icon: _showPassword
-                        ? HugeIcons.strokeRoundedView
-                        : HugeIcons.strokeRoundedViewOffSlash,
-                    color: AppColors.textTertiary,
-                    size: 18,
-                  ),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AuthInputField(
+                  controller: _emailController,
+                  hint: 'Email address',
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  enabled: !isLoading,
                 ),
-              ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => context.push(AppRoutes.forgotPassword),
-                  child: Text(
-                    'Forgot password?',
-                    style: AppTypography.small.copyWith(
-                      color: AppColors.textPrimary,
+                const SizedBox(height: 16),
+                AuthInputField(
+                  controller: _passwordController,
+                  hint: 'Password',
+                  obscureText: !_showPassword,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) {
+                    if (!isLoading) {
+                      _signIn();
+                    }
+                  },
+                  enabled: !isLoading,
+                  trailing: IconButton(
+                    onPressed: isLoading
+                        ? null
+                        : () {
+                            setState(() => _showPassword = !_showPassword);
+                          },
+                    icon: HugeIcon(
+                      icon: _showPassword
+                          ? HugeIcons.strokeRoundedView
+                          : HugeIcons.strokeRoundedViewOffSlash,
+                      color: AppColors.textTertiary,
+                      size: 18,
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              GzButton(
-                label: 'Sign in',
-                onPressed: isLoading ? null : _signIn,
-                loading: isLoading,
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: TextButton(
-                  onPressed: () => context.pushReplacement(AppRoutes.register),
-                  child: Text(
-                    'Don\'t have an account? Register →',
-                    style: AppTypography.body.copyWith(
-                      color: AppColors.textPrimary,
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => context.push(AppRoutes.forgotPassword),
+                    child: Text(
+                      'Forgot password?',
+                      style: AppTypography.small.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                GzButton(
+                  label: 'Sign in',
+                  onPressed: isLoading ? null : _signIn,
+                  loading: isLoading,
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: TextButton(
+                    onPressed: () => context.pushReplacement(AppRoutes.register),
+                    child: Text(
+                      'Don\'t have an account? Register →',
+                      style: AppTypography.body.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Divider(color: AppColors.rule),
+                const SizedBox(height: 12),
+                CredentialChips(
+                  title: 'QUICK LOGIN (PLAYERS)',
+                  credentials: DeveloperCredentials.players,
+                  onTap: (email, password) {
+                    _emailController.text = email;
+                    _passwordController.text = password;
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
