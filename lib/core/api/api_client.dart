@@ -270,7 +270,7 @@ final apiClientProvider = Provider<ApiClient>((ref) {
       try {
         // Direct HTTP call — bypass ApiClient to avoid re-triggering 401 loop
         final uri = Uri.parse(
-          '${ApiConstants.devBaseUrl}${ApiConstants.authRefresh}',
+          '${ApiConstants.baseUrl}${ApiConstants.authRefresh}',
         );
         final response = await http.post(
           uri,

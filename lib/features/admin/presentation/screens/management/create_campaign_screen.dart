@@ -1,42 +1,232 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../../core/errors/error_snackbar.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
 import '../../../../../shared/widgets/gz_button.dart';
-import '../../../../../shared/widgets/gz_card.dart';
 import '../../../../../shared/widgets/gz_scroll_content.dart';
+import '../../../../admin/application/admin_campaign_command_notifier.dart';
+import '../../../../admin/application/admin_campaigns_notifier.dart';
+import '../../../../admin/application/admin_command_state.dart';
 
-class CreateCampaignScreen extends StatefulWidget {
+// Maps UI label → API campaign_type string
+const _campaignTypeLabels = ['Discount %', 'Bonus Credits', 'Happy Hour', 'First Visit'];
+const _campaignTypeApiValues = {
+  'Discount %': 'percentage_off',
+  'Bonus Credits': 'bonus_credits',
+  'Happy Hour': 'happy_hour',
+  'First Visit': 'first_visit',
+};
+
+class CreateCampaignScreen extends ConsumerStatefulWidget {
   const CreateCampaignScreen({super.key});
 
   @override
-  State<CreateCampaignScreen> createState() => _CreateCampaignScreenState();
+  ConsumerState<CreateCampaignScreen> createState() =>
+      _CreateCampaignScreenState();
 }
 
-class _CreateCampaignScreenState extends State<CreateCampaignScreen> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+class _CreateCampaignScreenState extends ConsumerState<CreateCampaignScreen> {
+  final _nameController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _maxPerUserController = TextEditingController(text: '1');
   String _selectedType = 'Discount %';
   final Set<String> _selectedSystems = {};
-  bool _saved = false;
-
-  static const _types = [
-    'Discount %',
-    'Bonus Credits',
-    'Happy Hour',
-    'First Visit',
-  ];
-  static const _systemTypes = ['All Systems', 'PC Gaming', 'PS5', 'Xbox', 'VR'];
+  DateTime _startDate = DateTime.now();
+  DateTime _endDate = DateTime.now().add(const Duration(days: 90));
 
   @override
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
+    _maxPerUserController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickDate(bool isStart) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: isStart ? _startDate : _endDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 1)),
+      lastDate: DateTime.now().add(const Duration(days: 730)),
+    );
+    if (picked == null) return;
+    setState(() {
+      if (isStart) {
+        _startDate = picked;
+      } else {
+        _endDate = picked;
+      }
+    });
+  }
+
+  void _submit() {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      showErrorSnackbar(context, 'Campaign name is required');
+      return;
+    }
+    final campaignType =
+        _campaignTypeApiValues[_selectedType] ?? 'percentage_off';
+    final body = <String, dynamic>{
+      'name': name,
+      if (_descriptionController.text.trim().isNotEmpty)
+        'description': _descriptionController.text.trim(),
+      'campaign_type': campaignType,
+      if (_selectedSystems.isNotEmpty)
+        'applicable_system_types': _selectedSystems.toList(),
+      'valid_from': _startDate.toIso8601String(),
+      'valid_until': _endDate.toIso8601String(),
+      'max_per_user': int.tryParse(_maxPerUserController.text) ?? 1,
+    };
+    ref.read(adminCampaignCommandNotifierProvider.notifier).create(body);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<AdminCommandState>(adminCampaignCommandNotifierProvider, (
+      _,
+      next,
+    ) {
+      if (!context.mounted) return;
+      if (next is AdminCommandSuccess) {
+        showSuccessSnackbar(context, next.message);
+        context.pop();
+      }
+      if (next is AdminCommandError) showErrorSnackbar(context, next.message);
+    });
+
+    final cmdState = ref.watch(adminCampaignCommandNotifierProvider);
+    final isLoading = cmdState is AdminCommandLoading;
+
+    final systemTypes = ref.watch(
+      adminCampaignsNotifierProvider.select(
+        (async) => async.valueOrNull?.systemTypes ?? const [],
+      ),
+    );
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: GzAdminTopBar(
+        title: 'New Campaign',
+        onBack: () => context.pop(),
+      ),
+      body: SafeArea(
+        top: false,
+        child: GzScrollContent(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _inputField('Campaign name', _nameController,
+                    hint: 'e.g. Happy Hours', enabled: !isLoading),
+                _inputField(
+                  'Description',
+                  _descriptionController,
+                  hint: 'Short description for players',
+                  maxLines: 2,
+                  enabled: !isLoading,
+                ),
+
+                // Campaign type
+                Text('Campaign type', style: AppTypography.small),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _campaignTypeLabels.map((type) {
+                    final selected = _selectedType == type;
+                    return _selectChip(
+                      label: type,
+                      selected: selected,
+                      onTap: isLoading
+                          ? null
+                          : () => setState(() => _selectedType = type),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+
+                // Applicable systems (from API)
+                if (systemTypes.isNotEmpty) ...[
+                  Text('Applicable systems', style: AppTypography.small),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: systemTypes.map((t) {
+                      final name = t.name ?? '';
+                      final selected = _selectedSystems.contains(name);
+                      return _selectChip(
+                        label: name,
+                        selected: selected,
+                        onTap: isLoading
+                            ? null
+                            : () => setState(() {
+                                  if (selected) {
+                                    _selectedSystems.remove(name);
+                                  } else {
+                                    _selectedSystems.add(name);
+                                  }
+                                }),
+                      );
+                    }).toList(),
+                  ),
+                ],
+                const SizedBox(height: 16),
+
+                // Validity
+                Text('Validity', style: AppTypography.small),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _dateField(
+                        'Start date',
+                        _startDate,
+                        () => _pickDate(true),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _dateField(
+                        'End date',
+                        _endDate,
+                        () => _pickDate(false),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Max per user
+                _inputField(
+                  'Max uses per user',
+                  _maxPerUserController,
+                  hint: '1',
+                  keyboardType: TextInputType.number,
+                  enabled: !isLoading,
+                ),
+                const SizedBox(height: 24),
+
+                GzButton(
+                  label: 'Create Campaign',
+                  variant: GzButtonVariant.primary,
+                  loading: isLoading,
+                  onPressed: isLoading ? null : _submit,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _inputField(
@@ -44,6 +234,8 @@ class _CreateCampaignScreenState extends State<CreateCampaignScreen> {
     TextEditingController ctrl, {
     String? hint,
     int maxLines = 1,
+    bool enabled = true,
+    TextInputType? keyboardType,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,12 +250,12 @@ class _CreateCampaignScreenState extends State<CreateCampaignScreen> {
           ),
           child: TextField(
             controller: ctrl,
+            enabled: enabled,
+            keyboardType: keyboardType,
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: hint,
-              hintStyle: AppTypography.bodyR.copyWith(
-                color: AppColors.textMuted,
-              ),
+              hintStyle: AppTypography.bodyR.copyWith(color: AppColors.textMuted),
               isDense: true,
               contentPadding: EdgeInsets.zero,
             ),
@@ -76,201 +268,60 @@ class _CreateCampaignScreenState extends State<CreateCampaignScreen> {
     );
   }
 
-  Widget _dateField(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.pillBg,
-        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
-      ),
-      child: Row(
-        children: [
-          Expanded(child: Text(value, style: AppTypography.bodyR)),
-          HugeIcon(
-            icon: HugeIcons.strokeRoundedCalendar02,
-            size: 16,
-            color: AppColors.textTertiary,
-          ),
-        ],
+  Widget _dateField(String label, DateTime date, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.pillBg,
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                '${_month(date.month)} ${date.day}, ${date.year}',
+                style: AppTypography.bodyR,
+              ),
+            ),
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedCalendar02,
+              size: 16,
+              color: AppColors.textTertiary,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(title: 'New Campaign', onBack: () => context.pop()),
-      body: SafeArea(
-        top: false,
-        child: GzScrollContent(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _inputField(
-                  'Campaign name',
-                  _nameController,
-                  hint: 'e.g. Happy Hours',
-                ),
-                _inputField(
-                  'Description',
-                  _descriptionController,
-                  hint: 'Short description for players',
-                  maxLines: 2,
-                ),
-
-                // Campaign type
-                Text('Campaign type', style: AppTypography.small),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _types.map((type) {
-                    final selected = _selectedType == type;
-                    return GestureDetector(
-                      onTap: () => setState(() => _selectedType = type),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: selected
-                              ? AppColors.textPrimary
-                              : AppColors.pillBg,
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.borderRadiusPill,
-                          ),
-                        ),
-                        child: Text(
-                          type,
-                          style: AppTypography.body.copyWith(
-                            color: selected
-                                ? AppColors.surface
-                                : AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 16),
-
-                // Applicable systems
-                Text('Applicable systems', style: AppTypography.small),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _systemTypes.map((system) {
-                    final selected = _selectedSystems.contains(system);
-                    return GestureDetector(
-                      onTap: () => setState(() {
-                        if (selected) {
-                          _selectedSystems.remove(system);
-                        } else {
-                          _selectedSystems.add(system);
-                        }
-                      }),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: selected
-                              ? AppColors.textPrimary
-                              : AppColors.pillBg,
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.borderRadiusPill,
-                          ),
-                        ),
-                        child: Text(
-                          system,
-                          style: AppTypography.body.copyWith(
-                            color: selected
-                                ? AppColors.surface
-                                : AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 16),
-
-                // Validity
-                Text('Validity', style: AppTypography.small),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(child: _dateField('Start date', 'Jun 01, 2025')),
-                    const SizedBox(width: 8),
-                    Expanded(child: _dateField('End date', 'Dec 31, 2025')),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Usage limits
-                Text('Usage limits', style: AppTypography.small),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.pillBg,
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.borderRadiusLg,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Max uses per user',
-                          style: AppTypography.bodyR,
-                        ),
-                      ),
-                      Text(
-                        '2',
-                        style: AppTypography.body.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                if (_saved) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: GzCard(
-                      variant: CardVariant.tint,
-                      padding: 12,
-                      child: Text(
-                        'Campaign created!',
-                        style: AppTypography.body.copyWith(color: AppColors.ok),
-                      ),
-                    ),
-                  ),
-                ],
-                GzButton(
-                  label: 'Create Campaign',
-                  variant: GzButtonVariant.primary,
-                  onPressed: () => setState(() => _saved = true),
-                ),
-              ],
-            ),
+  Widget _selectChip({
+    required String label,
+    required bool selected,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.textPrimary : AppColors.pillBg,
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusPill),
+        ),
+        child: Text(
+          label,
+          style: AppTypography.body.copyWith(
+            color: selected ? AppColors.surface : AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
     );
   }
+
+  String _month(int m) => const [
+        '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      ][m];
 }

@@ -96,6 +96,13 @@ class AppPageError {
         icon: 'lock',
       );
     }
+    if (error is ValidationException) {
+      return AppPageError(
+        title: 'Error',
+        message: error.message,
+        icon: 'alert_circle',
+      );
+    }
     // Fallback for any untyped error
     return const AppPageError(
       title: 'Unexpected Error',

@@ -3,6 +3,7 @@ import '../../../../models/domain_billing.dart';
 import '../../../../models/domain_global.dart';
 import '../../../../models/domain_loyalty.dart';
 import '../../../../models/domain_systems.dart';
+import '../../../../models/enums.dart';
 
 class AdminPricingData {
   const AdminPricingData({
@@ -53,6 +54,62 @@ class AdminBillingData {
   final RevenueSummaryModel? summary;
   final ReconciliationModel? reconciliation;
   final DateTime loadedAt;
+}
+
+class AdminCampaignData {
+  const AdminCampaignData({
+    required this.campaigns,
+    required this.systemTypes,
+    required this.selectedFilter,
+    required this.loadedAt,
+  });
+
+  final List<CampaignModel> campaigns;
+  final List<SystemTypeModel> systemTypes;
+  final String selectedFilter;
+  final DateTime loadedAt;
+
+  List<CampaignModel> get filtered {
+    if (selectedFilter == 'All') return campaigns;
+    final status = selectedFilter.toLowerCase() == 'active'
+        ? CampaignStatus.active
+        : selectedFilter.toLowerCase() == 'paused'
+        ? CampaignStatus.paused
+        : null;
+    if (status == null) return campaigns;
+    return campaigns.where((c) => c.status == status).toList();
+  }
+
+  CampaignModel? findById(String id) {
+    for (final c in campaigns) {
+      if (c.id == id) return c;
+    }
+    return null;
+  }
+}
+
+class AdminDisputeData {
+  const AdminDisputeData({
+    required this.disputes,
+    required this.selectedFilter,
+    required this.loadedAt,
+  });
+
+  final List<BillingDisputeModel> disputes;
+  final String selectedFilter;
+  final DateTime loadedAt;
+
+  List<BillingDisputeModel> get filtered {
+    if (selectedFilter == 'All') return disputes;
+    final status = switch (selectedFilter) {
+      'Open' => DisputeStatus.open,
+      'In Review' => DisputeStatus.underReview,
+      'Resolved' => DisputeStatus.resolved,
+      _ => null,
+    };
+    if (status == null) return disputes;
+    return disputes.where((d) => d.status == status).toList();
+  }
 }
 
 class AdminCreditsData {

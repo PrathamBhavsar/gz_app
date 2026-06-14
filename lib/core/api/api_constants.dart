@@ -1,18 +1,20 @@
+import '../config/app_env.dart';
+
 /// Centralized API constants — all URLs, base URLs, and endpoint paths
 /// must be referenced from here. No hardcoded strings elsewhere.
 class ApiConstants {
   ApiConstants._();
 
   // ─── Base URLs ─────────────────────────────────────────────────────
-  static const String prodBaseUrl = 'https://gz.api.splin.app';
-  static const String devBaseUrl = 'http://192.168.1.2:3000';
+  static const String stagingBaseUrl = AppEnv.stagingBaseUrl;
+  static const String localBaseUrl = AppEnv.localBaseUrl;
 
-  /// Active base URL — switch between prod/dev here (or wire to env config).
-  static const String baseUrl = devBaseUrl;
+  /// Active base URL — controlled by AppEnv.currentBaseUrl.
+  static const String baseUrl = AppEnv.currentBaseUrl;
 
   // ─── Health Check ──────────────────────────────────────────────────
   static const String healthEndpoint = '/health';
-  static const String healthUrl = '$devBaseUrl$healthEndpoint';
+  static const String healthUrl = '${AppEnv.currentBaseUrl}$healthEndpoint';
 
   // ─── Auth Endpoints ────────────────────────────────────────────────
   static const String authLoginEmail = '/auth/login/email';
