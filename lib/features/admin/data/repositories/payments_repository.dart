@@ -42,6 +42,24 @@ class PaymentsRepository {
     return ReconciliationResponse.fromJson(map).data;
   }
 
+  Future<PaymentModel> fetchPaymentDetail(String paymentId) async {
+    await _net.assertConnection();
+
+    final raw = await _api.get(
+      await adminStorePath(_storage, ApiConstants.paymentDetail, id: paymentId),
+    );
+    final map = adminStoreAsMap(raw, responseName: 'payment detail');
+    final data = adminStoreAsMap(
+      map['data'],
+      responseName: 'payment detail payload',
+    );
+    final payment = adminStoreAsMap(
+      data['payment'],
+      responseName: 'payment detail item',
+    );
+    return PaymentModel.fromJson(payment);
+  }
+
   Future<String> refundPayment({
     required String paymentId,
     String? reason,

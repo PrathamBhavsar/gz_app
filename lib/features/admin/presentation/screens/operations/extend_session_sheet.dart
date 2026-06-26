@@ -103,7 +103,7 @@ class _ExtendSessionSheetState extends ConsumerState<ExtendSessionSheet> {
                 const SizedBox(height: 4),
                 Text(widget.systemName, style: AppTypography.bodyR),
                 const SizedBox(height: 16),
-                const Text('Add time', style: AppTypography.h3),
+                const Text('Add time (min)', style: AppTypography.h3),
                 const SizedBox(height: 10),
                 Row(
                   children: [
@@ -127,7 +127,7 @@ class _ExtendSessionSheetState extends ConsumerState<ExtendSessionSheet> {
                             ),
                             alignment: Alignment.center,
                             child: Text(
-                              '${_options[i]} min',
+                              '${_options[i]}',
                               style: AppTypography.body.copyWith(
                                 color: _minutes == _options[i]
                                     ? AppColors.surface

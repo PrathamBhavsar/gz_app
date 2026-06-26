@@ -44,7 +44,7 @@ class AdminBookingsRepository {
     await _net.assertConnection();
 
     final raw = await _api.get(
-      await _store(ApiConstants.bookingDetail, id: id),
+      await _store(ApiConstants.adminBookingDetail, id: id),
     );
     final response = BookingResponse.fromJson(_asMap(raw));
     final booking = response.data;

@@ -63,6 +63,7 @@
     - `splash_notifier.dart`
   - `presentation/screens/`
   - `presentation/widgets/auth_input_field.dart`
+  - No demo credential shortcut widgets remain in auth presentation
 - `lib/features/home/`
   - `data/repositories/store_repository.dart`
   - `application/`
@@ -139,12 +140,15 @@
   - `lib/features/admin/`
   - `data/repositories/`
     - `admin_billing_repository.dart`
+    - `admin_campaigns_repository.dart`
+    - `admin_disputes_repository.dart`
     - `admin_notify_send_repository.dart`
     - `admin_bookings_repository.dart`
     - `admin_credits_repository.dart`
     - `admin_dashboard_repository.dart`
     - `admin_sessions_repository.dart`
     - `admin_store_repository_support.dart`
+    - `analytics_repository.dart`
     - `payments_repository.dart`
     - `pricing_repository.dart`
     - `store_admins_repository.dart`
@@ -152,6 +156,13 @@
     - `systems_admin_repository.dart`
     - `system_types_repository.dart`
   - `application/`
+    - `admin_analytics_notifier.dart`
+    - `admin_billing_detail_notifier.dart`
+    - `admin_campaigns_notifier.dart`
+    - `admin_campaign_command_notifier.dart`
+    - `admin_disputes_notifier.dart`
+    - `admin_dispute_detail_notifier.dart`
+    - `admin_dispute_command_notifier.dart`
     - `admin_booking_command_notifier.dart`
     - `admin_billing_notifier.dart`
     - `admin_booking_detail_notifier.dart`
@@ -162,11 +173,13 @@
     - `admin_dashboard_notifier.dart`
     - `admin_management_models.dart`
     - `admin_notify_send_notifier.dart`
+    - `admin_payment_detail_notifier.dart`
     - `admin_operations_models.dart`
     - `admin_pricing_notifier.dart`
     - `admin_store_models.dart`
     - `admin_system_command_notifier.dart`
     - `admin_system_detail_notifier.dart`
+    - `admin_system_key_notifier.dart`
     - `admin_system_type_command_notifier.dart`
     - `admin_systems_notifier.dart`
     - `admin_session_command_notifier.dart`
@@ -181,13 +194,27 @@
   - `presentation/screens/admin_login_screen.dart`
   - `presentation/screens/admin_password_reset_screen.dart`
   - `presentation/screens/analytics/`
+    - `admin_analytics_screen.dart`
+    - `revenue_analytics_screen.dart`
+    - `utilization_heatmap_screen.dart`
+    - `session_statistics_screen.dart`
+    - `player_analytics_screen.dart`
+    - `system_performance_screen.dart`
   - `presentation/screens/management/`
+    - `admin_dispute_detail_screen.dart`
+    - `admin_management_screen.dart`
     - `adjust_credits_sheet.dart`
+    - `billing_detail_sheet.dart`
     - `billing_override_sheet.dart`
     - `billing_payments_screen.dart`
+    - `campaign_management_screen.dart`
+    - `create_campaign_screen.dart`
     - `create_pricing_rule_screen.dart`
     - `credits_management_screen.dart`
+    - `dispute_resolution_screen.dart`
+    - `edit_campaign_screen.dart`
     - `edit_pricing_rule_screen.dart`
+    - `payment_detail_sheet.dart`
     - `pricing_rule_form_support.dart`
     - `pricing_rules_screen.dart`
   - `presentation/screens/operations/`
@@ -205,6 +232,7 @@
     - `admin_store_screen.dart`
     - `edit_staff_sheet.dart`
     - `invite_staff_screen.dart`
+    - `regenerate_system_key_sheet.dart`
     - `staff_management_screen.dart`
     - `store_config_screen.dart`
     - `system_detail_screen.dart`
@@ -223,3 +251,9 @@ Models remain centralized in `lib/models/`.
 
 ## Phase 2 Notes
 - `lib/shared/widgets/store_selector_sheet.dart` now consumes `homeNotifierProvider` for store lists and `activeStoreNotifierProvider` for persisted selection instead of a separate overlay-specific notifier file.
+
+## Parity Notes
+- WP1 path/auth parity fixes corrected admin-only repository routes for notifications send, billing override, booking detail, and dispute detail without adding new files or widgets.
+- WP2 decision-flow parity fixes added backend support for player logout, phone-change OTP verification, and owner-scoped player session logs; the app now parses the backend session detail/log payload shapes and renders an explicit empty logs state.
+- WP3 unreachable-admin-endpoint parity fixes wired system key regeneration, billing ledger detail, payment detail, and bill generation into the existing admin flows; detail drill-downs use dedicated read-only sheets and end-session now finalizes billing through the backend billing route.
+- WP4 auth/profile coverage pass aligned `PATCH /auth/me` with the backend's name-only contract and surfaced player profile verification/member-since fields from `GET /auth/me` using existing shared widgets.

@@ -289,18 +289,19 @@ class _CampaignCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   color: AppColors.surfaceTint,
                   borderRadius: BorderRadius.circular(
                     AppSpacing.borderRadiusLg,
                   ),
                 ),
+                alignment: Alignment.center,
                 child: const HugeIcon(
                   icon: HugeIcons.strokeRoundedGift,
                   color: AppColors.textPrimary,
-                  size: 22,
+                  size: 24,
                 ),
               ),
               const SizedBox(height: 16),

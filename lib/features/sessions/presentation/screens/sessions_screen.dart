@@ -62,20 +62,25 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
               );
             }
 
-            final visibleUpcoming = switch (_filters[_filterIndex]) {
+            final filter = _filters[_filterIndex];
+            final visibleUpcoming = switch (filter) {
               'Upcoming' || 'All' => data.upcoming,
               _ => const <UpcomingBookingState>[],
             };
-            final visiblePast = switch (_filters[_filterIndex]) {
+            final visiblePast = switch (filter) {
               'Past' || 'All' => data.past,
               _ => const <PastSessionState>[],
             };
             final showActive =
-                (switch (_filters[_filterIndex]) {
+                (switch (filter) {
                   'Active' || 'All' => true,
                   _ => false,
                 }) &&
                 data.activeSession != null;
+            final filterEmpty =
+                !showActive &&
+                visibleUpcoming.isEmpty &&
+                visiblePast.isEmpty;
 
             return RefreshIndicator(
               onRefresh: () =>
@@ -183,22 +188,28 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                       ),
                     ),
                   ),
-                  SliverList(
-                    delegate: SliverChildListDelegate([
-                      for (final session in visiblePast)
-                        _PastSessionRow(
-                          store: session.store,
-                          system: session.system,
-                          date: session.date,
-                          duration: session.duration,
-                          amount: session.amount,
-                          onTap: () => context.push(
-                            AppRoutes.sessionHistoryDetailPath(session.id),
+                  if (filterEmpty && filter != 'All')
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _TabEmptyState(filter: filter),
+                    )
+                  else
+                    SliverList(
+                      delegate: SliverChildListDelegate([
+                        for (final session in visiblePast)
+                          _PastSessionRow(
+                            store: session.store,
+                            system: session.system,
+                            date: session.date,
+                            duration: session.duration,
+                            amount: session.amount,
+                            onTap: () => context.push(
+                              AppRoutes.sessionHistoryDetailPath(session.id),
+                            ),
                           ),
-                        ),
-                      const SizedBox(height: 24),
-                    ]),
-                  ),
+                        const SizedBox(height: 24),
+                      ]),
+                    ),
                 ],
               ),
             );
@@ -274,6 +285,67 @@ class _ActiveSessionBanner extends StatelessWidget {
   }
 }
 
+class _TabEmptyState extends StatelessWidget {
+  const _TabEmptyState({required this.filter});
+
+  final String filter;
+
+  List<List<dynamic>> get _icon => switch (filter) {
+    'Active' => HugeIcons.strokeRoundedGameController01,
+    'Upcoming' => HugeIcons.strokeRoundedCalendar02,
+    'Past' => HugeIcons.strokeRoundedTime04,
+    _ => HugeIcons.strokeRoundedInbox,
+  };
+
+  String get _title => switch (filter) {
+    'Active' => 'No active sessions',
+    'Upcoming' => 'No upcoming bookings',
+    'Past' => 'No session history',
+    _ => 'Nothing here',
+  };
+
+  String get _subtitle => switch (filter) {
+    'Active' => 'Start a session at your favourite store to see it here.',
+    'Upcoming' => 'Book a session and it will appear here.',
+    'Past' => 'Your completed sessions will show up here.',
+    _ => 'Switch to a different tab to see your sessions.',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: AppColors.pillBg,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            alignment: Alignment.center,
+            child: HugeIcon(
+              icon: _icon,
+              color: AppColors.textSecondary,
+              size: 28,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(_title, style: AppTypography.h2, textAlign: TextAlign.center),
+          const SizedBox(height: 6),
+          Text(
+            _subtitle,
+            style: AppTypography.bodyR.copyWith(color: AppColors.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 GzTagKind _tagKindForStatus(SessionUiStatus status) => switch (status) {
   SessionUiStatus.confirmed => GzTagKind.ok,
   SessionUiStatus.unpaid => GzTagKind.warn,
@@ -315,33 +387,37 @@ class _UpcomingItem extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCard),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(system, style: AppTypography.h3),
-                const SizedBox(height: 4),
-                Text(
-                  '$date · $time',
-                  style: AppTypography.small.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(system, style: AppTypography.h3),
+                    const SizedBox(height: 3),
+                    Text(
+                      '$date · $time',
+                      style: AppTypography.small.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 6),
-                tag,
-              ],
-            ),
+              ),
+              const SizedBox(width: 10),
+              tag,
+            ],
           ),
-          SizedBox(
-            width: 90,
-            child: GzButton(
-              label: actionLabel,
-              small: true,
-              variant: GzButtonVariant.ghost,
-              onPressed: onAction,
-            ),
+          const SizedBox(height: 12),
+          GzButton(
+            label: actionLabel,
+            small: true,
+            variant: GzButtonVariant.ghost,
+            onPressed: onAction,
           ),
         ],
       ),
@@ -372,7 +448,7 @@ class _PastSessionRow extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCard),
@@ -384,9 +460,9 @@ class _PastSessionRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(store, style: AppTypography.h3),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
-                    '$system · $date · $duration',
+                    '$system · $date',
                     style: AppTypography.small.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -394,9 +470,30 @@ class _PastSessionRow extends StatelessWidget {
                 ],
               ),
             ),
-            Text(
-              amount,
-              style: AppTypography.num.copyWith(fontWeight: FontWeight.w700),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  amount,
+                  style: AppTypography.body.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  duration,
+                  style: AppTypography.small.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 6),
+            const HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowRight01,
+              color: AppColors.textTertiary,
+              size: 16,
             ),
           ],
         ),

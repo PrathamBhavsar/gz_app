@@ -20,7 +20,7 @@ class WalletNotifier extends AsyncNotifier<WalletData> {
   Future<WalletData> _load() async {
     final repo = ref.read(walletRepositoryProvider);
     final results = await Future.wait<dynamic>([
-      repo.fetchBalance(),
+      repo.fetchBalance().catchError((_) => const CreditBalanceModel()),
       repo.fetchTransactions(limit: 3),
       repo.fetchActiveCampaigns(),
     ]);

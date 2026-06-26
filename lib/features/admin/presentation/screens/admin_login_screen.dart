@@ -7,7 +7,6 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../auth/application/admin_auth_notifier.dart';
 import '../../../auth/data/repositories/admin_auth_repository.dart';
 import '../../../auth/presentation/widgets/auth_input_field.dart';
-import '../../../auth/presentation/widgets/credential_chips.dart';
 import '../../../../core/errors/error_snackbar.dart';
 import '../../../../core/navigation/routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -208,37 +207,6 @@ class _EmailLoginScreenState extends ConsumerState<AdminLoginScreen> {
                       style: AppTypography.small,
                       textAlign: TextAlign.center,
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Divider(color: AppColors.rule),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: CredentialChips(
-                          title: 'SUPER ADMINS',
-                          credentials: DeveloperCredentials.admins,
-                          horizontal: false,
-                          onTap: (email, password) {
-                            _emailController.text = email;
-                            _passwordController.text = password;
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: CredentialChips(
-                          title: 'STAFF MEMBERS',
-                          credentials: DeveloperCredentials.staff,
-                          horizontal: false,
-                          onTap: (email, password) {
-                            _emailController.text = email;
-                            _passwordController.text = password;
-                          },
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),

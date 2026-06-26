@@ -30,12 +30,16 @@ class GzMetaRow extends StatelessWidget {
             label,
             style: AppTypography.bodyR.copyWith(color: AppColors.textSecondary),
           ),
-          Text(
-            value,
-            style: valueStyle ??
-                AppTypography.num.copyWith(
-                  fontWeight: valueBold ? FontWeight.w700 : FontWeight.w600,
-                ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: valueStyle ??
+                  AppTypography.num.copyWith(
+                    fontWeight: valueBold ? FontWeight.w700 : FontWeight.w600,
+                  ),
+            ),
           ),
         ],
       ),

@@ -43,9 +43,10 @@ The admin operations slice now has a real data layer, application state, and liv
 - `POST /stores/:storeId/sessions/:id/pause`
 - `POST /stores/:storeId/sessions/:id/resume`
 - `POST /stores/:storeId/sessions/:id/end`
+- `POST /stores/:storeId/billing/:sessionId/bill`
 - `POST /stores/:storeId/sessions/:id/extend`
 - `GET /stores/:storeId/bookings`
-- `GET /stores/:storeId/bookings/:id`
+- `GET /stores/:storeId/bookings/admin/:id`
 - `POST /stores/:storeId/bookings/:id/check-in`
 - `POST /stores/:storeId/bookings/:id/cancel`
 - `POST /stores/:storeId/bookings/walk-in`
@@ -53,6 +54,8 @@ The admin operations slice now has a real data layer, application state, and liv
 
 ## Notes
 - The operations screens now render loading, error, empty, and data states instead of inline sample rows.
+- WP1 parity fix corrected admin booking detail to the admin-auth `/bookings/admin/:id` route; existing detail UI and command flows were reused unchanged.
 - `AdminLiveService` is now exposed via Riverpod and used to trigger refreshes from live store events.
 - `BookingModel` and `SessionModel` were extended with optional display fields (`userName`, `systemName`, payment metadata, billed amount) because admin endpoints are expected to return richer payloads than the player flows.
 - Walk-in submission currently sends `systemId`, `duration`, optional `paymentMethod`, and optional customer identifiers. If backend payload requirements differ, update `AdminBookingsRepository.createWalkInBooking`.
+- WP3 parity fix chains `POST /sessions/:id/end` with `POST /billing/:sessionId/bill` inside the existing `adminSessionCommandNotifierProvider` so the end-session UX now matches the screen copy and backend split contract.

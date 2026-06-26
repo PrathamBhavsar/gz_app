@@ -32,13 +32,11 @@ class GzTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 22,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: _bg,
         borderRadius: BorderRadius.circular(999),
       ),
-      alignment: Alignment.center,
       child: Text(
         label,
         style: AppTypography.small.copyWith(

@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/auth/token_storage.dart';
+import '../../../../core/errors/app_exception.dart';
 import '../../../../models/api_responses.dart';
 import '../../../../models/domain_global.dart';
 import '../data/repositories/auth_repository.dart';
@@ -28,7 +30,12 @@ class AuthAuthenticated extends AuthSessionState {
 
 class AuthNotifier extends Notifier<AuthSessionState> {
   @override
-  AuthSessionState build() => const AuthInitial();
+  AuthSessionState build() {
+    ref.listen(forceLogoutSignalProvider, (prev, next) {
+      state = const AuthUnauthenticated();
+    });
+    return const AuthInitial();
+  }
 
   Future<bool> bootstrap() async {
     state = const AuthLoading();
@@ -37,8 +44,14 @@ class AuthNotifier extends Notifier<AuthSessionState> {
       final user = await ref.read(authRepositoryProvider).fetchCurrentUser();
       state = AuthAuthenticated(user);
       return true;
-    } catch (_) {
+    } on UnauthorizedException catch (_) {
+      // Token is genuinely invalid — clear stored session so the user must log in again.
       await ref.read(authRepositoryProvider).clearLocalSession();
+      state = const AuthUnauthenticated();
+      return false;
+    } catch (_) {
+      // Network error or server error — keep the refresh token intact so the next
+      // app open can retry automatically once connectivity is restored.
       state = const AuthUnauthenticated();
       return false;
     }

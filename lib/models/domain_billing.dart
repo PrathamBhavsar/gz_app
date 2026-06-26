@@ -135,32 +135,47 @@ class BillingLedgerModel {
   factory BillingLedgerModel.fromJson(Map<String, dynamic> json) =>
       BillingLedgerModel(
         id: json['id']?.toString(),
-        storeId: json['store_id']?.toString(),
-        sessionId: json['session_id']?.toString(),
-        userId: json['user_id']?.toString(),
-        systemId: json['system_id']?.toString(),
-        billedFrom: json['billed_from'] != null
-            ? DateTime.tryParse(json['billed_from'].toString())
+        storeId: (json['store_id'] ?? json['storeId'])?.toString(),
+        sessionId: (json['session_id'] ?? json['sessionId'])?.toString(),
+        userId: (json['user_id'] ?? json['userId'])?.toString(),
+        systemId: (json['system_id'] ?? json['systemId'])?.toString(),
+        billedFrom: (json['billed_from'] ?? json['billedFrom']) != null
+            ? DateTime.tryParse(
+                (json['billed_from'] ?? json['billedFrom']).toString(),
+              )
             : null,
-        billedUntil: json['billed_until'] != null
-            ? DateTime.tryParse(json['billed_until'].toString())
+        billedUntil: (json['billed_until'] ?? json['billedUntil']) != null
+            ? DateTime.tryParse(
+                (json['billed_until'] ?? json['billedUntil']).toString(),
+              )
             : null,
-        billedMinutes: json['billed_minutes'] as int?,
-        baseRate: double.tryParse(json['base_rate']?.toString() ?? ''),
+        billedMinutes:
+            (json['billed_minutes'] ?? json['billedMinutes']) as int?,
+        baseRate: double.tryParse(
+          (json['base_rate'] ?? json['baseRate']).toString(),
+        ),
         appliedMultiplier: double.tryParse(
-          json['applied_multiplier']?.toString() ?? '',
+          (json['applied_multiplier'] ?? json['appliedMultiplier']).toString(),
         ),
-        appliedRuleId: json['applied_rule_id']?.toString(),
-        grossAmount: double.tryParse(json['gross_amount']?.toString() ?? ''),
+        appliedRuleId: (json['applied_rule_id'] ?? json['appliedRuleId'])
+            ?.toString(),
+        grossAmount: double.tryParse(
+          (json['gross_amount'] ?? json['grossAmount']).toString(),
+        ),
         discountAmount: double.tryParse(
-          json['discount_amount']?.toString() ?? '',
+          (json['discount_amount'] ?? json['discountAmount']).toString(),
         ),
-        netAmount: double.tryParse(json['net_amount']?.toString() ?? ''),
-        billingReason: json['billing_reason']?.toString(),
+        netAmount: double.tryParse(
+          (json['net_amount'] ?? json['netAmount']).toString(),
+        ),
+        billingReason: (json['billing_reason'] ?? json['billingReason'])
+            ?.toString(),
         notes: json['notes']?.toString(),
         metadata: json['metadata'] as Map<String, dynamic>?,
-        createdAt: json['created_at'] != null
-            ? DateTime.tryParse(json['created_at'].toString())
+        createdAt: (json['created_at'] ?? json['createdAt']) != null
+            ? DateTime.tryParse(
+                (json['created_at'] ?? json['createdAt']).toString(),
+              )
             : null,
       );
 
@@ -223,25 +238,33 @@ class PaymentModel {
 
   factory PaymentModel.fromJson(Map<String, dynamic> json) => PaymentModel(
     id: json['id']?.toString(),
-    storeId: json['store_id']?.toString(),
-    billingId: json['billing_id']?.toString(),
-    userId: json['user_id']?.toString(),
+    storeId: (json['store_id'] ?? json['storeId'])?.toString(),
+    billingId: (json['billing_id'] ?? json['billingId'])?.toString(),
+    userId: (json['user_id'] ?? json['userId'])?.toString(),
     amount: double.tryParse(json['amount']?.toString() ?? ''),
     method: json['method']?.toString().toPaymentMethod(),
     status: json['status']?.toString().toPaymentStatus(),
-    transactionRef: json['transaction_ref']?.toString(),
-    idempotencyKey: json['idempotency_key']?.toString(),
-    gatewayId: json['gateway_id']?.toString(),
-    gatewayResponse: json['gateway_response'] as Map<String, dynamic>?,
-    paidAt: json['paid_at'] != null
-        ? DateTime.tryParse(json['paid_at'].toString())
+    transactionRef: (json['transaction_ref'] ?? json['transactionRef'])
+        ?.toString(),
+    idempotencyKey: (json['idempotency_key'] ?? json['idempotencyKey'])
+        ?.toString(),
+    gatewayId: (json['gateway_id'] ?? json['gatewayId'])?.toString(),
+    gatewayResponse:
+        (json['gateway_response'] ?? json['gatewayResponse'])
+            as Map<String, dynamic>?,
+    paidAt: (json['paid_at'] ?? json['paidAt']) != null
+        ? DateTime.tryParse((json['paid_at'] ?? json['paidAt']).toString())
         : null,
     notes: json['notes']?.toString(),
-    createdAt: json['created_at'] != null
-        ? DateTime.tryParse(json['created_at'].toString())
+    createdAt: (json['created_at'] ?? json['createdAt']) != null
+        ? DateTime.tryParse(
+            (json['created_at'] ?? json['createdAt']).toString(),
+          )
         : null,
-    updatedAt: json['updated_at'] != null
-        ? DateTime.tryParse(json['updated_at'].toString())
+    updatedAt: (json['updated_at'] ?? json['updatedAt']) != null
+        ? DateTime.tryParse(
+            (json['updated_at'] ?? json['updatedAt']).toString(),
+          )
         : null,
   );
 
@@ -291,23 +314,30 @@ class AdminOverrideModel {
     this.createdAt,
   });
 
-  factory AdminOverrideModel.fromJson(
-    Map<String, dynamic> json,
-  ) => AdminOverrideModel(
-    id: json['id']?.toString(),
-    storeId: json['store_id']?.toString(),
-    adminId: json['admin_id']?.toString(),
-    sessionId: json['session_id']?.toString(),
-    billingId: json['billing_id']?.toString(),
-    overrideType: json['override_type']?.toString().toOverrideType(),
-    originalValue: double.tryParse(json['original_value']?.toString() ?? ''),
-    overrideValue: double.tryParse(json['override_value']?.toString() ?? ''),
-    reason: json['reason']?.toString(),
-    metadata: json['metadata'] as Map<String, dynamic>?,
-    createdAt: json['created_at'] != null
-        ? DateTime.tryParse(json['created_at'].toString())
-        : null,
-  );
+  factory AdminOverrideModel.fromJson(Map<String, dynamic> json) =>
+      AdminOverrideModel(
+        id: json['id']?.toString(),
+        storeId: (json['store_id'] ?? json['storeId'])?.toString(),
+        adminId: (json['admin_id'] ?? json['adminId'])?.toString(),
+        sessionId: (json['session_id'] ?? json['sessionId'])?.toString(),
+        billingId: (json['billing_id'] ?? json['billingId'])?.toString(),
+        overrideType: (json['override_type'] ?? json['overrideType'])
+            ?.toString()
+            .toOverrideType(),
+        originalValue: double.tryParse(
+          (json['original_value'] ?? json['originalValue']).toString(),
+        ),
+        overrideValue: double.tryParse(
+          (json['override_value'] ?? json['overrideValue']).toString(),
+        ),
+        reason: json['reason']?.toString(),
+        metadata: json['metadata'] as Map<String, dynamic>?,
+        createdAt: (json['created_at'] ?? json['createdAt']) != null
+            ? DateTime.tryParse(
+                (json['created_at'] ?? json['createdAt']).toString(),
+              )
+            : null,
+      );
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -322,6 +352,29 @@ class AdminOverrideModel {
     'metadata': metadata,
     'created_at': createdAt?.toIso8601String(),
   };
+}
+
+class BillingLedgerDetailModel {
+  const BillingLedgerDetailModel({
+    required this.billing,
+    required this.overrides,
+  });
+
+  final BillingLedgerModel billing;
+  final List<AdminOverrideModel> overrides;
+
+  factory BillingLedgerDetailModel.fromJson(Map<String, dynamic> json) =>
+      BillingLedgerDetailModel(
+        billing: BillingLedgerModel.fromJson(
+          json['billing'] as Map<String, dynamic>? ?? const {},
+        ),
+        overrides: ((json['overrides'] as List<dynamic>?) ?? const [])
+            .map(
+              (item) =>
+                  AdminOverrideModel.fromJson(item as Map<String, dynamic>),
+            )
+            .toList(growable: false),
+      );
 }
 
 class BillingDisputeModel {

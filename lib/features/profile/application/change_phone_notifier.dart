@@ -65,14 +65,16 @@ class ChangePhoneNotifier extends Notifier<ChangePhoneState> {
     state = const ChangePhoneLoading();
 
     try {
-      final message = await ref
+      final user = await ref
           .read(authRepositoryProvider)
           .verifyPhoneChange(newPhone: phone, otp: otp);
-      final user = await ref.read(authRepositoryProvider).fetchCurrentUser();
       ref.read(authNotifierProvider.notifier).setCurrentUser(user);
       ref.invalidate(profileNotifierProvider);
       _pendingPhone = null;
-      state = ChangePhoneSuccess(phone: user.phone ?? phone, message: message);
+      state = ChangePhoneSuccess(
+        phone: user.phone ?? phone,
+        message: 'Phone number updated.',
+      );
     } catch (error) {
       state = ChangePhoneOtpSent(
         phone: phone,

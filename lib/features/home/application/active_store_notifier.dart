@@ -94,21 +94,34 @@ class ActiveStoreNotifier extends Notifier<ActiveStoreState> {
 
     try {
       final storage = ref.read(tokenStorageProvider);
+      final repo = ref.read(storeRepositoryProvider);
       final storeId = await storage.getActiveStoreId();
-      ref.read(activeStoreIdProvider.notifier).state = storeId;
 
       if (storeId == null || storeId.isEmpty) {
-        state = state.copyWith(
-          isLoading: false,
-          selectedStore: null,
-          actionError: null,
-        );
+        // No store saved yet (first login) — auto-select the first available store
+        // so the sessions and wallet tabs work without user interaction.
+        final stores = await repo.fetchStores(limit: 50);
+        if (stores.isNotEmpty) {
+          final first = stores.first;
+          final firstId = first.id ?? '';
+          if (firstId.isNotEmpty) {
+            ref.read(activeStoreIdProvider.notifier).state = firstId;
+            await storage.saveActiveStoreId(firstId);
+            state = state.copyWith(
+              isLoading: false,
+              selectedStore: first,
+              actionError: null,
+            );
+            return;
+          }
+        }
+        ref.read(activeStoreIdProvider.notifier).state = null;
+        state = state.copyWith(isLoading: false, selectedStore: null, actionError: null);
         return;
       }
 
-      final store = await ref.read(storeRepositoryProvider).findStoreById(
-        storeId,
-      );
+      ref.read(activeStoreIdProvider.notifier).state = storeId;
+      final store = await repo.findStoreById(storeId);
       state = state.copyWith(
         isLoading: false,
         selectedStore: store,

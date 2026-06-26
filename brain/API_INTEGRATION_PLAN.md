@@ -1,5 +1,7 @@
 # Backend API Integration — Master Implementation Plan (Feature-First, Phase-Wise)
 
+> **Status (2026-06-25):** Historical implementation plan. Phases 1–13 are complete, the app is live-wired to the backend, and the remaining parity closure work is tracked in `brain/BACKEND_PARITY_AUDIT.md` + `brain/REMEDIATION_PLAN.md`. References below to a presentation-only app or outstanding dummy-data replacement describe the pre-implementation baseline, not current repo reality.
+
 > **Canonical execution contract** for wiring every screen in `gz_app` to the live `gz_ideation`
 > backend, feature by feature, with a real repository + Riverpod notifier layer and full
 > loading / error / empty / data handling. **When a feature's phase is complete, that feature contains

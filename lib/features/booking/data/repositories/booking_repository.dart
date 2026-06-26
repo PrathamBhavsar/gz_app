@@ -19,18 +19,17 @@ class BookingRepository {
   final Ref _ref;
 
   Future<List<AvailabilitySlot>> fetchAvailability({
-    required DateTime date,
-    int? durationMinutes,
-    String? systemTypeId,
+    required String systemId,
+    required DateTime start,
+    required DateTime end,
   }) async {
     await _net.assertConnection();
 
     final raw = await _api.get(
       _withQuery(_store(ApiConstants.bookingsAvailability), {
-        'date': _formatIsoDate(date),
-        if (durationMinutes != null) 'duration': '$durationMinutes',
-        if (systemTypeId != null && systemTypeId.isNotEmpty)
-          'systemTypeId': systemTypeId,
+        'systemId': systemId,
+        'start': start.toUtc().toIso8601String(),
+        'end': end.toUtc().toIso8601String(),
       }),
     );
     final response = AvailabilityResponse.fromJson(_asMap(raw));
@@ -229,12 +228,6 @@ class BookingRepository {
     return const [];
   }
 
-  String _formatIsoDate(DateTime value) {
-    final normalized = DateTime(value.year, value.month, value.day);
-    final month = normalized.month.toString().padLeft(2, '0');
-    final day = normalized.day.toString().padLeft(2, '0');
-    return '${normalized.year}-$month-$day';
-  }
 }
 
 final bookingRepositoryProvider = Provider<BookingRepository>((ref) {

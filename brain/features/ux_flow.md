@@ -132,9 +132,9 @@
     API target: `GET /stores/:storeId/disputes`.
 64. `AdminDisputeDetailScreen` — `/admin/disputes/:id`
     API target: `GET /stores/:storeId/disputes/:id`, review and resolve actions.
-65. `AdminStoreScreen` — `/admin/management` and related store-area navigation
+65. `AdminStoreScreen` — `/admin/systems` (store-area tab root; distinct from `AdminManagementScreen` at `/admin/management`)
     API target: store management hub.
-66. `SystemManagementScreen` — `/admin/systems`
+66. `SystemManagementScreen` — `/admin/systems/list`
     API target: `GET /stores/:storeId/systems`, `GET /stores/:storeId/systems/live`.
 67. `AddEditSystemScreen` — `/admin/systems/add`, `/admin/systems/edit/:id`
     API target: `POST/PATCH /stores/:storeId/systems`.

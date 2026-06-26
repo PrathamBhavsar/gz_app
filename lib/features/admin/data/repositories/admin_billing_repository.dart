@@ -35,6 +35,24 @@ class AdminBillingRepository {
         .toList(growable: false);
   }
 
+  Future<BillingLedgerDetailModel> fetchLedgerDetail(String billingId) async {
+    await _net.assertConnection();
+
+    final raw = await _api.get(
+      await adminStorePath(
+        _storage,
+        ApiConstants.billingLedgerDetail,
+        id: billingId,
+      ),
+    );
+    final map = adminStoreAsMap(raw, responseName: 'billing detail');
+    final data = adminStoreAsMap(
+      map['data'],
+      responseName: 'billing detail payload',
+    );
+    return BillingLedgerDetailModel.fromJson(data);
+  }
+
   Future<RevenueSummaryModel?> fetchRevenueSummary() async {
     await _net.assertConnection();
 
@@ -66,6 +84,28 @@ class AdminBillingRepository {
     );
     final map = adminStoreAsMap(raw, responseName: 'billing override');
     return map['message']?.toString() ?? 'Billing overridden';
+  }
+
+  Future<BillingLedgerModel> generateBill(String sessionId) async {
+    await _net.assertConnection();
+
+    final raw = await _api.post(
+      await adminStorePath(
+        _storage,
+        ApiConstants.billingGenerateBill,
+        sessionId: sessionId,
+      ),
+    );
+    final map = adminStoreAsMap(raw, responseName: 'billing generation');
+    final data = adminStoreAsMap(
+      map['data'],
+      responseName: 'billing generation payload',
+    );
+    final billing = adminStoreAsMap(
+      data['billing'],
+      responseName: 'generated billing',
+    );
+    return BillingLedgerModel.fromJson(billing);
   }
 }
 

@@ -19,6 +19,9 @@ class AvailabilityNotifier extends AsyncNotifier<AvailabilityData> {
     ref.watch(
       bookingNotifierProvider.select((state) => state.selectedSystemTypeId),
     );
+    ref.watch(
+      bookingNotifierProvider.select((state) => state.selectedSystem?.id),
+    );
     return _load();
   }
 
@@ -29,12 +32,18 @@ class AvailabilityNotifier extends AsyncNotifier<AvailabilityData> {
 
   Future<AvailabilityData> _load() async {
     final booking = ref.read(bookingNotifierProvider);
+    final systemId = booking.selectedSystem?.id;
+    if (systemId == null || systemId.isEmpty) {
+      return const AvailabilityData(slots: []);
+    }
+
+    final date = booking.selectedDate;
+    final start = DateTime.utc(date.year, date.month, date.day);
+    final end = DateTime.utc(date.year, date.month, date.day, 23, 59, 59);
+
     final slots = await ref
         .read(bookingRepositoryProvider)
-        .fetchAvailability(
-          date: booking.selectedDate,
-          systemTypeId: booking.selectedSystemTypeId,
-        );
+        .fetchAvailability(systemId: systemId, start: start, end: end);
     return AvailabilityData(slots: slots);
   }
 }

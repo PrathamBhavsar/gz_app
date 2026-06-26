@@ -138,7 +138,17 @@ class SessionResponse extends SuccessResponse<SessionModel> {
   factory SessionResponse.fromJson(Map<String, dynamic> json) =>
       SessionResponse(
         message: json['message'] as String?,
-        data: json['data'] != null ? SessionModel.fromJson(json['data']) : null,
+        data: () {
+          final payload = json['data'];
+          if (payload is Map<String, dynamic>) {
+            final session = payload['session'];
+            if (session is Map<String, dynamic>) {
+              return SessionModel.fromJson(session);
+            }
+            return SessionModel.fromJson(payload);
+          }
+          return null;
+        }(),
       );
 }
 

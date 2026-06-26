@@ -28,10 +28,13 @@ class _MainPageState extends ConsumerState<MainPage> {
   GzTab _currentTab = GzTab.home;
   DateTime? _lastBackPress;
   StreamSubscription<PlayerWsEvent>? _wsSubscription;
+  // Cached at initState so dispose() can call disconnect() without touching ref.
+  PlayerWsService? _cachedWsService;
 
   @override
   void initState() {
     super.initState();
+    _cachedWsService = ref.read(playerWsServiceProvider);
     _connectPlayerWs();
   }
 
@@ -178,7 +181,7 @@ class _MainPageState extends ConsumerState<MainPage> {
   @override
   void dispose() {
     _wsSubscription?.cancel();
-    unawaited(ref.read(playerWsServiceProvider).disconnect());
+    unawaited(_cachedWsService?.disconnect());
     super.dispose();
   }
 

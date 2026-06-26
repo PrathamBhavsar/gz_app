@@ -25,20 +25,17 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   late final TextEditingController _nameController;
-  late final TextEditingController _emailController;
   bool _didSeedControllers = false;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
-    _emailController = TextEditingController();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _emailController.dispose();
     super.dispose();
   }
 
@@ -84,7 +81,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           data: (user) {
             if (!_didSeedControllers) {
               _nameController.text = user.name ?? '';
-              _emailController.text = user.email ?? '';
               _didSeedControllers = true;
             }
 
@@ -115,10 +111,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 const SizedBox(height: AppSpacing.md),
                 _ProfileField(
                   label: 'Email',
-                  child: TextField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
+                  child: InputDecorator(
                     decoration: _fieldDecoration(),
+                    child: Text(
+                      user.email?.trim().isNotEmpty == true
+                          ? user.email!.trim()
+                          : 'No email on this account',
+                      style: AppTypography.body.copyWith(
+                        color: user.email?.trim().isNotEmpty == true
+                            ? AppColors.textPrimary
+                            : AppColors.textTertiary,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -153,7 +157,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Phone updates happen in a separate verification flow.',
+                  'Email and phone changes follow their own verified flows. This screen updates your display name only.',
                   style: AppTypography.small.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -174,11 +178,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   Future<void> _save() async {
     final name = _nameController.text.trim();
-    final email = _emailController.text.trim();
 
-    await ref
-        .read(editProfileNotifierProvider.notifier)
-        .submit(name: name, email: email);
+    await ref.read(editProfileNotifierProvider.notifier).submit(name: name);
   }
 }
 

@@ -64,6 +64,8 @@ class ApiConstants {
   static const String systemsLive = '/stores/{storeId}/systems/live';
   static const String systemsList = '/stores/{storeId}/systems';
   static const String systemDetail = '/stores/{storeId}/systems/{id}';
+  static const String systemRegenerateKey =
+      '/stores/{storeId}/systems/{id}/regenerate-key';
   static const String systemsAvailable = '/stores/{storeId}/systems/available';
 
   // ─── Sessions Admin Endpoints ──────────────────────────────────────
@@ -80,6 +82,8 @@ class ApiConstants {
   // ─── Bookings Admin Endpoints ──────────────────────────────────────
   static const String bookingsList = '/stores/{storeId}/bookings';
   static const String bookingDetail = '/stores/{storeId}/bookings/{id}';
+  static const String adminBookingDetail =
+      '/stores/{storeId}/bookings/admin/{id}';
   static const String bookingUpdate = '/stores/{storeId}/bookings/{id}';
   static const String bookingsAvailability =
       '/stores/{storeId}/bookings/availability';
@@ -94,13 +98,18 @@ class ApiConstants {
 
   // ─── Billing Endpoints ────────────────────────────────────────────
   static const String billingLedger = '/stores/{storeId}/billing/ledger';
+  static const String billingLedgerDetail =
+      '/stores/{storeId}/billing/ledger/{id}';
+  static const String billingGenerateBill =
+      '/stores/{storeId}/billing/{sessionId}/bill';
   static const String billingOverride =
-      '/stores/{storeId}/billing/{id}/override';
+      '/stores/{storeId}/billing/ledger/{id}/override';
   static const String billingRevenueSummary =
       '/stores/{storeId}/billing/revenue/summary';
 
   // ─── Payments Endpoints ───────────────────────────────────────────
   static const String paymentsList = '/stores/{storeId}/payments';
+  static const String paymentDetail = '/stores/{storeId}/payments/{id}';
   static const String paymentsReconciliation =
       '/stores/{storeId}/payments/reconciliation';
   static const String paymentRefund = '/stores/{storeId}/payments/{id}/refund';
@@ -124,14 +133,17 @@ class ApiConstants {
   // ─── Disputes Admin Endpoints ─────────────────────────────────────
   static const String disputesAdminList = '/stores/{storeId}/disputes';
   static const String disputeDetail = '/stores/{storeId}/disputes/{id}';
+  static const String adminDisputeDetail =
+      '/stores/{storeId}/disputes/admin/{id}';
   static const String disputeReview = '/stores/{storeId}/disputes/{id}/review';
   static const String disputeResolve =
       '/stores/{storeId}/disputes/{id}/resolve';
 
   // ─── Notifications Admin Endpoints ────────────────────────────────
-  static const String notificationsAdminSend = '/notifications/admin/send';
-  static const String notificationsAdminSendTopic =
-      '/notifications/admin/send/topic';
+  static const String storeNotifyAdminSend =
+      '/stores/{storeId}/notifications/admin/send';
+  static const String storeNotifyAdminSendTopic =
+      '/stores/{storeId}/notifications/admin/send/topic';
 
   // ─── Store Config Endpoints ───────────────────────────────────────
   static const String storeConfig = '/stores/{id}/config';
@@ -141,8 +153,11 @@ class ApiConstants {
   static const String storeBySlug = '/stores/{slug}';
 
   // ─── System Types Endpoints ───────────────────────────────────────
+  // Player: active types only (userAuth on GET /)
   static const String systemTypes = '/stores/{storeId}/system-types';
   static const String systemTypeDetail = '/stores/{storeId}/system-types/{id}';
+  // Admin: all types including inactive (adminAuth on GET /all)
+  static const String systemTypesAll = '/stores/{storeId}/system-types/all';
 
   // ─── Player Endpoints ──────────────────────────────────────────────
   static const String sessionsMy = '/stores/{storeId}/sessions/my';

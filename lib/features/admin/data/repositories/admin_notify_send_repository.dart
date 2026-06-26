@@ -2,13 +2,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_constants.dart';
+import '../../../../core/auth/token_storage.dart';
 import '../../../../core/network/network_checker.dart';
+import 'admin_store_repository_support.dart';
 
 class AdminNotifySendRepository {
-  AdminNotifySendRepository(this._api, this._net);
+  AdminNotifySendRepository(this._api, this._net, this._storage);
 
   final ApiClient _api;
   final NetworkChecker _net;
+  final TokenStorage _storage;
 
   Future<void> sendNotification({
     required String title,
@@ -21,7 +24,7 @@ class AdminNotifySendRepository {
     if (channel == 'push') {
       final topic = audience == 'active' ? 'current-players' : 'all-users';
       await _api.post(
-        ApiConstants.notificationsAdminSendTopic,
+        await adminStorePath(_storage, ApiConstants.storeNotifyAdminSendTopic),
         body: {
           'topic': topic,
           'audience': audience,
@@ -36,7 +39,7 @@ class AdminNotifySendRepository {
     }
 
     await _api.post(
-      ApiConstants.notificationsAdminSend,
+      await adminStorePath(_storage, ApiConstants.storeNotifyAdminSend),
       body: {
         'title': title,
         'body': body,
@@ -55,5 +58,6 @@ final adminNotifySendRepositoryProvider = Provider<AdminNotifySendRepository>((
   return AdminNotifySendRepository(
     ref.watch(apiClientProvider),
     ref.watch(networkCheckerProvider),
+    ref.watch(tokenStorageProvider),
   );
 });

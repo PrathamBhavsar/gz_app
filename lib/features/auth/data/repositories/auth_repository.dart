@@ -186,20 +186,21 @@ class AuthRepository {
     return user;
   }
 
-  Future<void> updateProfile({
-    String? name,
-    String? email,
-    String? phone,
-  }) async {
+  Future<UserModel> updateProfile({String? name}) async {
     await _net.assertConnection();
-    await _api.patch(
+    final raw = await _api.patch(
       ApiConstants.authMe,
-      body: {
-        if (name != null && name.isNotEmpty) 'name': name,
-        if (email != null && email.isNotEmpty) 'email': email,
-        if (phone != null && phone.isNotEmpty) 'phone': phone,
-      },
+      body: {if (name != null && name.isNotEmpty) 'name': name},
     );
+    final data = (raw as Map<String, dynamic>)['data'];
+    final payload = data is Map<String, dynamic> ? data['user'] : null;
+    if (payload is! Map<String, dynamic>) {
+      throw const ApiException(
+        statusCode: 500,
+        message: 'Missing updated user profile in auth response',
+      );
+    }
+    return UserModel.fromJson(payload);
   }
 
   Future<String> requestPhoneChange({required String newPhone}) async {
@@ -212,7 +213,7 @@ class AuthRepository {
         'OTP sent to your new phone number.';
   }
 
-  Future<String> verifyPhoneChange({
+  Future<UserModel> verifyPhoneChange({
     required String newPhone,
     required String otp,
   }) async {
@@ -221,8 +222,15 @@ class AuthRepository {
       ApiConstants.authPhoneChangeVerify,
       body: {'phone': newPhone, 'code': otp},
     );
-    return (raw as Map<String, dynamic>)['message']?.toString() ??
-        'Phone number updated.';
+    final data = (raw as Map<String, dynamic>)['data'];
+    final payload = data is Map<String, dynamic> ? data['user'] : null;
+    if (payload is! Map<String, dynamic>) {
+      throw const ApiException(
+        statusCode: 500,
+        message: 'Missing updated user profile in phone change response',
+      );
+    }
+    return UserModel.fromJson(payload);
   }
 
   Future<void> registerDeviceToken(String token) async {

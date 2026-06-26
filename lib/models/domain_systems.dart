@@ -179,27 +179,34 @@ class SystemModel {
 
   factory SystemModel.fromJson(Map<String, dynamic> json) => SystemModel(
     id: json['id']?.toString(),
-    storeId: json['store_id']?.toString(),
-    systemTypeId: json['system_type_id']?.toString(),
+    storeId: (json['store_id'] ?? json['storeId'])?.toString(),
+    systemTypeId: (json['system_type_id'] ?? json['systemTypeId'])?.toString(),
     name: json['name']?.toString(),
-    stationNumber: json['station_number'] as int?,
+    stationNumber: (json['station_number'] ?? json['stationNumber']) as int?,
     platform: json['platform']?.toString().toSystemPlatform(),
     status: json['status']?.toString().toSystemStatus(),
     pricePerHour: double.tryParse(
       (json['price_per_hour'] ?? json['pricePerHour']).toString(),
     ),
-    ipAddress: json['ip_address']?.toString(),
-    macAddress: json['mac_address']?.toString(),
+    ipAddress: (json['ip_address'] ?? json['ipAddress'])?.toString(),
+    macAddress: (json['mac_address'] ?? json['macAddress'])?.toString(),
     specs: json['specs'] as Map<String, dynamic>?,
-    lastHeartbeatAt: json['last_heartbeat_at'] != null
-        ? DateTime.tryParse(json['last_heartbeat_at'].toString())
+    lastHeartbeatAt:
+        (json['last_heartbeat_at'] ?? json['lastHeartbeatAt']) != null
+        ? DateTime.tryParse(
+            (json['last_heartbeat_at'] ?? json['lastHeartbeatAt']).toString(),
+          )
         : null,
-    isActive: json['is_active'] as bool?,
-    createdAt: json['created_at'] != null
-        ? DateTime.tryParse(json['created_at'].toString())
+    isActive: (json['is_active'] ?? json['isActive']) as bool?,
+    createdAt: (json['created_at'] ?? json['createdAt']) != null
+        ? DateTime.tryParse(
+            (json['created_at'] ?? json['createdAt']).toString(),
+          )
         : null,
-    updatedAt: json['updated_at'] != null
-        ? DateTime.tryParse(json['updated_at'].toString())
+    updatedAt: (json['updated_at'] ?? json['updatedAt']) != null
+        ? DateTime.tryParse(
+            (json['updated_at'] ?? json['updatedAt']).toString(),
+          )
         : null,
   );
 
@@ -220,6 +227,17 @@ class SystemModel {
     'created_at': createdAt?.toIso8601String(),
     'updated_at': updatedAt?.toIso8601String(),
   };
+}
+
+class SystemApiKeyModel {
+  const SystemApiKeyModel({this.apiKey});
+
+  final String? apiKey;
+
+  factory SystemApiKeyModel.fromJson(Map<String, dynamic> json) =>
+      SystemApiKeyModel(apiKey: json['apiKey']?.toString());
+
+  Map<String, dynamic> toJson() => {'apiKey': apiKey};
 }
 
 class BookingModel {
@@ -405,37 +423,44 @@ class SessionModel {
 
   factory SessionModel.fromJson(Map<String, dynamic> json) => SessionModel(
     id: json['id']?.toString(),
-    storeId: json['store_id']?.toString(),
-    bookingId: json['booking_id']?.toString(),
-    userId: json['user_id']?.toString(),
+    storeId: (json['store_id'] ?? json['storeId'])?.toString(),
+    bookingId: (json['booking_id'] ?? json['bookingId'])?.toString(),
+    userId: (json['user_id'] ?? json['userId'])?.toString(),
     userName:
         json['user_name']?.toString() ??
         json['userName']?.toString() ??
         json['player_name']?.toString() ??
         json['playerName']?.toString(),
-    systemId: json['system_id']?.toString(),
+    systemId: (json['system_id'] ?? json['systemId'])?.toString(),
     systemName:
         json['system_name']?.toString() ?? json['systemName']?.toString(),
     status: json['status']?.toString().toSessionStatus(),
-    startedAt: json['started_at'] != null
-        ? DateTime.tryParse(json['started_at'].toString())
+    startedAt: (json['started_at'] ?? json['startedAt']) != null
+        ? DateTime.tryParse(
+            (json['started_at'] ?? json['startedAt']).toString(),
+          )
         : null,
-    endedAt: json['ended_at'] != null
-        ? DateTime.tryParse(json['ended_at'].toString())
+    endedAt: (json['ended_at'] ?? json['endedAt']) != null
+        ? DateTime.tryParse((json['ended_at'] ?? json['endedAt']).toString())
         : null,
-    durationMinutes: json['duration_minutes'] as int?,
+    durationMinutes:
+        (json['duration_minutes'] ?? json['durationMinutes']) as int?,
     billedAmount: double.tryParse(
       (json['billed_amount'] ?? json['billedAmount']).toString(),
     ),
-    isBilled: json['is_billed'] as bool?,
-    walkInPhone: json['walk_in_phone']?.toString(),
+    isBilled: (json['is_billed'] ?? json['isBilled']) as bool?,
+    walkInPhone: (json['walk_in_phone'] ?? json['walkInPhone'])?.toString(),
     notes: json['notes']?.toString(),
     metadata: json['metadata'] as Map<String, dynamic>?,
-    createdAt: json['created_at'] != null
-        ? DateTime.tryParse(json['created_at'].toString())
+    createdAt: (json['created_at'] ?? json['createdAt']) != null
+        ? DateTime.tryParse(
+            (json['created_at'] ?? json['createdAt']).toString(),
+          )
         : null,
-    updatedAt: json['updated_at'] != null
-        ? DateTime.tryParse(json['updated_at'].toString())
+    updatedAt: (json['updated_at'] ?? json['updatedAt']) != null
+        ? DateTime.tryParse(
+            (json['updated_at'] ?? json['updatedAt']).toString(),
+          )
         : null,
   );
 
@@ -493,22 +518,33 @@ class SessionLogModel {
   factory SessionLogModel.fromJson(Map<String, dynamic> json) =>
       SessionLogModel(
         id: json['id']?.toString(),
-        storeId: json['store_id']?.toString(),
-        sessionId: json['session_id']?.toString(),
-        eventType: json['event_type']?.toString(),
-        eventAt: json['event_at'] != null
-            ? DateTime.tryParse(json['event_at'].toString())
+        storeId: (json['store_id'] ?? json['storeId'])?.toString(),
+        sessionId: (json['session_id'] ?? json['sessionId'])?.toString(),
+        eventType: (json['event_type'] ?? json['eventType'])?.toString(),
+        eventAt: (json['event_at'] ?? json['eventAt']) != null
+            ? DateTime.tryParse(
+                (json['event_at'] ?? json['eventAt']).toString(),
+              )
             : null,
-        localTime: json['local_time'] != null
-            ? DateTime.tryParse(json['local_time'].toString())
+        localTime: (json['local_time'] ?? json['localTime']) != null
+            ? DateTime.tryParse(
+                (json['local_time'] ?? json['localTime']).toString(),
+              )
             : null,
         source: json['source']?.toString(),
-        oldStatus: json['old_status']?.toString().toSessionStatus(),
-        newStatus: json['new_status']?.toString().toSessionStatus(),
-        durationSeconds: json['duration_seconds'] as int?,
+        oldStatus: (json['old_status'] ?? json['oldStatus'])
+            ?.toString()
+            .toSessionStatus(),
+        newStatus: (json['new_status'] ?? json['newStatus'])
+            ?.toString()
+            .toSessionStatus(),
+        durationSeconds:
+            (json['duration_seconds'] ?? json['durationSeconds']) as int?,
         metadata: json['metadata'] as Map<String, dynamic>?,
-        createdAt: json['created_at'] != null
-            ? DateTime.tryParse(json['created_at'].toString())
+        createdAt: (json['created_at'] ?? json['createdAt']) != null
+            ? DateTime.tryParse(
+                (json['created_at'] ?? json['createdAt']).toString(),
+              )
             : null,
       );
 

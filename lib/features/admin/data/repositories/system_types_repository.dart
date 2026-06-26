@@ -20,7 +20,7 @@ class SystemTypesRepository {
     await _net.assertConnection();
 
     final raw = await _api.get(
-      await adminStorePath(_storage, ApiConstants.systemTypes),
+      await adminStorePath(_storage, ApiConstants.systemTypesAll),
     );
     final map = adminStoreAsMap(raw, responseName: 'system types');
     final paginated = PaginatedSystemTypesResponse.fromJson(map).data;

@@ -14,20 +14,20 @@ class AdminSystemCommandNotifier extends Notifier<AdminCommandState> {
     required String name,
     required String systemTypeId,
     required int stationNumber,
-    required double pricePerHour,
     required SystemPlatform platform,
     Map<String, dynamic>? specs,
   }) async {
     state = const AdminCommandLoading();
     try {
-      await ref.read(systemsAdminRepositoryProvider).createSystem(
-        name: name,
-        systemTypeId: systemTypeId,
-        stationNumber: stationNumber,
-        pricePerHour: pricePerHour,
-        platform: platform.name,
-        specs: specs,
-      );
+      await ref
+          .read(systemsAdminRepositoryProvider)
+          .createSystem(
+            name: name,
+            systemTypeId: systemTypeId,
+            stationNumber: stationNumber,
+            platform: platform.name,
+            specs: specs,
+          );
       ref.invalidate(adminSystemsNotifierProvider);
       state = const AdminCommandSuccess('System created');
     } catch (error) {
@@ -40,23 +40,23 @@ class AdminSystemCommandNotifier extends Notifier<AdminCommandState> {
     required String name,
     required String systemTypeId,
     required int stationNumber,
-    required double pricePerHour,
     required SystemPlatform platform,
     required SystemStatus status,
     Map<String, dynamic>? specs,
   }) async {
     state = const AdminCommandLoading();
     try {
-      await ref.read(systemsAdminRepositoryProvider).updateSystem(
-        id: id,
-        name: name,
-        systemTypeId: systemTypeId,
-        stationNumber: stationNumber,
-        pricePerHour: pricePerHour,
-        platform: platform.name,
-        status: status.name,
-        specs: specs,
-      );
+      await ref
+          .read(systemsAdminRepositoryProvider)
+          .updateSystem(
+            id: id,
+            name: name,
+            systemTypeId: systemTypeId,
+            stationNumber: stationNumber,
+            platform: platform.name,
+            status: status.name,
+            specs: specs,
+          );
       ref.invalidate(adminSystemsNotifierProvider);
       ref.invalidate(adminSystemDetailNotifierProvider(id));
       state = const AdminCommandSuccess('System updated');

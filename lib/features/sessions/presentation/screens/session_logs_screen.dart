@@ -60,8 +60,9 @@ class _SessionLogsScreenState extends ConsumerState<SessionLogsScreen> {
         error: (error, _) => SafeArea(
           child: PageErrorDisplay(
             error: AppPageError.from(error),
-            onRetry: () =>
-                ref.read(sessionLogsNotifierProvider(widget.sessionId).notifier).refresh(),
+            onRetry: () => ref
+                .read(sessionLogsNotifierProvider(widget.sessionId).notifier)
+                .refresh(),
           ),
         ),
         data: (items) {
@@ -70,13 +71,28 @@ class _SessionLogsScreenState extends ConsumerState<SessionLogsScreen> {
               if (_filter == 'All' || item.category == _filter) item,
           ];
 
+          if (filtered.isEmpty) {
+            return SafeArea(
+              child: PageErrorDisplay(
+                error: const AppPageError(
+                  title: 'No session events yet',
+                  message: 'This session does not have any event logs to show.',
+                  icon: 'inbox',
+                  kind: AppPageErrorKind.empty,
+                ),
+              ),
+            );
+          }
+
           return Column(
             children: [
               SafeArea(
                 bottom: false,
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   child: Row(
                     children: [
                       IconButton(
@@ -87,8 +103,10 @@ class _SessionLogsScreenState extends ConsumerState<SessionLogsScreen> {
                           size: 22,
                         ),
                         padding: EdgeInsets.zero,
-                        constraints:
-                            const BoxConstraints.tightFor(width: 40, height: 40),
+                        constraints: const BoxConstraints.tightFor(
+                          width: 40,
+                          height: 40,
+                        ),
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                       ),
@@ -144,7 +162,10 @@ class _SessionLogsScreenState extends ConsumerState<SessionLogsScreen> {
                 ),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 child: Row(
                   children: _filters.map((f) {
                     final selected = _filter == f;

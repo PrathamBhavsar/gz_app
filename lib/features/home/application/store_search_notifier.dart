@@ -13,7 +13,7 @@ class StoreSearchState {
     this.selectedPlatform,
     this.openNow = false,
     this.helperMessage,
-    this.results = const AsyncLoading(),
+    this.results = const AsyncLoading<List<StoreModel>>(),
   });
 
   final String query;
@@ -87,7 +87,7 @@ class StoreSearchNotifier extends Notifier<StoreSearchState> {
     final requestId = ++_requestId;
     state = state.copyWith(
       helperMessage: null,
-      results: const AsyncLoading(),
+      results: const AsyncLoading<List<StoreModel>>(),
     );
 
     try {

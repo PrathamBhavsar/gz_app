@@ -37,3 +37,4 @@ Existing files:
 ## Notes
 - Phase 4 should also wire `PlayerWsService` for live session and notification events.
 - `MainPage` now dispatches `PlayerWsService` session events into the Sessions providers.
+- WP2 closes the remaining player logs parity gap: `GET /stores/:storeId/sessions/:id/logs` is now owner-scoped on the backend, the app parses the backend's camelCase log payload, and `session_logs_screen.dart` now renders loading/error/empty/data states without adding a new widget.

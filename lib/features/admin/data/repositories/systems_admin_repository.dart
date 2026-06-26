@@ -21,23 +21,30 @@ class SystemsAdminRepository {
   Future<List<SystemModel>> fetchSystems() async {
     await _net.assertConnection();
 
-    final raw = await _api.get(await adminStorePath(_storage, ApiConstants.systemsList));
+    final raw = await _api.get(
+      await adminStorePath(_storage, ApiConstants.systemsList),
+    );
     final map = adminStoreAsMap(raw, responseName: 'systems');
     final paginated = PaginatedSystemsResponse.fromJson(map).data;
     if (paginated != null && paginated.isNotEmpty) {
       return paginated;
     }
 
-    return adminStoreExtractList(
-      map,
-      dataKeys: const ['systems', 'items'],
-    ).map((item) => SystemModel.fromJson(adminStoreAsMap(item, responseName: 'systems'))).toList(growable: false);
+    return adminStoreExtractList(map, dataKeys: const ['systems', 'items'])
+        .map(
+          (item) => SystemModel.fromJson(
+            adminStoreAsMap(item, responseName: 'systems'),
+          ),
+        )
+        .toList(growable: false);
   }
 
   Future<List<LiveSystemStatusModel>> fetchLiveSystems() async {
     await _net.assertConnection();
 
-    final raw = await _api.get(await adminStorePath(_storage, ApiConstants.systemsLive));
+    final raw = await _api.get(
+      await adminStorePath(_storage, ApiConstants.systemsLive),
+    );
     final response = LiveSystemsResponse.fromJson(
       adminStoreAsMap(raw, responseName: 'live systems'),
     );
@@ -50,24 +57,17 @@ class SystemsAdminRepository {
     final raw = await _api.get(
       await adminStorePath(_storage, ApiConstants.systemDetail, id: id),
     );
-    final response = SystemResponse.fromJson(
-      adminStoreAsMap(raw, responseName: 'system detail'),
+    return _parseSystemPayload(
+      raw,
+      responseName: 'system detail',
+      missingMessage: 'Missing system detail payload',
     );
-    final data = response.data;
-    if (data == null) {
-      throw const ApiException(
-        statusCode: 500,
-        message: 'Missing system detail payload',
-      );
-    }
-    return data;
   }
 
   Future<SystemModel> createSystem({
     required String name,
     required String systemTypeId,
     required int stationNumber,
-    required double pricePerHour,
     required String platform,
     Map<String, dynamic>? specs,
   }) async {
@@ -77,9 +77,8 @@ class SystemsAdminRepository {
       await adminStorePath(_storage, ApiConstants.systemsList),
       body: {
         'name': name,
-        'system_type_id': systemTypeId,
-        'station_number': stationNumber,
-        'price_per_hour': pricePerHour,
+        'systemTypeId': systemTypeId,
+        'stationNumber': stationNumber,
         'platform': platform,
         if (specs != null && specs.isNotEmpty) 'specs': specs,
       },
@@ -92,7 +91,6 @@ class SystemsAdminRepository {
     required String name,
     required String systemTypeId,
     required int stationNumber,
-    required double pricePerHour,
     required String platform,
     required String status,
     Map<String, dynamic>? specs,
@@ -103,15 +101,28 @@ class SystemsAdminRepository {
       await adminStorePath(_storage, ApiConstants.systemDetail, id: id),
       body: {
         'name': name,
-        'system_type_id': systemTypeId,
-        'station_number': stationNumber,
-        'price_per_hour': pricePerHour,
+        'systemTypeId': systemTypeId,
+        'stationNumber': stationNumber,
         'platform': platform,
         'status': status,
         if (specs != null && specs.isNotEmpty) 'specs': specs,
       },
     );
     return _parseSystemMutation(raw);
+  }
+
+  Future<SystemApiKeyModel> regenerateKey(String id) async {
+    await _net.assertConnection();
+
+    final raw = await _api.post(
+      await adminStorePath(_storage, ApiConstants.systemRegenerateKey, id: id),
+    );
+    final map = adminStoreAsMap(raw, responseName: 'system key regeneration');
+    final data = adminStoreAsMap(
+      map['data'],
+      responseName: 'system key regeneration payload',
+    );
+    return SystemApiKeyModel.fromJson(data);
   }
 
   Future<void> deleteSystem(String id) async {
@@ -122,17 +133,30 @@ class SystemsAdminRepository {
   }
 
   SystemModel _parseSystemMutation(dynamic raw) {
-    final response = SystemResponse.fromJson(
-      adminStoreAsMap(raw, responseName: 'system mutation'),
+    return _parseSystemPayload(
+      raw,
+      responseName: 'system mutation',
+      missingMessage: 'Missing system payload in response',
     );
-    final data = response.data;
-    if (data == null) {
-      throw const ApiException(
-        statusCode: 500,
-        message: 'Missing system payload in response',
-      );
+  }
+
+  SystemModel _parseSystemPayload(
+    dynamic raw, {
+    required String responseName,
+    required String missingMessage,
+  }) {
+    final map = adminStoreAsMap(raw, responseName: responseName);
+    final data = adminStoreAsMap(
+      map['data'],
+      responseName: '$responseName payload',
+    );
+    final system = data['system'] ?? data;
+    if (system is! Map) {
+      throw ApiException(statusCode: 500, message: missingMessage);
     }
-    return data;
+    return SystemModel.fromJson(
+      adminStoreAsMap(system, responseName: responseName),
+    );
   }
 }
 

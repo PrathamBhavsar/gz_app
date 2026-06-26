@@ -26,6 +26,11 @@ class ApiClient {
   /// Called when refresh fails — app should navigate to login.
   final Future<void> Function()? onLogout;
 
+  /// Guards against concurrent refresh calls. If a refresh is already
+  /// in-flight, subsequent 401s await the same Future instead of firing
+  /// a second refresh (which would consume the rotated token and fail).
+  Future<String?>? _refreshFuture;
+
   // ─── Logging ───────────────────────────────────────────────────────
 
   void _logRequest(String method, String endpoint) {
@@ -192,20 +197,29 @@ class ApiClient {
     final body = response.body;
 
     if (statusCode == 401) {
-      // Attempt silent refresh once
+      // Attempt silent refresh once — deduplicated so concurrent 401s
+      // don't each fire their own refresh (which would burn the rotated token).
       if (onRefreshToken != null) {
-        final newToken = await onRefreshToken!();
+        _refreshFuture ??= onRefreshToken!().whenComplete(() {
+          _refreshFuture = null;
+        });
+        final newToken = await _refreshFuture;
         if (newToken != null) {
-          // Retry original request with updated headers (getAccessToken now returns new token)
+          // Retry original request — _buildHeaders() will use the new token.
           final retried = await retry();
           _logResponse('$endpoint [retry]', retried.statusCode, retried.body);
           if (retried.statusCode == 401) {
-            await onLogout?.call();
+            // The refresh succeeded (session is valid) but this specific
+            // endpoint still rejects the token — likely a backend permission
+            // mismatch (e.g. admin-only route called by a player). Do NOT
+            // call onLogout() here: wiping the global token would cause all
+            // concurrent requests to fail too. Let each caller handle this.
             throw const UnauthorizedException('Session expired');
           }
           return _parseSuccess(endpoint, retried);
         }
       }
+      // Refresh returned null — the session is genuinely gone. Clear everything.
       await onLogout?.call();
       throw const UnauthorizedException('Session expired');
     }
@@ -241,8 +255,10 @@ class ApiClient {
   }
 
   dynamic _parseSuccess(String endpoint, http.Response response) {
+    final body = response.body.trim();
+    if (body.isEmpty) return null;
     try {
-      return jsonDecode(response.body);
+      return jsonDecode(body);
     } catch (e) {
       _logParseError(endpoint, e);
       throw ApiException(
@@ -306,6 +322,10 @@ final apiClientProvider = Provider<ApiClient>((ref) {
     onLogout: () async {
       ref.read(accessTokenProvider.notifier).state = null;
       await ref.read(tokenStorageProvider).clearAll();
+      // Signal AuthNotifier to transition to AuthUnauthenticated so the router
+      // redirects to login. Without this, auth state stays AuthAuthenticated and
+      // "Session expired" errors get stuck on screen with no path back.
+      ref.read(forceLogoutSignalProvider.notifier).update((n) => n + 1);
     },
   );
 });

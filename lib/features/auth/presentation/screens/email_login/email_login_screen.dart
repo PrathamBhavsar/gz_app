@@ -11,7 +11,6 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../application/login_notifier.dart';
 import '../../widgets/auth_input_field.dart';
-import '../../widgets/credential_chips.dart';
 import '../../../../../shared/widgets/gz_button.dart';
 import '../../../../../shared/widgets/gz_top_bar.dart';
 
@@ -145,17 +144,6 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                const Divider(color: AppColors.rule),
-                const SizedBox(height: 12),
-                CredentialChips(
-                  title: 'QUICK LOGIN (PLAYERS)',
-                  credentials: DeveloperCredentials.players,
-                  onTap: (email, password) {
-                    _emailController.text = email;
-                    _passwordController.text = password;
-                  },
                 ),
               ],
             ),

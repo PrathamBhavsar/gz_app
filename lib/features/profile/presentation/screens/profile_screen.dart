@@ -11,6 +11,8 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/gz_avatar.dart';
 import '../../../../shared/widgets/gz_button.dart';
 import '../../../../shared/widgets/gz_card.dart';
+import '../../../../shared/widgets/gz_meta_row.dart';
+import '../../../../shared/widgets/gz_tag.dart';
 import '../../../../shared/widgets/gz_loading_view.dart';
 import '../../../../shared/widgets/page_error_display.dart';
 import '../../../../models/domain_global.dart';
@@ -95,6 +97,32 @@ class ProfileScreen extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: AppSpacing.md),
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: [
+                        GzTag(
+                          kind: user.isVerified == true
+                              ? GzTagKind.ok
+                              : GzTagKind.warn,
+                          label: user.isVerified == true
+                              ? 'Verified'
+                              : 'Verification pending',
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    if (user.email != null && user.email!.trim().isNotEmpty)
+                      GzMetaRow(label: 'Email', value: user.email!.trim()),
+                    if (user.phone != null && user.phone!.trim().isNotEmpty)
+                      GzMetaRow(label: 'Phone', value: user.phone!.trim()),
+                    if (user.createdAt != null)
+                      GzMetaRow(
+                        label: 'Member since',
+                        value: MaterialLocalizations.of(
+                          context,
+                        ).formatMediumDate(user.createdAt!.toLocal()),
+                      ),
                     GestureDetector(
                       onTap: () => context.push(AppRoutes.editProfile),
                       child: Text(
@@ -218,16 +246,17 @@ class _ProfileNavTile extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 28,
-              height: 28,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 color: AppColors.pillBg,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
               ),
+              alignment: Alignment.center,
               child: HugeIcon(
                 icon: icon,
                 color: AppColors.textSecondary,
-                size: 14,
+                size: 18,
               ),
             ),
             const SizedBox(width: AppSpacing.md),

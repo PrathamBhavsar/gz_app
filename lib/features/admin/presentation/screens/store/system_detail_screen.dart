@@ -19,6 +19,7 @@ import '../../../../../shared/widgets/gz_tag.dart';
 import '../../../../../shared/widgets/page_error_display.dart';
 import '../../../application/admin_store_models.dart';
 import '../../../application/admin_system_detail_notifier.dart';
+import 'regenerate_system_key_sheet.dart';
 
 class SystemDetailScreen extends ConsumerWidget {
   const SystemDetailScreen({super.key, required this.id});
@@ -32,13 +33,31 @@ class SystemDetailScreen extends ConsumerWidget {
       backgroundColor: AppColors.background,
       appBar: GzAdminTopBar(
         title: 'System Detail',
-        trailing: GestureDetector(
-          onTap: () => context.push(AppRoutes.adminEditSystemPath(id)),
-          child: const HugeIcon(
-            icon: HugeIcons.strokeRoundedEdit02,
-            size: 20,
-            color: AppColors.textSecondary,
-          ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: () => showRegenerateSystemKeySheet(
+                context,
+                systemId: id,
+                systemName: id,
+              ),
+              child: const HugeIcon(
+                icon: HugeIcons.strokeRoundedKey01,
+                size: 20,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            GestureDetector(
+              onTap: () => context.push(AppRoutes.adminEditSystemPath(id)),
+              child: const HugeIcon(
+                icon: HugeIcons.strokeRoundedEdit02,
+                size: 20,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
       ),
       body: SafeArea(
@@ -70,6 +89,7 @@ class _SystemDetailContent extends StatelessWidget {
     final liveStatus = data.liveStatus;
     final status = liveStatus?.status ?? detail.status?.name;
     final currentSession = liveStatus?.currentSession;
+    final systemName = detail.name ?? id;
 
     return GzScrollContent(
       child: Padding(
@@ -108,17 +128,18 @@ class _SystemDetailContent extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              detail.name ?? id,
-                              style: AppTypography.h2,
-                            ),
+                            Text(detail.name ?? id, style: AppTypography.h2),
                             Text(
                               [
-                                liveStatus?.systemTypeName ?? detail.systemTypeId,
-                                detail.platform?.name.toUpperCase(),
-                                if (detail.stationNumber != null)
-                                  'Seat ${detail.stationNumber}',
-                              ].whereType<String>().where((item) => item.isNotEmpty).join(' · '),
+                                    liveStatus?.systemTypeName ??
+                                        detail.systemTypeId,
+                                    detail.platform?.name.toUpperCase(),
+                                    if (detail.stationNumber != null)
+                                      'Seat ${detail.stationNumber}',
+                                  ]
+                                  .whereType<String>()
+                                  .where((item) => item.isNotEmpty)
+                                  .join(' · '),
                               style: AppTypography.small,
                             ),
                           ],
@@ -127,10 +148,7 @@ class _SystemDetailContent extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  GzTag(
-                    kind: _tagKind(status),
-                    label: _statusLabel(status),
-                  ),
+                  GzTag(kind: _tagKind(status), label: _statusLabel(status)),
                 ],
               ),
             ),
@@ -175,17 +193,15 @@ class _SystemDetailContent extends StatelessWidget {
                     label: 'Seat number',
                     value: detail.stationNumber?.toString() ?? 'Unknown',
                   ),
-                  GzMetaRow(
-                    label: 'Hourly rate',
-                    value: _priceLabel(detail),
-                  ),
+                  GzMetaRow(label: 'System ID', value: detail.id ?? id),
                   GzMetaRow(
                     label: 'Platform',
                     value: detail.platform?.name.toUpperCase() ?? 'Unknown',
                   ),
                   GzMetaRow(
                     label: 'Type',
-                    value: liveStatus?.systemTypeName ??
+                    value:
+                        liveStatus?.systemTypeName ??
                         detail.systemTypeId ??
                         'Unknown',
                   ),
@@ -200,10 +216,16 @@ class _SystemDetailContent extends StatelessWidget {
                       value: _dateTimeLabel(detail.createdAt),
                     ),
                   if (_specsLabel(detail).isNotEmpty)
-                    GzMetaRow(
-                      label: 'Specs',
-                      value: _specsLabel(detail),
+                    GzMetaRow(label: 'Specs', value: _specsLabel(detail)),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextButton(
+                    onPressed: () => showRegenerateSystemKeySheet(
+                      context,
+                      systemId: id,
+                      systemName: systemName,
                     ),
+                    child: const Text('Regenerate API key'),
+                  ),
                 ],
               ),
             ),
@@ -237,17 +259,6 @@ String _statusLabel(String? status) => switch (status) {
   'offline' => 'Offline',
   _ => 'Unknown',
 };
-
-String _priceLabel(SystemModel system) {
-  final price = system.pricePerHour;
-  if (price == null) {
-    return 'Rate pending';
-  }
-  final normalized = price == price.roundToDouble()
-      ? price.toInt().toString()
-      : price.toStringAsFixed(0);
-  return 'Rs $normalized/hr';
-}
 
 String _specsLabel(SystemModel system) {
   final specs = system.specs;

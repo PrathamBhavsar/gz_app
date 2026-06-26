@@ -150,6 +150,7 @@ class _CampaignListCard extends StatelessWidget {
             Container(
               width: 44,
               height: 44,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: AppColors.surfaceTint,
                 borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),

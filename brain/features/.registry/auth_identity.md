@@ -50,3 +50,6 @@ metadata:
 1. OAuth callback exchange is implemented; the app still depends on an external browser/native OAuth handoff to deliver `code` back into `/auth/oauth-handler`.
 2. Email resend remains guidance-only by design because the backend exposes no resend endpoint.
 3. Registration/backend truth differs from the original phase plan: the live backend requires `name + email + password`, with phone optional.
+4. WP2 backend parity is now closed for player auth flows: `/auth/logout` exists for user logout, and `/auth/phone/change/verify` completes the existing two-step phone-change OTP UX without adding new widgets.
+5. WP4 auth/profile coverage pass confirmed the player auth user shape is `id, name, phone, email, isVerified, createdAt`; the app now surfaces verification state and member-since metadata in the profile UI instead of only rendering name/contact.
+6. WP5 removed the email-login demo credential chips entirely instead of debug-gating them. The auth flow now relies only on real backend credentials and reuses the existing `GzTopBar`, `AuthInputField`, and `GzButton` widgets.

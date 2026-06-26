@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/errors/app_exception.dart';
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../models/domain_billing.dart';
 import '../../../../../shared/widgets/gz_admin_top_bar.dart';
@@ -14,7 +15,9 @@ import '../../../../../shared/widgets/gz_tag.dart';
 import '../../../../../shared/widgets/page_error_display.dart';
 import '../../../application/admin_billing_notifier.dart';
 import '../../../application/admin_management_models.dart';
+import 'billing_detail_sheet.dart';
 import 'billing_override_sheet.dart';
+import 'payment_detail_sheet.dart';
 
 class BillingPaymentsScreen extends ConsumerWidget {
   const BillingPaymentsScreen({super.key});
@@ -115,6 +118,7 @@ class BillingPaymentsScreen extends ConsumerWidget {
 
           return _BillingRecordData(
             id: ledger.id ?? '',
+            paymentId: payment?.id,
             name: ledger.userId ?? 'Player',
             detail:
                 '${ledger.systemId ?? 'System'} · ${_durationLabel(ledger.billedMinutes)}',
@@ -204,49 +208,71 @@ class _BillingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GzCard(
-      padding: 14,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(child: Text(record.name, style: AppTypography.h3)),
-              GzTag(kind: record.tag, label: record.tagLabel),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(record.detail, style: AppTypography.small),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Text(
-                record.amount,
-                style: AppTypography.num.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Spacer(),
-              if (record.showOverride)
-                SizedBox(
-                  width: 104,
-                  child: GzButton(
-                    label: 'Override',
-                    variant: GzButtonVariant.ghost,
-                    small: true,
-                    onPressed: () => showBillingOverrideSheet(
-                      context,
-                      billingId: record.id,
-                      playerName: record.name,
-                      originalAmount: record.amount,
-                      description: record.detail,
-                    ),
+    return GestureDetector(
+      onTap: () => showBillingDetailSheet(
+        context,
+        billingId: record.id,
+        paymentId: record.paymentId,
+      ),
+      child: GzCard(
+        padding: 14,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(child: Text(record.name, style: AppTypography.h3)),
+                GzTag(kind: record.tag, label: record.tagLabel),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(record.detail, style: AppTypography.small),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Text(
+                  record.amount,
+                  style: AppTypography.num.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-            ],
-          ),
-        ],
+                const Spacer(),
+                if (record.paymentId != null && record.paymentId!.isNotEmpty)
+                  SizedBox(
+                    width: 96,
+                    child: GzButton(
+                      label: 'Payment',
+                      variant: GzButtonVariant.ghost,
+                      small: true,
+                      onPressed: () => showPaymentDetailSheet(
+                        context,
+                        paymentId: record.paymentId!,
+                      ),
+                    ),
+                  ),
+                if (record.showOverride) ...[
+                  SizedBox(width: record.paymentId != null ? AppSpacing.sm : 0),
+                  SizedBox(
+                    width: 104,
+                    child: GzButton(
+                      label: 'Override',
+                      variant: GzButtonVariant.ghost,
+                      small: true,
+                      onPressed: () => showBillingOverrideSheet(
+                        context,
+                        billingId: record.id,
+                        playerName: record.name,
+                        originalAmount: record.amount,
+                        description: record.detail,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -255,6 +281,7 @@ class _BillingCard extends StatelessWidget {
 class _BillingRecordData {
   const _BillingRecordData({
     required this.id,
+    this.paymentId,
     required this.name,
     required this.detail,
     required this.amount,
@@ -264,6 +291,7 @@ class _BillingRecordData {
   });
 
   final String id;
+  final String? paymentId;
   final String name;
   final String detail;
   final String amount;

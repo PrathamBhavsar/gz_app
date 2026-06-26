@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/auth/token_storage.dart';
 import '../../../../models/api_responses.dart';
 import '../../../../models/domain_systems.dart';
+import '../../../../features/home/application/active_store_notifier.dart';
 import '../data/repositories/billing_repository.dart';
 import '../data/repositories/bookings_repository.dart';
 import '../data/repositories/sessions_repository.dart';
@@ -13,7 +14,15 @@ import 'session_ui_models.dart';
 class ActivityHubNotifier extends AsyncNotifier<SessionsHubState> {
   @override
   Future<SessionsHubState> build() async {
+    final storeState = ref.watch(activeStoreNotifierProvider);
     ref.watch(activeStoreIdProvider);
+
+    // While the store is still hydrating from storage, stay in loading state.
+    // Once hydration finishes this build() reruns and _load() proceeds normally.
+    if (storeState.isLoading) {
+      return Completer<SessionsHubState>().future;
+    }
+
     return _load();
   }
 

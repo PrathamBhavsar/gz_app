@@ -27,13 +27,13 @@ class AddEditSystemScreen extends ConsumerStatefulWidget {
   final String? id;
 
   @override
-  ConsumerState<AddEditSystemScreen> createState() => _AddEditSystemScreenState();
+  ConsumerState<AddEditSystemScreen> createState() =>
+      _AddEditSystemScreenState();
 }
 
 class _AddEditSystemScreenState extends ConsumerState<AddEditSystemScreen> {
   final _nameCtrl = TextEditingController();
   final _seatCtrl = TextEditingController();
-  final _rateCtrl = TextEditingController();
   final _specsCtrl = TextEditingController();
 
   String? _selectedTypeId;
@@ -45,7 +45,6 @@ class _AddEditSystemScreenState extends ConsumerState<AddEditSystemScreen> {
   void dispose() {
     _nameCtrl.dispose();
     _seatCtrl.dispose();
-    _rateCtrl.dispose();
     _specsCtrl.dispose();
     super.dispose();
   }
@@ -59,7 +58,10 @@ class _AddEditSystemScreenState extends ConsumerState<AddEditSystemScreen> {
         : const AsyncValue<AdminSystemDetailData?>.data(null);
     final commandState = ref.watch(adminSystemCommandNotifierProvider);
 
-    ref.listen<AdminCommandState>(adminSystemCommandNotifierProvider, (_, next) {
+    ref.listen<AdminCommandState>(adminSystemCommandNotifierProvider, (
+      _,
+      next,
+    ) {
       if (next is AdminCommandSuccess) {
         showSuccessSnackbar(context, next.message);
         ref.read(adminSystemCommandNotifierProvider.notifier).reset();
@@ -88,7 +90,8 @@ class _AddEditSystemScreenState extends ConsumerState<AddEditSystemScreen> {
           loading: () => const GzLoadingView(message: 'Loading system types'),
           error: (error, _) => PageErrorDisplay(
             error: AppPageError.from(error),
-            onRetry: () => ref.read(adminSystemsNotifierProvider.notifier).refresh(),
+            onRetry: () =>
+                ref.read(adminSystemsNotifierProvider.notifier).refresh(),
           ),
           data: (systemsData) {
             if (systemsData.systemTypes.isEmpty) {
@@ -96,22 +99,22 @@ class _AddEditSystemScreenState extends ConsumerState<AddEditSystemScreen> {
             }
 
             return detailState.when(
-              loading: () => const GzLoadingView(message: 'Loading system detail'),
+              loading: () =>
+                  const GzLoadingView(message: 'Loading system detail'),
               error: (error, _) => PageErrorDisplay(
                 error: AppPageError.from(error),
                 onRetry: isEdit
                     ? () => ref
                           .read(
-                            adminSystemDetailNotifierProvider(widget.id!).notifier,
+                            adminSystemDetailNotifierProvider(
+                              widget.id!,
+                            ).notifier,
                           )
                           .refresh()
                     : null,
               ),
               data: (detailData) {
-                _seedFormIfNeeded(
-                  systemsData.systemTypes,
-                  detailData?.system,
-                );
+                _seedFormIfNeeded(systemsData.systemTypes, detailData?.system);
                 return GzScrollContent(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
@@ -144,14 +147,6 @@ class _AddEditSystemScreenState extends ConsumerState<AddEditSystemScreen> {
                           keyboardType: TextInputType.number,
                         ),
                         _inputField(
-                          'Rate (Rs per hour)',
-                          _rateCtrl,
-                          hint: '80',
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                        ),
-                        _inputField(
                           'Specs / description',
                           _specsCtrl,
                           hint: 'RTX 4090 · 32GB · 240Hz',
@@ -178,7 +173,8 @@ class _AddEditSystemScreenState extends ConsumerState<AddEditSystemScreen> {
                           GzButton(
                             label: 'Remove System',
                             variant: GzButtonVariant.dangerOutline,
-                            loading: _deleteRequested &&
+                            loading:
+                                _deleteRequested &&
                                 commandState is AdminCommandLoading,
                             onPressed: _confirmDelete,
                           ),
@@ -207,7 +203,6 @@ class _AddEditSystemScreenState extends ConsumerState<AddEditSystemScreen> {
     if (system != null) {
       _nameCtrl.text = system.name ?? '';
       _seatCtrl.text = system.stationNumber?.toString() ?? '';
-      _rateCtrl.text = system.pricePerHour?.toString() ?? '';
       _specsCtrl.text = system.specs?['summary']?.toString() ?? '';
       _selectedStatus = system.status ?? SystemStatus.available;
     }
@@ -306,10 +301,9 @@ class _AddEditSystemScreenState extends ConsumerState<AddEditSystemScreen> {
   void _submit(bool isEdit) {
     final name = _nameCtrl.text.trim();
     final seatNumber = int.tryParse(_seatCtrl.text.trim());
-    final rate = double.tryParse(_rateCtrl.text.trim());
     final typeId = _selectedTypeId;
 
-    if (name.isEmpty || seatNumber == null || rate == null || typeId == null) {
+    if (name.isEmpty || seatNumber == null || typeId == null) {
       showErrorSnackbar(
         context,
         const ValidationException('Fill the required system fields first'),
@@ -324,7 +318,6 @@ class _AddEditSystemScreenState extends ConsumerState<AddEditSystemScreen> {
         name: name,
         systemTypeId: typeId,
         stationNumber: seatNumber,
-        pricePerHour: rate,
         platform: _platformForTypeName(typeId),
         status: _selectedStatus,
         specs: _specsCtrl.text.trim().isEmpty
@@ -338,7 +331,6 @@ class _AddEditSystemScreenState extends ConsumerState<AddEditSystemScreen> {
       name: name,
       systemTypeId: typeId,
       stationNumber: seatNumber,
-      pricePerHour: rate,
       platform: _platformForTypeName(typeId),
       specs: _specsCtrl.text.trim().isEmpty
           ? null
@@ -397,8 +389,8 @@ class _AddEditSystemScreenState extends ConsumerState<AddEditSystemScreen> {
       return;
     }
     _deleteRequested = true;
-    await ref.read(adminSystemCommandNotifierProvider.notifier).deleteSystem(
-      widget.id!,
-    );
+    await ref
+        .read(adminSystemCommandNotifierProvider.notifier)
+        .deleteSystem(widget.id!);
   }
 }

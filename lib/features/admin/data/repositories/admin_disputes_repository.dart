@@ -30,7 +30,7 @@ class AdminDisputesRepository {
   Future<BillingDisputeModel> fetchDisputeDetail(String id) async {
     await _net.assertConnection();
     final raw = await _api.get(
-      await adminStorePath(_storage, ApiConstants.disputeDetail, id: id),
+      await adminStorePath(_storage, ApiConstants.adminDisputeDetail, id: id),
     );
     final map = adminStoreAsMap(raw, responseName: 'dispute detail');
     final dispute = DisputeResponse.fromJson(map).data;
@@ -47,9 +47,7 @@ class AdminDisputesRepository {
     await _net.assertConnection();
     final raw = await _api.post(
       await adminStorePath(_storage, ApiConstants.disputeReview, id: id),
-      body: {
-        if (notes != null && notes.isNotEmpty) 'notes': notes,
-      },
+      body: {if (notes != null && notes.isNotEmpty) 'notes': notes},
     );
     final map = adminStoreAsMap(raw, responseName: 'dispute review');
     return map['message']?.toString() ?? 'Dispute marked as under review';
@@ -75,8 +73,9 @@ class AdminDisputesRepository {
   }
 }
 
-final adminDisputesRepositoryProvider =
-    Provider<AdminDisputesRepository>((ref) {
+final adminDisputesRepositoryProvider = Provider<AdminDisputesRepository>((
+  ref,
+) {
   return AdminDisputesRepository(
     ref.watch(apiClientProvider),
     ref.watch(networkCheckerProvider),

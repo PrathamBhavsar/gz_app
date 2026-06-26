@@ -14,6 +14,12 @@ const _kHasSeenOnboardingKey = 'gz_has_seen_onboarding';
 // Kept in Riverpod state — never persisted (cleared on app restart = safe)
 final accessTokenProvider = StateProvider<String?>((ref) => null);
 
+// ─── Force-logout signal ────────────────────────────────────────────────────
+// Incremented by ApiClient.onLogout when refresh permanently fails.
+// AuthNotifier listens and transitions to AuthUnauthenticated so the router
+// redirects to login instead of leaving "Session expired" frozen on screen.
+final forceLogoutSignalProvider = StateProvider<int>((ref) => 0);
+
 // ─── Active Store Context ───────────────────────────────────────────────────
 // Persists across app restarts. Used by all store-scoped API calls.
 final activeStoreIdProvider = StateProvider<String?>((ref) => null);

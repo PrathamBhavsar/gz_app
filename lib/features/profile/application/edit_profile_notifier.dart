@@ -33,16 +33,14 @@ class EditProfileNotifier extends Notifier<EditProfileState> {
   @override
   EditProfileState build() => const EditProfileInitial();
 
-  Future<void> submit({required String name, required String email}) async {
+  Future<void> submit({required String name}) async {
     state = const EditProfileLoading();
 
     try {
-      await ref
-          .read(authRepositoryProvider)
-          .updateProfile(name: name, email: email);
       final user = await ref
-          .read(authNotifierProvider.notifier)
-          .refreshCurrentUser();
+          .read(authRepositoryProvider)
+          .updateProfile(name: name);
+      ref.read(authNotifierProvider.notifier).setCurrentUser(user);
       ref.invalidate(profileNotifierProvider);
       state = EditProfileSuccess(user);
     } catch (error) {

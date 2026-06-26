@@ -121,10 +121,19 @@ class _SessionManagementScreenState
                   GzCard(
                     child: Row(
                       children: [
-                        const HugeIcon(
-                          icon: HugeIcons.strokeRoundedGameboy,
-                          color: AppColors.rose,
-                          size: 28,
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppColors.rose.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          alignment: Alignment.center,
+                          child: const HugeIcon(
+                            icon: HugeIcons.strokeRoundedGameboy,
+                            color: AppColors.rose,
+                            size: 24,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -204,22 +213,6 @@ class _SessionManagementScreenState
                       SizedBox(
                         width: (MediaQuery.sizeOf(context).width - 52) / 2,
                         child: GzButton(
-                          label: 'Resume',
-                          variant: GzButtonVariant.ghost,
-                          onPressed: session.status?.name != 'inProgress'
-                              ? () => ref
-                                    .read(
-                                      adminSessionCommandNotifierProvider(
-                                        session.id ?? '',
-                                      ).notifier,
-                                    )
-                                    .resume()
-                              : null,
-                        ),
-                      ),
-                      SizedBox(
-                        width: (MediaQuery.sizeOf(context).width - 52) / 2,
-                        child: GzButton(
                           label: 'Extend',
                           onPressed: () => showExtendSessionSheet(
                             context,
@@ -243,22 +236,24 @@ class _SessionManagementScreenState
                         child: GzButton(
                           label: 'End Session',
                           variant: GzButtonVariant.dangerOutline,
-                          onPressed: () => showEndSessionSheet(
-                            context,
-                            sessionId: session.id ?? '',
-                            systemName:
-                                session.systemName ??
-                                session.systemId ??
-                                'System',
-                            elapsed: _elapsedLabel(session),
-                            onCompleted: () => ref
-                                .read(
-                                  adminSessionsNotifierProvider(
-                                    widget.systemId,
-                                  ).notifier,
+                          onPressed: session.status?.name == 'inProgress'
+                              ? () => showEndSessionSheet(
+                                  context,
+                                  sessionId: session.id ?? '',
+                                  systemName:
+                                      session.systemName ??
+                                      session.systemId ??
+                                      'System',
+                                  elapsed: _elapsedLabel(session),
+                                  onCompleted: () => ref
+                                      .read(
+                                        adminSessionsNotifierProvider(
+                                          widget.systemId,
+                                        ).notifier,
+                                      )
+                                      .refresh(),
                                 )
-                                .refresh(),
-                          ),
+                              : null,
                         ),
                       ),
                     ],

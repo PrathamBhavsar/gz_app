@@ -5,15 +5,22 @@ Future<String> adminStorePath(
   TokenStorage storage,
   String template, {
   String? id,
+  String? sessionId,
 }) async {
   final storeId = await storage.getAdminStoreId();
   if (storeId == null || storeId.isEmpty) {
     throw const ValidationException('Missing admin store context');
   }
 
-  var path = template.replaceAll('{storeId}', storeId).replaceAll('{id}', id ?? storeId);
+  var path = template
+      .replaceAll('{storeId}', storeId)
+      .replaceAll('{id}', id ?? storeId)
+      .replaceAll('{sessionId}', sessionId ?? storeId);
   if (id != null) {
     path = path.replaceAll('{id}', id);
+  }
+  if (sessionId != null) {
+    path = path.replaceAll('{sessionId}', sessionId);
   }
   return path;
 }
@@ -26,9 +33,7 @@ Map<String, dynamic> adminStoreAsMap(
     return value;
   }
   if (value is Map) {
-    return value.map(
-      (key, mapValue) => MapEntry(key.toString(), mapValue),
-    );
+    return value.map((key, mapValue) => MapEntry(key.toString(), mapValue));
   }
   throw ApiException(
     statusCode: 500,
