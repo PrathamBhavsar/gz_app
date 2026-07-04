@@ -43,6 +43,14 @@ dependencies:
   http: ^1.4.0
   flutter_secure_storage: ^9.2.2
   web_socket_channel: ^3.0.3
+  google_sign_in: ^7.2.0
+  # Discord OAuth: opened in the external browser via url_launcher and the
+  # redirect captured via app_links. We deliberately do NOT use
+  # flutter_web_auth_2 — its v5 AuthTabIntent path breaks Discord's custom-scheme
+  # redirect on Android 16, and its v4 won't build under JDK 26 (old Kotlin).
+  url_launcher: ^6.3.0
+  app_links: ^6.3.0
+  crypto: ^3.0.3
 
 dev_dependencies:
   flutter_test:

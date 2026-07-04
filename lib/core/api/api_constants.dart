@@ -21,6 +21,10 @@ class ApiConstants {
   static const String authLoginOtp = '/auth/login/otp';
   static String authLoginOAuth(String provider) =>
       '/auth/login/oauth/$provider';
+  // Social login — two-phase flow (verify identity, then complete signup).
+  static String authOAuthVerify(String provider) =>
+      '/auth/oauth/$provider/verify';
+  static const String authOAuthSignup = '/auth/oauth/signup';
   static const String authVerifyOtp = '/auth/verify/otp';
   static const String authVerifyEmail = '/auth/verify/email';
   static const String authMe = '/auth/me';

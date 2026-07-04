@@ -7,6 +7,9 @@
   - `api_constants.dart`
 - `lib/core/auth/`
   - `token_storage.dart`
+- `lib/core/config/`
+  - `app_env.dart`
+  - `oauth_config.dart` (Google web client id, Discord client id/scheme/redirect)
 - `lib/core/errors/`
   - `app_exception.dart`
   - `error_snackbar.dart`
@@ -51,17 +54,22 @@
 - `lib/features/auth/`
   - `data/repositories/auth_repository.dart`
   - `data/repositories/admin_auth_repository.dart`
+  - `data/services/` (native social-login transport)
+    - `google_sign_in_service.dart` (google_sign_in 7.x → idToken)
+    - `discord_oauth_service.dart` (flutter_web_auth_2 → auth code)
   - `application/`
     - `auth_notifier.dart`
     - `admin_auth_notifier.dart`
     - `email_verification_notifier.dart`
     - `login_notifier.dart`
-    - `oauth_login_notifier.dart`
+    - `social_login_notifier.dart` (Google/Discord verify + needs-signup)
+    - `oauth_signup_notifier.dart` (phase 2: complete social signup)
     - `register_notifier.dart`
     - `otp_notifier.dart`
     - `password_reset_notifier.dart`
     - `splash_notifier.dart`
   - `presentation/screens/`
+    - `oauth_signup_details/oauth_signup_details_screen.dart`
   - `presentation/widgets/auth_input_field.dart`
   - No demo credential shortcut widgets remain in auth presentation
 - `lib/features/home/`

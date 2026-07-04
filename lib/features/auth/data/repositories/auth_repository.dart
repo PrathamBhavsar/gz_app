@@ -56,6 +56,47 @@ class RegisterResult {
   }
 }
 
+/// Profile fields the provider gave us, used to prefill the signup screen.
+class OAuthPrefill {
+  const OAuthPrefill({this.email, this.name, this.avatarUrl});
+
+  final String? email;
+  final String? name;
+  final String? avatarUrl;
+
+  factory OAuthPrefill.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return const OAuthPrefill();
+    return OAuthPrefill(
+      email: json['email']?.toString(),
+      name: json['name']?.toString(),
+      avatarUrl: json['avatarUrl']?.toString(),
+    );
+  }
+}
+
+/// Outcome of phase 1 (`/auth/oauth/:provider/verify`).
+sealed class OAuthVerifyResult {
+  const OAuthVerifyResult();
+}
+
+/// Identity already maps to an account — we have a full session.
+class OAuthExistingUser extends OAuthVerifyResult {
+  const OAuthExistingUser(this.session);
+  final AuthTokenResponse session;
+}
+
+/// No account yet — ask the user, then complete signup with [signupToken].
+class OAuthNewUser extends OAuthVerifyResult {
+  const OAuthNewUser({
+    required this.provider,
+    required this.signupToken,
+    required this.prefill,
+  });
+  final String provider;
+  final String signupToken;
+  final OAuthPrefill prefill;
+}
+
 class AuthRepository {
   AuthRepository(this._api, this._net, this._storage, this._ref);
 
@@ -143,20 +184,66 @@ class AuthRepository {
         'Password updated.';
   }
 
-  Future<AuthTokenResponse> exchangeOAuthCode({
+  /// Phase 1 — verify a provider identity. Google sends [idToken]; Discord
+  /// sends [code] + [redirectUri]. Returns either an existing-user session or a
+  /// new-user signup token (no account is created on the new-user path).
+  Future<OAuthVerifyResult> oauthVerify({
     required String provider,
-    required String code,
-    String? state,
+    String? idToken,
+    String? accessToken,
+    String? code,
     String? redirectUri,
   }) async {
     await _net.assertConnection();
+    final body = <String, dynamic>{
+      if (idToken != null && idToken.isNotEmpty) 'idToken': idToken,
+      if (accessToken != null && accessToken.isNotEmpty)
+        'accessToken': accessToken,
+      if (code != null && code.isNotEmpty) 'code': code,
+      if (redirectUri != null && redirectUri.isNotEmpty)
+        'redirectUri': redirectUri,
+    };
+
+    final raw =
+        await _api.post(ApiConstants.authOAuthVerify(provider), body: body)
+            as Map<String, dynamic>;
+    final data = raw['data'] is Map<String, dynamic>
+        ? raw['data'] as Map<String, dynamic>
+        : const <String, dynamic>{};
+
+    if (data['isNewUser'] == true) {
+      final signupToken = data['signupToken']?.toString();
+      if (signupToken == null || signupToken.isEmpty) {
+        throw const ApiException(
+          statusCode: 500,
+          message: 'Missing signup token in OAuth verify response',
+        );
+      }
+      return OAuthNewUser(
+        provider: provider,
+        signupToken: signupToken,
+        prefill: OAuthPrefill.fromJson(
+          data['prefill'] as Map<String, dynamic>?,
+        ),
+      );
+    }
+
+    return OAuthExistingUser(AuthTokenResponse.fromJson(raw));
+  }
+
+  /// Phase 2 — complete a social signup after the user confirms.
+  Future<AuthTokenResponse> oauthCompleteSignup({
+    required String signupToken,
+    required String name,
+    String? phone,
+  }) async {
+    await _net.assertConnection();
     final raw = await _api.post(
-      ApiConstants.authLoginOAuth(provider),
+      ApiConstants.authOAuthSignup,
       body: {
-        'code': code,
-        if (state != null && state.isNotEmpty) 'state': state,
-        if (redirectUri != null && redirectUri.isNotEmpty)
-          'redirectUri': redirectUri,
+        'signupToken': signupToken,
+        'name': name,
+        if (phone != null && phone.isNotEmpty) 'phone': phone,
       },
     );
     return AuthTokenResponse.fromJson(raw as Map<String, dynamic>);

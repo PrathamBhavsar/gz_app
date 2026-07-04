@@ -8,7 +8,7 @@ class AppRoutes {
   static const register                 = '/auth/register';
   static const otpVerification          = '/auth/otp';
   static const emailLogin               = '/auth/email-login';
-  static const oauthHandler             = '/auth/oauth-handler';
+  static const oauthSignupDetails       = '/auth/oauth/signup';
   static const forgotPassword           = '/auth/forgot-password';
   static const resetPassword            = '/auth/reset-password';
   static const emailVerificationPending = '/auth/email-verification-pending';

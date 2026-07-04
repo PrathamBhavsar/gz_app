@@ -8,12 +8,13 @@ import 'routes.dart';
 import '../../features/auth/presentation/screens/splash/splash_screen.dart';
 import '../../features/auth/application/admin_auth_notifier.dart';
 import '../../features/auth/application/auth_notifier.dart';
+import '../../features/auth/data/repositories/auth_repository.dart';
 import '../../features/auth/presentation/screens/onboarding/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/auth_landing/auth_landing_screen.dart';
 import '../../features/auth/presentation/screens/register/register_screen.dart';
 import '../../features/auth/presentation/screens/otp/otp_verification_screen.dart';
 import '../../features/auth/presentation/screens/email_login/email_login_screen.dart';
-import '../../features/auth/presentation/screens/oauth_handler/oauth_handler_screen.dart';
+import '../../features/auth/presentation/screens/oauth_signup_details/oauth_signup_details_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/reset_password/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/email_verification_pending/email_verification_pending_screen.dart';
@@ -122,6 +123,15 @@ final routerProvider = Provider<GoRouter>((ref) {
     overridePlatformDefaultLocation: true,
     refreshListenable: refreshListenable,
     redirect: (context, state) {
+      // The Discord OAuth callback (discord-<appId>:/authorize/callback) is
+      // captured out-of-band by DiscordOAuthService via app_links. Flutter also
+      // delivers it to go_router, so keep navigation on a valid route instead of
+      // trying to match the callback path.
+      if (state.uri.scheme.startsWith('discord-') ||
+          state.uri.path == '/authorize/callback') {
+        return AppRoutes.authLanding;
+      }
+
       final deepLinkRoute = _mapIncomingUriToRoute(state.uri);
       if (deepLinkRoute != null && deepLinkRoute != state.uri.toString()) {
         return deepLinkRoute;
@@ -158,13 +168,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const EmailLoginScreen(),
       ),
       GoRoute(
-        path: AppRoutes.oauthHandler,
-        builder: (context, state) => OAuthHandlerScreen(
-          provider: state.uri.queryParameters['provider'],
-          code: state.uri.queryParameters['code'],
-          stateParam: state.uri.queryParameters['state'],
-          redirectUri: state.uri.queryParameters['redirectUri'],
-        ),
+        path: AppRoutes.oauthSignupDetails,
+        builder: (context, state) =>
+            OAuthSignupDetailsScreen(newUser: state.extra as OAuthNewUser?),
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
@@ -536,7 +542,7 @@ String? _authRedirect(Ref ref, GoRouterState state) {
     AppRoutes.register,
     AppRoutes.otpVerification,
     AppRoutes.emailLogin,
-    AppRoutes.oauthHandler,
+    AppRoutes.oauthSignupDetails,
     AppRoutes.forgotPassword,
     AppRoutes.resetPassword,
     AppRoutes.emailVerificationPending,
@@ -621,21 +627,6 @@ String? _mapIncomingUriToRoute(Uri? uri) {
     return Uri(
       path: AppRoutes.adminPasswordReset,
       queryParameters: _tokenQuery(uri.queryParameters['token']),
-    ).toString();
-  }
-
-  if ((isAppScheme &&
-          uri.host == 'auth' &&
-          normalizedPath == '/oauth-handler') ||
-      normalizedPath == AppRoutes.oauthHandler) {
-    final redirectUri = uri.replace(queryParameters: const {}, fragment: null);
-    return Uri(
-      path: AppRoutes.oauthHandler,
-      queryParameters: {
-        ...uri.queryParameters,
-        if (redirectUri.toString().isNotEmpty)
-          'redirectUri': redirectUri.toString(),
-      },
     ).toString();
   }
 

@@ -27,6 +27,18 @@ class ValidationException extends AppException {
   const ValidationException(super.message);
 }
 
+/// User dismissed the Google account picker or the Discord consent screen.
+/// Treated as a silent no-op by the UI (no error toast).
+class OAuthCancelledException extends AppException {
+  const OAuthCancelledException([super.message = 'Sign-in cancelled']);
+}
+
+/// A provider is not configured yet (e.g. missing Google web client id, or an
+/// unregistered redirect). Surfaces a clear developer-facing message.
+class OAuthSetupException extends AppException {
+  const OAuthSetupException(super.message);
+}
+
 /// The kind of page-level error being displayed.
 enum AppPageErrorKind {
   /// Backend returned an error, or parsing failed.
