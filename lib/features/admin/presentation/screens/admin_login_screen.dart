@@ -10,6 +10,7 @@ import '../../../auth/presentation/widgets/auth_input_field.dart';
 import '../../../../core/errors/error_snackbar.dart';
 import '../../../../core/navigation/routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/widgets/gz_button.dart';
 import '../../../../shared/widgets/gz_top_bar.dart';
@@ -74,6 +75,20 @@ class _EmailLoginScreenState extends ConsumerState<AdminLoginScreen> {
   bool _showPassword = false;
   DateTime? _lastBackPress;
 
+  static const _staffCredentials = [
+    _CredentialShortcut('Urban', 'staff@urban-gamer.com', 'password123'),
+    _CredentialShortcut('Elite', 'staff@elite-esports.com', 'password123'),
+    _CredentialShortcut('Console', 'staff@console-corner.com', 'password123'),
+    _CredentialShortcut('Retro', 'staff@retro-pc.com', 'password123'),
+  ];
+
+  static const _adminCredentials = [
+    _CredentialShortcut('Urban', 'admin@urban-gamer.com', 'password123'),
+    _CredentialShortcut('Elite', 'admin@elite-esports.com', 'password123'),
+    _CredentialShortcut('Console', 'admin@console-corner.com', 'password123'),
+    _CredentialShortcut('Retro', 'admin@retro-pc.com', 'password123'),
+  ];
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -89,6 +104,13 @@ class _EmailLoginScreenState extends ConsumerState<AdminLoginScreen> {
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+  }
+
+  void _fillCredential(_CredentialShortcut credential) {
+    setState(() {
+      _emailController.text = credential.email;
+      _passwordController.text = credential.password;
+    });
   }
 
   void _onPop(bool didPop, Object? result) {
@@ -181,11 +203,19 @@ class _EmailLoginScreenState extends ConsumerState<AdminLoginScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  _CredentialShortcutRows(
+                    enabled: !isLoading,
+                    staffCredentials: _staffCredentials,
+                    adminCredentials: _adminCredentials,
+                    onSelected: _fillCredential,
+                  ),
                   const SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () => context.push(AppRoutes.adminPasswordReset),
+                      onPressed: () =>
+                          context.push(AppRoutes.adminPasswordReset),
                       child: Text(
                         'Forgot password?',
                         style: AppTypography.small.copyWith(
@@ -214,6 +244,120 @@ class _EmailLoginScreenState extends ConsumerState<AdminLoginScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CredentialShortcut {
+  const _CredentialShortcut(this.label, this.email, this.password);
+
+  final String label;
+  final String email;
+  final String password;
+}
+
+class _CredentialShortcutRows extends StatelessWidget {
+  const _CredentialShortcutRows({
+    required this.enabled,
+    required this.staffCredentials,
+    required this.adminCredentials,
+    required this.onSelected,
+  });
+
+  final bool enabled;
+  final List<_CredentialShortcut> staffCredentials;
+  final List<_CredentialShortcut> adminCredentials;
+  final ValueChanged<_CredentialShortcut> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _CredentialShortcutRow(
+          label: 'Staff',
+          credentials: staffCredentials,
+          enabled: enabled,
+          onSelected: onSelected,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        _CredentialShortcutRow(
+          label: 'Admin',
+          credentials: adminCredentials,
+          enabled: enabled,
+          onSelected: onSelected,
+        ),
+      ],
+    );
+  }
+}
+
+class _CredentialShortcutRow extends StatelessWidget {
+  const _CredentialShortcutRow({
+    required this.label,
+    required this.credentials,
+    required this.enabled,
+    required this.onSelected,
+  });
+
+  final String label;
+  final List<_CredentialShortcut> credentials;
+  final bool enabled;
+  final ValueChanged<_CredentialShortcut> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 44,
+          height: 32,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              label,
+              style: AppTypography.small.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                for (final credential in credentials) ...[
+                  ActionChip(
+                    label: Text(credential.label),
+                    onPressed: enabled ? () => onSelected(credential) : null,
+                    labelStyle: AppTypography.small.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    backgroundColor: AppColors.surface,
+                    disabledColor: AppColors.pillBg,
+                    side: const BorderSide(color: AppColors.rule),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.borderRadiusChip,
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

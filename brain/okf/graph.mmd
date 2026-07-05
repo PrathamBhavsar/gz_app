@@ -1,0 +1,26 @@
+```mermaid
+graph LR
+    concepts["concepts (glossary, project-brain,<br/>agent-model, okf)"]
+    systems["systems (9: shell, navigation, state,<br/>api, auth, ws, theme, errors, contract)"]
+    modules["modules (11 features,<br/>72 screens)"]
+    data["data (models, enums,<br/>local-storage)"]
+    flows["flows (9 UX journeys)"]
+    rules["rules (7)"]
+    workflows["workflows (2)"]
+    references["references (ux-flow, code-map,<br/>parity, backend-link, +legacy)"]
+
+    concepts --> systems
+    concepts --> rules
+    concepts --> workflows
+    systems --> modules
+    modules --> systems
+    modules --> data
+    modules --> flows
+    flows --> modules
+    rules --> modules
+    rules --> systems
+    references --> modules
+    references --> data
+    modules --> references
+    references -->|cross-repo| backend["gz_ideation/brain/okf"]
+```

@@ -8,6 +8,7 @@ import '../../../../../core/errors/app_exception.dart';
 import '../../../../../core/errors/error_snackbar.dart';
 import '../../../../../core/navigation/routes.dart';
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../application/login_notifier.dart';
 import '../../widgets/auth_input_field.dart';
@@ -26,6 +27,15 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
   final _passwordController = TextEditingController();
   bool _showPassword = false;
 
+  static const _playerCredentials = [
+    _CredentialShortcut('Teresa', 'teresa43@hotmail.com', 'password123'),
+    _CredentialShortcut('Iris', 'iris8@hotmail.com', 'password123'),
+    _CredentialShortcut('Joan', 'joan_ankunding80@yahoo.com', 'password123'),
+    _CredentialShortcut('Gerardo', 'gerardo.weissnat@yahoo.com', 'password123'),
+    _CredentialShortcut('Zakary', 'zakary66@yahoo.com', 'password123'),
+    _CredentialShortcut('Ian', 'ian.watsica@yahoo.com', 'password123'),
+  ];
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -41,6 +51,13 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+  }
+
+  void _fillCredential(_CredentialShortcut credential) {
+    setState(() {
+      _emailController.text = credential.email;
+      _passwordController.text = credential.password;
+    });
   }
 
   @override
@@ -114,6 +131,12 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 12),
+                _CredentialShortcutWrap(
+                  credentials: _playerCredentials,
+                  enabled: !isLoading,
+                  onSelected: _fillCredential,
+                ),
                 const SizedBox(height: 8),
                 Align(
                   alignment: Alignment.centerRight,
@@ -136,7 +159,8 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                 const SizedBox(height: 16),
                 Center(
                   child: TextButton(
-                    onPressed: () => context.pushReplacement(AppRoutes.register),
+                    onPressed: () =>
+                        context.pushReplacement(AppRoutes.register),
                     child: Text(
                       'Don\'t have an account? Register →',
                       style: AppTypography.body.copyWith(
@@ -150,6 +174,53 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CredentialShortcut {
+  const _CredentialShortcut(this.label, this.email, this.password);
+
+  final String label;
+  final String email;
+  final String password;
+}
+
+class _CredentialShortcutWrap extends StatelessWidget {
+  const _CredentialShortcutWrap({
+    required this.credentials,
+    required this.enabled,
+    required this.onSelected,
+  });
+
+  final List<_CredentialShortcut> credentials;
+  final bool enabled;
+  final ValueChanged<_CredentialShortcut> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: [
+        for (final credential in credentials)
+          ActionChip(
+            label: Text(credential.label),
+            onPressed: enabled ? () => onSelected(credential) : null,
+            labelStyle: AppTypography.small.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+            backgroundColor: AppColors.surface,
+            disabledColor: AppColors.pillBg,
+            side: const BorderSide(color: AppColors.rule),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.borderRadiusChip),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+            visualDensity: VisualDensity.compact,
+          ),
+      ],
     );
   }
 }
