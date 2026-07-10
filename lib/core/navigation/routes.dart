@@ -21,7 +21,6 @@ class AppRoutes {
 
   static const book             = '/book';
   static const bookAvailability = '/book/availability';
-  static const bookSystems      = '/book/systems';
   static const bookSummary      = '/book/summary';
   static const bookSuccess      = '/book/success';
 
@@ -71,6 +70,8 @@ class AppRoutes {
   // Admin App (Authenticated)
   static const adminDashboard    = '/admin/dashboard';
   static const adminSessions     = '/admin/sessions';
+  static const adminSystemSessions = '/admin/systems/:id/sessions';
+  static const adminSessionDetail  = '/admin/sessions/:id';
   static const adminWalkIn       = '/admin/walk-in';
   static const adminBookings     = '/admin/bookings';
   static const adminAnalytics    = '/admin/analytics';
@@ -115,4 +116,6 @@ class AppRoutes {
   static String adminAddSystemPath()               => '/admin/systems/add';
   static String adminEditSystemPath(String id)     => '/admin/systems/edit/$id';
   static String sessionLogsPath(String id)         => '/sessions/logs/$id';
+  static String adminSystemSessionsPath(String id) => '/admin/systems/$id/sessions';
+  static String adminSessionDetailPath(String id)  => '/admin/sessions/$id';
 }

@@ -72,8 +72,9 @@ class CampaignDetailScreen extends ConsumerWidget {
                       Container(
                         width: 48,
                         height: 48,
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: AppColors.overlayLight,
+                          color: AppColors.surface,
                           borderRadius: BorderRadius.circular(
                             AppSpacing.borderRadiusLg,
                           ),

@@ -84,10 +84,17 @@ class PaginatedStoresResponse extends PaginatedSuccessResponse<StoreModel> {
 // --- SYSTEMS ---
 class SystemResponse extends SuccessResponse<SystemModel> {
   const SystemResponse({super.message, super.data});
-  factory SystemResponse.fromJson(Map<String, dynamic> json) => SystemResponse(
-    message: json['message'] as String?,
-    data: json['data'] != null ? SystemModel.fromJson(json['data']) : null,
-  );
+  factory SystemResponse.fromJson(Map<String, dynamic> json) {
+    // The backend nests the system one level deeper: `data: { system: {...} }`.
+    final data = json['data'];
+    final systemJson = data is Map<String, dynamic>
+        ? (data['system'] as Map<String, dynamic>? ?? data)
+        : null;
+    return SystemResponse(
+      message: json['message'] as String?,
+      data: systemJson != null ? SystemModel.fromJson(systemJson) : null,
+    );
+  }
 }
 
 class PaginatedSystemsResponse extends PaginatedSuccessResponse<SystemModel> {
@@ -107,11 +114,17 @@ class PaginatedSystemsResponse extends PaginatedSuccessResponse<SystemModel> {
 // --- BOOKINGS ---
 class BookingResponse extends SuccessResponse<BookingModel> {
   const BookingResponse({super.message, super.data});
-  factory BookingResponse.fromJson(Map<String, dynamic> json) =>
-      BookingResponse(
-        message: json['message'] as String?,
-        data: json['data'] != null ? BookingModel.fromJson(json['data']) : null,
-      );
+  factory BookingResponse.fromJson(Map<String, dynamic> json) {
+    // The backend nests the booking one level deeper: `data: { booking: {...} }`.
+    final data = json['data'];
+    final bookingJson = data is Map<String, dynamic>
+        ? (data['booking'] as Map<String, dynamic>? ?? data)
+        : null;
+    return BookingResponse(
+      message: json['message'] as String?,
+      data: bookingJson != null ? BookingModel.fromJson(bookingJson) : null,
+    );
+  }
 }
 
 class PaginatedBookingsResponse extends PaginatedSuccessResponse<BookingModel> {
@@ -173,11 +186,17 @@ class PaginatedSessionsResponse extends PaginatedSuccessResponse<SessionModel> {
 // --- PAYMENTS ---
 class PaymentResponse extends SuccessResponse<PaymentModel> {
   const PaymentResponse({super.message, super.data});
-  factory PaymentResponse.fromJson(Map<String, dynamic> json) =>
-      PaymentResponse(
-        message: json['message'] as String?,
-        data: json['data'] != null ? PaymentModel.fromJson(json['data']) : null,
-      );
+  factory PaymentResponse.fromJson(Map<String, dynamic> json) {
+    // The backend nests the payment one level deeper: `data: { payment: {...} }`.
+    final data = json['data'];
+    final paymentJson = data is Map<String, dynamic>
+        ? (data['payment'] as Map<String, dynamic>? ?? data)
+        : null;
+    return PaymentResponse(
+      message: json['message'] as String?,
+      data: paymentJson != null ? PaymentModel.fromJson(paymentJson) : null,
+    );
+  }
 }
 
 class PaginatedPaymentsResponse extends PaginatedSuccessResponse<PaymentModel> {
@@ -201,13 +220,17 @@ class PaginatedPaymentsResponse extends PaginatedSuccessResponse<PaymentModel> {
 // --- CAMPAIGNS ---
 class CampaignResponse extends SuccessResponse<CampaignModel> {
   const CampaignResponse({super.message, super.data});
-  factory CampaignResponse.fromJson(Map<String, dynamic> json) =>
-      CampaignResponse(
-        message: json['message'] as String?,
-        data: json['data'] != null
-            ? CampaignModel.fromJson(json['data'])
-            : null,
-      );
+  factory CampaignResponse.fromJson(Map<String, dynamic> json) {
+    // The backend nests the campaign one level deeper: `data: { campaign: {...} }`.
+    final data = json['data'];
+    final campaignJson = data is Map<String, dynamic>
+        ? (data['campaign'] as Map<String, dynamic>? ?? data)
+        : null;
+    return CampaignResponse(
+      message: json['message'] as String?,
+      data: campaignJson != null ? CampaignModel.fromJson(campaignJson) : null,
+    );
+  }
 }
 
 class PaginatedCampaignsResponse
@@ -351,43 +374,15 @@ class SystemsListResponse extends SuccessResponse<List<SystemModel>> {
   }
 }
 
-// --- BOOKING AVAILABILITY SLOTS ---
-// Returns { slots: [{ startTime, endTime, status, systemCount }] }
+// --- BOOKING TIME WINDOW ---
+// Client-picked start/end for a booking. The backend has no endpoint that
+// buckets a day into hourly slots, so this is built locally from a chosen
+// start time rather than parsed from an API response.
 class AvailabilitySlot {
   final String? startTime;
   final String? endTime;
-  final String? status;
-  final int? systemCount;
 
-  const AvailabilitySlot({
-    this.startTime,
-    this.endTime,
-    this.status,
-    this.systemCount,
-  });
-
-  factory AvailabilitySlot.fromJson(Map<String, dynamic> json) =>
-      AvailabilitySlot(
-        startTime: json['startTime']?.toString(),
-        endTime: json['endTime']?.toString(),
-        status: json['status']?.toString(),
-        systemCount: json['systemCount'] as int?,
-      );
-}
-
-class AvailabilityResponse extends SuccessResponse<List<AvailabilitySlot>> {
-  const AvailabilityResponse({super.message, super.data});
-
-  factory AvailabilityResponse.fromJson(Map<String, dynamic> json) {
-    final rawSlots =
-        json['slots'] as List<dynamic>? ?? json['data'] as List<dynamic>?;
-    return AvailabilityResponse(
-      message: json['message'] as String?,
-      data: rawSlots
-          ?.map((e) => AvailabilitySlot.fromJson(e as Map<String, dynamic>))
-          .toList(),
-    );
-  }
+  const AvailabilitySlot({this.startTime, this.endTime});
 }
 
 // --- CAMPAIGN REDEMPTION ---
@@ -439,15 +434,20 @@ class NotificationListResponse
 class NotificationResponse extends SuccessResponse<NotificationModel> {
   const NotificationResponse({super.message, super.data});
 
-  factory NotificationResponse.fromJson(Map<String, dynamic> json) =>
-      NotificationResponse(
-        message: json['message'] as String?,
-        data: json['notification'] != null
-            ? NotificationModel.fromJson(
-                json['notification'] as Map<String, dynamic>,
-              )
-            : null,
-      );
+  factory NotificationResponse.fromJson(Map<String, dynamic> json) {
+    // The backend nests the notification one level deeper:
+    // `data: { notification: {...} }`.
+    final data = json['data'];
+    final notificationJson = data is Map<String, dynamic>
+        ? (data['notification'] as Map<String, dynamic>? ?? data)
+        : null;
+    return NotificationResponse(
+      message: json['message'] as String?,
+      data: notificationJson != null
+          ? NotificationModel.fromJson(notificationJson)
+          : null,
+    );
+  }
 }
 
 class NotificationPreferencesResponse
@@ -572,17 +572,35 @@ class BillingRow {
 
   factory BillingRow.fromJson(Map<String, dynamic> json) => BillingRow(
     id: json['id']?.toString() ?? '',
-    storeId: json['store_id']?.toString() ?? '',
-    sessionId: json['session_id']?.toString(),
-    storeName: json['store_name']?.toString(),
-    systemName: json['system_name']?.toString(),
-    date: json['date'] != null
-        ? DateTime.tryParse(json['date'].toString())
+    storeId: (json['store_id'] ?? json['storeId'])?.toString() ?? '',
+    sessionId: (json['session_id'] ?? json['sessionId'])?.toString(),
+    storeName: json['store_name']?.toString() ?? json['storeName']?.toString(),
+    systemName:
+        json['system_name']?.toString() ?? json['systemName']?.toString(),
+    // Billing ledger rows carry no bare `date`/`duration_minutes`/`amount` —
+    // the sanitized shape uses `billedFrom`/`billedMinutes`/`netAmount`.
+    date: (json['date'] ?? json['billed_from'] ?? json['billedFrom']) != null
+        ? DateTime.tryParse(
+            (json['date'] ?? json['billed_from'] ?? json['billedFrom'])
+                .toString(),
+          )
         : null,
-    durationMinutes: json['duration_minutes'] as int?,
-    amount: double.tryParse(json['amount']?.toString() ?? '') ?? 0.0,
-    method: json['method']?.toString(),
-    status: json['status']?.toString(),
+    durationMinutes:
+        (json['duration_minutes'] ??
+                json['durationMinutes'] ??
+                json['billedMinutes'])
+            as int?,
+    amount:
+        double.tryParse(
+          (json['amount'] ?? json['net_amount'] ?? json['netAmount'])
+                  ?.toString() ??
+              '',
+        ) ??
+        0.0,
+    // Billing ledger rows have no `method`/`status` of their own — those
+    // live on the joined payment record, exposed as `paymentMethod`/`paymentStatus`.
+    method: json['method']?.toString() ?? json['paymentMethod']?.toString(),
+    status: json['status']?.toString() ?? json['paymentStatus']?.toString(),
   );
 }
 

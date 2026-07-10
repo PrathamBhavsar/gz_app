@@ -113,6 +113,7 @@ class WalletRepository {
 
     final raw = await _api.post(
       _store(ApiConstants.playerCampaignRedeem, id: campaignId),
+      body: const {},
     );
     final map = _asMap(raw);
     return map['message']?.toString() ?? 'Campaign redeemed successfully';

@@ -470,7 +470,6 @@ class _PaymentMethodCard extends StatelessWidget {
     PaymentMethod.upi,
     PaymentMethod.card,
     PaymentMethod.cash,
-    PaymentMethod.wallet,
     PaymentMethod.credits,
   ];
 

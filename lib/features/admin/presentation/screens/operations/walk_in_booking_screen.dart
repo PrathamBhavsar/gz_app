@@ -65,10 +65,7 @@ class _WalkInBookingScreenState extends ConsumerState<WalkInBookingScreen> {
     final submitState = ref.watch(adminWalkInNotifierProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: GzAdminTopBar(
-        title: 'Walk-in Booking',
-        onBack: () => context.go(AppRoutes.adminDashboard),
-      ),
+      appBar: const GzAdminTopBar(title: 'Walk-in Booking'),
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(

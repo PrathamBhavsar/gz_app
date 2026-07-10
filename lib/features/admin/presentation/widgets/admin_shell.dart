@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/navigation/routes.dart';
 import '../../../../shared/widgets/gz_admin_bottom_nav.dart';
@@ -12,6 +13,29 @@ class AdminShell extends StatefulWidget {
 }
 
 class _AdminShellState extends State<AdminShell> {
+  DateTime? _lastBackPress;
+
+  void _onPop(bool didPop, Object? result) {
+    if (didPop) return;
+    if (_selectedTab(context) != GzAdminTab.dashboard) {
+      context.go(AppRoutes.adminDashboard);
+      return;
+    }
+    final now = DateTime.now();
+    if (_lastBackPress == null ||
+        now.difference(_lastBackPress!) > const Duration(seconds: 2)) {
+      _lastBackPress = now;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Press back again to exit'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      SystemNavigator.pop();
+    }
+  }
+
   bool _showsBottomNav(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
     return location == AppRoutes.adminDashboard ||
@@ -67,14 +91,18 @@ class _AdminShellState extends State<AdminShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: widget.child,
-      bottomNavigationBar: _showsBottomNav(context)
-          ? GzAdminBottomNav(
-              currentTab: _selectedTab(context),
-              onTap: (tab) => _onTap(context, tab),
-            )
-          : null,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: _onPop,
+      child: Scaffold(
+        body: widget.child,
+        bottomNavigationBar: _showsBottomNav(context)
+            ? GzAdminBottomNav(
+                currentTab: _selectedTab(context),
+                onTap: (tab) => _onTap(context, tab),
+              )
+            : null,
+      ),
     );
   }
 }

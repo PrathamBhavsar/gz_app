@@ -24,8 +24,9 @@ class SystemsRepository {
 
     final raw = await _api.get(
       _withQuery(_store(ApiConstants.systemsAvailable), {
-        if (startTime != null) 'startTime': startTime.toIso8601String(),
-        if (endTime != null) 'endTime': endTime.toIso8601String(),
+        if (startTime != null)
+          'startTime': startTime.toUtc().toIso8601String(),
+        if (endTime != null) 'endTime': endTime.toUtc().toIso8601String(),
         if (systemTypeId != null && systemTypeId.isNotEmpty)
           'systemTypeId': systemTypeId,
       }),

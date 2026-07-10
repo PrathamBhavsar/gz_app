@@ -21,20 +21,20 @@ class NotificationModel {
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) => NotificationModel(
     id: json['id']?.toString(),
-    storeId: json['store_id']?.toString(),
-    userId: json['user_id']?.toString(),
+    storeId: (json['store_id'] ?? json['storeId'])?.toString(),
+    userId: (json['user_id'] ?? json['userId'])?.toString(),
     channel: json['channel']?.toString().toNotificationChannel(),
     status: json['status']?.toString().toNotificationStatus(),
     title: json['title']?.toString(),
     body: json['body']?.toString(),
-    scheduledAt: json['scheduled_at'] != null ? DateTime.tryParse(json['scheduled_at'].toString()) : null,
-    sentAt: json['sent_at'] != null ? DateTime.tryParse(json['sent_at'].toString()) : null,
-    deliveredAt: json['delivered_at'] != null ? DateTime.tryParse(json['delivered_at'].toString()) : null,
-    readAt: json['read_at'] != null ? DateTime.tryParse(json['read_at'].toString()) : null,
-    referenceType: json['reference_type']?.toString(),
-    referenceId: json['reference_id']?.toString(),
+    scheduledAt: (json['scheduled_at'] ?? json['scheduledAt']) != null ? DateTime.tryParse((json['scheduled_at'] ?? json['scheduledAt']).toString()) : null,
+    sentAt: (json['sent_at'] ?? json['sentAt']) != null ? DateTime.tryParse((json['sent_at'] ?? json['sentAt']).toString()) : null,
+    deliveredAt: (json['delivered_at'] ?? json['deliveredAt']) != null ? DateTime.tryParse((json['delivered_at'] ?? json['deliveredAt']).toString()) : null,
+    readAt: (json['read_at'] ?? json['readAt']) != null ? DateTime.tryParse((json['read_at'] ?? json['readAt']).toString()) : null,
+    referenceType: json['reference_type']?.toString() ?? json['referenceType']?.toString(),
+    referenceId: json['reference_id']?.toString() ?? json['referenceId']?.toString(),
     gatewayResponse: json['gateway_response'] as Map<String, dynamic>?,
-    createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) : null,
+    createdAt: (json['created_at'] ?? json['createdAt']) != null ? DateTime.tryParse((json['created_at'] ?? json['createdAt']).toString()) : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -59,13 +59,13 @@ class NotificationPreferenceModel {
 
   factory NotificationPreferenceModel.fromJson(Map<String, dynamic> json) => NotificationPreferenceModel(
     id: json['id']?.toString(),
-    userId: json['user_id']?.toString(),
-    storeId: json['store_id']?.toString(),
+    userId: (json['user_id'] ?? json['userId'])?.toString(),
+    storeId: (json['store_id'] ?? json['storeId'])?.toString(),
     channel: json['channel']?.toString().toNotificationChannel(),
-    notificationGroup: json['notification_group']?.toString(),
-    isEnabled: json['is_enabled'] as bool?,
-    createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) : null,
-    updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at'].toString()) : null,
+    notificationGroup: json['notification_group']?.toString() ?? json['notificationGroup']?.toString(),
+    isEnabled: (json['is_enabled'] ?? json['isEnabled']) as bool?,
+    createdAt: (json['created_at'] ?? json['createdAt']) != null ? DateTime.tryParse((json['created_at'] ?? json['createdAt']).toString()) : null,
+    updatedAt: (json['updated_at'] ?? json['updatedAt']) != null ? DateTime.tryParse((json['updated_at'] ?? json['updatedAt']).toString()) : null,
   );
 
   Map<String, dynamic> toJson() => {

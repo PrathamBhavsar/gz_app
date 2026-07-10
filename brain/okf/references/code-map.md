@@ -44,6 +44,7 @@ timestamp: 2026-07-04
   - `api_responses.dart`
   - `api_responses_admin.dart`
   - `core.dart`
+  - `domain_activity.dart` (AdminActivityItem — unified admin session/booking feed entry)
   - `domain_admin.dart`
   - `domain_analytics.dart`
   - `domain_billing.dart`
@@ -58,6 +59,7 @@ timestamp: 2026-07-04
   - Base UI primitives and shell widgets
   - Error/loading widgets: `page_error_display.dart`, `gz_loading_view.dart`
   - Common overlays: `otp_input_sheet.dart`, `store_selector_sheet.dart`
+  - Admin activity: `gz_session_timeline.dart` (shared session log timeline), `gz_activity_card.dart` (shared session/booking feed row)
 
 ## Features
 - `lib/features/auth/`
@@ -94,7 +96,6 @@ timestamp: 2026-07-04
     - `booking_repository.dart`
     - `systems_repository.dart`
   - `application/`
-    - `availability_notifier.dart`
     - `booking_form_notifier.dart`
     - `booking_notifier.dart`
     - `booking_payment_notifier.dart`
@@ -163,6 +164,7 @@ timestamp: 2026-07-04
     - `admin_bookings_repository.dart`
     - `admin_credits_repository.dart`
     - `admin_dashboard_repository.dart`
+    - `admin_activity_repository.dart` (unified session/booking feed — `GET .../sessions/feed`)
     - `admin_sessions_repository.dart`
     - `admin_store_repository_support.dart`
     - `analytics_repository.dart`
@@ -200,7 +202,9 @@ timestamp: 2026-07-04
     - `admin_system_type_command_notifier.dart`
     - `admin_systems_notifier.dart`
     - `admin_session_command_notifier.dart`
-    - `admin_sessions_notifier.dart`
+    - `admin_sessions_notifier.dart` (store-wide activity feed for Session Management tabs)
+    - `admin_system_sessions_notifier.dart` (per-system activity for SystemSessionsScreen)
+    - `admin_session_timeline_notifier.dart` (session detail + logs for SessionTimelineScreen)
     - `admin_walk_in_notifier.dart`
     - `billing_override_notifier.dart`
     - `pricing_rule_command_notifier.dart`
@@ -241,7 +245,9 @@ timestamp: 2026-07-04
     - `cancel_booking_sheet.dart`
     - `end_session_sheet.dart`
     - `extend_session_sheet.dart`
-    - `session_management_screen.dart`
+    - `session_management_screen.dart` (store-wide All/Current/Incoming/Past tabs)
+    - `system_sessions_screen.dart` (per-system live/incoming/past view, opened from dashboard tile tap)
+    - `session_timeline_screen.dart` (session detail + shared GzSessionTimeline)
     - `walk_in_booking_screen.dart`
   - `presentation/screens/store/`
     - `add_edit_system_screen.dart`
@@ -274,3 +280,4 @@ Models remain centralized in `lib/models/`.
 - WP2 decision-flow parity fixes added backend support for player logout, phone-change OTP verification, and owner-scoped player session logs; the app now parses the backend session detail/log payload shapes and renders an explicit empty logs state.
 - WP3 unreachable-admin-endpoint parity fixes wired system key regeneration, billing ledger detail, payment detail, and bill generation into the existing admin flows; detail drill-downs use dedicated read-only sheets and end-session now finalizes billing through the backend billing route.
 - WP4 auth/profile coverage pass aligned `PATCH /auth/me` with the backend's name-only contract and surfaced player profile verification/member-since fields from `GET /auth/me` using existing shared widgets.
+- WP5 admin sessions/systems redesign: backend now enriches session responses (user/system/booking joins) and `systems/live` returns `currentSession`; added `GET /stores/:storeId/sessions/feed` (unified session+booking activity, rolling 7-day window, incoming dedup against linked sessions). Frontend: dashboard tile tap now opens `SystemSessionsScreen` (`/admin/systems/:id/sessions`) instead of Session Management; `SessionManagementScreen` rebuilt as a store-wide All/Current/Incoming/Past tabbed feed; new `SessionTimelineScreen` (`/admin/sessions/:id`) is the shared "open a session" destination, rendering `GzSessionTimeline` + `GzActivityCard`.

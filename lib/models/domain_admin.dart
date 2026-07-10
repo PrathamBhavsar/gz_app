@@ -36,11 +36,19 @@ class StoreConfigModel {
 
   factory StoreConfigModel.fromJson(Map<String, dynamic> json) =>
       StoreConfigModel(
-        storeId: json['store_id']?.toString(),
-        bookingWindowMinutes: json['booking_window_minutes'] as int?,
-        paymentWindowMinutes: json['payment_window_minutes'] as int?,
-        noShowGraceMinutes: json['no_show_grace_minutes'] as int?,
-        checkInEarlyMinutes: json['check_in_early_minutes'] as int?,
+        storeId: (json['store_id'] ?? json['storeId'])?.toString(),
+        bookingWindowMinutes:
+            (json['booking_window_minutes'] ?? json['bookingWindowMinutes'])
+                as int?,
+        paymentWindowMinutes:
+            (json['payment_window_minutes'] ?? json['paymentWindowMinutes'])
+                as int?,
+        noShowGraceMinutes:
+            (json['no_show_grace_minutes'] ?? json['noShowGraceMinutes'])
+                as int?,
+        checkInEarlyMinutes:
+            (json['check_in_early_minutes'] ?? json['checkInEarlyMinutes'])
+                as int?,
         maxBookingDurationMinutes: json['max_booking_duration_minutes'] as int?,
         autoStartSessionOnCheckIn:
             json['auto_start_session_on_check_in'] as bool?,
@@ -425,7 +433,7 @@ class LiveSystemStatusModel {
 
   factory LiveSystemStatusModel.fromJson(Map<String, dynamic> json) =>
       LiveSystemStatusModel(
-        systemId: json['systemId']?.toString(),
+        systemId: (json['id'] ?? json['systemId'])?.toString(),
         name: json['name']?.toString(),
         stationNumber: json['stationNumber'] as int?,
         platform: json['platform']?.toString(),

@@ -42,31 +42,45 @@ class PricingRuleModel {
   factory PricingRuleModel.fromJson(Map<String, dynamic> json) =>
       PricingRuleModel(
         id: json['id']?.toString(),
-        storeId: json['store_id']?.toString(),
-        systemTypeId: json['system_type_id']?.toString(),
+        storeId: (json['store_id'] ?? json['storeId'])?.toString(),
+        systemTypeId:
+            (json['system_type_id'] ?? json['systemTypeId'])?.toString(),
         name: json['name']?.toString(),
-        ruleType: json['rule_type']?.toString().toPricingRuleType(),
-        dayOfWeek: (json['day_of_week'] as List<dynamic>?)
+        ruleType: (json['rule_type'] ?? json['ruleType'])
+            ?.toString()
+            .toPricingRuleType(),
+        dayOfWeek: ((json['day_of_week'] ?? json['dayOfWeek']) as List<dynamic>?)
             ?.map((e) => e as int)
             .toList(),
-        startTime: json['start_time']?.toString(),
-        endTime: json['end_time']?.toString(),
+        startTime:
+            json['start_time']?.toString() ?? json['startTime']?.toString(),
+        endTime: json['end_time']?.toString() ?? json['endTime']?.toString(),
         multiplier: double.tryParse(json['multiplier']?.toString() ?? ''),
-        fixedRate: double.tryParse(json['fixed_rate']?.toString() ?? ''),
-        minTier: json['min_tier'] as int?,
+        fixedRate: double.tryParse(
+          (json['fixed_rate'] ?? json['fixedRate'])?.toString() ?? '',
+        ),
+        minTier: (json['min_tier'] ?? json['minTier']) as int?,
         priority: json['priority'] as int?,
-        isActive: json['is_active'] as bool?,
-        validFrom: json['valid_from'] != null
-            ? DateTime.tryParse(json['valid_from'].toString())
+        isActive: (json['is_active'] ?? json['isActive']) as bool?,
+        validFrom: (json['valid_from'] ?? json['validFrom']) != null
+            ? DateTime.tryParse(
+                (json['valid_from'] ?? json['validFrom']).toString(),
+              )
             : null,
-        validUntil: json['valid_until'] != null
-            ? DateTime.tryParse(json['valid_until'].toString())
+        validUntil: (json['valid_until'] ?? json['validUntil']) != null
+            ? DateTime.tryParse(
+                (json['valid_until'] ?? json['validUntil']).toString(),
+              )
             : null,
-        createdAt: json['created_at'] != null
-            ? DateTime.tryParse(json['created_at'].toString())
+        createdAt: (json['created_at'] ?? json['createdAt']) != null
+            ? DateTime.tryParse(
+                (json['created_at'] ?? json['createdAt']).toString(),
+              )
             : null,
-        updatedAt: json['updated_at'] != null
-            ? DateTime.tryParse(json['updated_at'].toString())
+        updatedAt: (json['updated_at'] ?? json['updatedAt']) != null
+            ? DateTime.tryParse(
+                (json['updated_at'] ?? json['updatedAt']).toString(),
+              )
             : null,
       );
 
@@ -417,30 +431,41 @@ class BillingDisputeModel {
   factory BillingDisputeModel.fromJson(Map<String, dynamic> json) =>
       BillingDisputeModel(
         id: json['id']?.toString(),
-        storeId: json['store_id']?.toString(),
-        billingId: json['billing_id']?.toString(),
-        sessionId: json['session_id']?.toString(),
-        userId: json['user_id']?.toString(),
+        storeId: (json['store_id'] ?? json['storeId'])?.toString(),
+        billingId: (json['billing_id'] ?? json['billingId'])?.toString(),
+        sessionId: (json['session_id'] ?? json['sessionId'])?.toString(),
+        userId: (json['user_id'] ?? json['userId'])?.toString(),
         status: json['status']?.toString().toDisputeStatus(),
         reason: json['reason']?.toString(),
         disputeAmount: double.tryParse(
-          json['dispute_amount']?.toString() ?? '',
+          (json['dispute_amount'] ?? json['disputeAmount'])?.toString() ?? '',
         ),
         resolution: json['resolution']?.toString().toDisputeResolution(),
         resolutionAmount: double.tryParse(
-          json['resolution_amount']?.toString() ?? '',
+          (json['resolution_amount'] ?? json['resolutionAmount'])
+                  ?.toString() ??
+              '',
         ),
-        resolvedBy: json['resolved_by']?.toString(),
-        resolvedAt: json['resolved_at'] != null
-            ? DateTime.tryParse(json['resolved_at'].toString())
+        resolvedBy:
+            json['resolved_by']?.toString() ?? json['resolvedBy']?.toString(),
+        resolvedAt: (json['resolved_at'] ?? json['resolvedAt']) != null
+            ? DateTime.tryParse(
+                (json['resolved_at'] ?? json['resolvedAt']).toString(),
+              )
             : null,
-        resolutionNotes: json['resolution_notes']?.toString(),
+        resolutionNotes:
+            json['resolution_notes']?.toString() ??
+            json['resolutionNotes']?.toString(),
         metadata: json['metadata'] as Map<String, dynamic>?,
-        createdAt: json['created_at'] != null
-            ? DateTime.tryParse(json['created_at'].toString())
+        createdAt: (json['created_at'] ?? json['createdAt']) != null
+            ? DateTime.tryParse(
+                (json['created_at'] ?? json['createdAt']).toString(),
+              )
             : null,
-        updatedAt: json['updated_at'] != null
-            ? DateTime.tryParse(json['updated_at'].toString())
+        updatedAt: (json['updated_at'] ?? json['updatedAt']) != null
+            ? DateTime.tryParse(
+                (json['updated_at'] ?? json['updatedAt']).toString(),
+              )
             : null,
       );
 

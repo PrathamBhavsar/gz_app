@@ -54,6 +54,10 @@ class AdminAuthNotifier extends Notifier<AdminAuthSessionState> {
   }
 
   Future<void> logout() async {
+    if (state is AdminAuthLoading || state is AdminAuthUnauthenticated) {
+      return;
+    }
+
     state = const AdminAuthLoading();
     try {
       await ref.read(adminAuthRepositoryProvider).logout();

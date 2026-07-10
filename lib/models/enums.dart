@@ -6,7 +6,7 @@ enum PaymentMethod { cash, card, upi, wallet, credits }
 enum PaymentStatus { pending, completed, failed, refunded }
 enum PricingRuleType { base, peak, offPeak, weekend, custom }
 enum OverrideType { price, duration, both }
-enum AuthMethod { phoneOtp, emailPassword, googleOauth, appleOauth }
+enum AuthMethod { phoneOtp, emailPassword, googleOauth, appleOauth, discordOauth }
 enum AdminRole { superAdmin, admin, staff }
 enum SystemPlatform { pc, ps5, ps4, xbox, vr, other }
 enum DisputeStatus { open, underReview, resolved, withdrawn }

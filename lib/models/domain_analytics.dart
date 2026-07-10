@@ -193,15 +193,19 @@ class UtilizationHourModel {
 
   factory UtilizationHourModel.fromJson(Map<String, dynamic> json) =>
       UtilizationHourModel(
-        storeId: json['store_id']?.toString(),
-        summaryDate: json['summary_date']?.toString(),
-        hourOfDay: json['hour_of_day'] as int?,
-        sessionsStarted: json['sessions_started'] as int?,
-        sessionsEnded: json['sessions_ended'] as int?,
-        activeSessionsPeak: json['active_sessions_peak'] as int?,
+        storeId: (json['store_id'] ?? json['storeId'])?.toString(),
+        summaryDate:
+            json['summary_date']?.toString() ?? json['summaryDate']?.toString(),
+        hourOfDay: (json['hour_of_day'] ?? json['hourOfDay']) as int?,
+        sessionsStarted:
+            (json['sessions_started'] ?? json['sessionsStarted']) as int?,
+        sessionsEnded: (json['sessions_ended'] ?? json['sessionsEnded']) as int?,
+        activeSessionsPeak:
+            (json['active_sessions_peak'] ?? json['activeSessionsPeak'])
+                as int?,
         revenue: json['revenue']?.toString(),
-        systemsInUse: json['systems_in_use'] as int?,
-        totalSystems: json['total_systems'] as int?,
+        systemsInUse: (json['systems_in_use'] ?? json['systemsInUse']) as int?,
+        totalSystems: (json['total_systems'] ?? json['totalSystems']) as int?,
       );
 
   Map<String, dynamic> toJson() => {

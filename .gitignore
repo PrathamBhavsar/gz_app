@@ -49,3 +49,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /creds.txt
+
+# understand-anything tool scratch/generated output
+.understand-anything/

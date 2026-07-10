@@ -4,7 +4,6 @@ import '../../../models/api_responses.dart';
 import '../../../models/domain_loyalty.dart';
 import '../../../models/domain_systems.dart';
 import '../../../models/enums.dart';
-import '../../../shared/widgets/gz_tag.dart';
 
 const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const _months = [
@@ -157,23 +156,27 @@ String systemSpecsLabel(SystemModel system) {
   return parts.join(' · ');
 }
 
-GzTagKind availabilityTagKind(String? status) => switch (status) {
-  'available' => GzTagKind.ok,
-  'walk_in_only' => GzTagKind.warn,
-  'booked' => GzTagKind.mute,
-  _ => GzTagKind.info,
-};
+const bookingSlotDurationMinutes = 60;
+const bookingWindowStartHour = 10;
+const bookingWindowEndHour = 23;
 
-String availabilityStatusLabel(String? status) => switch (status) {
-  'available' => 'Available',
-  'walk_in_only' => 'Walk-in only',
-  'booked' => 'Booked',
-  _ => 'Unknown',
-};
-
-bool isBookableSlot(AvailabilitySlot slot) {
-  final count = slot.systemCount ?? 0;
-  return slot.status == 'available' && count > 0;
+/// Hourly booking start times for [date], each [bookingSlotDurationMinutes]
+/// long, bounded by the store's assumed [bookingWindowStartHour]-
+/// [bookingWindowEndHour] window. Past start times are excluded when [date]
+/// is today.
+List<DateTime> generateBookingSlotStarts(DateTime date) {
+  final now = DateTime.now();
+  final isToday =
+      date.year == now.year && date.month == now.month && date.day == now.day;
+  final starts = <DateTime>[];
+  for (var hour = bookingWindowStartHour; hour < bookingWindowEndHour; hour++) {
+    final start = DateTime(date.year, date.month, date.day, hour);
+    if (isToday && !start.isAfter(now)) {
+      continue;
+    }
+    starts.add(start);
+  }
+  return starts;
 }
 
 dynamic platformIcon(SystemPlatform? platform) => switch (platform) {

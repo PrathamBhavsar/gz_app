@@ -32,22 +32,28 @@ class CreditLedgerModel {
   factory CreditLedgerModel.fromJson(Map<String, dynamic> json) =>
       CreditLedgerModel(
         id: json['id']?.toString(),
-        storeId: json['store_id']?.toString(),
-        userId: json['user_id']?.toString(),
-        transactionType: json['transaction_type']
+        storeId: (json['store_id'] ?? json['storeId'])?.toString(),
+        userId: (json['user_id'] ?? json['userId'])?.toString(),
+        transactionType: (json['transaction_type'] ?? json['transactionType'])
             ?.toString()
             .toCreditTransactionType(),
         amount: double.tryParse(json['amount']?.toString() ?? ''),
-        balanceAfter: double.tryParse(json['balance_after']?.toString() ?? ''),
-        sourceId: json['source_id']?.toString(),
-        sourceType: json['source_type']?.toString(),
+        balanceAfter: double.tryParse(
+          (json['balance_after'] ?? json['balanceAfter'])?.toString() ?? '',
+        ),
+        sourceId: (json['source_id'] ?? json['sourceId'])?.toString(),
+        sourceType: (json['source_type'] ?? json['sourceType'])?.toString(),
         description: json['description']?.toString(),
-        expiresAt: json['expires_at'] != null
-            ? DateTime.tryParse(json['expires_at'].toString())
+        expiresAt: (json['expires_at'] ?? json['expiresAt']) != null
+            ? DateTime.tryParse(
+                (json['expires_at'] ?? json['expiresAt']).toString(),
+              )
             : null,
         metadata: json['metadata'] as Map<String, dynamic>?,
-        createdAt: json['created_at'] != null
-            ? DateTime.tryParse(json['created_at'].toString())
+        createdAt: (json['created_at'] ?? json['createdAt']) != null
+            ? DateTime.tryParse(
+                (json['created_at'] ?? json['createdAt']).toString(),
+              )
             : null,
       );
 
@@ -88,7 +94,7 @@ class CreditBalanceModel {
     Map<String, dynamic> json,
   ) => CreditBalanceModel(
     storeId: (json['store_id'] ?? json['storeId'])?.toString(),
-    userId: json['user_id']?.toString(),
+    userId: (json['user_id'] ?? json['userId'])?.toString(),
     storeName: json['store_name']?.toString() ?? json['storeName']?.toString(),
     currentBalance: double.tryParse(
       (json['current_balance'] ?? json['balance'])?.toString() ?? '',
@@ -162,38 +168,55 @@ class CampaignModel {
 
   factory CampaignModel.fromJson(Map<String, dynamic> json) => CampaignModel(
     id: json['id']?.toString(),
-    storeId: json['store_id']?.toString(),
+    storeId: (json['store_id'] ?? json['storeId'])?.toString(),
     name: json['name']?.toString(),
-    campaignType: (json['campaign_type'] ?? json['type'])
+    campaignType: (json['campaign_type'] ?? json['campaignType'] ?? json['type'])
         ?.toString()
         .toCampaignType(),
     status: json['status']?.toString().toCampaignStatus(),
     value: double.tryParse(
-      (json['value'] ?? json['discount_value'])?.toString() ?? '',
+      (json['value'] ?? json['discount_value'] ?? json['discountValue'])
+              ?.toString() ??
+          '',
     ),
-    minTier: json['min_tier'] as int?,
-    maxRedemptions: json['max_redemptions'] as int?,
+    minTier: (json['min_tier'] ?? json['minTier']) as int?,
+    maxRedemptions: (json['max_redemptions'] ?? json['maxRedemptions']) as int?,
     currentRedemptions:
-        (json['current_redemptions'] ?? json['redemption_count']) as int?,
-    maxPerUser: json['max_per_user'] as int?,
-    validFrom: json['valid_from'] != null
-        ? DateTime.tryParse(json['valid_from'].toString())
+        (json['current_redemptions'] ??
+                json['currentRedemptions'] ??
+                json['redemption_count'] ??
+                json['redemptionCount'])
+            as int?,
+    maxPerUser: (json['max_per_user'] ?? json['maxPerUser']) as int?,
+    validFrom: (json['valid_from'] ?? json['validFrom']) != null
+        ? DateTime.tryParse((json['valid_from'] ?? json['validFrom']).toString())
         : null,
-    validUntil: json['valid_until'] != null
-        ? DateTime.tryParse(json['valid_until'].toString())
+    validUntil: (json['valid_until'] ?? json['validUntil']) != null
+        ? DateTime.tryParse(
+            (json['valid_until'] ?? json['validUntil']).toString(),
+          )
         : null,
-    applicableSystemTypes: (json['applicable_system_types'] as List<dynamic>?)
-        ?.map((e) => e.toString())
-        .toList(),
+    applicableSystemTypes:
+        (json['applicable_system_types'] ?? json['applicableSystemTypes'])
+            is List<dynamic>
+        ? ((json['applicable_system_types'] ?? json['applicableSystemTypes'])
+                  as List<dynamic>)
+              .map((e) => e.toString())
+              .toList()
+        : null,
     description: json['description']?.toString(),
     terms: json['terms']?.toString(),
     metadata: json['metadata'] as Map<String, dynamic>?,
-    createdBy: json['created_by']?.toString(),
-    createdAt: json['created_at'] != null
-        ? DateTime.tryParse(json['created_at'].toString())
+    createdBy: json['created_by']?.toString() ?? json['createdBy']?.toString(),
+    createdAt: (json['created_at'] ?? json['createdAt']) != null
+        ? DateTime.tryParse(
+            (json['created_at'] ?? json['createdAt']).toString(),
+          )
         : null,
-    updatedAt: json['updated_at'] != null
-        ? DateTime.tryParse(json['updated_at'].toString())
+    updatedAt: (json['updated_at'] ?? json['updatedAt']) != null
+        ? DateTime.tryParse(
+            (json['updated_at'] ?? json['updatedAt']).toString(),
+          )
         : null,
   );
 
@@ -246,16 +269,19 @@ class CampaignRedemptionModel {
   factory CampaignRedemptionModel.fromJson(Map<String, dynamic> json) =>
       CampaignRedemptionModel(
         id: json['id']?.toString(),
-        storeId: json['store_id']?.toString(),
-        campaignId: json['campaign_id']?.toString(),
-        userId: json['user_id']?.toString(),
-        sessionId: json['session_id']?.toString(),
-        billingId: json['billing_id']?.toString(),
+        storeId: (json['store_id'] ?? json['storeId'])?.toString(),
+        campaignId: (json['campaign_id'] ?? json['campaignId'])?.toString(),
+        userId: (json['user_id'] ?? json['userId'])?.toString(),
+        sessionId: (json['session_id'] ?? json['sessionId'])?.toString(),
+        billingId: (json['billing_id'] ?? json['billingId'])?.toString(),
         discountAmount: double.tryParse(
-          json['discount_amount']?.toString() ?? '',
+          (json['discount_amount'] ?? json['discountAmount'])?.toString() ??
+              '',
         ),
-        redeemedAt: json['redeemed_at'] != null
-            ? DateTime.tryParse(json['redeemed_at'].toString())
+        redeemedAt: (json['redeemed_at'] ?? json['redeemedAt']) != null
+            ? DateTime.tryParse(
+                (json['redeemed_at'] ?? json['redeemedAt']).toString(),
+              )
             : null,
         metadata: json['metadata'] as Map<String, dynamic>?,
       );

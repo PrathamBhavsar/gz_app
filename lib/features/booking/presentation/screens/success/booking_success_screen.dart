@@ -146,7 +146,7 @@ class _BookingSuccessScreenState extends ConsumerState<BookingSuccessScreen> {
                     ? null
                     : () {
                         if (isPaid) {
-                          context.go(AppRoutes.bookingDetailPath(bookingId));
+                          context.push(AppRoutes.bookingDetailPath(bookingId));
                           return;
                         }
                         ref

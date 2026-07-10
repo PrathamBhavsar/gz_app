@@ -64,7 +64,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go(AppRoutes.adminWalkIn),
+        onPressed: () => context.push(AppRoutes.adminWalkIn),
         backgroundColor: AppColors.rose,
         shape: const CircleBorder(),
         child: const HugeIcon(
@@ -163,9 +163,13 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                       final system = visibleSystems[index];
                       return _SystemTile(
                         data: system,
-                        onTap: () => context.go(
-                          '${AppRoutes.adminSessions}?systemId=${Uri.encodeComponent(system.systemId ?? system.name ?? '')}',
-                        ),
+                        onTap: system.systemId == null
+                            ? null
+                            : () => context.push(
+                                AppRoutes.adminSystemSessionsPath(
+                                  system.systemId!,
+                                ),
+                              ),
                       );
                     },
                   ),
@@ -337,7 +341,7 @@ class _SystemTile extends StatelessWidget {
   const _SystemTile({required this.data, required this.onTap});
 
   final LiveSystemStatusModel data;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

@@ -26,7 +26,6 @@ import '../../features/home/presentation/screens/store_detail/store_detail_scree
 import '../../features/main_shell/presentation/screens/main_page.dart';
 import '../../features/booking/presentation/screens/slot_selection/booking_slot_selection_screen.dart';
 import '../../features/booking/presentation/screens/availability/booking_availability_screen.dart';
-import '../../features/booking/presentation/screens/system_selection/booking_system_selection_screen.dart';
 import '../../features/booking/presentation/screens/summary/booking_summary_screen.dart';
 import '../../features/booking/presentation/screens/success/booking_success_screen.dart';
 import '../../features/sessions/presentation/screens/sessions_screen.dart';
@@ -56,6 +55,8 @@ import '../../features/admin/presentation/screens/admin_password_reset_screen.da
 import '../../features/admin/presentation/widgets/admin_shell.dart';
 import '../../features/admin/presentation/screens/operations/admin_dashboard_screen.dart';
 import '../../features/admin/presentation/screens/operations/session_management_screen.dart';
+import '../../features/admin/presentation/screens/operations/system_sessions_screen.dart';
+import '../../features/admin/presentation/screens/operations/session_timeline_screen.dart';
 import '../../features/admin/presentation/screens/operations/walk_in_booking_screen.dart';
 import '../../features/admin/presentation/screens/operations/booking_management_screen.dart';
 import '../../features/admin/presentation/screens/analytics/admin_analytics_screen.dart';
@@ -430,6 +431,20 @@ final routerProvider = Provider<GoRouter>((ref) {
             },
           ),
           GoRoute(
+            path: AppRoutes.adminSystemSessions,
+            builder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return SystemSessionsScreen(id: id);
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.adminSessionDetail,
+            builder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return SessionTimelineScreen(id: id);
+            },
+          ),
+          GoRoute(
             path: AppRoutes.adminStaff,
             builder: (context, state) => const StaffManagementScreen(),
           ),
@@ -494,10 +509,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.bookAvailability,
         builder: (context, state) => const BookingAvailabilityScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.bookSystems,
-        builder: (context, state) => const BookingSystemSelectionScreen(),
       ),
       GoRoute(
         path: AppRoutes.bookSummary,

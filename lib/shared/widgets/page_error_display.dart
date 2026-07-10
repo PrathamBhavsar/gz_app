@@ -63,7 +63,12 @@ class PageErrorDisplay extends StatelessWidget {
                         ),
                       ),
                     ),
-                    child: Text('Retry', style: AppTypography.button),
+                    child: Text(
+                      'Retry',
+                      style: AppTypography.button.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
                   ),
                 ),
               ],

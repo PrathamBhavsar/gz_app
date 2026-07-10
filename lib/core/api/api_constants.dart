@@ -76,12 +76,13 @@ class ApiConstants {
   static const String sessionsList = '/stores/{storeId}/sessions';
   static const String sessionCreate = '/stores/{storeId}/sessions';
   static const String sessionsActive = '/stores/{storeId}/sessions/active';
-  static const String sessionDetail = '/stores/{storeId}/sessions/{id}';
+  static const String sessionsFeed = '/stores/{storeId}/sessions/feed';
+  static const String sessionDetail = '/stores/{storeId}/sessions/admin/{id}';
   static const String sessionPause = '/stores/{storeId}/sessions/{id}/pause';
   static const String sessionResume = '/stores/{storeId}/sessions/{id}/resume';
   static const String sessionEnd = '/stores/{storeId}/sessions/{id}/end';
   static const String sessionExtend = '/stores/{storeId}/sessions/{id}/extend';
-  static const String sessionLogs = '/stores/{storeId}/sessions/{id}/logs';
+  static const String sessionLogs = '/stores/{storeId}/sessions/admin/{id}/logs';
 
   // ─── Bookings Admin Endpoints ──────────────────────────────────────
   static const String bookingsList = '/stores/{storeId}/bookings';
@@ -89,8 +90,6 @@ class ApiConstants {
   static const String adminBookingDetail =
       '/stores/{storeId}/bookings/admin/{id}';
   static const String bookingUpdate = '/stores/{storeId}/bookings/{id}';
-  static const String bookingsAvailability =
-      '/stores/{storeId}/bookings/availability';
   static const String bookingWalkIn = '/stores/{storeId}/bookings/walk-in';
   static const String bookingCheckIn =
       '/stores/{storeId}/bookings/{id}/check-in';

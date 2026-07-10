@@ -6,10 +6,8 @@ import '../../../../core/auth/token_storage.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/network/network_checker.dart';
 import '../../../../models/api_responses.dart';
-import '../../../../models/domain_billing.dart';
 import '../../../../models/domain_loyalty.dart';
 import '../../../../models/domain_systems.dart';
-import '../../../../models/enums.dart';
 
 class BookingRepository {
   BookingRepository(this._api, this._net, this._ref);
@@ -18,48 +16,22 @@ class BookingRepository {
   final NetworkChecker _net;
   final Ref _ref;
 
-  Future<List<AvailabilitySlot>> fetchAvailability({
-    required String systemId,
-    required DateTime start,
-    required DateTime end,
-  }) async {
-    await _net.assertConnection();
-
-    final raw = await _api.get(
-      _withQuery(_store(ApiConstants.bookingsAvailability), {
-        'systemId': systemId,
-        'start': start.toUtc().toIso8601String(),
-        'end': end.toUtc().toIso8601String(),
-      }),
-    );
-    final response = AvailabilityResponse.fromJson(_asMap(raw));
-    return response.data ?? const [];
-  }
-
   Future<BookingModel> createBooking({
     required String systemId,
-    required DateTime startTime,
-    required DateTime endTime,
-    required PaymentMethod paymentMethod,
-    String? systemTypeId,
-    String? campaignId,
-    int? creditsToRedeem,
+    required DateTime scheduledStart,
+    required DateTime scheduledEnd,
   }) async {
     await _net.assertConnection();
 
+    // Backend `POST /bookings` only accepts systemId/scheduledStart/scheduledEnd/notes.
+    // Payment happens separately via payBooking(); campaigns/credits are redeemed
+    // against the session/billing record after the session completes, not here.
     final raw = await _api.post(
       _store(ApiConstants.bookingsList),
       body: {
         'systemId': systemId,
-        'startTime': startTime.toIso8601String(),
-        'endTime': endTime.toIso8601String(),
-        'paymentMethod': paymentMethod.name,
-        if (systemTypeId != null && systemTypeId.isNotEmpty)
-          'systemTypeId': systemTypeId,
-        if (campaignId != null && campaignId.isNotEmpty)
-          'campaignId': campaignId,
-        if (creditsToRedeem != null && creditsToRedeem > 0)
-          'creditsToRedeem': creditsToRedeem,
+        'scheduledStart': scheduledStart.toUtc().toIso8601String(),
+        'scheduledEnd': scheduledEnd.toUtc().toIso8601String(),
       },
     );
     final response = BookingResponse.fromJson(_asMap(raw));
@@ -107,29 +79,21 @@ class BookingRepository {
     return response.data;
   }
 
-  Future<PaymentModel> payBooking({
-    required String bookingId,
-    required PaymentMethod paymentMethod,
-    required String idempotencyKey,
-  }) async {
+  Future<BookingModel> payBooking({required String bookingId}) async {
     await _net.assertConnection();
 
-    final raw = await _api.post(
-      _store(ApiConstants.bookingPayment, id: bookingId),
-      body: {
-        'paymentMethod': paymentMethod.name,
-        'idempotencyKey': idempotencyKey,
-      },
-    );
-    final response = PaymentResponse.fromJson(_asMap(raw));
-    final payment = response.data;
-    if (payment == null) {
+    // Backend `POST /bookings/:id/pay` takes no body — it just flips the
+    // booking to paid/confirmed and returns the updated booking, not a payment record.
+    final raw = await _api.post(_store(ApiConstants.bookingPayment, id: bookingId));
+    final response = BookingResponse.fromJson(_asMap(raw));
+    final booking = response.data;
+    if (booking == null) {
       throw const ApiException(
         statusCode: 500,
-        message: 'Missing payment in booking payment response',
+        message: 'Missing booking in booking payment response',
       );
     }
-    return payment;
+    return booking;
   }
 
   Future<BookingModel> cancelBooking(String bookingId) async {
@@ -177,13 +141,6 @@ class BookingRepository {
       path = path.replaceAll('{id}', id);
     }
     return path;
-  }
-
-  String _withQuery(String path, Map<String, String> query) {
-    if (query.isEmpty) {
-      return path;
-    }
-    return '$path?${Uri(queryParameters: query).query}';
   }
 
   Map<String, dynamic> _asMap(dynamic value) {

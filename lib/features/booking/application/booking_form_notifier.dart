@@ -4,7 +4,6 @@ import '../../../../core/errors/app_exception.dart';
 import '../../../../models/domain_systems.dart';
 import '../data/repositories/booking_repository.dart';
 import 'booking_notifier.dart';
-import 'booking_summary_ui_notifier.dart';
 
 sealed class BookingFormState {
   const BookingFormState();
@@ -54,19 +53,13 @@ class BookingFormNotifier extends Notifier<BookingFormState> {
           'Pick a system before confirming the booking',
         );
       }
-      final summaryUi = ref.read(bookingSummaryUiNotifierProvider).valueOrNull;
 
       final booking = await ref
           .read(bookingRepositoryProvider)
           .createBooking(
             systemId: systemId,
-            systemTypeId:
-                system?.systemTypeId ?? bookingState.selectedSystemTypeId,
-            startTime: startTime,
-            endTime: endTime,
-            paymentMethod: bookingState.selectedPaymentMethod,
-            campaignId: summaryUi?.selectedCampaignId,
-            creditsToRedeem: summaryUi?.creditsToRedeem,
+            scheduledStart: startTime,
+            scheduledEnd: endTime,
           );
       ref.read(bookingNotifierProvider.notifier).setCreatedBooking(booking);
       state = BookingFormSuccess(booking);

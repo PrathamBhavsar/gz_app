@@ -1,9 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/app_exception.dart';
-import '../../../../models/domain_billing.dart';
+import '../../../../models/domain_systems.dart';
 import '../data/repositories/booking_repository.dart';
 import 'booking_notifier.dart';
 
@@ -20,9 +18,9 @@ class BookingPaymentLoading extends BookingPaymentState {
 }
 
 class BookingPaymentSuccess extends BookingPaymentState {
-  const BookingPaymentSuccess(this.payment);
+  const BookingPaymentSuccess(this.booking);
 
-  final PaymentModel payment;
+  final BookingModel booking;
 }
 
 class BookingPaymentError extends BookingPaymentState {
@@ -46,14 +44,13 @@ class BookingPaymentNotifier extends Notifier<BookingPaymentState> {
         );
       }
 
-      final payment = await ref
+      // Backend `/pay` takes no body — the chosen payment method is not sent
+      // (there's no field for it) and is purely cosmetic on this screen today.
+      final booking = await ref
           .read(bookingRepositoryProvider)
-          .payBooking(
-            bookingId: bookingId,
-            paymentMethod: bookingState.selectedPaymentMethod,
-            idempotencyKey: _idempotencyKey(),
-          );
-      state = BookingPaymentSuccess(payment);
+          .payBooking(bookingId: bookingId);
+      ref.read(bookingNotifierProvider.notifier).setCreatedBooking(booking);
+      state = BookingPaymentSuccess(booking);
     } catch (error) {
       state = BookingPaymentError(error);
     }
@@ -61,12 +58,6 @@ class BookingPaymentNotifier extends Notifier<BookingPaymentState> {
 
   void reset() {
     state = const BookingPaymentInitial();
-  }
-
-  String _idempotencyKey() {
-    final random = Random();
-    final suffix = random.nextInt(1 << 32).toRadixString(16).padLeft(8, '0');
-    return 'gz-book-$suffix';
   }
 }
 

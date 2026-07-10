@@ -151,43 +151,58 @@ class _AdminBookingDetailScreenState
                   ),
                 ),
                 const SizedBox(height: 24),
-                GzButton(
-                  label: 'Check In',
-                  onPressed: data.id == null
-                      ? null
-                      : () => ref
-                            .read(
-                              adminBookingCommandNotifierProvider(
-                                data.id!,
-                              ).notifier,
-                            )
-                            .checkIn(),
-                ),
-                const SizedBox(height: 10),
-                GzButton(
-                  label: 'Cancel Booking',
-                  variant: GzButtonVariant.dangerOutline,
-                  onPressed: data.id == null
-                      ? null
-                      : () => showAdminCancelBookingSheet(
-                          context,
-                          id: data.id!,
-                          playerLabel: data.userName ?? data.userId ?? 'Player',
-                          systemLabel:
-                              data.systemName ?? data.systemId ?? 'System',
-                          timeLabel: _timeRange(
-                            data.scheduledStart,
-                            data.scheduledEnd,
-                          ),
-                          onCompleted: () => ref
+                if (data.status?.name == 'confirmed') ...[
+                  GzButton(
+                    label: 'Check In',
+                    onPressed: data.id == null
+                        ? null
+                        : () => ref
                               .read(
-                                adminBookingDetailNotifierProvider(
-                                  widget.id,
+                                adminBookingCommandNotifierProvider(
+                                  data.id!,
                                 ).notifier,
                               )
-                              .refresh(),
-                        ),
-                ),
+                              .checkIn(),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                if (data.status?.name == 'pending' ||
+                    data.status?.name == 'confirmed')
+                  GzButton(
+                    label: 'Cancel Booking',
+                    variant: GzButtonVariant.dangerOutline,
+                    onPressed: data.id == null
+                        ? null
+                        : () => showAdminCancelBookingSheet(
+                            context,
+                            id: data.id!,
+                            playerLabel:
+                                data.userName ?? data.userId ?? 'Player',
+                            systemLabel:
+                                data.systemName ?? data.systemId ?? 'System',
+                            timeLabel: _timeRange(
+                              data.scheduledStart,
+                              data.scheduledEnd,
+                            ),
+                            onCompleted: () => ref
+                                .read(
+                                  adminBookingDetailNotifierProvider(
+                                    widget.id,
+                                  ).notifier,
+                                )
+                                .refresh(),
+                          ),
+                  ),
+                if (data.status?.name != 'pending' &&
+                    data.status?.name != 'confirmed')
+                  Center(
+                    child: Text(
+                      'No actions available for this booking.',
+                      style: AppTypography.small.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

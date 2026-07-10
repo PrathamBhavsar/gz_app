@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_constants.dart';
@@ -112,9 +113,18 @@ class AdminAuthRepository {
       await clearLocalSession();
     }
 
+    if (_shouldIgnoreLogoutError(pendingError)) {
+      debugPrint('Admin logout completed locally after terminal auth error.');
+      return;
+    }
+
     if (pendingError != null && pendingStack != null) {
       Error.throwWithStackTrace(pendingError, pendingStack);
     }
+  }
+
+  bool _shouldIgnoreLogoutError(Object? error) {
+    return error is UnauthorizedException;
   }
 
   Future<void> clearLocalSession() async {

@@ -163,6 +163,11 @@ class _MainPageState extends ConsumerState<MainPage> {
 
   void _onPop(bool didPop, Object? result) {
     if (didPop) return;
+    if (_currentTab != GzTab.home) {
+      setState(() => _currentTab = GzTab.home);
+      context.go(AppRoutes.home);
+      return;
+    }
     final now = DateTime.now();
     if (_lastBackPress == null ||
         now.difference(_lastBackPress!) > const Duration(seconds: 2)) {

@@ -495,6 +495,10 @@ String formatBillingStatus(String? status) {
       return 'Unpaid';
     case 'overdue':
       return 'Overdue';
+    case 'failed':
+      return 'Failed';
+    case 'refunded':
+      return 'Refunded';
     default:
       return 'Unknown';
   }

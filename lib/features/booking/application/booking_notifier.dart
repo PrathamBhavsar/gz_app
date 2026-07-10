@@ -99,6 +99,15 @@ class BookingNotifier extends Notifier<BookingState> {
     );
   }
 
+  void setSelectedTimeSlot(DateTime start, DateTime end) {
+    setSelectedSlot(
+      AvailabilitySlot(
+        startTime: start.toUtc().toIso8601String(),
+        endTime: end.toUtc().toIso8601String(),
+      ),
+    );
+  }
+
   void setSelectedSystem(SystemModel system) {
     state = state.copyWith(
       selectedSystem: system,

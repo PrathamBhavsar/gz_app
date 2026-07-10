@@ -30,7 +30,10 @@ class SystemsNotifier extends AsyncNotifier<List<SystemModel>> {
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
+    // Keep the previous list on screen while a background poll refetches —
+    // resetting to a bare AsyncLoading() here would blank the list and flash
+    // the full-page loading view every 30 seconds.
+    state = const AsyncLoading<List<SystemModel>>().copyWithPrevious(state);
     state = await AsyncValue.guard(_load);
   }
 

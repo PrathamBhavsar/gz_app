@@ -89,7 +89,7 @@ class AdminSessionsRepository {
     return _postMessage(
       ApiConstants.sessionExtend,
       id: id,
-      body: {'extraMinutes': extraMinutes},
+      body: {'additionalMinutes': extraMinutes},
     );
   }
 
